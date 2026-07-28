@@ -77,6 +77,16 @@
       <div class="ra-recdot"><span class="d"></span><span>REC</span><span class="ra-timer">0:00</span></div>
     </div>
     <div class="ra-controls">
+      <div class="ra-check" style="margin-bottom:12px;border:1px solid #141412;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6B6A64">Daily packet</span>
+          <span class="ra-clock" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:#6B6A64"></span>
+        </div>
+        <span class="ra-ck-w" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
+        <span class="ra-ck-p" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
+        <span class="ra-ck-v" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B6A64">YouTube post: manual check — <a href="https://studio.youtube.com" target="_blank" style="color:#B3261E">open Studio ↗</a></span>
+      </div>
       <div class="ra-row">
         <div class="ra-field">
           <label>Today's Weight (lb)</label>
@@ -211,7 +221,7 @@
       const MODE = this.getAttribute('mode') || 'daily';
       if (MODE === 'corrective') {
         ['.ra-w', '.ra-day'].forEach((s) => { const r = $(s).closest('.ra-row'); if (r) r.classList.add('ra-hide'); });
-        ['.ra-start', '.ra-rehearse', '.ra-note', '.ra-mealbox'].forEach((s) => $(s).classList.add('ra-hide'));
+        ['.ra-start', '.ra-rehearse', '.ra-note', '.ra-mealbox', '.ra-check'].forEach((s) => $(s).classList.add('ra-hide'));
         const cb = $('.ra-corrbox');
         cb.style.borderTop = 'none'; cb.style.marginTop = '0'; cb.style.paddingTop = '0';
       } else {
@@ -349,6 +359,72 @@
             'Review the video and photos below (retake any photo), then Download All \u2192 Drive folder \u2192 YouTube.', false);
         } catch (e) {}
       }
+      // ---- One-tap packet filing: photos + weight go straight to the record ----
+      async function postPacket(payload) {
+        try {
+          const r = await fetch(ATTEST_ENDPOINT, { method: 'POST', body: JSON.stringify(Object.assign({ action: 'packet', date: isoStr, day: dayNum }, payload)) });
+          return !!(await r.json()).ok;
+        } catch (e) { return false; }
+      }
+      async function filePacket() {
+        setNote('Filing photos and weight to the record…', false);
+        let okAll = photos.length > 0;
+        for (const p of photos) {
+          const ok = await postPacket({
+            name: 'micheal-ray-berry-daily-photo-' + isoStr + '-' + p.slug + '.jpg',
+            image_b64: String(p.dataUrl).split(',')[1],
+            weight: parseFloat($('.ra-w').value) || '',
+          });
+          okAll = okAll && ok;
+        }
+        await postPacket({ finalize: true });
+        refreshChecklist();
+        setNote(okAll
+          ? 'Photos + weight are ON THE RECORD \u2713 (attested). Remaining: Download Video \u2192 upload to YouTube. The downloads below are backups.'
+          : 'Some photos failed to file automatically — use Download All and upload them to the Drive folder manually.', false);
+      }
+      // ---- Packet checklist + deadline clock (reads the live tracker) ----
+      let checklistData = null;
+      async function refreshChecklist() {
+        try {
+          const t = await (await fetch(SHEET_CSV + '&cb=' + Date.now())).text();
+          const line = t.split(/\r?\n/).find((l) => l.indexOf('"' + isoStr + '"') === 0);
+          const cols = line ? line.split('","').map((s) => s.replace(/^"|"$/g, '')) : [];
+          checklistData = {
+            weight: !!parseFloat(cols[1]),
+            photos: !!(cols[3] || '').trim(),
+            video: !!(cols[7] || '').trim(),
+          };
+        } catch (e) { checklistData = null; }
+        drawChecklist();
+      }
+      function drawChecklist() {
+        const el = $('.ra-check');
+        if (!el) return;
+        try {
+          const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour12: false, hour: 'numeric', minute: 'numeric' }).formatToParts(new Date());
+          const mins = (22 * 60) - ((+p.find((x) => x.type === 'hour').value) * 60 + (+p.find((x) => x.type === 'minute').value));
+          const done = checklistData && checklistData.weight && checklistData.photos && checklistData.video;
+          const clockEl = el.querySelector('.ra-clock');
+          clockEl.textContent = mins > 0
+            ? Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm to 10:00 PM ET'
+            : (done ? 'Past 10:00 PM ET — packet complete' : 'PAST 10:00 PM ET — OVERDUE');
+          clockEl.style.color = (mins > 0 && mins >= 60) ? '#6B6A64' : (mins <= 0 && done ? '#6B6A64' : '#B3261E');
+          clockEl.style.fontWeight = mins < 60 ? '600' : '400';
+        } catch (e) {}
+        const c = checklistData || {};
+        const mark = (sel, on, label) => {
+          const n = el.querySelector(sel);
+          n.textContent = (on ? '\u2713 ' : '\u25cb ') + label + (on ? ' — on the record' : ' — not yet on the record');
+          n.style.color = on ? '#141412' : '#B3261E';
+        };
+        mark('.ra-ck-w', c.weight, 'Weight');
+        mark('.ra-ck-p', c.photos, 'Daily photos');
+        mark('.ra-ck-v', c.video, 'Inspection video (Drive archive)');
+      }
+      setInterval(drawChecklist, 30000);
+      setInterval(refreshChecklist, 300000);
+      refreshChecklist();
 
       fetch(SHEET_CSV)
         .then((r) => (r.ok ? r.text() : null))
@@ -885,7 +961,7 @@
         $('.ra-xcard').classList.remove('ra-hide');
         $('.ra-all').classList.remove('ra-hide');
         showReview();
-        attestDaily();
+        attestDaily().then(() => filePacket());
         setNote(
           'Review the video and all four photos below — retake any photo individually if needed. Then Download All → upload the five files to the MRB Daily Photos Drive folder → post the video to YouTube with the copied title.',
           true
@@ -936,7 +1012,7 @@
         beep(880, 150);
         refreshThumbs();
         say('Retake captured.');
-        attestDaily(); // re-log fingerprints — the retaken photo changed a hash
+        attestDaily().then(() => filePacket()); // re-log fingerprints + re-file — the retaken photo changed a hash
       }
 
       function drawPhotoPhase() {
@@ -1421,7 +1497,13 @@
         await setVideoRes(3840, 2160);
         if (captureMeal()) {
           beep(880, 150);
-          setMealNote('Meal photo captured. Download it and upload to the same day folder in the MRB Daily Photos Drive folder.');
+          setMealNote('Meal photo captured — filing to the record…');
+          const mdl = $('.ra-mealdl');
+          postPacket({ name: mdl.download, image_b64: String(mdl.href).split(',')[1] }).then((ok) => {
+            setMealNote(ok
+              ? 'Meal photo is ON THE RECORD \u2713 — the download below is a backup.'
+              : 'Automatic filing failed — download the photo and upload it to the Drive folder manually.');
+          });
         }
       });
 
