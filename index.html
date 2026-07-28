@@ -13,19 +13,19 @@
   <meta name="description" content="The official public record of Micheal Ray Berry's weight loss accountability project: 340 to 175 pounds, documented with daily inspection videos, public weigh-ins, and enforced penalties. Started July 20, 2026. Up, down, or flat — it gets posted.">
   <meta name="keywords" content="Micheal Ray Berry, public accountability project, weight loss accountability, daily weigh-in, accountability partner, weight loss journey, public weight loss record, accountability agreement, weight loss transformation, before and after weight loss, extreme weight loss journey, 340 pounds to 175 pounds, daily inspection video, weight loss documentation, public weigh-in log, body transformation record, daily accountability photos, weight loss contract">
   <link rel="canonical" href="https://michealrayberry.com/">
-  <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/512909_4d525a1d763f4d86ae891f7fe089ac63~mv2.png">
-  <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/512909_4d525a1d763f4d86ae891f7fe089ac63~mv2.png">
+  <link rel="icon" type="image/png" href="https://michealrayberry.com/favicon.png">
+  <link rel="apple-touch-icon" href="https://michealrayberry.com/favicon.png">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
   <meta property="og:title" content="Micheal Ray Berry — Public Accountability Project">
   <meta property="og:description" content="340 → 175 lbs, documented daily in public. Daily inspection videos, weigh-in log, public violation record. There is no unrecorded ending to this project.">
   <meta property="og:url" content="https://michealrayberry.com/">
-  <meta property="og:image" content="https://static.wixstatic.com/media/512909_515d3d507f3f471c931a763b9939152f~mv2.png">
+  <meta property="og:image" content="https://michealrayberry.com/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/512909_515d3d507f3f471c931a763b9939152f~mv2.png">
+  <meta name="twitter:image" content="https://michealrayberry.com/og-image.png">
   <meta name="twitter:title" content="Micheal Ray Berry — Public Accountability Project">
   <meta name="twitter:description" content="340 → 175 lbs, documented daily in public. Up, down, or flat — it gets posted.">
   <script type="application/ld+json">
@@ -1044,7 +1044,11 @@ class Component extends DCLogic {
     });
   }
 
-  componentDidUpdate() { this.syncPhotoImgs(); }
+  componentDidUpdate() {
+    this.syncPhotoImgs();
+    // Helmet's static <title> re-asserts on every render — re-apply the page/day title after it.
+    try { if (this._seoTitle && document.title !== this._seoTitle) document.title = this._seoTitle; } catch (e) {}
+  }
 
   // SEO: inject structured data for every published photo and video so search
   // engines index each day's media as first-class objects.
@@ -1101,10 +1105,10 @@ class Component extends DCLogic {
         if (this.pathRouting()) {
           const p = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
           const pages = ['home', 'dashboard', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'record'];
-          if (pages.indexOf(p) !== -1) { this.setState({ page: p }); return; }
-          if (!p) { this.setState({ page: 'home' }); return; }
+          if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
+          if (!p) { this.setState({ page: 'home' }); this.applyPageSeo('home'); return; }
         }
-        if ((window.location.hash || '').toLowerCase().indexOf('record') !== -1) this.setState({ page: 'record' });
+        if ((window.location.hash || '').toLowerCase().indexOf('record') !== -1) { this.setState({ page: 'record' }); this.applyPageSeo('record'); }
       };
       openFromUrl();
       window.addEventListener('hashchange', openFromUrl);
@@ -1222,29 +1226,48 @@ class Component extends DCLogic {
     d.setDate(d.getDate() + (n - 1));
     return d.toISOString().slice(0, 10);
   }
+  // Per-page title/description/canonical/OG so each real URL presents itself
+  // to crawlers and link unfurlers as a distinct document.
+  applyPageSeo(page) {
+    try {
+      const base = 'https://michealrayberry.com/';
+      const M = {
+        home: ['Micheal Ray Berry \u2014 Public Accountability Project | 340 to 175 lbs, Documented Daily', 'The official public record of Micheal Ray Berry\u2019s weight loss accountability project: 340 to 175 pounds, documented with daily inspection videos, public weigh-ins, four-angle photos, and a public violation log.', ''],
+        dashboard: ['Weigh-In Dashboard & Daily Record \u2014 Micheal Ray Berry', 'Every daily weigh-in, four-angle photo set, and inspection video from the Public Accountability Project, updated daily by 10 PM ET.', 'dashboard'],
+        about: ['About the Project \u2014 Micheal Ray Berry Public Accountability Project', 'Why this project exists, how the accountability structure works, and the three possible outcomes: full compliance, enforcement, or a permanently public abandonment record.', 'about'],
+        agreement: ['The Signed Accountability Agreement \u2014 Micheal Ray Berry', 'The complete signed Public Accountability Agreement: daily compliance packet, documentation standard, official weigh-ins, violations, and the Accountability Partner\u2019s authority.', 'agreement'],
+        penalties: ['Violation Log \u2014 Micheal Ray Berry Public Accountability Project', 'The public violation record: every documentation failure by date and nature, resolved or unresolved. Consequences are administered privately by the Accountability Partner.', 'penalties'],
+        uniform: ['Documentation Standard & Uniform \u2014 Micheal Ray Berry', 'The standardized uniform, pose, and four-angle documentation format every daily inspection follows.', 'uniform'],
+        updates: ['Updates & Milestones \u2014 Micheal Ray Berry Public Accountability Project', 'Official updates from the record: milestones, weekly reviews, and project events.', 'updates'],
+        record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
+      };
+      const m = M[page] || M.home;
+      const canon = base + m[2];
+      this._seoTitle = m[0]; // re-asserted after every render (helmet title wins otherwise)
+      document.title = m[0];
+      const set = (sel, attr, val) => { const el = document.querySelector(sel); if (el) el.setAttribute(attr, val); };
+      set('link[rel="canonical"]', 'href', canon);
+      set('meta[name="description"]', 'content', m[1]);
+      set('meta[property="og:title"]', 'content', m[0]);
+      set('meta[property="og:description"]', 'content', m[1]);
+      set('meta[property="og:url"]', 'content', canon);
+    } catch (e) {}
+  }
   // Keep title/canonical/description in sync with the open day so each ?day=N
   // URL presents itself to crawlers as a distinct document.
   applyDaySeo(dateStr) {
     try {
       const canon = document.querySelector('link[rel="canonical"]');
       const desc = document.querySelector('meta[name="description"]');
-      if (!this._defaultSeo) {
-        this._defaultSeo = {
-          title: document.title,
-          canonical: canon ? canon.href : '',
-          description: desc ? desc.getAttribute('content') : '',
-        };
-      }
       if (!dateStr) {
-        document.title = this._defaultSeo.title;
-        if (canon) canon.href = this._defaultSeo.canonical;
-        if (desc) desc.setAttribute('content', this._defaultSeo.description);
+        this.applyPageSeo(this.state.page || 'home');
         return;
       }
       const n = this.dayNumOf(dateStr);
       const w = this.weighIns().find((x) => x.date === dateStr);
       const wStr = w && !isNaN(w.weight) ? w.weight.toFixed(1) + ' lb' : '';
-      document.title = 'Day ' + n + (wStr ? ' — ' + wStr : '') + ' — ' + dateStr + ' — Micheal Ray Berry Public Accountability Record';
+      this._seoTitle = 'Day ' + n + (wStr ? ' — ' + wStr : '') + ' — ' + dateStr + ' — Micheal Ray Berry Public Accountability Record';
+      document.title = this._seoTitle;
       if (canon) canon.href = 'https://michealrayberry.com/?day=' + n;
       if (desc) desc.setAttribute('content', 'Day ' + n + ' of Micheal Ray Berry\u2019s public weight-loss accountability record' + (wStr ? ': ' + wStr : '') + ' on ' + dateStr + '. Daily photos from all four angles and the inspection video. 340 to 175 pounds, documented in public.');
     } catch (e) {}
@@ -1271,6 +1294,7 @@ class Component extends DCLogic {
   pathRouting() { try { return !/\.html/i.test(window.location.pathname); } catch (e) { return false; } }
   go(page) {
     this.setState({ page });
+    this.applyPageSeo(page);
     try {
       if (this.pathRouting()) window.history.pushState({ page }, '', page === 'home' ? '/' : '/' + page);
       else if (page === 'record') window.location.hash = 'record';
