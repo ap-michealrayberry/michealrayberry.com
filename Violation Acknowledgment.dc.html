@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Violation Acknowledgment — Recording Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Mono', monospace; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 64px; gap: 28px; box-sizing: border-box;">
+  <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 680px;">
+    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public record version — voluntary practice, per violation</span>
+    <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Violation Acknowledgment</h1>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Stand at attention facing the camera while the voice states the violation from the public log — factual, severe, never degrading. The exposure comes from the record itself.</p>
+  </div>
+
+  <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+  <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 560px; border: 1px solid #141412; padding: 26px 28px; box-sizing: border-box; background: #FFFFFF;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Violation — from the public log</span>
+      <sc-if value="{{ hasPens }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ penList }}" as="p" hint-placeholder-count="1">
+            <button onClick="{{ p.pick }}" style="text-align: left; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid {{ p.border }}; background: {{ p.bg }}; color: #141412;">{{ p.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noPens }}" hint-placeholder-val="{{ true }}">
+        <div style="border: 1px solid #D8D6CF; background: #F1F0EA; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #3A3935;">The public Violation Log is clean. There is nothing to acknowledge — keep it that way. (The AP logs the violation first; this tool reads it from there.)</div>
+      </sc-if>
+    </div>
+    <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+      <input type="checkbox" checked="{{ camera }}" onChange="{{ toggleCamera }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
+      <span>Record video (for YouTube)</span>
+    </label>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Narration — generated from the log; not editable</span>
+      <div style="font-size: 12.5px; line-height: 1.6; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935; white-space: pre-wrap; max-height: 220px; overflow: auto;">{{ scriptPreview }}</div>
+    </div>
+    <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
+    <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, nothing recorded</button>
+    <button onClick="{{ start }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">Begin Acknowledgment</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; max-width: 680px; text-align: center;">
+    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">Acknowledgment in progress</span>
+    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">At attention · face the camera</div>
+    <div style="font-size: 16px; color: #3A3935; line-height: 1.6; min-height: 52px; max-width: 620px;">{{ line }}</div>
+    <div style="font-size: 56px; font-weight: 700; line-height: 1; color: #B9B8B2;">{{ clock }}</div>
+    <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; display: {{ camDisplay }}; transform: scaleX(-1);"></video>
+    <button onClick="{{ stop }}" style="padding: 12px 36px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">END EARLY</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; gap: 16px; border: 1px solid #141412; padding: 32px 40px; max-width: 560px; width: 100%; box-sizing: border-box; background: #FFFFFF;">
+    <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">Acknowledgment Complete</span>
+    <span style="font-size: 14px; color: #6B6A64; line-height: 1.7;">{{ summary }}</span>
+    <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 28px; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-size: 13px; letter-spacing: 0.1em; text-align: center;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD VIDEO</a>
+    </sc-if>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">YouTube title — copy exactly</span>
+      <input type="text" value="{{ ytTitle }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+    </div>
+    <button onClick="{{ reset }}" style="padding: 12px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; background: none; color: #141412; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="border-color: #141412;">NEW SESSION</button>
+  </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  DAY1 = '2026-07-20';
+  PEN_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
+
+  state = { pens: [], sel: 0, camera: true, status: '', phase: 'setup', line: '', clock: '0:00', dlUrl: '', dlName: '', summary: '', ytTitle: '' };
+
+  parseCSV(text) {
+    const rows = []; let row = [], field = '', inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) { if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; } else field += c; }
+      else if (c === '"') inQ = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+    if (field || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  async componentDidMount() {
+    try {
+      const pens = this.parseCSV(await (await fetch(this.PEN_CSV)).text()).slice(1)
+        .map((r) => ({ date: (r[0] || '').trim(), what: (r[1] || '').trim(), status: (r[2] || '').trim() }))
+        .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.what);
+      this.setState({ pens, sel: Math.max(0, pens.length - 1) });
+    } catch (e) { this.setState({ status: 'Could not load the violation log: ' + e }); }
+  }
+
+  dayNum(d) { return Math.max(1, Math.round((new Date(d + 'T12:00:00') - new Date(this.DAY1 + 'T12:00:00')) / 864e5) + 1); }
+
+  script() {
+    const p = this.state.pens[this.state.sel];
+    if (!p) return null;
+    const unresolved = (p.status || '').toLowerCase().indexOf('unresolved') !== -1;
+    return [
+      'Micheal Ray Berry. Stand at attention. This is a public violation acknowledgment.',
+      'On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, the following requirement was not met: ' + p.what + '.',
+      'This was a Violation Event. It has been entered permanently into the public record.',
+      unresolved
+        ? 'The applicable consequence is pending. The entry remains unresolved, and it stays unresolved until the consequence is completed.'
+        : 'The applicable consequence has been imposed and is administered privately, as the agreement requires.',
+      'You created this system because private promises allowed you to avoid accountability.',
+      'You do not get to hide this failure, rename it, delete it, or restart the project.',
+      'The record remains. The project continues.',
+      'The next deadline is tonight. Ten PM. Return to compliance.',
+      'This acknowledgment is complete.',
+    ];
+  }
+
+  async speak(text) {
+    const key = localStorage.getItem('mrb_el_key');
+    const voice = localStorage.getItem('mrb_el_voice') || 'pNInz6obpgDQGcFmaJgB';
+    if (key) {
+      try {
+        if (!this._vc) this._vc = {};
+        if (!this._vc[text]) {
+          const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=mp3_44100_64', {
+            method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+          });
+          if (!r.ok) throw new Error(r.status);
+          this._vc[text] = URL.createObjectURL(await r.blob());
+        }
+        if (this._audio) this._audio.pause();
+        this._audio = new Audio(this._vc[text]);
+        this.routeAudio(this._audio);
+        await this._audio.play(); return;
+      } catch (e) {}
+    }
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.92; u.pitch = 0.85; speechSynthesis.speak(u); } catch (e) {}
+  }
+
+  ensureAudio() {
+    try {
+      if (!this._ac) this._ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (!this._dest) this._dest = this._ac.createMediaStreamDestination();
+    } catch (e) {}
+  }
+
+  routeAudio(a) {
+    try {
+      this.ensureAudio();
+      const s = this._ac.createMediaElementSource(a);
+      s.connect(this._dest);
+      s.connect(this._ac.destination);
+    } catch (e) {}
+  }
+
+  beep(freq, ms) {
+    try { this.ensureAudio(); const o = this._ac.createOscillator(), g = this._ac.createGain(); o.frequency.value = freq; o.connect(g); g.connect(this._ac.destination); if (this._dest) g.connect(this._dest); g.gain.setValueAtTime(0.12, this._ac.currentTime); o.start(); o.stop(this._ac.currentTime + ms / 1000); } catch (e) {}
+  }
+
+  _fmt(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  async startCamera() {
+    try {
+      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: false });
+      if (this._camEl) { this._camEl.srcObject = this._stream; this._camEl.play(); }
+      return true;
+    } catch (e) { this.setState({ camera: false, status: 'Camera unavailable — a recording is needed for YouTube.' }); return false; }
+  }
+
+  beginRecording() {
+    const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
+    const p = this.state.pens[this.state.sel];
+    const trig = ('VIOLATION · ' + p.what + ' · DAY ' + this.dayNum(p.date)).toUpperCase().slice(0, 52);
+    const draw = () => {
+      if (this.state.phase !== 'active') return;
+      const v = this._camEl;
+      if (v && v.videoWidth) { const s = Math.max(W / v.videoWidth, H / v.videoHeight); ctx.save(); ctx.translate(W, 0); ctx.scale(-1, 1); ctx.drawImage(v, (W - v.videoWidth * s) / 2, (H - v.videoHeight * s) / 2, v.videoWidth * s, v.videoHeight * s); ctx.restore(); }
+      else { ctx.fillStyle = '#F1F0EA'; ctx.fillRect(0, 0, W, H); }
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, 0, W, 118);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '700 30px "IBM Plex Sans Condensed","Arial Narrow",sans-serif'; ctx.fillText('MICHEAL RAY BERRY', 24, 34);
+      ctx.fillStyle = '#FF6B61'; ctx.font = '600 17px "IBM Plex Mono",monospace'; ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT · VIOLATION ACKNOWLEDGMENT', 24, 64);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '600 16px "IBM Plex Mono",monospace'; ctx.fillText(trig, 24, 92);
+      const el = this._fmt(Math.floor((Date.now() - this._start) / 1000));
+      ctx.font = '700 26px "IBM Plex Mono",monospace'; ctx.fillText(el, W - ctx.measureText(el).width - 24, 48);
+      ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, H - 60, W, 60);
+      ctx.fillStyle = '#B9B8B2'; ctx.font = '400 20px "IBM Plex Mono",monospace';
+      ctx.fillText(new Date().toISOString().slice(0, 10) + ' · MICHEALRAYBERRY.COM', 24, H - 30);
+      requestAnimationFrame(draw);
+    };
+    this._chunks = []; let mime = '';
+    ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].some((m) => (MediaRecorder.isTypeSupported(m) ? (mime = m, true) : false));
+    this.ensureAudio();
+    const stream = c.captureStream(30);
+    if (this._dest) this._dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 8000000 } : {});
+    this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
+    this._rec.onstop = () => {
+      const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
+      const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-violation-acknowledgment-' + p.date + '.' + ext });
+    };
+    this._rec.start(1000); requestAnimationFrame(draw);
+  }
+
+  async start() {
+    const lines = this.script();
+    if (!lines) { this.setState({ status: 'Select a violation from the log first.' }); return; }
+    if (!this._rehearse && this.state.camera) { const ok = await this.startCamera(); if (!ok) return; }
+    this.setState({ phase: 'active', line: '', clock: '0:00', dlUrl: '' });
+    if (this.state.camera && this._stream) this.beginRecording();
+    this._start = Date.now();
+    this.beep(880, 160);
+    this._clockTimer = setInterval(() => this.setState({ clock: this._fmt(Math.floor((Date.now() - this._start) / 1000)) }), 1000);
+    let i = 0;
+    const step = () => {
+      if (this.state.phase !== 'active') return;
+      if (i >= lines.length) { setTimeout(() => this.finish(false), 2500); return; }
+      const line = lines[i];
+      this.setState({ line });
+      this.speak(line);
+      const wait = Math.max(5, Math.round(line.split(' ').length / 2.2 + 2.5));
+      i++;
+      this._stepTimer = setTimeout(step, wait * 1000);
+    };
+    setTimeout(step, 2000);
+  }
+
+  finish(aborted) {
+    clearTimeout(this._stepTimer); clearInterval(this._clockTimer);
+    if (this.state.phase !== 'active') return;
+    this.setState({ phase: 'done' });
+    if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
+    if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
+    if (!aborted) { this.beep(660, 200); setTimeout(() => this.beep(880, 300), 300); }
+    if (this._rehearse) { this._rehearse = false; this.setState({ summary: 'Rehearsal complete — nothing was recorded, nothing to upload. Run the real acknowledgment with the camera when ready.', ytTitle: '' }); return; }
+    const p = this.state.pens[this.state.sel];
+    this.setState({
+      summary: (aborted ? 'Ended early — re-record for a complete acknowledgment. ' : '') + 'Violation of ' + p.date + ' acknowledged on camera. Upload, then give the AP the link if he wants it noted with the entry.',
+      ytTitle: 'Micheal Ray Berry — Violation Acknowledgment — ' + p.what + ' — Day ' + this.dayNum(p.date) + ' — ' + p.date,
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const lines = this.script();
+    return {
+      isSetup: s.phase === 'setup', isActive: s.phase === 'active', isDone: s.phase === 'done',
+      hasPens: s.pens.length > 0, noPens: s.pens.length === 0,
+      penList: s.pens.map((p, i) => ({
+        label: p.date + ' · ' + p.what + ' · ' + (p.status || 'unresolved'),
+        pick: () => this.setState({ sel: i }),
+        border: i === s.sel ? '#B3261E' : '#D8D6CF',
+        bg: i === s.sel ? '#F6DEDC' : '#FAFAF7',
+      })),
+      camera: s.camera, toggleCamera: () => this.setState({ camera: !s.camera, status: '' }),
+      camDisplay: s.camera ? 'block' : 'none',
+      camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
+      scriptPreview: lines ? lines.join('\n') : 'No violation selected — the log is clean.',
+      status: s.status,
+      start: () => { this._rehearse = false; this.start(); },
+      rehearse: () => { this._rehearse = true; this.start(); },
+      stop: () => this.finish(true),
+      reset: () => this.setState({ phase: 'setup' }),
+      line: s.line, clock: s.clock,
+      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

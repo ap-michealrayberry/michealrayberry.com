@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Training Session — Public Record Version</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Mono', monospace; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+    input[type=range] { accent-color: #B3261E; width: 100%; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 64px; gap: 28px; box-sizing: border-box;">
+  <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 640px;">
+    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public record version — safe for the YouTube channel</span>
+    <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Training Session</h1>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Guided posture and endurance holds in the project uniform, stamped in the record's format. Neutral commands only — this tool contains nothing that can't live on @michealrayberry.</p>
+  </div>
+
+  <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+  <div style="display: flex; flex-direction: column; gap: 22px; width: 100%; max-width: 460px; border: 1px solid #141412; padding: 26px 28px; box-sizing: border-box; background: #FFFFFF;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Exercises in rotation</span>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <sc-for list="{{ positionList }}" as="p" hint-placeholder-count="6">
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+            <input type="checkbox" checked="{{ p.on }}" onChange="{{ p.toggle }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
+            <span>{{ p.name }}</span>
+          </label>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Hold per exercise — {{ holdLabel }}</span>
+      <input type="range" min="20" max="120" step="5" value="{{ hold }}" onChange="{{ setHold }}">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Rounds — {{ rounds }}</span>
+      <input type="range" min="1" max="4" step="1" value="{{ rounds }}" onChange="{{ setRounds }}">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Today's weight (lb, optional — stamps the video)</span>
+      <input type="number" step="0.1" value="{{ weight }}" onChange="{{ setWeight }}" placeholder="e.g. 337.8" style="background: #FAFAF7; border: 1px solid #141412; color: #141412; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 12px;">
+    </div>
+    <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+      <input type="checkbox" checked="{{ camera }}" onChange="{{ toggleCamera }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
+      <span>Record video (for YouTube)</span>
+    </label>
+    <span style="font-size: 12px; color: #B3261E;">{{ camStatus }}</span>
+    <span style="font-size: 12px; color: #6B6A64;">Estimated length: {{ estimate }}</span>
+    <button onClick="{{ start }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">Begin Session</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; max-width: 640px;">
+    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">{{ progressLabel }}</span>
+    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 56px; text-transform: uppercase; letter-spacing: 0.04em; text-align: center;">{{ command }}</div>
+    <div style="font-size: 96px; font-weight: 700; line-height: 1;">{{ clock }}</div>
+    <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; display: {{ camDisplay }}; transform: scaleX(-1);"></video>
+    <button onClick="{{ stop }}" style="padding: 12px 36px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">END SESSION</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 18px; border: 1px solid #141412; padding: 32px 40px; max-width: 520px; width: 100%; box-sizing: border-box; background: #FFFFFF;">
+    <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">Session Complete</span>
+    <span style="font-size: 14px; color: #6B6A64; text-align: center; line-height: 1.7;">{{ summary }}</span>
+    <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 28px; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-size: 13px; letter-spacing: 0.1em;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD VIDEO</a>
+    </sc-if>
+    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">YouTube title — copy when uploading</span>
+      <input type="text" value="{{ ytTitle }}" readOnly="{{ true }}" style="background: #FAFAF7; border: 1px solid #141412; color: #141412; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px;">
+    </div>
+    <button onClick="{{ reset }}" style="padding: 12px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; background: none; color: #141412; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="border-color: #141412;">NEW SESSION</button>
+  </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Neutral exercise vocabulary ONLY. No practice-layer positions, no
+  // affirmations, no address — this tool's output goes on the public channel.
+  POSITIONS = ['Attention', 'Stand Tall', 'Wall Sit', 'Squat Hold', 'Calf Raises', 'March in Place', 'Plank'];
+  REINFORCE = ['Good.', 'Hold.', 'Very good.'];
+  DAY1 = '2026-07-20';
+
+  state = {
+    on: { 'Attention': true, 'Stand Tall': true, 'Wall Sit': true, 'Squat Hold': true, 'Calf Raises': false, 'March in Place': true, 'Plank': false },
+    hold: 40, rounds: 2, weight: '', camera: true, camStatus: '',
+    phase: 'setup', command: '', clock: '', idx: 0, queue: [],
+    dlUrl: '', dlName: '', summary: '', ytTitle: '',
+    ai: localStorage.getItem('mrb_el_on') === '1',
+    elKey: localStorage.getItem('mrb_el_key') || '',
+    elVoice: localStorage.getItem('mrb_el_voice') || '',
+  };
+
+  componentDidMount() {
+    fetch('./voice-pack.json').then((r) => (r.ok ? r.json() : null)).then((p) => { this._pack = p; }).catch(() => {});
+  }
+
+  dayNum() {
+    return Math.max(1, Math.round((new Date(this._dateStr + 'T12:00:00') - new Date(this.DAY1 + 'T12:00:00')) / 864e5) + 1);
+  }
+
+  say(t) {
+    if (this._pack && this._pack[t]) {
+      if (this._audio) this._audio.pause();
+      this._audio = new Audio(this._pack[t]);
+      this._audio.play();
+      return;
+    }
+    if (this.state.ai && this.state.elKey) { this.elSay(t); return; }
+    this.synthSay(t);
+  }
+
+  synthSay(t) {
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(t);
+      u.rate = 0.95; u.pitch = 0.9;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  async elSay(text) {
+    try {
+      if (!this._elCache) this._elCache = {};
+      if (!this._elCache[text]) {
+        const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + (this.state.elVoice || 'pNInz6obpgDQGcFmaJgB') + '?output_format=mp3_44100_64', {
+          method: 'POST',
+          headers: { 'xi-api-key': this.state.elKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+        });
+        if (!r.ok) throw new Error('TTS ' + r.status);
+        this._elCache[text] = URL.createObjectURL(await r.blob());
+      }
+      if (this._audio) this._audio.pause();
+      this._audio = new Audio(this._elCache[text]);
+      this.routeAudio(this._audio);
+      this._audio.play();
+    } catch (e) { this.synthSay(text); }
+  }
+
+  ensureAudio() {
+    try {
+      if (!this._ac) this._ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (!this._dest) this._dest = this._ac.createMediaStreamDestination();
+    } catch (e) {}
+  }
+
+  routeAudio(a) {
+    try {
+      this.ensureAudio();
+      const s = this._ac.createMediaElementSource(a);
+      s.connect(this._dest);
+      s.connect(this._ac.destination);
+    } catch (e) {}
+  }
+
+  beep(freq, ms) {
+    try {
+      this.ensureAudio();
+      const o = this._ac.createOscillator(), g = this._ac.createGain();
+      o.frequency.value = freq; o.connect(g); g.connect(this._ac.destination);
+      if (this._dest) g.connect(this._dest);
+      g.gain.setValueAtTime(0.12, this._ac.currentTime);
+      o.start(); o.stop(this._ac.currentTime + ms / 1000);
+    } catch (e) {}
+  }
+
+  _fmt(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  async startCamera() {
+    try {
+      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: false });
+      if (this._camEl) { this._camEl.srcObject = this._stream; this._camEl.play(); }
+      return true;
+    } catch (e) {
+      this.setState({ camera: false, camStatus: 'Camera unavailable — running without recording.' });
+      return false;
+    }
+  }
+
+  beginRecording() {
+    const W = 720, H = 1280;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    const day = 'DAY ' + this.dayNum();
+    const draw = () => {
+      if (this.state.phase !== 'active') return;
+      const v = this._camEl;
+      if (v && v.videoWidth) {
+        const s = Math.max(W / v.videoWidth, H / v.videoHeight);
+        ctx.save(); ctx.translate(W, 0); ctx.scale(-1, 1);
+        ctx.drawImage(v, (W - v.videoWidth * s) / 2, (H - v.videoHeight * s) / 2, v.videoWidth * s, v.videoHeight * s);
+        ctx.restore();
+      } else { ctx.fillStyle = '#F1F0EA'; ctx.fillRect(0, 0, W, H); }
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, 0, W, 96);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '700 32px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';
+      ctx.fillText('MICHEAL RAY BERRY', 24, 36);
+      ctx.fillStyle = '#FF6B61'; ctx.font = '600 18px "IBM Plex Mono",monospace';
+      ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT', 24, 70);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '700 26px "IBM Plex Mono",monospace';
+      const cmd = this.state.command.toUpperCase();
+      ctx.fillText(cmd, W - ctx.measureText(cmd).width - 24, 52);
+      ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, H - 88, W, 88);
+      const w = parseFloat(this.state.weight);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '600 24px "IBM Plex Mono",monospace';
+      ctx.fillText(day + ' — ' + this._dateStr + (isNaN(w) ? '' : ' · ' + w.toFixed(1) + ' LB'), 24, H - 56);
+      ctx.fillStyle = '#B9B8B2'; ctx.font = '400 18px "IBM Plex Mono",monospace';
+      ctx.fillText('TRAINING SESSION · MICHEALRAYBERRY.COM', 24, H - 26);
+      requestAnimationFrame(draw);
+    };
+    this._chunks = [];
+    let mime = '';
+    ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].some((m) => (MediaRecorder.isTypeSupported(m) ? (mime = m, true) : false));
+    this.ensureAudio();
+    const stream = c.captureStream(30);
+    if (this._dest) this._dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 8000000 } : {});
+    this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
+    this._rec.onstop = () => {
+      const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
+      const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+      this.setState({
+        dlUrl: URL.createObjectURL(blob),
+        dlName: 'micheal-ray-berry-training-' + this._dateStr + '-day-' + String(this.dayNum()).padStart(3, '0') + '.' + ext,
+      });
+    };
+    this._rec.start(1000);
+    requestAnimationFrame(draw);
+  }
+
+  _buildCues(secs) {
+    const cues = {};
+    if (secs >= 20 && Math.random() < 0.6) {
+      const t = 6 + Math.floor(Math.random() * (secs - 12));
+      cues[t] = this.REINFORCE[Math.floor(Math.random() * this.REINFORCE.length)];
+    }
+    if (secs >= 60) cues[10] = 'Ten seconds.';
+    return cues;
+  }
+
+  async start() {
+    const sel = this.POSITIONS.filter((p) => this.state.on[p]);
+    if (!sel.length) { this.setState({ camStatus: 'Select at least one exercise.' }); return; }
+    this._dateStr = new Date().toISOString().slice(0, 10);
+    if (this.state.camera) await this.startCamera();
+    let queue = [];
+    for (let r = 0; r < this.state.rounds; r++) queue = queue.concat(sel);
+    this.setState({ phase: 'active', queue, idx: -1, command: 'Get ready', clock: this._fmt(5), dlUrl: '', summary: '' });
+    if (this.state.camera && this._stream) this.beginRecording();
+    this.say('Training session begins.');
+    this._remaining = 5;
+    this._startTime = Date.now();
+    this._timer = setInterval(() => {
+      if (this._remaining <= 1) {
+        const next = this.state.idx + 1;
+        if (next >= this.state.queue.length) { this.finish(false); return; }
+        this.setState({ idx: next, command: this.state.queue[next], clock: this._fmt(this.state.hold) });
+        this._remaining = this.state.hold;
+        this._cues = this._buildCues(this.state.hold);
+        this.beep(880, 140);
+        this.say(this.state.queue[next]);
+      } else {
+        this._remaining--;
+        if (this._remaining <= 3) this.beep(660, 90);
+        if (this._cues && this._cues[this._remaining] && this.state.idx >= 0) this.say(this._cues[this._remaining]);
+        this.setState({ clock: this._fmt(this._remaining) });
+      }
+    }, 1000);
+  }
+
+  finish(aborted) {
+    clearInterval(this._timer);
+    if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
+    if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
+    const mins = Math.round((Date.now() - this._startTime) / 6000) / 10;
+    const done = Math.max(0, this.state.idx + (aborted ? 0 : 1));
+    this.say('Training session complete.');
+    this.beep(660, 200); setTimeout(() => this.beep(880, 300), 300);
+    const w = parseFloat(this.state.weight);
+    this.setState({
+      phase: 'done',
+      summary: done + ' of ' + this.state.queue.length + ' holds · ' + mins + ' min · ' + this._dateStr + (aborted ? ' · ended early (the video shows what it shows)' : ''),
+      ytTitle: 'Micheal Ray Berry — Day ' + this.dayNum() + ' Training Session' + (isNaN(w) ? '' : ' · ' + w.toFixed(1) + ' LB') + ' | Public Accountability Project',
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const sel = this.POSITIONS.filter((p) => s.on[p]).length;
+    return {
+      isSetup: s.phase === 'setup', isActive: s.phase === 'active', isDone: s.phase === 'done',
+      positionList: this.POSITIONS.map((name) => ({
+        name, on: !!s.on[name],
+        toggle: () => this.setState({ on: Object.assign({}, s.on, { [name]: !s.on[name] }) }),
+      })),
+      hold: s.hold, holdLabel: s.hold + ' seconds',
+      setHold: (e) => this.setState({ hold: parseInt(e.target.value, 10) }),
+      rounds: s.rounds,
+      setRounds: (e) => this.setState({ rounds: parseInt(e.target.value, 10) }),
+      weight: s.weight,
+      setWeight: (e) => this.setState({ weight: e.target.value }),
+      camera: s.camera, toggleCamera: () => this.setState({ camera: !s.camera, camStatus: '' }),
+      camStatus: s.camStatus,
+      camDisplay: s.camera ? 'block' : 'none',
+      camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
+      estimate: '~' + Math.max(1, Math.round(sel * s.rounds * (s.hold + 2) / 60)) + ' minutes',
+      start: () => this.start(),
+      stop: () => this.finish(true),
+      reset: () => this.setState({ phase: 'setup' }),
+      command: s.command, clock: s.clock,
+      progressLabel: s.idx === -1 ? 'PREPARE' : 'HOLD ' + (s.idx + 1) + ' OF ' + s.queue.length,
+      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
