@@ -118,6 +118,7 @@
       <nav style="display: flex; gap: 2px; row-gap: 6px; flex-wrap: wrap; align-items: center;">
         <button onClick="{{ goHome }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</button>
         <button onClick="{{ goDashboard }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</button>
+        <button onClick="{{ goMilestones }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</button>
         <button onClick="{{ goAbout }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</button>
         <button onClick="{{ goAgreement }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</button>
         <button onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</button>
@@ -127,6 +128,10 @@
       </nav>
     </div>
   </header>
+
+  <sc-if value="{{ showOverdue }}" hint-placeholder-val="{{ false }}">
+    <div style="background: #B3261E; color: #FFFFFF; padding: 14px 32px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">{{ overdueMsg }}</div>
+  </sc-if>
 
   <main style="flex: 1;">
 
@@ -181,6 +186,10 @@
         <div style="padding: 36px 0 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Goal</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ goalLabel }}</span>
+        </div>
+        <div style="padding: 36px 0 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Days without violation</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ cleanDays }}</span>
         </div>
       </div>
     </section>
@@ -322,6 +331,16 @@
       </div>
     </section>
 
+    <sc-if value="{{ hasAttested }}" hint-placeholder-val="{{ false }}">
+    <section style="border-bottom: 1px solid #141412; padding: 20px 32px;">
+      <div style="max-width: 1160px; margin: 0 auto; display: flex; gap: 12px 32px; flex-wrap: wrap; align-items: baseline; font-family: 'IBM Plex Mono', monospace;">
+        <span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Capture verification</span>
+        <span style="font-size: 14px; font-weight: 600;">{{ attestedLabel }}</span>
+        <span style="font-size: 13px; color: #6B6A64;">Every session fetches a one-time code — spoken and burned into the video — and logs SHA-256 file fingerprints with Google server time. Recordings cannot be pre-made, replayed, or swapped afterward.</span>
+      </div>
+    </section>
+    </sc-if>
+
     <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div style="padding: 40px 24px 40px 0; display: flex; flex-direction: column; gap: 8px;">
@@ -457,6 +476,9 @@
                 </figure>
               </sc-for>
             </div>
+            <sc-if value="{{ hasExpandedAttested }}" hint-placeholder-val="{{ false }}">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; color: #141412; border-top: 1px solid #D8D6CF; padding-top: 12px;">{{ expandedAttested }}</span>
+            </sc-if>
           </div>
         </sc-if>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px;">
@@ -490,6 +512,31 @@
       </div>
     </section>
     </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ==================== MILESTONES ==================== -->
+  <sc-if value="{{ isMilestones }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Milestones">
+    <section style="border-bottom: 1px solid #141412; padding: 72px 32px 56px;">
+      <div style="max-width: 1160px; margin: 0 auto;">
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§6 — Official milestones</p>
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 20px;">The Milestone Ladder</h1>
+        <p style="max-width: 680px; font-size: 17px; line-height: 1.65; margin: 0;">Six fixed checkpoints between 340 and 175 pounds. Each one only counts once verified by an official on-camera weigh-in and a milestone video on the record. Reaching 175 starts the final phase: 28 consecutive days at goal.</p>
+      </div>
+    </section>
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px 24px;">
+      <div style="max-width: 1160px; margin: 0 auto; border: 1px solid #141412;">
+        <sc-for list="{{ milestoneRows }}" as="ms" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding: 26px 28px; border-bottom: 1px solid #D8D6CF;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600; min-width: 150px;">{{ ms.targetLabel }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; padding: 6px 12px; background: {{ ms.badgeBg }}; color: {{ ms.badgeFg }};">{{ ms.badge }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #3A3935;">{{ ms.detail }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="max-width: 1160px; margin: 18px auto 64px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64; line-height: 1.7;">Reached dates are computed live from the public weigh-in record. A milestone is official only once its verification weigh-in and milestone video are on the record (§6). At each milestone the enforcement baseline resets — the record can never move backward past a verified milestone without consequence.</p>
+    </section>
   </div>
   </sc-if>
 
@@ -1104,7 +1151,7 @@ class Component extends DCLogic {
       const openFromUrl = () => {
         if (this.pathRouting()) {
           const p = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
-          const pages = ['home', 'dashboard', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'record'];
+          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'record'];
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
           if (!p) { this.setState({ page: 'home' }); this.applyPageSeo('home'); return; }
         }
@@ -1204,6 +1251,28 @@ class Component extends DCLogic {
         this.setState({ livePenalties: entries });
       })
       .catch(() => {});
+    // Attestation tab (same spreadsheet): which days carry a verified capture attestation.
+    fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Attestation')
+      .then((r) => (r.ok ? r.text() : null))
+      .then((t) => {
+        if (!t) return;
+        const norm = (s) => {
+          const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+          return m ? m[3] + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0') : String(s).trim();
+        };
+        const map = {};
+        this.parseCSV(t).slice(1).forEach((r) => {
+          const ev = String(r[3] || '').trim();
+          const kind = String(r[5] || '').trim();
+          const date = norm(r[1] || '');
+          const status = String(r[9] || '').trim();
+          if (ev === 'capture-attested' && kind.indexOf('daily') === 0 && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            if (/^VALID/.test(status) || !map[date]) map[date] = status;
+          }
+        });
+        if (Object.keys(map).length) this.setState({ liveAttest: map });
+      })
+      .catch(() => {});
   }
 
   // ===== THE OFFICIAL WEIGH-IN RECORD =====
@@ -1240,6 +1309,7 @@ class Component extends DCLogic {
         uniform: ['Documentation Standard & Uniform \u2014 Micheal Ray Berry', 'The standardized uniform, pose, and four-angle documentation format every daily inspection follows.', 'uniform'],
         updates: ['Updates & Milestones \u2014 Micheal Ray Berry Public Accountability Project', 'Official updates from the record: milestones, weekly reviews, and project events.', 'updates'],
         record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
+        milestones: ['Milestone Ladder \u2014 300 to 175 | Micheal Ray Berry', 'The six official milestones between 340 and 175 pounds, each verified by an on-camera weigh-in and milestone video. Live status computed from the public weigh-in record.', 'milestones'],
       };
       const m = M[page] || M.home;
       const canon = base + m[2];
@@ -1391,6 +1461,45 @@ class Component extends DCLogic {
     // Private consequence details NEVER appear here or in the sheet.
     const penalties = this.state.livePenalties || [];
 
+    // ----- Live deadline status: overdue banner is automatic, sitewide -----
+    const etHour = (() => {
+      try { return parseInt(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour12: false, hour: 'numeric' }).format(new Date()), 10) || 0; } catch (e) { return 0; }
+    })();
+    const etTodayStr = (() => {
+      try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date()); } catch (e) { return ''; }
+    })();
+    const todayRow = data.find((r) => r.date === etTodayStr);
+    const packetDone = !!(todayRow && !isNaN(todayRow.weight) && todayRow.photo);
+    const showOverdue = rawDay >= 1 && etHour >= 22 && !packetDone;
+    const overdueMsg = 'Day ' + dayNumber + ' packet overdue \u2014 due 10:00 PM ET. This notice is automatic and clears only when the record is complete.';
+
+    // ----- Days without a violation -----
+    const violDates = penalties.map((p) => String(p.date)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+    const lastViol = violDates.length ? violDates[violDates.length - 1] : null;
+    const cleanDays = rawDay < 1 ? 0 : (lastViol ? Math.max(0, Math.floor((now - new Date(lastViol + 'T00:00:00')) / 864e5)) : dayNumber);
+
+    // ----- Capture attestation (public view of the verification log) -----
+    const attMap = this.state.liveAttest || {};
+    const attestedDays = Object.keys(attMap).filter((d) => /^VALID/.test(attMap[d])).length;
+    const attestedLabel = attestedDays + (attestedDays === 1 ? ' day attested \u2713' : ' days attested \u2713');
+
+    // ----- Milestone ladder (\u00a76): computed live from the weigh-in record -----
+    let msNextFound = false;
+    const milestoneRows = [300, 275, 250, 225, 200, 175].map((t) => {
+      const hit = data.find((r) => !isNaN(r.weight) && r.weight <= t);
+      let isNext = false;
+      if (!hit && !msNextFound) { isNext = true; msNextFound = true; }
+      return {
+        targetLabel: t + ' LB',
+        badge: hit ? 'REACHED' : (isNext ? 'NEXT' : 'AHEAD'),
+        badgeBg: hit ? '#141412' : (isNext ? '#B3261E' : '#F1F0EA'),
+        badgeFg: hit ? '#FAFAF7' : (isNext ? '#FFFFFF' : '#6B6A64'),
+        detail: hit
+          ? 'Reached ' + fmtDate(hit.date) + ' \u00b7 Day ' + dayOf(hit.date)
+          : fmt(Math.max(0, current - t)) + ' lb away at last recorded weight',
+      };
+    });
+
     // ----- Updates (official entries by the AP; personal notes by Micheal, permanent once posted) -----
     const fallbackUpdates = [{
       date: 'July 20, 2026', type: 'official', title: 'Entry 001 — Project Commencement',
@@ -1467,6 +1576,11 @@ class Component extends DCLogic {
           { label: 'RIGHT SIDE', url: expDay.right },
         ].filter((a) => a.url).map((a) => ({ label: a.label, url: normalizeDriveUrl(a.url) }))
       : [];
+    const expandedAttested = expDay && attMap[expDay.date]
+      ? (/^VALID/.test(attMap[expDay.date])
+          ? 'CAPTURE ATTESTED \u2713 \u2014 one-time code + file fingerprints logged with Google server time'
+          : 'ATTESTATION LOGGED \u2014 ' + attMap[expDay.date])
+      : '';
     const penaltyRows = penalties.map((p, i) => ({
       num: String(i + 1).padStart(3, '0'),
       date: p.date, violation: p.violation,
@@ -1512,6 +1626,13 @@ class Component extends DCLogic {
       isUniform: page === 'uniform',
       isUpdates: page === 'updates',
       wrClosed, wrCurrent,
+      showOverdue, overdueMsg,
+      cleanDays: String(cleanDays),
+      hasAttested: attestedDays > 0, attestedDays, attestedLabel,
+      expandedAttested, hasExpandedAttested: !!expandedAttested,
+      milestoneRows,
+      isMilestones: page === 'milestones',
+      goMilestones: () => this.go('milestones'),
       isRecord: page === 'record',
       goRecord: () => this.go('record'),
       ...(() => {
