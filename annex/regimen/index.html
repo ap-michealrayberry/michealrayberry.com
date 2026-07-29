@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Training Regimen — Micheal Ray Berry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans Condensed', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <header style="border-bottom: 2px solid #141412; padding: 18px 32px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;">Micheal Ray Berry</span>
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Annex · Training Regimen</span>
+  </header>
+  <main style="flex: 1; padding: 40px 32px; box-sizing: border-box;">
+    <div style="max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h1 style="margin: 0; font-size: 30px; font-weight: 700;">Standing Training Regimen</h1>
+        <p style="margin: 0; font-size: 13px; line-height: 1.7; color: #57544F;">Set and amended only by the Accountability Partner. Version 1 — pending AP approval. The daily compliance packet (agreement §4) is contractual and unaffected; everything below is training on top of it.</p>
+      </div>
+      <div style="border: 1px solid #141412; background: #FFFFFF;">
+        <div style="padding: 20px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Daily — every project day</span>
+        </div>
+        <sc-for list="{{ daily }}" as="row" hint-placeholder-count="5">
+          <div style="padding: 16px 28px; border-bottom: 1px solid #EDEBE4; display: grid; grid-template-columns: 110px 1fr; gap: 16px; align-items: baseline;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">{{ row.when }}</span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="font-size: 15px; font-weight: 600;">{{ row.what }}</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">{{ row.how }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border: 1px solid #141412; background: #FFFFFF;">
+        <div style="padding: 20px 28px; border-bottom: 1px solid #D8D6CF;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Weekly</span>
+        </div>
+        <sc-for list="{{ weekly }}" as="row" hint-placeholder-count="3">
+          <div style="padding: 16px 28px; border-bottom: 1px solid #EDEBE4; display: grid; grid-template-columns: 110px 1fr; gap: 16px; align-items: baseline;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">{{ row.when }}</span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="font-size: 15px; font-weight: 600;">{{ row.what }}</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">{{ row.how }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border: 1px solid #141412; background: #FFFFFF; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Standards</span>
+        <sc-for list="{{ standards }}" as="s" hint-placeholder-count="5">
+          <p style="margin: 0; font-size: 14px; line-height: 1.7; padding-left: 14px; border-left: 2px solid #D8D6CF;">{{ s }}</p>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.7; color: #8A8983;">Tools: <a href="/record">Daily Inspection</a> · Position Trainer · <a href="/annex/record">Annex Recording Assistant</a>. Only the daily compliance packet is contractual; regimen items are training obligations under AP supervision, adjusted by the AP as progress warrants.</p>
+    </div>
+  </main>
+  <footer style="border-top: 1px solid #D8D6CF; padding: 16px 32px;">
+    <a href="/annex" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #57544F; text-decoration: none;">← Annex</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      daily: [
+        { when: 'MORNING', what: 'Weigh-in and uniform check', how: 'Weight on the official scale, uniform on for the day\u2019s documentation. Log the weight before anything else.' },
+        { when: 'MORNING', what: 'Position drill — 10 minutes', how: 'Position Trainer, verification ON: Attention, Wait, Inspection, plus the week\u2019s assigned positions. 30-second holds, two rounds. Below 90% verified = repeat once.' },
+        { when: 'MIDDAY', what: 'Protocol check-in', how: 'One-line message to the AP: weight, drill grade, any anticipated problem with tonight\u2019s packet. Silence counts as a skipped item, not a violation.' },
+        { when: 'EVENING', what: 'Evening meal photo', how: 'Verified meal capture in the Recording Assistant — live, food-checked, code-stamped. If a meal plan is assigned, the camera confirms it.' },
+        { when: 'BY 10 PM', what: 'Daily Compliance Packet (contractual)', how: 'Daily Inspection video with challenge code, four photos, weight, tracker update. This is the agreement\u2019s hard deadline — everything above exists to make it routine.' },
+      ],
+      weekly: [
+        { when: 'SUNDAY', what: 'Weekly review preparation', how: 'Stand for the AP Edition weekly inspection. Uniform, full position sequence, week\u2019s numbers stated to camera.' },
+        { when: 'SUNDAY', what: 'Regimen grade', how: 'AP reviews the week: drill grades, check-ins, packet punctuality. Sub-standard weeks earn added drills or an assigned recording, at the AP\u2019s discretion.' },
+        { when: 'AP-SET', what: 'Assigned recording', how: 'When directed: a training or discipline session captured with the Annex Recording Assistant — single take, live clock — posted or delivered as the AP instructs.' },
+      ],
+      standards: [
+        'Positions are held still, in uniform, to the Position Trainer\u2019s verified standard — 90% or better is the passing grade.',
+        'Every obligation is documented the day it happens; an undocumented obligation counts as not done.',
+        'Corrective sessions, when assigned, follow the strict tool: full duration, single take, monitored, delivered to the AP the same night.',
+        'The AP may add, remove, or re-weight regimen items at any time; changes take effect the day after they are issued in writing.',
+        'Nothing in this regimen overrides the signed agreement. If they conflict, the agreement wins and the conflict is flagged to the AP.',
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

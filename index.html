@@ -103,7 +103,7 @@
   <div class="mrb-edge" style="background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; padding: 8px 32px; gap: 16px; flex-wrap: wrap;">
     <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
       <span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block;"></span>
-      <span>Official Public Record — Active</span>
+      <span>{{ recordStatus }}</span>
     </div>
     <div style="display: flex; gap: 28px; flex-wrap: wrap;">
       <span style="white-space: nowrap;">{{ dayStatus }}</span>
@@ -132,6 +132,28 @@
     </div>
   </header>
 
+  <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
+    <div style="background: #B3261E; color: #FAFAF7; border-bottom: 4px solid #141412;">
+      <div style="max-width: 1160px; margin: 0 auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 34px; text-transform: uppercase; letter-spacing: 0.04em;">Micheal is in violation</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;">{{ violationCountLabel }}</span>
+        </div>
+        <sc-for list="{{ openViolations }}" as="v" hint-placeholder-count="1">
+          <div style="border-left: 3px solid #FAFAF7; padding: 2px 0 2px 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline; font-family: 'IBM Plex Mono', monospace;">
+            <span style="font-size: 13px; font-weight: 600;">{{ v.date }}</span>
+            <span style="font-size: 13px;">{{ v.violation }}</span>
+            <span style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85;">{{ v.openFor }}</span>
+          </div>
+        </sc-for>
+        <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px;">He built this record and signed the agreement that governs it. He failed it anyway. Every visitor — family, coworker, stranger — sees this notice on every page until the failure is resolved to the Accountability Partner's standard, and the record of it stays in the log permanently. His clean-day streak is zero. Resolution is documented; it does not expire, and he cannot remove it.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a href="#penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E; background: #FAFAF7; padding: 10px 16px; text-decoration: none;">The violation log →</a>
+          <a href="/annex" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FAFAF7; border: 1px solid #FAFAF7; padding: 10px 16px; text-decoration: none;" style-hover="background: #141412; border-color: #141412;">What he answers to — the annex →</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
   <sc-if value="{{ showOverdue }}" hint-placeholder-val="{{ false }}">
     <div style="background: #B3261E; color: #FFFFFF; padding: 14px 32px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">{{ overdueMsg }}</div>
   </sc-if>
@@ -340,6 +362,26 @@
         <span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Capture verification</span>
         <span style="font-size: 14px; font-weight: 600;">{{ attestedLabel }}</span>
         <span style="font-size: 13px; color: #6B6A64;">Every session fetches a one-time code — spoken and burned into the video — and logs SHA-256 file fingerprints with Google server time. Recordings cannot be pre-made, replayed, or swapped afterward.</span>
+      </div>
+    </section>
+    </sc-if>
+
+    <sc-if value="{{ hasHealth }}" hint-placeholder-val="{{ false }}">
+    <section style="border-bottom: 1px solid #141412; padding: 20px 32px; background: #F1F0EA;">
+      <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; font-family: 'IBM Plex Mono', monospace;">
+        <div style="display: flex; gap: 12px 32px; flex-wrap: wrap; align-items: baseline;">
+          <span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Activity — Fitbit-verified</span>
+          <span style="font-size: 13px; color: #6B6A64;">Pulled from Fitbit's servers, not self-reported.</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <sc-for list="{{ healthRows }}" as="h" hint-placeholder-count="7">
+            <div style="border: 1px solid #D8D6CF; background: #FFFFFF; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 116px;">
+              <span style="font-size: 11px; color: #6B6A64;">{{ h.label }}</span>
+              <span style="font-size: 17px; font-weight: 600;">{{ h.steps }}</span>
+              <span style="font-size: 11px; color: #6B6A64;">{{ h.sub }}</span>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </section>
     </sc-if>
@@ -963,7 +1005,6 @@
         <button onClick="{{ toolDaily }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tdBg }}; color: {{ tdFg }};">Daily Inspection</button>
         <button onClick="{{ toolTraining }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ ttBg }}; color: {{ ttFg }};">Training Session</button>
         <button onClick="{{ toolAck }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ taBg }}; color: {{ taFg }};">Violation Acknowledgment</button>
-        <button onClick="{{ toolCorr }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tcBg }}; color: {{ tcFg }};">Corrective Session</button>
               </div>
     </section>
     <sc-if value="{{ isToolDaily }}" hint-placeholder-val="{{ true }}">
@@ -987,13 +1028,7 @@
       </div>
     </section>
     </sc-if>
-    <sc-if value="{{ isToolCorr }}" hint-placeholder-val="{{ false }}">
-    <section style="border-bottom: 1px solid #141412;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <x-import component-from-global-scope="recording-assistant" from="./recording-assistant.js?v=20260727" mode="corrective" hint-size="100%,700px"></x-import>
-      </div>
-    </section>
-    </sc-if>
+
       </div>
   </sc-if>
 
@@ -1259,12 +1294,15 @@ class Component extends DCLogic {
       .then((r) => (r.ok ? r.text() : null))
       .then((t) => {
         if (!t) return;
+        const arows = this.parseCSV(t);
+        const ahead = (arows[0] || []).map((h) => String(h).toLowerCase());
+        if (ahead[3] !== 'event' || ahead[4] !== 'code') return; // gviz fell back to another sheet
         const norm = (s) => {
           const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
           return m ? m[3] + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0') : String(s).trim();
         };
         const map = {};
-        this.parseCSV(t).slice(1).forEach((r) => {
+        arows.slice(1).forEach((r) => {
           const ev = String(r[3] || '').trim();
           const kind = String(r[5] || '').trim();
           const date = norm(r[1] || '');
@@ -1274,6 +1312,28 @@ class Component extends DCLogic {
           }
         });
         if (Object.keys(map).length) this.setState({ liveAttest: map });
+      })
+      .catch(() => {});
+    // Health tab: Fitbit-synced daily activity (steps / zone minutes).
+    fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Health')
+      .then((r) => (r.ok ? r.text() : null))
+      .then((t) => {
+        if (!t) return;
+        const rows = this.parseCSV(t);
+        // gviz falls back to the FIRST sheet when the named tab doesn't exist —
+        // only parse if this is really the Health tab.
+        const head = (rows[0] || []).map((h) => String(h).toLowerCase());
+        if (head[1] !== 'steps' || head[2] !== 'zone_minutes') return;
+        const norm = (s) => {
+          const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+          return m ? m[3] + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0') : String(s).trim();
+        };
+        const map = {};
+        rows.slice(1).forEach((r) => {
+          const date = norm(r[0] || '');
+          if (/^\d{4}-\d{2}-\d{2}$/.test(date)) map[date] = { steps: parseFloat(r[1]) || 0, zone: parseFloat(r[2]) || 0, dist: parseFloat(r[5]) || 0, cal: parseFloat(r[6]) || 0, wt: parseFloat(r[7]) || 0 };
+        });
+        if (Object.keys(map).length) this.setState({ liveHealth: map });
       })
       .catch(() => {});
   }
@@ -1463,6 +1523,21 @@ class Component extends DCLogic {
     // Public columns per §8 of the agreement: date · violation · status ('Unresolved' or 'Resolved · date').
     // Private consequence details NEVER appear here or in the sheet.
     const penalties = this.state.livePenalties || [];
+    // AP directive (July 28, 2026): while any violation is unresolved, the front
+    // page links the annex. Resolved log = no link.
+    const openList = penalties.filter((p) => !/satisfied|resolved/i.test(p.status || ''));
+    const inViolation = openList.length > 0;
+    const openViolations = openList.map((p) => {
+      let openFor = '';
+      const d = new Date(p.date + 'T00:00:00');
+      if (!isNaN(d)) {
+        const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
+        openFor = days === 0 ? 'today' : 'unresolved ' + days + (days === 1 ? ' day' : ' days');
+      }
+      return { date: p.date, violation: p.violation, openFor };
+    });
+    const violationCountLabel = openList.length === 1 ? '1 unresolved violation' : openList.length + ' unresolved violations';
+    const recordStatus = inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active';
 
     // ----- Live deadline status: overdue banner is automatic, sitewide -----
     const etHour = (() => {
@@ -1485,6 +1560,22 @@ class Component extends DCLogic {
     const attMap = this.state.liveAttest || {};
     const attestedDays = Object.keys(attMap).filter((d) => /^VALID/.test(attMap[d])).length;
     const attestedLabel = attestedDays + (attestedDays === 1 ? ' day attested \u2713' : ' days attested \u2713');
+
+    // ----- Fitbit activity strip (last 7 synced days) -----
+    const healthMap = this.state.liveHealth || {};
+    const healthRows = Object.keys(healthMap).sort().slice(-7).map((d) => {
+      const h = healthMap[d];
+      const bits = ['steps'];
+      if (h.zone) bits.push(h.zone + ' zone min');
+      if (h.dist) bits.push(h.dist.toFixed(1) + ' mi');
+      if (h.cal) bits.push(Number(h.cal).toLocaleString('en-US') + ' cal');
+      if (h.wt) bits.push(h.wt.toFixed(1) + ' lb synced');
+      return {
+        label: (dayOf(d) >= 1 ? 'DAY ' + dayOf(d) : 'PRE') + ' \u00b7 ' + d.slice(5),
+        steps: Number(h.steps || 0).toLocaleString('en-US'),
+        sub: bits.join(' \u00b7 '),
+      };
+    });
 
     // ----- Milestone ladder (\u00a76): computed live from the weigh-in record -----
     let msNextFound = false;
@@ -1632,6 +1723,8 @@ class Component extends DCLogic {
       showOverdue, overdueMsg,
       cleanDays: String(cleanDays),
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
+      hasHealth: healthRows.length > 0, healthRows,
+      inViolation, openViolations, violationCountLabel, recordStatus,
       expandedAttested, hasExpandedAttested: !!expandedAttested,
       milestoneRows,
       isMilestones: page === 'milestones',
