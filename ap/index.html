@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="robots" content="noindex, nofollow">
+  <title>AP Portal — Accountability Partner Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #141412; color: #FAFAF7; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #FAFAF7; }
+    a:hover { color: #E8837B; }
+    input::placeholder, textarea::placeholder { color: #6B6A64; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; background: #141412; color: #FAFAF7;">
+  <header style="border-bottom: 1px solid #3A3935; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">AP-only · not part of the public record</span>
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: 0.03em;">Accountability Partner Portal</span>
+    </div>
+    <sc-if value="{{ authed }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">{{ today }} · Day {{ day }}</span>
+        <button onClick="{{ reload }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #FAFAF7; border: 1px solid #57544F; padding: 9px 14px; cursor: pointer;" style-hover="border-color: #FAFAF7;">Refresh</button>
+        <button onClick="{{ publish }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: 1px solid #B3261E; padding: 9px 14px; cursor: pointer;" style-hover="background: #8F1E18;">Publish site now</button>
+        <button onClick="{{ lock }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #8A8983; border: 1px solid #3A3935; padding: 9px 14px; cursor: pointer;" style-hover="color: #FAFAF7;">Lock</button>
+      </div>
+    </sc-if>
+  </header>
+
+  <sc-if value="{{ statusMsg }}" hint-placeholder-val="{{ false }}">
+    <div style="background: #262521; border-bottom: 1px solid #3A3935; padding: 10px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D8D6CF;">{{ statusMsg }}</div>
+  </sc-if>
+
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width: 480px; margin: 80px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Restricted console</span>
+      <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #D8D6CF;">This portal administers the record: daily packet review, violation control, position grading, and corrective assignments. It requires the AP key. Micheal's record key does not open it.</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A8983;">AP key</label>
+        <input type="password" onChange="{{ onKeyField }}" onKeyDown="{{ keyEnter }}" placeholder="set with setApKey() in Apps Script" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px;">
+      </div>
+      <button onClick="{{ unlock }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 13px 18px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Unlock portal</button>
+      <sc-if value="{{ err }}" hint-placeholder-val="{{ false }}">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #E8837B;">{{ err }}</span>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ authed }}" hint-placeholder-val="{{ false }}">
+    <main style="max-width: 1160px; margin: 0 auto; padding: 32px 28px 80px; display: flex; flex-direction: column; gap: 40px;">
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Today's packet — {{ today }}</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ packetColor }};">{{ packetSummary }}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Weight entry</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600;">{{ wWeight }}</span>
+          </div>
+          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Photos filed</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600;">{{ photoCount }}/4</span>
+          </div>
+          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Capture attested</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; color: {{ attestColor }};">{{ attestLabel }}</span>
+          </div>
+          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Health sync</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; line-height: 1.5;">{{ healthLabel }}</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+          <sc-for list="{{ photos }}" as="p" hint-placeholder-count="4">
+            <a href="{{ p.url }}" target="_blank" style="text-decoration: none; display: flex; flex-direction: column; gap: 6px;">
+              <div style="aspect-ratio: 3 / 4; background: #1E1D1A; border: 1px solid #3A3935; position: relative; overflow: hidden;">
+                <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #57544F;">{{ p.state }}</span>
+                <div style="position: absolute; inset: 0; background-image: url('{{ p.url }}'); background-size: cover; background-position: center;"></div>
+              </div>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">{{ p.label }}</span>
+            </a>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasAttest }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Server-logged events today</span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <sc-for list="{{ attest }}" as="a" hint-placeholder-count="2">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; border: 1px solid {{ a.color }}; color: {{ a.color }}; padding: 5px 10px; letter-spacing: 0.06em;">{{ a.text }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; border-top: 1px solid #3A3935; padding-top: 14px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">A complete packet needs no action. If the packet is missed, late, or incomplete at 10 PM ET:</span>
+          <button onClick="{{ declarePacket }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #E8837B; border: 1px solid #B3261E; padding: 9px 14px; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">Declare packet violation</button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Violation log</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ openColor }};">{{ openLabel }}</span>
+        </div>
+        <sc-if value="{{ hasViolations }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ violations }}" as="v" hint-placeholder-count="2">
+              <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; min-width: 92px;">{{ v.date }}</span>
+                <span style="font-size: 14px; flex: 1; min-width: 220px; color: #D8D6CF;">{{ v.violation }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ v.color }};">{{ v.status }}</span>
+                <sc-if value="{{ v.open }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ v.resolve }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #9CCC9C; border: 1px solid #4C6E4C; padding: 7px 12px; cursor: pointer;" style-hover="background: #1B6E3C; color: #FAFAF7;">Mark resolved</button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noViolations }}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">No violations on record.</p>
+        </sc-if>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Declare a violation</span>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="date" onChange="{{ onVDate }}" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+            <input type="text" onChange="{{ onVText }}" placeholder="Nature of the documentation failure (published verbatim, §8: no amounts or consequences)" style="flex: 1; min-width: 280px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
+            <button onClick="{{ declareViolation }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #8F1E18;">Declare</button>
+          </div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6B6A64;">Declaring or resolving updates the public site on the next publish. Use "Publish site now" to push immediately.</span>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Position grading</h2>
+        <sc-if value="{{ hasPositions }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ positions }}" as="p" hint-placeholder-count="2">
+              <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; min-width: 140px;">{{ p.name }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{ p.color }};">{{ p.grade }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8983;">{{ p.date }}</span>
+                <span style="font-size: 13px; color: #8A8983; flex: 1;">{{ p.notes }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <input type="text" onChange="{{ onPosName }}" placeholder="Position (e.g. Inspection)" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+          <input type="number" min="0" max="100" onChange="{{ onPosGrade }}" placeholder="Grade %" style="width: 90px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+          <input type="text" onChange="{{ onPosNotes }}" placeholder="Notes (optional)" style="flex: 1; min-width: 200px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
+          <button onClick="{{ saveGrade }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save grade</button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corrective sessions</h2>
+        <sc-if value="{{ hasCorrective }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ corrective }}" as="c" hint-placeholder-count="2">
+              <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; min-width: 92px;">{{ c.date }}</span>
+                <span style="font-size: 14px; flex: 1; min-width: 220px; color: #D8D6CF;">{{ c.assignment }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8983;">{{ c.due }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ c.color }};">{{ c.status }}</span>
+                <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ c.complete }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #9CCC9C; border: 1px solid #4C6E4C; padding: 7px 12px; cursor: pointer;" style-hover="background: #1B6E3C; color: #FAFAF7;">Recording received — complete</button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <input type="text" onChange="{{ onCAssign }}" placeholder="Assignment (e.g. 30-minute corner-time corrective, recorded)" style="flex: 1; min-width: 280px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
+          <input type="date" onChange="{{ onCDue }}" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+          <button onClick="{{ assignCorrective }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Assign</button>
+        </div>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6B6A64;">Corrective recordings stay private (§8) — they arrive by direct delivery, never through this portal or the public site. This log records only assignment and completion.</span>
+      </section>
+
+      <section style="border-top: 1px solid #3A3935; padding-top: 20px; display: flex; gap: 22px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12px;">
+        <a href="https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM" target="_blank">Open the record sheet →</a>
+        <a href="https://michealrayberry.com" target="_blank">Public site →</a>
+        <a href="https://github.com/michealrayberry/michealrayberry.com" target="_blank">Repository →</a>
+      </section>
+    </main>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { key: '', authed: false, err: '', msg: '', data: null,
+    keyField: '', vDate: '', vText: '', posName: '', posGrade: '', posNotes: '', cAssign: '', cDue: '' };
+  EP = 'https://script.google.com/macros/s/AKfycbz9drhPe0Jn6ptytde5Ut3wZlxbIll5nYv3Z5-JF5thkt1__wfzzyjyJjs0lT2VQlcnWg/exec';
+  componentDidMount() {
+    let k = '';
+    try { k = localStorage.getItem('mrb_ap_portal_key') || ''; } catch (e) {}
+    if (k) this.setState({ key: k }, () => this.load());
+  }
+  async load() {
+    this.setState({ msg: 'Loading the record…', err: '' });
+    try {
+      const r = await fetch(this.EP + '?action=apstate&key=' + encodeURIComponent(this.state.key));
+      const j = await r.json();
+      if (!j.ok) {
+        try { localStorage.removeItem('mrb_ap_portal_key'); } catch (e) {}
+        this.setState({ authed: false, msg: '', err: j.error === 'unauthorized' ? 'Key not accepted. Set it with setApKey() in Apps Script, then retry.' : String(j.error || 'Load failed') });
+        return;
+      }
+      this.setState({ authed: true, data: j, msg: '' });
+    } catch (e) {
+      this.setState({ msg: '', err: 'Could not reach the record endpoint — check the connection and that the web app is deployed.' });
+    }
+  }
+  async post(payload, doing) {
+    this.setState({ msg: doing });
+    try {
+      const r = await fetch(this.EP, { method: 'POST', body: JSON.stringify(Object.assign({ key: this.state.key }, payload)) });
+      const j = await r.json();
+      if (!j.ok) { this.setState({ msg: '', err: String(j.error || 'Action failed') }); return false; }
+      this.setState({ err: '' });
+      await this.load();
+      return true;
+    } catch (e) { this.setState({ msg: '', err: 'Action failed — network error.' }); return false; }
+  }
+  renderVals() {
+    const s = this.state, d = s.data || {};
+    const w = d.weighin || {};
+    const photos = ['front', 'left', 'rear', 'right'].map((k) => ({
+      label: k, url: w[k] || '', state: w[k] ? '' : 'NOT FILED',
+    }));
+    const photoCount = photos.filter((p) => p.url).length;
+    const attRows = d.attest || [];
+    const attested = attRows.some((a) => a.event === 'capture-attested');
+    const mismatch = attRows.some((a) => (a.status || '').indexOf('MISMATCH') !== -1);
+    const attest = attRows.map((a) => ({
+      text: a.at + ' ' + a.event + (a.kind ? ' · ' + a.kind : '') + (a.status ? ' · ' + a.status : ''),
+      color: (a.status || '').indexOf('MISMATCH') !== -1 ? '#E8837B' : (a.event === 'capture-attested' ? '#9CCC9C' : '#8A8983'),
+    }));
+    const h = d.health;
+    const parts = [];
+    if (!w.weight) parts.push('no weight'); if (photoCount < 4) parts.push('photos ' + photoCount + '/4'); if (!attested) parts.push('not attested');
+    const complete = parts.length === 0;
+    const violations = (d.violations || []).map((v) => {
+      const open = !/^\s*resolved/i.test(String(v.status || ''));
+      return { date: v.date, violation: v.violation, status: v.status || 'Unresolved', open,
+        color: open ? '#E8837B' : '#9CCC9C',
+        resolve: () => { if (confirm('Mark resolved?\n\n' + v.date + ' — ' + v.violation)) this.post({ action: 'apviolation', op: 'resolve', row: v.row }, 'Resolving…'); } };
+    });
+    const openCount = violations.filter((v) => v.open).length;
+    const positions = (d.positions || []).map((p) => ({
+      name: p.name, grade: p.grade === '' ? '—' : p.grade + '%', date: p.date || '', notes: p.notes || '',
+      color: p.grade >= 85 ? '#9CCC9C' : (p.grade === '' ? '#8A8983' : '#E8C55F'),
+    }));
+    const corrective = (d.corrective || []).map((c) => {
+      const open = !/completed/i.test(c.status);
+      return { date: c.date, assignment: c.assignment, due: c.due ? 'due ' + c.due : '', status: c.status || 'Assigned', open,
+        color: open ? '#E8C55F' : '#9CCC9C',
+        complete: () => { if (confirm('Confirm: the corrective recording was received and reviewed?')) this.post({ action: 'apcorrective', op: 'complete', row: c.row }, 'Updating…'); } };
+    });
+    const set = (k) => (e) => this.setState({ [k]: e.target.value });
+    return {
+      locked: !s.authed, authed: s.authed, err: s.err, statusMsg: s.msg,
+      today: d.today || '', day: d.day || '',
+      wWeight: w.weight ? w.weight + ' lb' : '—', photoCount, photos,
+      attestLabel: mismatch ? 'MISMATCH' : (attested ? 'YES' : 'NO'),
+      attestColor: mismatch ? '#E8837B' : (attested ? '#9CCC9C' : '#E8C55F'),
+      hasAttest: attRows.length > 0, attest,
+      healthLabel: h ? (h.steps + ' steps · ' + h.zone + ' zone min · ' + h.mi + ' mi · ' + h.cal + ' cal') : 'not synced yet',
+      packetSummary: s.data ? (complete ? 'Packet complete' : 'Missing: ' + parts.join(' · ')) : '…',
+      packetColor: complete ? '#9CCC9C' : '#E8C55F',
+      violations, hasViolations: violations.length > 0, noViolations: s.data && violations.length === 0,
+      openLabel: openCount ? openCount + ' unresolved — violation mode' : 'record clean',
+      openColor: openCount ? '#E8837B' : '#9CCC9C',
+      positions, hasPositions: positions.length > 0,
+      corrective, hasCorrective: corrective.length > 0,
+      onKeyField: set('keyField'), onVDate: set('vDate'), onVText: set('vText'),
+      onPosName: set('posName'), onPosGrade: set('posGrade'), onPosNotes: set('posNotes'),
+      onCAssign: set('cAssign'), onCDue: set('cDue'),
+      keyEnter: (e) => { if (e.key === 'Enter') this.unlock(); },
+      unlock: () => this.unlock(),
+      lock: () => { try { localStorage.removeItem('mrb_ap_portal_key'); } catch (e) {} this.setState({ authed: false, key: '', data: null }); },
+      reload: () => this.load(),
+      publish: () => { if (confirm('Trigger a Netlify deploy of michealrayberry.com now?')) this.post({ action: 'apdeploy' }, 'Publishing…'); },
+      declarePacket: () => {
+        const t = (d.today || new Date().toISOString().slice(0, 10));
+        const text = 'Daily Compliance Packet not completed by 10:00 PM ET';
+        if (confirm('Declare violation?\n\n' + t + ' — ' + text + '\n\nThis enters the permanent public log and activates violation mode.'))
+          this.post({ action: 'apviolation', op: 'declare', date: t, violation: text }, 'Declaring…');
+      },
+      declareViolation: () => {
+        if (!s.vText.trim()) { this.setState({ err: 'Describe the documentation failure first.' }); return; }
+        const t = s.vDate || d.today;
+        if (confirm('Declare violation?\n\n' + t + ' — ' + s.vText.trim() + '\n\nThis enters the permanent public log and activates violation mode.'))
+          this.post({ action: 'apviolation', op: 'declare', date: t, violation: s.vText.trim() }, 'Declaring…');
+      },
+      saveGrade: () => {
+        if (!s.posName.trim() || s.posGrade === '') { this.setState({ err: 'Position and grade are required.' }); return; }
+        this.post({ action: 'apgrade', position: s.posName.trim(), grade: Math.max(0, Math.min(100, parseFloat(s.posGrade))), notes: s.posNotes.trim() }, 'Saving grade…');
+      },
+      assignCorrective: () => {
+        if (!s.cAssign.trim()) { this.setState({ err: 'Describe the assignment first.' }); return; }
+        this.post({ action: 'apcorrective', op: 'assign', assignment: s.cAssign.trim(), due: s.cDue }, 'Assigning…');
+      },
+    };
+  }
+  unlock() {
+    const k = this.state.keyField.trim();
+    if (!k) { this.setState({ err: 'Enter the AP key.' }); return; }
+    try { localStorage.setItem('mrb_ap_portal_key', k); } catch (e) {}
+    this.setState({ key: k }, () => this.load());
+  }
+}
+</script>
+</body>
+</html>

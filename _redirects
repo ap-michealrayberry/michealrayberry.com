@@ -7,5 +7,7 @@
 /penalties   /index.html  200
 /uniform     /index.html  200
 /updates     /index.html  200
-/annex/* /fagspose/:splat 301
-/annex /fagspose 301
+/annex/* / 301
+/annex / 301
+/fagspose/* / 301
+/fagspose / 301

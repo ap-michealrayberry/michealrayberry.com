@@ -13,5 +13,7 @@
 /*.json
   Cache-Control: public, max-age=3600
 
-/annex/*
+
+/ap/*
   X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
