@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>The Fagspose Annex — Micheal Ray Berry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans Condensed', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div style="background: #141412; color: #FAFAF7; padding: 10px 32px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
+    <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block;"></span>
+      <span>The Fagspose Annex — The Record Behind the Record</span>
+    </div>
+    <span>Unlisted</span>
+  </div>
+  <header style="border-bottom: 2px solid #141412; padding: 22px 32px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.02em;">MICHEAL RAY BERRY</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #6B6A64;">The Fagspose Annex to the Public Accountability Project</span>
+    </div>
+    <a href="/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: 1px solid #141412; padding: 9px 14px;" style-hover="color: #B3261E; border-color: #B3261E;">The official record →</a>
+  </header>
+  <sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+  <nav style="border-bottom: 1px solid #141412; padding: 0 32px; display: flex; gap: 26px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;">
+    <a href="#statement" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">Statement</a>
+    <a href="#about" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">This site</a>
+    <a href="#discipline" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">Discipline</a>
+    <a href="#positions" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">Positions</a>
+    <a href="#tools" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">Tools</a>
+    <a href="#cost" style="padding: 12px 0; text-decoration: none; color: #141412;" style-hover="color: #B3261E;">Failure</a>
+  </nav>
+  </sc-if>
+
+  <sc-if value="{{ gated }}" hint-placeholder-val="{{ true }}">
+    <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 32px; box-sizing: border-box;">
+      <div style="max-width: 560px; border: 1px solid #141412; background: #FFFFFF; padding: 36px; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">Before you continue</span>
+        <h1 style="margin: 0; font-size: 28px; font-weight: 700; line-height: 1.25; text-transform: uppercase;">This page describes a consensual submissive arrangement, under Micheal's real name.</h1>
+        <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #57544F;">It is not part of the Public Accountability Record. It is Micheal Ray Berry's Fagspose Submission Record — the submissive structure the record runs on, administered through Fagspose (fagspose.com — 18+): discipline, positions, corner time, supervision, in plain terms, in project uniform. Nothing explicit is hosted here; any link to adult material carries an 18+ warning.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onClick="{{ enter }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; padding: 14px 22px; cursor: pointer;">Continue</button>
+          <a href="/" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #141412; border: 1px solid #141412; padding: 14px 22px; text-decoration: none; display: inline-block; box-sizing: border-box;">Leave</a>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+    <main style="flex: 1;">
+      <section style="border-bottom: 1px solid #141412; padding: 64px 32px;">
+        <div style="max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(300px, 1.6fr) minmax(240px, 1fr); gap: 48px; align-items: start;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Published by AP directive — July 29, 2026</span>
+            <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 50px; line-height: 1.04; text-transform: uppercase; letter-spacing: 0.01em; text-wrap: pretty;">Micheal Ray Berry's Fagspose Submission Record</h1>
+            <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 560px; color: #3A3935;">The public record documents the weight. This site documents the structure it runs on — the training, the discipline, and the supervision — and names the authority it runs under: an Accountability Partner operating through Fagspose (<a href="https://fagspose.com" style="color: #B3261E;">fagspose.com</a> — 18+). It stands on its own, for those who know this side of the project or want to. It is not a violation page; the facts here already exist. A violation only changes who is directed to them.</p>
+          </div>
+          <div style="border: 1px solid #141412; background: #FFFFFF; font-family: 'IBM Plex Mono', monospace;">
+            <div style="padding: 14px 18px; border-bottom: 1px solid #D8D6CF; display: flex; justify-content: space-between; gap: 10px;"><span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Status</span><span style="font-size: 12px; font-weight: 600;">Unlisted · noindex</span></div>
+            <div style="padding: 14px 18px; border-bottom: 1px solid #D8D6CF; display: flex; justify-content: space-between; gap: 10px;"><span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Operator</span><a href="https://fagspose.com" style="font-size: 12px; font-weight: 600; color: #141412;">AP · fagspose.com (18+)</a></div>
+            <div style="padding: 14px 18px; border-bottom: 1px solid #D8D6CF; display: flex; justify-content: space-between; gap: 10px;"><span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Removal by Micheal</span><span style="font-size: 12px; font-weight: 600; color: #B3261E;">Not permitted</span></div>
+            <div style="padding: 14px 18px; display: flex; justify-content: space-between; gap: 10px;"><span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Hosted content</span><span style="font-size: 12px; font-weight: 600;">Non-explicit · SFW</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="statement" style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #F1F0EA;">
+        <div style="max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">01</span>
+            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">From the Accountability Partner</h2>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px; border-left: 2px solid #B3261E; padding-left: 24px;">
+            <p style="margin: 0; font-size: 16px; line-height: 1.75;">The public record documents Micheal's weight. This page acknowledges what the record does not say: Micheal is a submissive. He requires strict structure, supervision, and control to function at his best, and the structure his record runs on is submissive training, administered through Fagspose and supervised by me. He serves voluntarily, under his real name, and this page connects the two plainly — his legal identity, his submissive role, and the authority he accepted.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.75;">Micheal serves under a signed agreement that gives me control of his daily routine. Each day he weighs in, puts on the required uniform, stands for inspection on camera, and submits the day's evidence for my review by 10 PM. He holds trained positions on command. When he fails a requirement, he reports the failure, acknowledges it on video, and completes the corrective session I assign. The tools, the deadlines, and the verification on this domain exist so that he cannot soften any of it.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.75;">That is what this page documents — the standards, the positions, the discipline record, and what failure costs him. All of it in plain terms, all of it in project uniform, all of it where anyone reading his record can see it.</p>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #57544F;">— AP</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" style="border-bottom: 1px solid #141412; padding: 56px 32px;">
+        <div style="max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">02</span>
+            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">What this site is</h2>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0; border: 1px solid #141412; background: #FFFFFF;">
+            <div style="padding: 22px 26px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Disclosure</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3A3935;">The record cannot be honest and half-told. michealrayberry.com asks strangers to trust its numbers, its photos, and its violation log. That trust fails if the most basic fact about the project is hidden: Micheal keeps the record because he is trained and required to, the discipline that enforces it is real, and the authority behind it is a Fagspose Accountability Partner — not an anonymous administrator of a conventional weight-loss program. This site states that once, plainly, where anyone who needs the whole picture can find it.</p>
+            </div>
+            <div style="padding: 22px 26px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Audience</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3A3935;">Under normal conditions this site exists for the audiences it is intentionally provided to — people and communities for whom the submissive side of the project is relevant. It stays unlisted; it is shared, not stumbled on. When a violation stands unresolved, that separation is removed: the front page links here by the AP's directive, and visitors who came for a weight-loss record see what kind of arrangement he failed, and under whose supervision. He knows this before he skips a requirement. That is the point.</p>
+            </div>
+            <div style="padding: 22px 26px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Goal</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3A3935;">175 pounds, held for 28 consecutive days, with every day of the road there documented. This site exists so that nothing about how he gets there is misrepresented — not the training, not the supervision, not the cost of failing. When the project completes, the record closes with its integrity intact, this site included.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="discipline" style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #F1F0EA;">
+        <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">03</span>
+              <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">The discipline record</h2>
+            </div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64;">Maintained by the AP · Micheal cannot remove entries</span>
+          </div>
+          <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3A3935; max-width: 680px;">Documentation of the training as it is enforced — assigned, timed, and recorded under AP supervision. Non-explicit by rule: project uniform, nothing more.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;">
+            <sc-for list="{{ discipline }}" as="d" hint-placeholder-count="3">
+              <div style="border: 1px solid #141412; background: #FFFFFF; display: flex; flex-direction: column;">
+                <div style="aspect-ratio: 3 / 4; background: #E4E2DA; position: relative; overflow: hidden;">
+                  <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8983; text-align: center; padding: 12px; box-sizing: border-box;">{{ d.pending }}</span>
+                  <div style="position: absolute; inset: 0; background-image: url('{{ d.img }}'); background-size: cover; background-position: center;"></div>
+                </div>
+                <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #141412;">
+                  <span style="font-size: 16px; font-weight: 600;">{{ d.title }}</span>
+                  <span style="font-size: 13px; line-height: 1.6; color: #57544F;">{{ d.caption }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #B3261E;">{{ d.meta }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section id="positions" style="border-bottom: 1px solid #141412; padding: 56px 32px;">
+        <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">04</span>
+              <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Trained positions</h2>
+            </div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64;">Graded by on-device pose tracking · 90% passes</span>
+          </div>
+          <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3A3935; max-width: 680px;">The full command set — every position he is required to hold on command, as drilled in the Position Trainer. Verified grades are added as sessions are graded.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px;">
+            <sc-for list="{{ positions }}" as="p" hint-placeholder-count="4">
+              <div style="border: 1px solid #141412; background: #FFFFFF; display: flex; flex-direction: column;">
+                <div style="aspect-ratio: 3 / 4; background: #EDEBE4; position: relative; overflow: hidden;">
+                  <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8983; text-align: center; padding: 12px; box-sizing: border-box;">{{ p.pending }}</span>
+                  <div style="position: absolute; inset: 0; background-image: url('{{ p.img }}'); background-size: cover; background-position: center;"></div>
+                </div>
+                <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #141412;">
+                  <span style="font-size: 15px; font-weight: 600;">{{ p.name }}</span>
+                  <span style="font-size: 12px; line-height: 1.55; color: #57544F;">{{ p.desc }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: {{ p.gradeColor }};">{{ p.grade }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section id="tools" style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #F1F0EA;">
+        <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">05</span>
+            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Annex tools</h2>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+            <a href="/fagspose/regimen" style="border: 1px solid #141412; background: #FFFFFF; padding: 22px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 6px;" style-hover="border-color: #B3261E;">
+              <span style="font-size: 17px; font-weight: 600;">Training Regimen →</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">The standing daily and weekly training structure: drills, check-ins, standards, and how it feeds the contractual packet.</span>
+            </a>
+            <a href="/fagspose/weekly" style="border: 1px solid #141412; background: #FFFFFF; padding: 22px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 6px;" style-hover="border-color: #B3261E;">
+              <span style="font-size: 17px; font-weight: 600;">AP Edition — Weekly Inspection →</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">The guided weekly inspection recording with AP branding, identification, and on-camera consent. Produced by Micheal, posted by the AP.</span>
+            </a>
+            <a href="/fagspose/corrective" style="border: 1px solid #141412; background: #FFFFFF; padding: 22px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 6px;" style-hover="border-color: #B3261E;">
+              <span style="font-size: 17px; font-weight: 600;">Corrective Session — Corner Time →</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">The violation consequence: timed corner time on camera — code-verified, position and audio monitored, invalidated on the third warning, delivered to the AP.</span>
+            </a>
+            <a href="/fagspose/positions" style="border: 1px solid #141412; background: #FFFFFF; padding: 22px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 6px;" style-hover="border-color: #B3261E;">
+              <span style="font-size: 17px; font-weight: 600;">Position Photo Assistant →</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">Guided photography of every trained position: the stance is spoken, the camera verifies the hold, and the photo takes itself — stamped with the grade.</span>
+            </a>
+            <a href="/fagspose/record" style="border: 1px solid #141412; background: #FFFFFF; padding: 22px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 6px;" style-hover="border-color: #B3261E;">
+              <span style="font-size: 17px; font-weight: 600;">Recording Assistant →</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">Guided capture for training and discipline recordings: spoken cues, session timer, live clock and title burned into every frame.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="cost" style="padding: 56px 32px;">
+        <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">06</span>
+            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">What failure costs</h2>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+            <div style="border: 1px solid #141412; background: #FFFFFF; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 16px; font-weight: 600;">The record shows it</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">Every violation is logged permanently on the public record — date, nature, and a front-page notice on every page until resolved. He cannot remove it.</span>
+            </div>
+            <div style="border: 1px solid #141412; background: #FFFFFF; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 16px; font-weight: 600;">This page is linked</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">During an unresolved violation the front page links here by AP directive — every visitor sees what kind of arrangement he failed, and under whose supervision.</span>
+            </div>
+            <div style="border: 1px solid #141412; background: #FFFFFF; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 16px; font-weight: 600;">A corrective session is assigned</span>
+              <span style="font-size: 13px; line-height: 1.6; color: #57544F;">15, 20, or 30 minutes of corner time by level — single take, monitored, delivered to the AP the same night. The public record shows only resolved or unresolved.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <footer style="border-top: 2px solid #141412; padding: 20px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace;">
+    <a href="/" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #57544F; text-decoration: none;">← michealrayberry.com</a>
+    <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8983;">The Fagspose Annex · The record behind the record</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { entered: false };
+  renderVals() {
+    return {
+      gated: !this.state.entered,
+      open: this.state.entered,
+      enter: () => this.setState({ entered: true }),
+      // Photos render as background-image divs: a missing file or an unresolved
+      // {{ }} hole degrades to the pending card with NO network request or error.
+      // Images: commit JPGs to the repo at these exact paths (non-explicit, project uniform).
+      discipline: [
+        { title: 'Inspection portrait — pink unitard', caption: 'The approved annex portrait: inspection stance in the pink unitard, published here by AP approval.', meta: 'APPROVED FOR THE ANNEX · AP DIRECTIVE JULY 29', img: '/images/annex/pink-unitard-portrait.jpg', pending: 'Photo pending — images/annex/pink-unitard-portrait.jpg' },
+        { title: 'Corrective session — corner time', caption: 'Every corrective session is served as corner time: standing in the corner, hands behind the head, 15, 20, or 30 minutes by level — single take, monitored, invalidated on the third warning. The recording is delivered to the AP the same night.', meta: 'ASSIGNED PER VIOLATION · DELIVERED, NOT POSTED', img: '/images/annex/corner-time.jpg', pending: 'Photo pending — images/annex/corner-time.jpg' },
+        { title: 'Inspection stance', caption: 'The daily standard: standing, hands behind the head, elbows open, held for the full four-view sequence.', meta: 'DOCUMENTED DAILY ON THE RECORD', img: '/images/annex/inspection-stance.jpg', pending: 'Photo pending — images/annex/inspection-stance.jpg' },
+      ],
+      positions: [
+        { name: 'Attention', desc: 'Standing tall, feet together, arms at the sides, eyes forward.', grade: 'VERIFIED 90% · 2026-07-29', gradeColor: '#1B6E3C', img: '/images/annex/pos-attention.jpg', pending: 'images/annex/pos-attention.jpg' },
+        { name: 'Wait', desc: 'Feet slightly apart, hands clasped behind the back, chin lowered, eyes on the floor. Silent and still.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-wait.jpg', pending: 'images/annex/pos-wait.jpg' },
+        { name: 'Inspection', desc: 'Standing tall, hands behind the head, elbows wide, held for review.', grade: 'VERIFIED 90% · 2026-07-29', gradeColor: '#1B6E3C', img: '/images/annex/pos-inspection.jpg', pending: 'images/annex/pos-inspection.jpg' },
+        { name: 'Weekly Review', desc: 'At attention, presented for the record — the stance of the Sunday inspection.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-weekly-review.jpg', pending: 'images/annex/pos-weekly-review.jpg' },
+        { name: 'Closing Acknowledgment', desc: 'Feet together, hands behind the back, head lowered.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-closing.jpg', pending: 'images/annex/pos-closing.jpg' },
+        { name: 'Wall', desc: 'Facing the wall, hands behind the head, nose an inch from the surface.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-wall.jpg', pending: 'images/annex/pos-wall.jpg' },
+        { name: 'Corner', desc: 'Standing in the corner, hands behind the back, facing in. The corner-time stance.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-corner.jpg', pending: 'images/annex/pos-corner.jpg' },
+        { name: 'Kneel', desc: 'Kneeling upright, back straight, hands resting on the thighs.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-kneel.jpg', pending: 'images/annex/pos-kneel.jpg' },
+        { name: 'Nadu', desc: 'Kneeling, back straight, head up, hands palms-up on the thighs, knees apart.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-nadu.jpg', pending: 'images/annex/pos-nadu.jpg' },
+        { name: 'At Your Service', desc: 'Kneeling, head bowed, hands clasped behind the back.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-at-your-service.jpg', pending: 'images/annex/pos-at-your-service.jpg' },
+        { name: 'Ready to Please', desc: 'Kneeling upright, eyes forward, awaiting instruction.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-ready-to-please.jpg', pending: 'images/annex/pos-ready-to-please.jpg' },
+        { name: 'Collar Me', desc: 'Kneeling, head lifted and tilted back, presenting the throat.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-collar-me.jpg', pending: 'images/annex/pos-collar-me.jpg' },
+        { name: 'Humble', desc: 'Kneeling, folded forward, forehead low, arms extended.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-humble.jpg', pending: 'images/annex/pos-humble.jpg' },
+        { name: 'Table', desc: 'On hands and knees, back flat and level.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-table.jpg', pending: 'images/annex/pos-table.jpg' },
+        { name: 'Floor', desc: 'Fully down on the floor, held low and still.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-floor.jpg', pending: 'images/annex/pos-floor.jpg' },
+        { name: 'Stool', desc: 'Seated upright on the stool, posture held, hands on the thighs.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-stool.jpg', pending: 'images/annex/pos-stool.jpg' },
+        { name: 'Prostration', desc: 'Fully prostrate, all the way down, arms forward.', grade: 'NOT YET GRADED', gradeColor: '#8A8983', img: '/images/annex/pos-prostration.jpg', pending: 'images/annex/pos-prostration.jpg' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

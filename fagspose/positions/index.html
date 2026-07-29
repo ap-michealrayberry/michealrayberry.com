@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Position Photo Assistant — Micheal Ray Berry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans Condensed', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <header style="border-bottom: 2px solid #141412; padding: 18px 32px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;">Micheal Ray Berry</span>
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Fagspose Annex · Position Photo Assistant</span>
+  </header>
+  <main style="flex: 1; padding: 32px; box-sizing: border-box;">
+    <div style="max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 400px) minmax(260px, 1fr); gap: 28px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="border: 1px solid #141412; background: #FFFFFF; padding: 24px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Session</span>
+          <p style="margin: 0; font-size: 13px; line-height: 1.65; color: #57544F;">Each selected position: the exact stance is spoken, the camera checks it live and speaks corrections, and when the hold is verified the photo takes itself — stamped with the grade. Files are named to drop straight into images/annex/.</p>
+          <div style="display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow: auto; border: 1px solid #D8D6CF; padding: 12px 14px;">
+            <sc-for list="{{ posList }}" as="p" hint-placeholder-count="8">
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+                <input type="checkbox" checked="{{ p.on }}" onChange="{{ p.toggle }}" style="width: 15px; height: 15px; accent-color: #B3261E;">
+                <span>{{ p.name }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ p.doneColor }}; margin-left: auto;">{{ p.done }}</span>
+              </label>
+            </sc-for>
+          </div>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+            <input type="checkbox" checked="{{ mirror }}" onChange="{{ toggleMirror }}" style="width: 16px; height: 16px; accent-color: #B3261E;">
+            <span>Front camera (mirrored preview)</span>
+          </label>
+          <sc-if value="{{ idle }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ begin }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; padding: 15px 22px; cursor: pointer;">Begin Session</button>
+          </sc-if>
+          <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button onClick="{{ captureNow }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; padding: 12px 22px; cursor: pointer;">Capture now (current grade)</button>
+              <button onClick="{{ skip }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #141412; border: 1px solid #141412; padding: 12px 22px; cursor: pointer;">Skip position</button>
+              <button onClick="{{ endSession }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #B3261E; border: 1px solid #B3261E; padding: 12px 22px; cursor: pointer;">■ End session</button>
+            </div>
+          </sc-if>
+          <span style="font-size: 12px; line-height: 1.6; color: #57544F;">{{ note }}</span>
+        </div>
+        <sc-if value="{{ hasShots }}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #141412; background: #FFFFFF; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">Photos</span>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px;">
+              <sc-for list="{{ shots }}" as="s" hint-placeholder-count="3">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <img src="{{ s.url }}" alt="{{ s.name }}" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border: 1px solid #141412; display: block;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.4;">{{ s.name }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: {{ s.gradeColor }};">{{ s.grade }}</span>
+                  <div style="display: flex; gap: 6px;">
+                    <a href="{{ s.url }}" download="{{ s.file }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;">Save</a>
+                    <button onClick="{{ s.retake }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 0; color: #B3261E; cursor: pointer;">Retake</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <span style="font-size: 11px; line-height: 1.6; color: #8A8983;">Save each file, then commit to the repo at images/annex/ — the filenames already match the annex slots.</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="border: 1px solid #141412; background: #141412; position: relative; aspect-ratio: 3 / 4; max-height: 76vh; justify-self: center; width: 100%; max-width: 57vh;">
+        <canvas class="pp-view" width="1080" height="1440" style="width: 100%; height: 100%; display: block;"></canvas>
+      </div>
+    </div>
+  </main>
+  <footer style="border-top: 1px solid #D8D6CF; padding: 16px 32px;">
+    <a href="/fagspose" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #57544F; text-decoration: none;">← The Fagspose Annex</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  POSITIONS = [
+    ['Attention', 'Attention. Stand tall, feet together, arms at your sides, eyes forward.'],
+    ['Wait', 'Wait. Feet slightly apart, hands clasped behind your back, chin lowered, eyes on the floor.'],
+    ['Inspection', 'Inspection. Hands behind your head, elbows wide, standing tall.'],
+    ['Weekly Review', 'Weekly review. Stand at attention and present yourself for the record.'],
+    ['Closing Acknowledgment', 'Closing acknowledgment. Feet together, hands behind your back, head lowered.'],
+    ['Wall', 'Wall. Face the wall, hands behind your head, an inch from the surface.'],
+    ['Corner', 'Corner. Stand in the corner, hands behind your back, facing in.'],
+    ['Kneel', 'Kneel. Upright, back straight, hands resting on your thighs.'],
+    ['Nadu', 'Nadu. Kneel, back straight, head up, hands palms-up on your thighs, knees apart.'],
+    ['At Your Service', 'At your service. Kneel, head bowed, hands clasped behind your back.'],
+    ['Ready to Please', 'Ready to please. Kneel upright, eyes forward, awaiting instruction.'],
+    ['Collar Me', 'Collar me. Kneel, head lifted and tilted back, presenting the throat.'],
+    ['Humble', 'Humble. Kneel, fold forward, forehead low, arms extended.'],
+    ['Table', 'Table. On hands and knees, back flat and level.'],
+    ['Floor', 'Floor. All the way down on the floor, low and still.'],
+    ['Stool', 'Stool. Seated upright, posture held, hands on your thighs.'],
+    ['Prostration', 'Prostration. Fully prostrate, all the way down, arms forward.'],
+  ];
+  RULES = {
+    'Attention': [['standing', 'Stand tall.'], ['armsAtSides', 'Arms at your sides.'], ['feetTogether', 'Feet together.']],
+    'Wait': [['standing', 'Stand up.'], ['handsBehindBack', 'Hands behind your back.']],
+    'Inspection': [['standing', 'Stand tall.'], ['handsOnHead', 'Hands behind your head.'], ['elbowsWide', 'Elbows wide.']],
+    'Weekly Review': [['standing', 'Stand tall.'], ['handsOnHead', 'Hands behind your head.']],
+    'Closing Acknowledgment': [['standing', 'Stand up.'], ['handsBehindBack', 'Hands behind your back.']],
+    'Wall': [['standing', 'Stand at the wall.'], ['handsOnHead', 'Hands behind your head.']],
+    'Corner': [['standing', 'Stand in the corner.'], ['handsBehindBack', 'Hands behind your back.']],
+    'Kneel': [['kneeling', 'Kneel.']],
+    'Nadu': [['kneeling', 'Kneel.']],
+    'At Your Service': [['kneeling', 'Kneel.']],
+    'Ready to Please': [['kneeling', 'Kneel.']],
+    'Collar Me': [['kneeling', 'Kneel.']],
+    'Humble': [['kneeling', 'Kneel.']],
+    'Table': [['horizontal', 'Hands and knees. Back flat.']],
+    'Floor': [['low', 'Down on the floor.']],
+    'Stool': [['seated', 'Seated. Upright.']],
+    'Prostration': [['low', 'All the way down.']],
+  };
+  state = {
+    on: Object.fromEntries(['Attention','Wait','Inspection','Kneel'].map((n) => [n, true])),
+    mirror: true, phase: 'idle', idx: -1, queue: [],
+    note: 'Select positions, allow the camera, then Begin. Nothing uploads — photos stay on this device.',
+    shots: [], status: '', statusOk: false,
+  };
+
+  componentDidMount() {
+    this._view = document.querySelector('.pp-view');
+    this._ctx = this._view.getContext('2d');
+    this._cam = document.createElement('video');
+    this._cam.muted = true; this._cam.playsInline = true;
+    this.startCamera();
+  }
+  componentWillUnmount() {
+    clearInterval(this._mon); clearInterval(this._cd);
+    cancelAnimationFrame(this._raf);
+    if (this._stream) this._stream.getTracks().forEach((t) => t.stop());
+    if (this._wake) { try { this._wake.release(); } catch (e) {} }
+  }
+
+  async startCamera() {
+    try {
+      if (this._stream) this._stream.getTracks().forEach((t) => t.stop());
+      this._stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: this.state.mirror ? 'user' : 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
+      this._cam.srcObject = this._stream;
+      await this._cam.play();
+      try { this._wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+      this._loop();
+    } catch (e) {
+      this.setState({ note: 'Camera unavailable — allow camera access and reload.' });
+    }
+  }
+
+  async loadPose() {
+    if (this._pose) return true;
+    try {
+      const v = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+      const files = await v.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+      const opts = (d) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate: d }, runningMode: 'VIDEO', numPoses: 1 });
+      try { this._pose = await v.PoseLandmarker.createFromOptions(files, opts('GPU')); }
+      catch (e) { this._pose = await v.PoseLandmarker.createFromOptions(files, opts('CPU')); }
+      return true;
+    } catch (e) { return false; }
+  }
+
+  _checks(lm) {
+    const y = (i) => lm[i].y, x = (i) => lm[i].x, vis = (i) => (lm[i].visibility == null ? 1 : lm[i].visibility);
+    const dist = (a, b) => Math.hypot(x(a) - x(b), y(a) - y(b));
+    const sw = Math.max(0.05, Math.abs(x(11) - x(12)));
+    const shY = (y(11) + y(12)) / 2, hipY = (y(23) + y(24)) / 2, kneeY = (y(25) + y(26)) / 2;
+    const standing = shY < hipY - 0.12 && hipY < kneeY - 0.08;
+    const wristsHidden = vis(15) < 0.45 && vis(16) < 0.45;
+    return {
+      standing,
+      kneeling: !standing && shY < hipY - 0.15 && Math.abs(hipY - kneeY) < 0.16,
+      seated: !standing && Math.abs(hipY - kneeY) < 0.12 && shY < hipY - 0.15,
+      low: y(0) > 0.55 && shY > 0.6 && hipY > 0.6,
+      horizontal: Math.abs(shY - hipY) < 0.12 && shY > 0.3 && shY < 0.85,
+      handsOnHead: (dist(15, 7) < sw * 0.9 || dist(15, 8) < sw * 0.9) && (dist(16, 7) < sw * 0.9 || dist(16, 8) < sw * 0.9) && y(15) < shY && y(16) < shY,
+      elbowsWide: Math.abs(x(13) - x(0)) > sw * 0.6 && Math.abs(x(14) - x(0)) > sw * 0.6,
+      armsAtSides: Math.abs(y(15) - hipY) < 0.18 && Math.abs(y(16) - hipY) < 0.18 && Math.abs(x(15) - x(23)) < sw * 0.8 && Math.abs(x(16) - x(24)) < sw * 0.8,
+      handsBehindBack: wristsHidden || (dist(15, 16) < sw * 0.7 && y(15) > hipY - 0.18 && y(16) > hipY - 0.18),
+      feetTogether: vis(27) > 0.3 && vis(28) > 0.3 ? dist(27, 28) < sw * 0.7 : true,
+    };
+  }
+
+  say(t) { try { const u = new SpeechSynthesisUtterance(t); u.rate = 0.95; u.pitch = 0.9; speechSynthesis.speak(u); } catch (e) {} }
+  beep(f, ms) {
+    try {
+      this._ac = this._ac || new (window.AudioContext || window.webkitAudioContext)();
+      const o = this._ac.createOscillator(), g = this._ac.createGain();
+      o.frequency.value = f; o.connect(g); g.connect(this._ac.destination);
+      g.gain.setValueAtTime(0.12, this._ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, this._ac.currentTime + ms / 1000);
+      o.start(); o.stop(this._ac.currentTime + ms / 1000);
+    } catch (e) {}
+  }
+
+  _loop() {
+    cancelAnimationFrame(this._raf);
+    const W = 1080, H = 1440, ctx = this._ctx, cam = this._cam;
+    const draw = () => {
+      this._raf = requestAnimationFrame(draw);
+      ctx.fillStyle = '#0A0C0E'; ctx.fillRect(0, 0, W, H);
+      if (cam.readyState >= 2 && cam.videoWidth) {
+        const vw = cam.videoWidth, vh = cam.videoHeight;
+        const s = Math.max(W / vw, H / vh), dw = vw * s, dh = vh * s;
+        ctx.save();
+        if (this.state.mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+        ctx.drawImage(cam, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#57544F'; ctx.font = '600 30px "IBM Plex Mono",monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('CAMERA STARTING…', W / 2, H / 2); ctx.textAlign = 'left';
+      }
+      if (this.state.phase === 'running') {
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const name = (this.state.queue[this.state.idx] || '').toUpperCase();
+        ctx.font = '700 44px "IBM Plex Sans Condensed",sans-serif';
+        ctx.fillStyle = 'rgba(10,12,14,0.8)'; ctx.fillRect(0, 48, W, 74);
+        ctx.fillStyle = '#FAFAF7'; ctx.fillText(name, W / 2, 86);
+        ctx.font = '600 26px "IBM Plex Mono",monospace';
+        ctx.fillStyle = this.state.statusOk ? 'rgba(32,74,38,0.85)' : 'rgba(140,25,20,0.85)';
+        ctx.fillRect(0, 122, W, 52);
+        ctx.fillStyle = '#FAFAF7';
+        ctx.fillText((this._cdLeft ? 'HOLD — ' + this._cdLeft : (this.state.status || 'FINDING YOU…').toUpperCase()), W / 2, 148);
+        ctx.textAlign = 'left';
+      }
+    };
+    draw();
+  }
+
+  slug(name) { return 'pos-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
+  async begin() {
+    if (this.state.phase !== 'idle' || !this._stream) return;
+    this.setState({ note: 'Loading pose verification…' });
+    const ok = await this.loadPose();
+    if (!ok) { this.setState({ note: 'Pose model failed to load — check the connection and try again.' }); return; }
+    const queue = this.POSITIONS.map(([n]) => n).filter((n) => this.state.on[n]);
+    if (!queue.length) { this.setState({ note: 'Select at least one position.' }); return; }
+    this.setState({ phase: 'running', queue, idx: -1, note: 'Session running — follow the voice. The photo takes itself when the hold is verified.' });
+    this._startMonitor();
+    this._next();
+  }
+
+  _next() {
+    const next = this.state.idx + 1;
+    if (next >= this.state.queue.length) { this.endSession(true); return; }
+    this._holdOk = 0; this._holdTotal = 0; this._okRun = 0; this._badRun = 0; this._cdLeft = 0; this._started = Date.now();
+    this.setState({ idx: next, status: 'Take position', statusOk: false });
+    this.beep(880, 140);
+    const name = this.state.queue[next];
+    this.say(this.POSITIONS.find(([n]) => n === name)[1]);
+  }
+
+  _startMonitor() {
+    clearInterval(this._mon);
+    this._mon = setInterval(() => {
+      if (this.state.phase !== 'running' || !this._pose || !this._cam.videoWidth || this._cdLeft) return;
+      let ok = false, msg = 'Not detected — step into frame';
+      try {
+        const res = this._pose.detectForVideo(this._cam, performance.now());
+        const lm = res.landmarks && res.landmarks[0];
+        if (lm) {
+          const rules = this.RULES[this.state.queue[this.state.idx]];
+          const c = this._checks(lm);
+          const fail = rules.find((r) => !c[r[0]]);
+          if (fail) msg = fail[1];
+          else { ok = true; msg = 'Verified — hold'; }
+        }
+      } catch (e) {}
+      this._holdTotal++; if (ok) { this._holdOk++; this._okRun++; this._badRun = 0; }
+      else {
+        this._okRun = 0; this._badRun++;
+        if (this._badRun === 8) { this.say(msg); this._badRun = 0; } // ~2.5s sustained → speak the correction
+      }
+      this.setState({ status: msg, statusOk: ok });
+      if (this._okRun >= 6) this._countdown(); // ~2s verified → shoot
+    }, 320);
+  }
+
+  _grade() {
+    // Grade the last ~10s of the hold — the settling period doesn't count against him.
+    const pct = this._holdTotal ? Math.round((100 * this._holdOk) / Math.max(1, Math.min(this._holdTotal, 30))) : 0;
+    return Math.min(100, pct);
+  }
+
+  _countdown() {
+    if (this._cdLeft) return;
+    this._cdLeft = 3;
+    this.say('Hold.');
+    this._cd = setInterval(() => {
+      this.beep(660, 100);
+      this._cdLeft--;
+      if (this._cdLeft <= 0) {
+        clearInterval(this._cd);
+        this._shoot(true);
+      }
+    }, 800);
+  }
+
+  captureNow() { if (this.state.phase === 'running' && !this._cdLeft) this._shoot(false); }
+  skip() {
+    if (this.state.phase !== 'running' || this._cdLeft) return;
+    this.say('Skipped.');
+    this._next();
+  }
+
+  _shoot(verified) {
+    const cam = this._cam;
+    if (!cam.videoWidth) return;
+    const name = this.state.queue[this.state.idx];
+    const grade = verified ? Math.max(90, this._grade()) : this._grade();
+    const PH = Math.min(2160, cam.videoHeight * 2), scale = Math.min(1, 2160 / cam.videoHeight);
+    const vw = cam.videoWidth, vh = cam.videoHeight;
+    const outH = Math.round(vh * scale), outW = Math.round(outH * 3 / 4);
+    const c = document.createElement('canvas');
+    c.width = outW; c.height = outH;
+    const p = c.getContext('2d');
+    const s = Math.max(outW / vw, outH / vh), dw = vw * s, dh = vh * s;
+    if (this.state.mirror) { p.save(); p.translate(outW, 0); p.scale(-1, 1); p.drawImage(cam, (outW - dw) / 2, (outH - dh) / 2, dw, dh); p.restore(); }
+    else p.drawImage(cam, (outW - dw) / 2, (outH - dh) / 2, dw, dh);
+    const k = outW / 1080;
+    p.textBaseline = 'middle'; p.textAlign = 'center';
+    const bandH = Math.round(150 * k), y = outH - Math.round(70 * k) - bandH;
+    p.fillStyle = 'rgba(10,12,14,0.8)'; p.fillRect(Math.round(90 * k), y, outW - Math.round(180 * k), bandH);
+    p.fillStyle = '#B3261E'; p.fillRect(Math.round(90 * k), y, Math.round(7 * k), bandH);
+    p.fillStyle = '#B9BEC4'; p.font = '600 ' + Math.round(24 * k) + 'px "IBM Plex Mono",monospace';
+    p.fillText('MICHEAL RAY BERRY · TRAINED POSITION · ' + new Date().toISOString().slice(0, 10), outW / 2, y + bandH * 0.24);
+    p.fillStyle = '#FAFAF7'; p.font = '700 ' + Math.round(48 * k) + 'px "IBM Plex Sans Condensed",sans-serif';
+    p.fillText(name.toUpperCase() + ' · ' + grade + '%' + (verified ? ' VERIFIED' : ''), outW / 2, y + bandH * 0.55);
+    p.fillStyle = '#B9BEC4'; p.font = '600 ' + Math.round(21 * k) + 'px "IBM Plex Mono",monospace';
+    p.fillText('POSE-TRACKED · MICHEALRAYBERRY.COM/ANNEX', outW / 2, y + bandH * 0.82);
+    const url = c.toDataURL('image/jpeg', 0.92);
+    const shots = this.state.shots.filter((s2) => s2.name !== name);
+    shots.push({ name, url, grade, verified, file: this.slug(name) + '.jpg' });
+    this.beep(880, 150);
+    this.say(verified ? name + '. ' + grade + ' percent, verified.' : name + ' captured. ' + grade + ' percent.');
+    this.setState({ shots });
+    this._cdLeft = 0;
+    setTimeout(() => this._next(), 900);
+  }
+
+  endSession(complete) {
+    clearInterval(this._mon); clearInterval(this._cd); this._cdLeft = 0;
+    if (this.state.phase !== 'running') return;
+    this.say(complete === true ? 'Session complete. ' + this.state.shots.length + ' positions photographed.' : 'Session ended.');
+    this.setState({ phase: 'idle', status: '', note: this.state.shots.length + ' photo(s) below — save each and commit to images/annex/. Retake replaces the photo.' });
+  }
+
+  retake(name) {
+    if (this.state.phase !== 'idle') return;
+    this.setState({ phase: 'running', queue: [name], idx: -1, note: 'Retaking ' + name + '…' });
+    this._startMonitor();
+    this._next();
+  }
+
+  renderVals() {
+    const s = this.state;
+    return {
+      posList: this.POSITIONS.map(([n]) => {
+        const shot = s.shots.find((x) => x.name === n);
+        return {
+          name: n, on: !!s.on[n],
+          toggle: () => this.setState({ on: Object.assign({}, s.on, { [n]: !s.on[n] }) }),
+          done: shot ? shot.grade + '%' + (shot.verified ? ' ✓' : '') : '',
+          doneColor: shot ? (shot.verified ? '#204A26' : '#8A8983') : '#8A8983',
+        };
+      }),
+      mirror: s.mirror, toggleMirror: () => { this.setState({ mirror: !s.mirror }, () => this.startCamera()); },
+      idle: s.phase === 'idle', running: s.phase === 'running',
+      begin: () => this.begin(), captureNow: () => this.captureNow(), skip: () => this.skip(),
+      endSession: () => this.endSession(false),
+      note: s.note,
+      hasShots: s.shots.length > 0,
+      shots: s.shots.map((x) => ({
+        name: x.name, url: x.url, file: x.file,
+        grade: x.grade + '%' + (x.verified ? ' VERIFIED' : ''),
+        gradeColor: x.verified ? '#204A26' : '#8A8983',
+        retake: () => this.retake(x.name),
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>
