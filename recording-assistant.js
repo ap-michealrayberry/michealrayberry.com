@@ -169,6 +169,26 @@
           Optional, independent of the inspection above. Live capture only — no gallery uploads: the tool fetches a one-time code, checks the frame actually contains food (on-device AI), stamps day · date · time · code into the photo, files it to the record, and logs its fingerprint with server time.
         </p>
       </div>
+      <div class="ra-vpbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
+        <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Violation portrait — required while a violation is active</label>
+        <div class="ra-row">
+          <div class="ra-field" style="max-width:140px">
+            <label>Violation number</label>
+            <input class="ra-vpnum" type="number" min="1" placeholder="1">
+          </div>
+          <div class="ra-field">
+            <label>Violation date</label>
+            <input class="ra-vpdate" type="date">
+          </div>
+        </div>
+        <div class="ra-row">
+          <button class="ra-ghost ra-vp">Capture Violation Portrait</button>
+        </div>
+        <a class="ra-dl ra-vpdl ra-hide" download style="margin-top:10px">Download Portrait</a>
+        <p class="ra-vpnote" style="margin-top:8px">
+          Standardized pink-unitard portrait, inspection stance, facing the camera. Factual and fully clothed; stamped with the violation number and date (§8: no consequence details). It is filed to the record and appears in the public violation notice until the violation is resolved.
+        </p>
+      </div>
       <div class="ra-corrbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
         <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Corrective session — corner time</label>
         <div class="ra-row">
@@ -1053,6 +1073,66 @@
         ctx.fillText(String(photoPhase.count), W / 2, H / 2);
         ctx.textAlign = 'left';
       }
+
+      // ---- Violation portrait (§8-trimmed): stamped still, filed to the record ----
+      const setVpNote = (m) => { $('.ra-vpnote').textContent = m; };
+      async function captureViolationPortrait(vnum, vdate, code) {
+        const shots = [];
+        for (let s = 0; s < 3; s++) {
+          const f = grabFrame();
+          if (f) shots.push(f);
+          if (s < 2) await new Promise((r) => setTimeout(r, 160));
+        }
+        if (!shots.length) return null;
+        let c = shots[0], bestV = -1;
+        for (const f of shots) { const v = sharpness(f); if (v > bestV) { bestV = v; c = f; } }
+        const PW = c.width, PH = c.height, k = PW / 1080;
+        const p = c.getContext('2d');
+        p.textBaseline = 'middle';
+        p.fillStyle = 'rgba(15,15,13,0.82)'; p.fillRect(0, 0, PW, Math.round(128 * k));
+        p.fillStyle = '#FAFAF7'; p.font = '700 ' + Math.round(44 * k) + 'px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';
+        p.fillText('MICHEAL RAY BERRY', Math.round(40 * k), Math.round(50 * k));
+        p.fillStyle = '#FF6B61'; p.font = '600 ' + Math.round(24 * k) + 'px "IBM Plex Mono",monospace';
+        p.fillText('PUBLIC ACCOUNTABILITY PROJECT', Math.round(40 * k), Math.round(94 * k));
+        const tag = 'VIOLATION V-' + String(vnum).padStart(3, '0');
+        p.font = '700 ' + Math.round(34 * k) + 'px "IBM Plex Mono",monospace'; p.fillStyle = '#FF6B61';
+        p.fillText(tag, PW - p.measureText(tag).width - Math.round(40 * k), Math.round(62 * k));
+        p.fillStyle = 'rgba(15,15,13,0.82)'; p.fillRect(0, PH - Math.round(128 * k), PW, Math.round(128 * k));
+        p.fillStyle = '#FAFAF7'; p.font = '600 ' + Math.round(34 * k) + 'px "IBM Plex Mono",monospace';
+        p.fillText('VIOLATION OF ' + vdate + ' · ASSESSED ' + isoStr, Math.round(40 * k), PH - Math.round(82 * k));
+        p.fillStyle = '#B9B8B2'; p.font = '400 ' + Math.round(24 * k) + 'px "IBM Plex Mono",monospace';
+        p.fillText('ACTIVE UNTIL RESOLVED · LIVE CAPTURE' + (code ? ' · CODE ' + code : '') + ' · MICHEALRAYBERRY.COM', Math.round(40 * k), PH - Math.round(40 * k));
+        return c;
+      }
+      $('.ra-vp').addEventListener('click', async () => {
+        if (recording || countdownLeft > 0) return;
+        if (!stream) { setVpNote('Tap Begin Daily Inspection (or just allow the camera) first, then capture.'); return; }
+        const vnum = parseInt($('.ra-vpnum').value, 10);
+        const vdate = $('.ra-vpdate').value;
+        if (!vnum || !vdate) { setVpNote('Enter the violation number and date first — both are stamped into the portrait.'); return; }
+        setVpNote('Requesting verification code…');
+        const ch = await fetchChallenge('violation-portrait');
+        if (!ch) { setVpNote('Verification code unavailable — a connection is required. The portrait cannot be captured unverified.'); return; }
+        await setVideoRes(3840, 2160);
+        const c = await captureViolationPortrait(vnum, vdate, ch.code);
+        await setVideoRes(1920, 1080);
+        if (!c) { setVpNote('Camera frame unavailable — try again.'); return; }
+        beep(880, 150);
+        const dataUrl = c.toDataURL('image/jpeg', 0.92);
+        const dl = $('.ra-vpdl');
+        dl.href = dataUrl;
+        dl.download = 'micheal-ray-berry-violation-portrait-v' + String(vnum).padStart(3, '0') + '-' + isoStr + '.jpg';
+        dl.textContent = 'Download Portrait (V-' + String(vnum).padStart(3, '0') + ')';
+        dl.classList.remove('ra-hide');
+        setVpNote('Filing to the record…');
+        const blob = await (await fetch(dataUrl)).blob();
+        const hash = await sha256Blob(blob);
+        const filed = await postPacket({ name: 'violation-portrait.jpg', image_b64: String(dataUrl).split(',')[1] });
+        const att = await attestPost({ kind: 'violation-portrait-v' + vnum, code: ch.code, weight: '', video_sha256: '', photo_sha256s: [hash] });
+        setVpNote(filed && att
+          ? 'Filed and attested. The portrait publishes to the violation notice on the next site deploy.'
+          : 'Captured, but filing failed — download it and send it to the AP directly.');
+      });
 
       // ---- Corrective session (private · §8): continuous timed single take ----
       const CORR_LEVELS = { 1: 15, 2: 20, 3: 30 }; // minutes, per unified consequence structure

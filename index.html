@@ -139,8 +139,18 @@
           <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 34px; text-transform: uppercase; letter-spacing: 0.04em;">Micheal is in violation</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;">{{ violationCountLabel }}</span>
         </div>
+        <div style="display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap;">
+        <div style="width: 168px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;">
+          <div style="aspect-ratio: 3 / 4; background: #8F1E18; position: relative; overflow: hidden; border: 1px solid #FAFAF7;">
+            <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #FAFAF7; opacity: 0.7; text-align: center; padding: 10px; box-sizing: border-box;">VIOLATION PORTRAIT PENDING</span>
+            <div style="position: absolute; inset: 0; background-image: url('images/violation-portrait.jpg'); background-size: cover; background-position: center top;"></div>
+          </div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85;">Standardized violation portrait — removed on resolution</span>
+        </div>
+        <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px;">
         <sc-for list="{{ openViolations }}" as="v" hint-placeholder-count="1">
           <div style="border-left: 3px solid #FAFAF7; padding: 2px 0 2px 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline; font-family: 'IBM Plex Mono', monospace;">
+            <span style="font-size: 12px; letter-spacing: 0.1em; font-weight: 700; background: #FAFAF7; color: #B3261E; padding: 2px 7px;">{{ v.vnum }}</span>
             <span style="font-size: 13px; font-weight: 600;">{{ v.date }}</span>
             <span style="font-size: 13px;">{{ v.violation }}</span>
             <span style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85;">{{ v.openFor }}</span>
@@ -149,6 +159,8 @@
         <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px;">He built this record and signed the agreement that governs it. He failed it anyway. Every visitor — family, coworker, stranger — sees this notice on every page until the failure is resolved to the Accountability Partner's standard, and the record of it stays in the log permanently. His clean-day streak is zero. Resolution is documented; it does not expire, and he cannot remove it.</p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <a href="#penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E; background: #FAFAF7; padding: 10px 16px; text-decoration: none;">The violation log →</a>
+        </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1523,16 +1535,18 @@ class Component extends DCLogic {
     // Private consequence details NEVER appear here or in the sheet.
     const penalties = this.state.livePenalties || [];
     // While any violation is unresolved, the site-wide violation notice shows.
-    const openList = penalties.filter((p) => !/satisfied|resolved/i.test(p.status || ''));
+    // NB: anchored regex — 'Unresolved' contains the substring 'resolved'.
+    const openList = penalties.filter((p) => !/^\s*(satisfied|resolved)/i.test(p.status || ''));
     const inViolation = openList.length > 0;
     const openViolations = openList.map((p) => {
+      const vnum = 'V-' + String(penalties.indexOf(p) + 1).padStart(3, '0');
       let openFor = '';
       const d = new Date(p.date + 'T00:00:00');
       if (!isNaN(d)) {
         const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 864e5));
         openFor = days === 0 ? 'today' : 'unresolved ' + days + (days === 1 ? ' day' : ' days');
       }
-      return { date: p.date, violation: p.violation, openFor };
+      return { date: p.date, violation: p.violation, openFor, vnum };
     });
     const violationCountLabel = openList.length === 1 ? '1 unresolved violation' : openList.length + ' unresolved violations';
     const recordStatus = inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active';
