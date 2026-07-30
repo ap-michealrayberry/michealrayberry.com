@@ -1222,15 +1222,16 @@ class Component extends DCLogic {
   // Tabs are read BY NAME, so a rebuild's new gids never need chasing.
   SHEET_ID = '1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM';
   CSV_BASE = 'https://docs.google.com/spreadsheets/d/' + this.SHEET_ID + '/gviz/tq?tqx=out:csv';
-  WEIGHINS_CSV = this.CSV_BASE + '&sheet=Weigh-ins';
-  PENALTIES_CSV = this.CSV_BASE + '&sheet=Penalty Log';
+  // Tab reads use the sheet's REAL gids (tab names on the live sheet differ from
+  // the code-created ones — a wrong &sheet= name silently serves the FIRST tab).
+  WEIGHINS_CSV = this.CSV_BASE + '&gid=1146060827';
+  PENALTIES_CSV = this.CSV_BASE + '&gid=1365599185';
   // Updates (AP-administered). Columns: date · type ('official'|'personal') · title · body · link.
-  UPDATES_CSV = this.CSV_BASE + '&sheet=Updates';
-  // Micheal's journal form responses — a Google Form's response tab. Kept gid-based
-  // because the form (re)creates its own tab name; repoint after the form is rebuilt.
+  UPDATES_CSV = this.CSV_BASE + '&gid=742923954';
+  // Micheal's journal form responses — a Google Form's response tab.
   JOURNAL_CSV = this.CSV_BASE + '&gid=482638063';
   // Amendments log — public change history of the SIGNED agreement (§12.1).
-  AMENDMENTS_CSV = this.CSV_BASE + '&sheet=Amendments';
+  AMENDMENTS_CSV = this.CSV_BASE + '&gid=413137433';
 
   parseCSV(text) {
     // Handles quoted fields with commas; returns array of row arrays.
