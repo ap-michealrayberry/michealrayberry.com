@@ -1,0 +1,18 @@
+{
+  "project": {
+    "name": "Micheal Ray Berry Public Accountability Project",
+    "participant": "Micheal Ray Berry",
+    "startDate": "2026-07-20",
+    "startWeightLb": 340,
+    "goalWeightLb": 175,
+    "deadline": "10:00 PM ET",
+    "status": "active",
+    "configStatus": "LEGACY IMPORT \u2014 VERIFY BEFORE GO-LIVE"
+  },
+  "summary": {
+    "currentWeightLb": 340,
+    "acceptedDays": 1,
+    "violations": 0,
+    "lastUpdated": "2026-07-20T22:00:00-04:00"
+  }
+}

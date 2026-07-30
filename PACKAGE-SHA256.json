@@ -1,0 +1,23 @@
+{
+  "README.md": "a84cad6042b9a1a5c1329929653e6970649efdf9c52b501af3e2514c58fefe6d",
+  "ap-console/assets/ap.css": "cae76643bd9f8a628f17bb99d5c6f4e97f6b98dfc44953861a6cfed8c69d735f",
+  "ap-console/assets/ap.js": "c685f0bd00d2c5e8f6cdd653cd918ac09a009b4356f06553fec9e53051702555",
+  "ap-console/index.html": "3f3607291ebfc90c694b3ea90d977f1c8f9cce9c7adf78ce13254af0e0e805ef",
+  "backend/Code.gs": "775c0d457f3d5237eede889b108816e1b1a5c113af63c82466e164437dedeca5",
+  "backend/README.md": "e294ca4c4d08e558317240c7f70fe3423780031821d2c06d028e0dd10ddabe1f",
+  "backend/appsscript.json": "34a83aae72323956c2eb9e69514297084ef2a5791bed7649c0d127226d5fccce",
+  "docs/ARCHITECTURE.md": "bf06db9d7e83d439c8cf1dad4e5fa68c4063c3607fcb6659702a680a76f6249f",
+  "docs/DATA-CONTRACT.md": "97cc26413f445c5c122b12e9e2aed8f3b40f917525036d2ca3cd896688ebb59c",
+  "docs/MIGRATION.md": "c8e8e74e677101b76be2c6b2f43125b9ada5c61b21fc4c22ae4d750204af2f1f",
+  "docs/SECURITY.md": "e6c1ec8fac466a0821b536eadec80b538a576bbfa38f7136faaecfab68c2f406",
+  "public-site/assets/site.css": "a7e0ebb5ef96e21049fe3d908f3227cfc55d39021e771d27ab72dedbc288c07b",
+  "public-site/assets/site.js": "b0e9b5d290318eec487b5c05c839a6b5d98afcd1eccc2ce211e303208e3de854",
+  "public-site/data/days.json": "8b0f3f1ee44d8d93baa93ff4e97f827a450f556837b4b8740b090998372b797f",
+  "public-site/data/project.json": "41089bf966045e0d116c9352b7ba96de6de0856c48fd681ea0058f04645ba9e9",
+  "public-site/data/violations.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "public-site/index.html": "2b6eb6c394f479c8b790327364914e169ec065ea77b3f311bf9df051997e9937",
+  "recorder/assets/recorder.css": "486bbc3921f32e1f92c2b849f8081a6d7302e1140a9ac179aa9ade9567ffe2ec",
+  "recorder/assets/recorder.js": "3c15c2e9b6e044758464a488a98bd95937ded71ef57f5ea085aa9ce48b37a36e",
+  "recorder/index.html": "45924be10b7acf40e0f9b08a451c4ae68c4066bf5902fa8c1761867c36d70539",
+  "shared/project-config.js": "24eebe65728fba75c6dd8026e2d8a9a82736aed13017093b6fe7fbae4bdd12c2"
+}
