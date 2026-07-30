@@ -1,6 +1,6 @@
 // Network-first service worker: the record must never be stale, but the app
 // shell still opens offline / on flaky connections.
-const CACHE = 'mrb-v1';
+const CACHE = 'mrb-v2';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js', '/recording-assistant.js'])).then(() => self.skipWaiting()));
 });
@@ -11,6 +11,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const u = new URL(e.request.url);
   if (u.origin !== location.origin) return;
+  if (u.pathname.indexOf('/ap') === 0) return; // AP portal: always live, never cached
   e.respondWith(
     fetch(e.request).then((r) => {
       const cp = r.clone();

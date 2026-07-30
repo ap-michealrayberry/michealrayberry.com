@@ -1,3 +1,9 @@
+# Typo domain → canonical (301 keeps SEO on michealrayberry.com)
+https://michaelrayberry.com/* https://michealrayberry.com/:splat 301!
+http://michaelrayberry.com/* https://michealrayberry.com/:splat 301!
+https://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
+http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
+
 /home        /            301
 /record      /index.html  200
 /dashboard   /index.html  200

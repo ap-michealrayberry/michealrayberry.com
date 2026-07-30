@@ -31,7 +31,7 @@
     'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv';
   // AP's Apps Script web app — issues one-time challenge codes and records
   // capture attestations (SHA-256 fingerprints) with Google server time.
-  const ATTEST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz9drhPe0Jn6ptytde5Ut3wZlxbIll5nYv3Z5-JF5thkt1__wfzzyjyJjs0lT2VQlcnWg/exec';
+  const ATTEST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
 
   const CSS = `
     .ra-root{background:#FAFAF7;color:#141412;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;width:100%;}
@@ -473,6 +473,34 @@
           else if (lastLogged !== null) $('.ra-w').placeholder = lastLogged.toFixed(1) + ' (last logged)';
         })
         .catch(() => {});
+
+      // From 2026-07-30 the official weight is SCALE-SYNCED (Withings → Google
+      // Health → record) — no manual logging. The field locks to the synced
+      // value (it still feeds the video overlay + spoken intro). If the scale
+      // hasn't synced yet, the field stays open and prompts a weigh-in first.
+      const WEIGHT_AUTO_START = '2026-07-30';
+      if (isoStr >= WEIGHT_AUTO_START) {
+        const wl = $('.ra-w').closest('.ra-field').querySelector('label');
+        if (wl) wl.textContent = "Today's Weight (scale-synced)";
+        $('.ra-w').placeholder = 'step on the scale…';
+        const lockWeight = () => fetch(SHEET_CSV.split('?')[0] + '?tqx=out:csv&sheet=Health')
+          .then((r) => (r.ok ? r.text() : null))
+          .then((t) => {
+            if (!t) return;
+            const rows = t.trim().split(/\r?\n/);
+            for (let i = rows.length - 1; i >= 1; i--) {
+              const cols = rows[i].split(',').map((c) => c.replace(/"/g, '').trim());
+              if (cols[0] === isoStr && parseFloat(cols[7])) {
+                $('.ra-w').value = parseFloat(cols[7]).toFixed(1);
+                $('.ra-w').readOnly = true;
+                return;
+              }
+            }
+            setTimeout(lockWeight, 120000); // scale not synced yet — keep checking
+          })
+          .catch(() => {});
+        lockWeight();
+      }
 
       // AP-assigned meal plan for today (optional 'Meal Plan' tab).
       let mealPlan = null, _mealPlanOk = null, _mealOverride = false;

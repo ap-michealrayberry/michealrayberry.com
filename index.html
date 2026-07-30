@@ -132,6 +132,125 @@
     </div>
   </header>
 
+  <sc-if value="{{ completedShown }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 1000; overflow: auto; background: #FAFAF7; color: #141412;" data-screen-label="Completion record">
+      <div style="border-bottom: 4px solid #1B6E3C; padding: 16px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">
+        <span>Official public record — michealrayberry.com</span>
+        <span style="color: #1B6E3C;">§6.3 Completion — verified</span>
+      </div>
+      <div style="max-width: 880px; margin: 0 auto; padding: 72px 32px 80px; display: flex; flex-direction: column; gap: 44px;">
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #1B6E3C;">Completed {{ completedDate }}</span>
+          <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 8vw, 84px); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.01em;">Micheal Ray Berry completed this project.</h1>
+          <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 640px; color: #3A3935;">340 pounds to 175 pounds, held for 28 consecutive days and verified by official weigh-in. Every day of the road here is documented below — the weigh-ins, the photos, the inspections, and every violation along the way. He said there would be no unrecorded ending. This is the recorded one.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: #D8D6CF; border: 1px solid #D8D6CF;">
+          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Started at</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">340 lbs</span>
+          </div>
+          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Finished at</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #1B6E3C;">175 lbs</span>
+          </div>
+          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Eliminated</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">165 lbs</span>
+          </div>
+          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Completed on day</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #1B6E3C;">{{ completedDay }}</span>
+          </div>
+        </div>
+        <sc-if value="{{ completionStatement }}" hint-placeholder-val="{{ false }}">
+          <div style="border-left: 3px solid #1B6E3C; padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Statement of the Accountability Partner</span>
+            <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #3A3935; white-space: pre-line;">{{ completionStatement }}</p>
+          </div>
+        </sc-if>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button onClick="{{ enterArchive }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; padding: 14px 22px; cursor: pointer; font-weight: 600;" style-hover="background: #3A3935;">View the complete record →</button>
+        </div>
+        <p style="margin: 0; border-top: 1px solid #D8D6CF; padding-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; color: #6B6A64;">Per §6.3 of the signed agreement, this website is now a permanent completion archive. The full record — every weigh-in, photo, video, and violation — remains published as it was built: in public, under his real name.</p>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ abandonedConfirmed }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 999; overflow: auto; background: #0B0B0A; color: #FAFAF7;" data-screen-label="Abandonment record">
+      <div style="border-bottom: 4px solid #B3261E; padding: 16px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">
+        <span>Official public record — michealrayberry.com</span>
+        <span style="color: #E8837B;">§11 Termination without completion</span>
+      </div>
+      <div style="max-width: 880px; margin: 0 auto; padding: 72px 32px 80px; display: flex; flex-direction: column; gap: 44px;">
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Terminated {{ abandonDate }}</span>
+          <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 8vw, 84px); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.01em;">Micheal Ray Berry abandoned this project.</h1>
+          <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 640px; color: #D8D6CF;">He built this site, signed the agreement, and asked strangers to hold him accountable. Then he stopped answering. Per §11 of the agreement he signed, this website is now his permanent abandonment record. He cannot remove it.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: #3A3935; border: 1px solid #3A3935;">
+          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Started at</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">340 lbs</span>
+          </div>
+          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Goal — never reached</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #8A8983;">175 lbs</span>
+          </div>
+          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Quit on day</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #E8837B;">{{ abandonDay }}</span>
+          </div>
+          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Violations on record</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #E8837B;">{{ abandonViolationCount }}</span>
+          </div>
+        </div>
+        <sc-if value="{{ abandonStatement }}" hint-placeholder-val="{{ false }}">
+          <div style="border-left: 3px solid #B3261E; padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Statement of the Accountability Partner</span>
+            <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #D8D6CF; white-space: pre-line;">{{ abandonStatement }}</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasApLinks }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Placed by the Accountability Partner</span>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <sc-for list="{{ apLinks }}" as="l" hint-placeholder-count="1">
+                <a href="{{ l.url }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; border: 1px solid #3A3935; padding: 14px 18px; text-decoration: none; color: #FAFAF7;" style-hover="border-color: #B3261E;">
+                  <span style="font-size: 15px; font-weight: 600; flex: 1;">{{ l.label }}</span>
+                  <sc-if value="{{ l.adult }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; background: #B3261E; color: #FAFAF7; padding: 3px 8px;">18+ ADULT</span>
+                  </sc-if>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">→</span>
+                </a>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ abandonHasViolations }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">The violation log — frozen as he left it</span>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ abandonPenalties }}" as="p" hint-placeholder-count="2">
+                <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace;">
+                  <span style="font-size: 12px; font-weight: 600; min-width: 92px;">{{ p.date }}</span>
+                  <span style="font-size: 13px; flex: 1; min-width: 220px; color: #D8D6CF;">{{ p.violation }}</span>
+                  <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ p.color }};">{{ p.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <p style="margin: 0; border-top: 1px solid #3A3935; padding-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; color: #8A8983;">Thirty consecutive days without required documentation, or an attempt to delete or conceal this record, constitutes abandonment under §11 of the signed Public Accountability Agreement. The record, including every violation and this notice, remains published. There was no unrecorded ending to this project — this is the recorded one.</p>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ abandonedPresumed }}" hint-placeholder-val="{{ false }}">
+    <div style="background: #141412; color: #FAFAF7; border-bottom: 4px solid #B3261E; padding: 22px 32px; display: flex; flex-direction: column; gap: 8px;" data-screen-label="Presumed abandoned notice">
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; letter-spacing: 0.04em; color: #E8837B;">Presumed abandoned</span>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Pending the Accountability Partner's determination, after which this site converts permanently to the abandonment record.</p>
+    </div>
+  </sc-if>
   <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
     <div style="background: #B3261E; color: #FAFAF7; border-bottom: 4px solid #141412;">
       <div style="max-width: 1160px; margin: 0 auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px;">
@@ -226,6 +345,11 @@
         <div style="padding: 36px 0 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Days without violation</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ cleanDays }}</span>
+        </div>
+        <div style="padding: 36px 0 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Next milestone</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ nextMilestone }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">{{ toMilestoneLabel }}</span>
         </div>
       </div>
     </section>
@@ -373,6 +497,7 @@
         <span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Capture verification</span>
         <span style="font-size: 14px; font-weight: 600;">{{ attestedLabel }}</span>
         <span style="font-size: 13px; color: #6B6A64;">Every session fetches a one-time code — spoken and burned into the video — and logs SHA-256 file fingerprints with Google server time. Recordings cannot be pre-made, replayed, or swapped afterward.</span>
+        <a href="/verify" style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #B3261E;">Verify a file yourself →</a>
       </div>
     </section>
     </sc-if>
@@ -1089,22 +1214,23 @@ class Component extends DCLogic {
 
   // Subscribe endpoint: the AP's Apps Script web app URL (ends in /exec).
   // Empty string = form shows "not yet activated". See apps-script/Code.gs for setup.
-  SUBSCRIBE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz9drhPe0Jn6ptytde5Ut3wZlxbIll5nYv3Z5-JF5thkt1__wfzzyjyJjs0lT2VQlcnWg/exec';
+  SUBSCRIBE_ENDPOINT = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
 
   // Official public tracker sheets (AP-administered). Read-only CSV endpoints; no key needed.
-  // All record tabs live in ONE AP-administered spreadsheet; each CSV endpoint
-  // targets its tab by gid.
-  WEIGHINS_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1146060827';
-  PENALTIES_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
-  // Updates sheet (AP-administered). Columns: date · type ('official'|'personal') · title · body · link.
-  // AP posts official entries directly; Micheal's journal form appends personal rows. Set after the AP creates it:
-  UPDATES_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=742923954';
-  // Micheal's journal form responses (Timestamp · Title · Note). Permanent once submitted.
-  JOURNAL_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=482638063';
-  // Amendments log (AP-administered). Columns: date · title · summary · link. Public
-  // change history of the SIGNED agreement (§12.1). Empty until the AP creates the
-  // sheet (run createAmendmentsSheet in Apps Script) and pastes its CSV URL here.
-  AMENDMENTS_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=413137433';
+  // All record tabs live in ONE AP-administered spreadsheet. Swapping to a new
+  // spreadsheet (e.g. the ap@ rebuild) is a ONE-LINE change: set SHEET_ID.
+  // Tabs are read BY NAME, so a rebuild's new gids never need chasing.
+  SHEET_ID = '1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM';
+  CSV_BASE = 'https://docs.google.com/spreadsheets/d/' + this.SHEET_ID + '/gviz/tq?tqx=out:csv';
+  WEIGHINS_CSV = this.CSV_BASE + '&sheet=Weigh-ins';
+  PENALTIES_CSV = this.CSV_BASE + '&sheet=Penalty Log';
+  // Updates (AP-administered). Columns: date · type ('official'|'personal') · title · body · link.
+  UPDATES_CSV = this.CSV_BASE + '&sheet=Updates';
+  // Micheal's journal form responses — a Google Form's response tab. Kept gid-based
+  // because the form (re)creates its own tab name; repoint after the form is rebuilt.
+  JOURNAL_CSV = this.CSV_BASE + '&gid=482638063';
+  // Amendments log — public change history of the SIGNED agreement (§12.1).
+  AMENDMENTS_CSV = this.CSV_BASE + '&sheet=Amendments';
 
   parseCSV(text) {
     // Handles quoted fields with commas; returns array of row arrays.
@@ -1298,6 +1424,17 @@ class Component extends DCLogic {
           })
           .filter((e) => e.date && e.violation);
         this.setState({ livePenalties: entries });
+      })
+      .catch(() => {});
+    // Site State tab (key/value, AP-administered): abandonment stage (§11), AP statement, AP-placed links.
+    fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Site State')
+      .then((r) => (r.ok ? r.text() : null))
+      .then((t) => {
+        if (!t) return;
+        const rows = this.parseCSV(t);
+        const sst = {};
+        rows.slice(1).forEach((r) => { if (r[0]) sst[String(r[0]).trim()] = String(r[1] == null ? '' : r[1]).trim(); });
+        this.setState({ siteState: sst });
       })
       .catch(() => {});
     // Attestation tab (same spreadsheet): which days carry a verified capture attestation.
@@ -1549,6 +1686,19 @@ class Component extends DCLogic {
       return { date: p.date, violation: p.violation, openFor, vnum };
     });
     const violationCountLabel = openList.length === 1 ? '1 unresolved violation' : openList.length + ' unresolved violations';
+    // ----- Abandonment (§11) — staged: presumed (reversible) → confirmed (permanent takeover) -----
+    const sst = this.state.siteState || {};
+    const abandonedConfirmed = sst.abandoned === 'confirmed';
+    const abandonedPresumed = sst.abandoned === 'presumed';
+    const abandonDate = sst.abandoned_date || '';
+    const abd = new Date(abandonDate + 'T00:00:00');
+    const abandonDay = isNaN(abd) ? '—' : Math.max(1, Math.floor((abd - new Date('2026-07-20T00:00:00')) / 864e5) + 1);
+    let apLinks = [];
+    try { apLinks = JSON.parse(sst.ap_links || '[]').filter((l) => l && l.url); } catch (e) {}
+    const abandonPenalties = penalties.map((p) => ({
+      date: p.date, violation: p.violation, status: p.status || 'Unresolved',
+      color: /^\s*(satisfied|resolved)/i.test(p.status || '') ? '#8A8983' : '#E8837B',
+    }));
     const recordStatus = inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active';
 
     // ----- Live deadline status: overdue banner is automatic, sitewide -----
@@ -1691,7 +1841,7 @@ class Component extends DCLogic {
       num: String(i + 1).padStart(3, '0'),
       date: p.date, violation: p.violation,
       status: p.status || 'Unresolved',
-      statusColor: /satisfied|resolved/i.test(p.status || '') ? '#3A6B3A' : '#B3261E',
+      statusColor: /^\s*(satisfied|resolved)/i.test(p.status || '') ? '#3A6B3A' : '#B3261E',
     }));
 
     // ----- Milestone ladder (reached when lowest recorded weight crosses) -----
@@ -1707,6 +1857,26 @@ class Component extends DCLogic {
     return {
       dayNumber,
       dayStatus,
+      nextMilestone: (() => {
+        if (!current || isNaN(current)) return '—';
+        const ms = [300, 275, 250, 225, 200, 175].filter((m) => m < current);
+        return ms.length ? String(ms[0]) : '175';
+      })(),
+      toMilestoneLabel: (() => {
+        if (!current || isNaN(current)) return '';
+        const ms = [300, 275, 250, 225, 200, 175].filter((m) => m < current);
+        if (!ms.length) return current <= 175 ? 'final milestone reached' : '';
+        const diff = current - ms[0];
+        return diff > 0 ? diff.toFixed(1) + ' lbs to go' : '';
+      })(),
+      completedShown: sst.completed === 'confirmed' && !this.state.completedDismissed,
+      completedDate: sst.completed_date || '',
+      completedDay: (() => {
+        const cd = new Date((sst.completed_date || '') + 'T00:00:00');
+        return isNaN(cd) ? '—' : Math.max(1, Math.floor((cd - new Date('2026-07-20T00:00:00')) / 864e5) + 1);
+      })(),
+      completionStatement: sst.completion_statement || '',
+      enterArchive: () => this.setState({ completedDismissed: true }),
       startLabel: fmt(startWeight),
       currentLabel: fmt(current),
       goalLabel: fmt(goalWeight),
@@ -1737,6 +1907,11 @@ class Component extends DCLogic {
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
       inViolation, openViolations, violationCountLabel, recordStatus,
+      abandonedConfirmed, abandonedPresumed, abandonDate, abandonDay,
+      abandonViolationCount: penalties.length,
+      abandonStatement: sst.ap_statement || '',
+      apLinks, hasApLinks: apLinks.length > 0,
+      abandonPenalties, abandonHasViolations: penalties.length > 0,
       expandedAttested, hasExpandedAttested: !!expandedAttested,
       milestoneRows,
       isMilestones: page === 'milestones',

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Verify a file — Micheal Ray Berry, Public Accountability Project</title>
+  <meta name="description" content="Check any downloaded photo or video from the record against the server-logged SHA-256 fingerprint. Files cannot be edited or swapped without detection.">
+  <link rel="canonical" href="https://michealrayberry.com/verify">
+  <link rel="icon" type="image/png" href="https://michealrayberry.com/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #B3261E; }
+    a:hover { color: #8F1E18; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <header style="border-bottom: 1px solid #141412; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Public Accountability Project</span>
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase;">Verify a file</span>
+    </div>
+    <a href="/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: 1px solid #141412; padding: 9px 14px; color: #141412;" style-hover="color: #B3261E; border-color: #B3261E;">← The record</a>
+  </header>
+
+  <main style="flex: 1; max-width: 880px; margin: 0 auto; padding: 56px 32px 80px; display: flex; flex-direction: column; gap: 44px; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(34px, 5vw, 52px); text-transform: uppercase; line-height: 1;">The record can prove itself.</h1>
+      <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 640px; color: #3A3935;">Every photo and video on this record is fingerprinted at the moment of capture: the tool computes the file's SHA-256 hash and logs it — with Google's server clock, not a device clock — to an append-only sheet only the Accountability Partner controls. If a file were ever edited, re-shot, or swapped afterward, its fingerprint would no longer match the one logged at capture time.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+      <div style="border: 1px solid #141412; padding: 22px; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B3261E;">Server-anchored time</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">Capture events are timestamped by Google's servers. The device clock — the thing a backdater would change — is never trusted.</p>
+      </div>
+      <div style="border: 1px solid #141412; padding: 22px; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B3261E;">One-time challenge codes</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">Each session fetches a code that did not exist until seconds before recording — spoken aloud and burned into the video. Pre-recorded or replayed footage cannot contain it.</p>
+      </div>
+      <div style="border: 1px solid #141412; padding: 22px; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B3261E;">Content fingerprints</span>
+        <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">SHA-256 hashes of every file, logged at capture. The checker below recomputes a file's hash in your browser and searches the public log for it.</p>
+      </div>
+    </div>
+
+    <div style="border: 2px solid #141412; padding: 28px; display: flex; flex-direction: column; gap: 16px; background: #F1F0EA;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;">Check a file against the log</span>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">Pick any photo or video downloaded from this record (or from the Drive archive / YouTube download). The hash is computed locally — the file never leaves your device.</p>
+      <input type="file" onChange="{{ onFile }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+      <sc-if value="{{ checking }}" hint-placeholder-val="{{ false }}">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">{{ checkingMsg }}</span>
+      </sc-if>
+      <sc-if value="{{ hasResult }}" hint-placeholder-val="{{ false }}">
+        <div style="border-left: 4px solid {{ resultColor }}; background: #FAFAF7; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: {{ resultColor }};">{{ resultTitle }}</span>
+          <span style="font-size: 14px; line-height: 1.6; color: #3A3935;">{{ resultDetail }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8983; word-break: break-all;">SHA-256: {{ resultHash }}</span>
+        </div>
+      </sc-if>
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.7; color: #8A8983;">NOT FOUND is expected for files that were re-encoded after capture (YouTube re-compresses uploads; screenshots and re-saves change the bytes). Original downloads from the tool and the Drive archive match exactly. For any discrepancy: ap@michealrayberry.com.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Inspect the raw log yourself</span>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935; max-width: 640px;">The attestation log is public and machine-readable: <a href="https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&amp;sheet=Attestation">download it as CSV</a>. Columns: server timestamp, project day, event, challenge code, session kind, video and photo SHA-256 fingerprints.</p>
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid #141412; padding: 18px 32px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8983;">
+    Administered by the Accountability Partner · ap@michealrayberry.com
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { checking: false, checkingMsg: '', result: null };
+  ATTEST_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&sheet=Attestation';
+  parseCSV(text) {
+    const rows = [];
+    let row = [], cur = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+        else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(cur); cur = ''; }
+      else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (ch !== '\r') cur += ch;
+    }
+    if (cur || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+  async check(file) {
+    this.setState({ checking: true, checkingMsg: 'Computing SHA-256 locally…', result: null });
+    try {
+      const buf = await file.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', buf);
+      const hash = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      this.setState({ checkingMsg: 'Searching the attestation log…' });
+      const r = await fetch(this.ATTEST_CSV);
+      if (!r.ok) throw new Error('log unavailable');
+      const rows = this.parseCSV(await r.text());
+      let hit = null;
+      for (const row of rows.slice(1)) {
+        const vid = String(row[6] || '').toLowerCase();
+        const photos = String(row[7] || '').toLowerCase();
+        if (vid === hash || photos.split(/\s+/).indexOf(hash) !== -1) { hit = row; break; }
+      }
+      this.setState({ checking: false, result: { hash, hit } });
+    } catch (e) {
+      this.setState({ checking: false, result: { hash: '', error: true } });
+    }
+  }
+  renderVals() {
+    const s = this.state, res = s.result;
+    let resultTitle = '', resultDetail = '', resultColor = '#6B6A64';
+    if (res) {
+      if (res.error) { resultTitle = 'CHECK FAILED'; resultDetail = 'Could not compute the hash or reach the public log. Try again with a connection.'; resultColor = '#8A7430'; }
+      else if (res.hit) {
+        resultTitle = '✓ ON RECORD';
+        resultColor = '#1B6E3C';
+        resultDetail = 'This exact file was fingerprinted at capture: ' + (res.hit[3] || 'capture-attested') + ' · ' + (res.hit[5] || '') + ' session · Day ' + (res.hit[2] || '?') + ' (' + (res.hit[1] || '') + '), logged ' + (res.hit[0] || '') + ' by Google server time. It has not been altered since.';
+      } else {
+        resultTitle = '✗ NOT FOUND IN THE LOG';
+        resultColor = '#B3261E';
+        resultDetail = 'No capture attestation matches this file byte-for-byte. If it was re-encoded (YouTube download, screenshot, re-save) this is expected; if it claims to be an original from the record, treat it as unverified and report it.';
+      }
+    }
+    return {
+      checking: s.checking, checkingMsg: s.checkingMsg,
+      hasResult: !!res, resultTitle, resultDetail, resultColor,
+      resultHash: res && res.hash ? res.hash : '—',
+      onFile: (e) => { const f = e.target.files && e.target.files[0]; if (f) this.check(f); },
+    };
+  }
+}
+</script>
+</body>
+</html>

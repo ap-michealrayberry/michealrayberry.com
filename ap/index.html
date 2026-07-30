@@ -188,6 +188,67 @@
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6B6A64;">Corrective recordings stay private (§8) — they arrive by direct delivery, never through this portal or the public site. This log records only assignment and completion.</span>
       </section>
 
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Abandonment (§11)</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ abColor }};">{{ abLabel }}</span>
+        </div>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Missed-day streak: {{ missedStreak }}. At 30 consecutive missed days the site automatically shows PRESUMED ABANDONED and emails you. Presumed is reversible (§9 medical exception). Confirmed is the permanent §11 takeover — the site stops being a progress record and becomes the abandonment record.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onClick="{{ abPresume }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #E8C55F; border: 1px solid #8A7430; padding: 9px 14px; cursor: pointer;" style-hover="background: #8A7430; color: #FAFAF7;">Declare presumed</button>
+          <button onClick="{{ abConfirm }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: 1px solid #B3261E; padding: 9px 14px; cursor: pointer; font-weight: 600;" style-hover="background: #8F1E18;">Confirm abandonment — permanent</button>
+          <button onClick="{{ abClear }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #9CCC9C; border: 1px solid #4C6E4C; padding: 9px 14px; cursor: pointer;" style-hover="background: #1B6E3C; color: #FAFAF7;">Reverse abandonment</button>
+        </div>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">AP statement — shown on the abandonment record</span>
+          <textarea onChange="{{ onAbStatement }}" rows="3" placeholder="Optional. Published verbatim on the takeover page." style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px; resize: vertical;">{{ abStatement }}</textarea>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">AP-placed links — one per line: Label | https://url | 18+ (mark adult links 18+; they get a warning tag)</span>
+          <textarea onChange="{{ onAbLinks }}" rows="3" placeholder="His submission record | https://… | 18+" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; resize: vertical;">{{ abLinksText }}</textarea>
+          <button onClick="{{ abSave }}" style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save statement + links</button>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6B6A64;">Statement and links go live immediately (the site reads them directly) — no deploy needed. They appear only while a stage is active.</span>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Completion (§6.3)</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ compColor }};">{{ compLabel }}</span>
+        </div>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Declare only after the official on-camera weigh-in verifies 175 lbs held for 28 consecutive days. The site permanently converts to the completion archive. The nightly check emails you when the streak reaches 28.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <button onClick="{{ compConfirm }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #1B6E3C; color: #FAFAF7; border: 1px solid #1B6E3C; padding: 9px 14px; cursor: pointer; font-weight: 600;" style-hover="background: #14522D;">Declare project complete</button>
+          <button onClick="{{ compClear }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #8A8983; border: 1px solid #3A3935; padding: 9px 14px; cursor: pointer;" style-hover="color: #FAFAF7;">Reverse</button>
+        </div>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Completion statement — shown on the archive</span>
+          <textarea onChange="{{ onCompStatement }}" rows="3" placeholder="Optional. Published verbatim on the completion page." style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px; resize: vertical;">{{ compStatement }}</textarea>
+          <button onClick="{{ compSave }}" style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save statement</button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Post an update</h2>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Publishes to the site's Updates section immediately as an official AP entry — weekly reviews, milestone rulings, notices. No deploy needed.</p>
+        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <input type="text" onChange="{{ onUpdTitle }}" placeholder="Title (e.g. Week 3 review — compliant, weight trending on pace)" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
+          <textarea onChange="{{ onUpdBody }}" rows="4" placeholder="Body — published verbatim under the official AP label." style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px; resize: vertical;"></textarea>
+          <button onClick="{{ postUpdate }}" style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Publish update</button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Handover runbook (§13)</h2>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Everything the AP operates. At handover: take each account, rotate each key, and Micheal keeps only his record key and the camera.</p>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ runbook }}" as="r" hint-placeholder-count="4">
+            <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; min-width: 170px; color: #E8C55F;">{{ r.what }}</span>
+              <span style="font-size: 13px; flex: 1; min-width: 260px; color: #D8D6CF; line-height: 1.6;">{{ r.detail }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
       <section style="border-top: 1px solid #3A3935; padding-top: 20px; display: flex; gap: 22px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12px;">
         <a href="https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM" target="_blank">Open the record sheet →</a>
         <a href="https://michealrayberry.com" target="_blank">Public site →</a>
@@ -201,7 +262,7 @@
 class Component extends DCLogic {
   state = { key: '', authed: false, err: '', msg: '', data: null,
     keyField: '', vDate: '', vText: '', posName: '', posGrade: '', posNotes: '', cAssign: '', cDue: '' };
-  EP = 'https://script.google.com/macros/s/AKfycbz9drhPe0Jn6ptytde5Ut3wZlxbIll5nYv3Z5-JF5thkt1__wfzzyjyJjs0lT2VQlcnWg/exec';
+  EP = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
   componentDidMount() {
     let k = '';
     try { k = localStorage.getItem('mrb_ap_portal_key') || ''; } catch (e) {}
@@ -268,6 +329,10 @@ class Component extends DCLogic {
         color: open ? '#E8C55F' : '#9CCC9C',
         complete: () => { if (confirm('Confirm: the corrective recording was received and reviewed?')) this.post({ action: 'apcorrective', op: 'complete', row: c.row }, 'Updating…'); } };
     });
+    const st = d.siteState || {};
+    const stage = st.abandoned || '';
+    let abLinksText = '';
+    try { abLinksText = JSON.parse(st.ap_links || '[]').map((l) => l.label + ' | ' + l.url + (l.adult ? ' | 18+' : '')).join('\n'); } catch (e) {}
     const set = (k) => (e) => this.setState({ [k]: e.target.value });
     return {
       locked: !s.authed, authed: s.authed, err: s.err, statusMsg: s.msg,
@@ -287,6 +352,60 @@ class Component extends DCLogic {
       onKeyField: set('keyField'), onVDate: set('vDate'), onVText: set('vText'),
       onPosName: set('posName'), onPosGrade: set('posGrade'), onPosNotes: set('posNotes'),
       onCAssign: set('cAssign'), onCDue: set('cDue'),
+      missedStreak: d.missedStreak == null ? '—' : d.missedStreak + ' day' + (d.missedStreak === 1 ? '' : 's'),
+      abLabel: stage === 'confirmed' ? 'ABANDONED — PERMANENT' : (stage === 'presumed' ? 'PRESUMED ABANDONED' : 'not in effect'),
+      abColor: stage === 'confirmed' ? '#E8837B' : (stage === 'presumed' ? '#E8C55F' : '#9CCC9C'),
+      abStatement: s.abStatement !== undefined ? s.abStatement : (st.ap_statement || ''),
+      abLinksText: s.abLinks !== undefined ? s.abLinks : abLinksText,
+      onAbStatement: set('abStatement'), onAbLinks: set('abLinks'),
+      abPresume: () => { if (confirm('Set the site to PRESUMED ABANDONED?\n\nReversible. Use for a manual §11 call (e.g. delete/conceal attempt) ahead of the 30-day automatic trigger.')) this.post({ action: 'apabandon', op: 'presume' }, 'Setting…'); },
+      abConfirm: () => {
+        if (!confirm('CONFIRM ABANDONMENT — §11 TERMINATION.\n\nThe site permanently converts to the abandonment record. This is designed to be one-way.')) return;
+        if (!confirm('Second confirmation: you have ruled out the §9 medical exception?')) return;
+        this.post({ action: 'apabandon', op: 'confirm' }, 'Confirming…');
+      },
+      compLabel: st.completed === 'confirmed' ? 'COMPLETE — ARCHIVE MODE' : 'in progress',
+      compColor: st.completed === 'confirmed' ? '#9CCC9C' : '#8A8983',
+      compStatement: s.compStatement !== undefined ? s.compStatement : (st.completion_statement || ''),
+      onCompStatement: set('compStatement'),
+      compConfirm: () => {
+        if (!confirm('DECLARE PROJECT COMPLETE (§6.3)?\n\nOnly after the official weigh-in verifies 175 lbs held 28 consecutive days. The site converts permanently to the completion archive.')) return;
+        this.post({ action: 'apcomplete', op: 'confirm' }, 'Declaring…');
+      },
+      compClear: () => { if (confirm('Reverse the completion declaration?')) this.post({ action: 'apcomplete', op: 'clear' }, 'Reversing…'); },
+      compSave: () => this.post({ action: 'apcomplete', op: 'statement', text: s.compStatement !== undefined ? s.compStatement : (st.completion_statement || '') }, 'Saving…'),
+      onUpdTitle: set('updTitle'), onUpdBody: set('updBody'),
+      postUpdate: () => {
+        if (!(s.updTitle || '').trim() || !(s.updBody || '').trim()) { this.setState({ err: 'Title and body are both required.' }); return; }
+        if (confirm('Publish to the public Updates section?\n\n' + s.updTitle.trim()))
+          this.post({ action: 'apupdate', title: s.updTitle.trim(), body: s.updBody.trim() }, 'Publishing…');
+      },
+      runbook: [
+        { what: 'Google account', detail: 'Owns the record spreadsheet (all tabs), Apps Script (every endpoint + trigger), Drive photo archive, and the health-sync OAuth. The single most important login — 2FA mandatory.' },
+        { what: 'Apps Script keys', detail: 'Script properties: PACKET_KEY (Micheal\u2019s record key), AP_KEY (this portal), GH_TOKEN (GitHub commits — check expiry), NETLIFY_HOOK (deploys), ElevenLabs key lives only on Micheal\u2019s device. Rotate AP_KEY and GH_TOKEN at handover.' },
+        { what: 'Triggers', detail: 'importPhotos (10 min), githubMirrorPhotos (15 min), fitbitSync (hourly), nightlyComplianceCheck (10 PM ET), abandonmentCheck (11 PM, incl. completion-streak alert), backupRecord (weekly). Re-run setup after any script change.' },
+        { what: 'GitHub repo', detail: 'michealrayberry/michealrayberry.com — the site source. At handover: transfer ownership to the AP, enable branch protection on main (AP approval required to merge), reissue GH_TOKEN under the AP account.' },
+        { what: 'Netlify', detail: 'Serves the site from the repo. Take over the team, keep the build hook, confirm the domain + HTTPS. DNS stays at Wix (registrar): A → 75.2.60.5, www CNAME → the Netlify site; MX/TXT untouched (email).' },
+        { what: 'YouTube @michealrayberry', detail: 'Official platform for inspection videos. AP needs at least manager access; violation notices are posted and marked RESOLVED here, never deleted.' },
+        { what: 'This portal', detail: 'michealrayberry.com/ap — everything above is operated from here day-to-day. The AP key opens it; Micheal\u2019s record key cannot.' },
+      ],
+      abClear: () => {
+        const isConfirmed = stage === 'confirmed';
+        if (confirm(isConfirmed
+          ? 'REVERSE a CONFIRMED abandonment?\n\nThe takeover page comes down and the site returns to the active record. This is an extraordinary AP determination (e.g. documented medical event, §9) — the violation log and history remain untouched.'
+          : 'Clear the presumed-abandoned stage (documented medical event / verified platform failure)?'))
+          this.post({ action: 'apabandon', op: 'clear' }, 'Reversing…');
+      },
+      abSave: () => {
+        const links = (this.state.abLinks !== undefined ? this.state.abLinks : abLinksText).split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+          const parts = l.split('|').map((x) => x.trim());
+          return { label: parts[0] || parts[1] || '', url: parts[1] || '', adult: /18\+/.test(parts[2] || '') };
+        }).filter((l) => l.url);
+        const text = this.state.abStatement !== undefined ? this.state.abStatement : (st.ap_statement || '');
+        this.post({ action: 'apabandon', op: 'statement', text }, 'Saving…').then((ok) => {
+          if (ok) this.post({ action: 'apabandon', op: 'links', links: JSON.stringify(links) }, 'Saving links…');
+        });
+      },
       keyEnter: (e) => { if (e.key === 'Enter') this.unlock(); },
       unlock: () => this.unlock(),
       lock: () => { try { localStorage.removeItem('mrb_ap_portal_key'); } catch (e) {} this.setState({ authed: false, key: '', data: null }); },
