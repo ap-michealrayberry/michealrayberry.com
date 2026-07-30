@@ -1,0 +1,94 @@
+name: Publish permanent daily SEO record
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "photos/**"
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [daily-packet-finalized]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-seo-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the public record
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install image publisher
+        run: npm install --prefix .github/seo-publisher --no-audit --no-fund
+
+      - name: Generate permanent pages, responsive photos, metadata, sitemaps, and manifests
+        id: publish
+        env:
+          SITE_ORIGIN: https://michealrayberry.com
+        run: node .github/seo-publisher/publish.mjs
+
+      - name: Commit generated public record
+        id: commit
+        run: |
+          git config user.name "mrb-seo-publisher[bot]"
+          git config user.email "mrb-seo-publisher[bot]@users.noreply.github.com"
+          for target in daily media manifests sitemap.xml sitemap-static.xml sitemap-daily.xml sitemap-images.xml sitemap-videos.xml; do
+            if [ -e "$target" ]; then
+              git add -A "$target"
+            fi
+          done
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No finalized packet changes to publish."
+            exit 0
+          fi
+          git commit -m "seo: publish permanent daily record pages [seo-publisher]"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Netlify build hook when configured
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: |
+          if [ -n "$NETLIFY_BUILD_HOOK" ]; then
+            curl --fail --silent --show-error -X POST "$NETLIFY_BUILD_HOOK"
+          else
+            echo "No build-hook secret configured; Netlify's GitHub auto-deploy will handle this commit."
+          fi
+
+      - name: Wait for the generated page to deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          LATEST_URL: ${{ steps.publish.outputs.latest_url }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --location "$LATEST_URL" >/dev/null; then
+              echo "Deployed: $LATEST_URL"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "The GitHub commit succeeded, but the Netlify page was not reachable before the polling window ended."
+          exit 1
+
+      - name: Submit changed URLs to IndexNow
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          SITE_ORIGIN: https://michealrayberry.com
+        run: node .github/seo-publisher/submit-indexnow.mjs

@@ -1,0 +1,8 @@
+{
+  "name": "mrb-seo-publisher",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}
