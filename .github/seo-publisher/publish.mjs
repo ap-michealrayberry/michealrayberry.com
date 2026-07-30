@@ -345,6 +345,97 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 </html>`;
 }
 
+function archivePage(entries) {
+  const canonical = `${SITE_ORIGIN}/daily/`;
+  const title = `Daily Record Archive — Micheal Ray Berry Public Accountability Project`;
+  const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${entries.length} permanent daily records, each with four-angle photographs, the recorded weight, and the daily inspection video.`;
+  const newest = entries.at(-1);
+  const items = entries.slice().reverse();
+  const cards = items.map(({ record, photos }) => {
+    const href = `/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`;
+    const thumb = photos.front.variants[0] || null;
+    const alt = `Micheal Ray Berry front view on ${longDate(record.date)}, Day ${record.day}, at ${record.weight.toFixed(1)} pounds`;
+    return `<li>
+      <a href="${href}">
+        <img src="${htmlEscape(thumb ? thumb.url : photos.front.sourceUrl)}" width="${thumb ? thumb.width : photos.front.width}" height="${thumb ? thumb.height : photos.front.height}" alt="${htmlEscape(alt)}" loading="lazy" decoding="async">
+        <span class="meta"><strong>Day ${record.day}</strong><span>${htmlEscape(longDate(record.date))}</span><span class="w">${record.weight.toFixed(1)} lb</span></span>
+      </a>
+    </li>`;
+  }).join('\n');
+  const graph = [
+    {
+      '@type': 'CollectionPage',
+      '@id': canonical,
+      url: canonical,
+      name: title,
+      description,
+      about: { '@id': PERSON_ID },
+      isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+      ...(newest ? { dateModified: newest.record.date } : {}),
+    },
+    {
+      '@type': 'ItemList',
+      '@id': `${canonical}#record-list`,
+      name: 'Permanent daily records',
+      numberOfItems: items.length,
+      itemListOrder: 'https://schema.org/ItemListOrderDescending',
+      itemListElement: items.map(({ record }, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: `Day ${record.day} — ${longDate(record.date)}`,
+        url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
+      })),
+    },
+  ];
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
+  <meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}">
+  <meta property="og:url" content="${canonical}">
+  ${newest ? `<meta property="og:image" content="${htmlEscape(newest.photos.front.sourceUrl)}">` : ''}
+  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <style>
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header,main,footer{max-width:1160px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}
+    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(1.9rem,5vw,3.4rem);line-height:1.05;margin:.35rem 0}
+    .intro{max-width:760px;font-size:1.1rem}
+    ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;padding:0;margin:32px 0}
+    li a{display:block;border:1px solid var(--ink);background:#fff;color:inherit;text-decoration:none}
+    li img{display:block;width:100%;height:auto}
+    .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase;border-top:1px solid var(--rule)}
+    .meta strong{font-size:15px}.meta .w{color:var(--accent);font-weight:600}
+    li a:hover{outline:2px solid var(--accent)}
+    footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>Daily record archive</h1>
+</header>
+<main>
+  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Each entry is a permanent page holding that day's four-angle documentation photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes.</p>
+  <p><a href="/">Return to michealrayberry.com</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
+  <ul>
+${cards}
+  </ul>
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · ${items.length} published ${items.length === 1 ? 'day' : 'days'} · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
 function staticSitemap(latestDate) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -354,8 +445,10 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
 }
 
 function dailySitemap(records) {
+  const latest = records.at(-1)?.date || START_DATE;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${SITE_ORIGIN}/daily/</loc><lastmod>${latest}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>
 ${records.map((r) => `  <url><loc>${SITE_ORIGIN}/daily/${r.date}-day-${String(r.day).padStart(3, '0')}/</loc><lastmod>${r.date}</lastmod><changefreq>never</changefreq><priority>0.8</priority></url>`).join('\n')}
 </urlset>
 `;
@@ -500,6 +593,21 @@ async function main() {
     const manifestHash = sha256(Buffer.from(manifestText));
     await writeIfChanged(path.join(ROOT, 'manifests', `${record.date}.sha256`), `${manifestHash}  ${record.date}.json\n`);
     generated.push({ record, photos });
+  }
+
+  // Archive hub at /daily/ — a crawlable static index linking every published day,
+  // plus the machine-readable list the dashboard reads to link its log rows.
+  if (generated.length) {
+    if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), archivePage(generated))) {
+      changedUrls.add(`${SITE_ORIGIN}/daily/`);
+    }
+    const published = generated.map(({ record }) => ({
+      day: record.day,
+      date: record.date,
+      weight_lb: record.weight,
+      url: `/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
+    }));
+    await writeIfChanged(path.join(ROOT, 'daily', 'published.json'), JSON.stringify(published, null, 2) + '\n');
   }
 
   const latestDate = generated.at(-1)?.record.date || START_DATE;
