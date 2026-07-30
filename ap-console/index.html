@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AP Console v2</title>
+  <link rel="stylesheet" href="./assets/ap.css">
+</head>
+<body>
+  <header>
+    <div><p class="eyebrow">Restricted administration</p><h1>AP Console</h1></div>
+    <button id="lock">Lock</button>
+  </header>
+  <main>
+    <section id="login" class="panel">
+      <h2>Unlock</h2>
+      <label>AP key<input id="ap-key" type="password" autocomplete="current-password"></label>
+      <button id="unlock" class="primary">Open console</button>
+      <p id="login-message"></p>
+    </section>
+    <section id="console" hidden>
+      <div class="banner">Prototype only — writes are disabled until the backend is connected and tested.</div>
+      <div class="grid">
+        <article class="panel"><p class="eyebrow">Today's packet</p><h2 id="packet-status">Not connected</h2><p id="packet-detail">No backend response.</p></article>
+        <article class="panel"><p class="eyebrow">Open violations</p><h2 id="open-violations">—</h2><p>Public consequence details remain excluded.</p></article>
+        <article class="panel"><p class="eyebrow">System health</p><h2 id="system-health">Configuration required</h2><p>Backend, storage, and scheduled checks must all report healthy before enforcement automation is enabled.</p></article>
+      </div>
+      <section class="panel">
+        <h2>AP actions</h2>
+        <div class="actions">
+          <button disabled>Accept packet</button>
+          <button disabled>Mark incomplete</button>
+          <button disabled>Declare violation</button>
+          <button disabled>Resolve violation</button>
+          <button disabled>Publish update</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="../shared/project-config.js"></script>
+  <script src="./assets/ap.js" defer></script>
+</body>
+</html>
