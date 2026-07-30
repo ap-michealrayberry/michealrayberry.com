@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,14 +37,18 @@
     "@graph": [
       {
         "@type": "WebSite",
+        "@id": "https://michealrayberry.com/#website",
         "name": "Micheal Ray Berry — Public Accountability Project",
         "url": "https://michealrayberry.com/",
         "description": "The official public record of Micheal Ray Berry's weight loss accountability project: 340 to 175 pounds, documented daily.",
-        "inLanguage": "en-US"
+        "inLanguage": "en-US",
+        "publisher": { "@id": "https://michealrayberry.com/#micheal-ray-berry" }
       },
       {
         "@type": "Person",
+        "@id": "https://michealrayberry.com/#micheal-ray-berry",
         "name": "Micheal Ray Berry",
+        "alternateName": "Ray Berry",
         "url": "https://michealrayberry.com/",
         "sameAs": ["https://youtube.com/@michealrayberry", "https://x.com/michealrayberry", "https://www.tiktok.com/@michealrayberry", "https://www.instagram.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry", "https://www.reddit.com/user/MichealRayBerry/", "https://www.flickr.com/photos/michealrayberry/"],
         "description": "Participant in a public weight loss accountability project, documenting a journey from 340 to 175 pounds with daily public inspection videos and weigh-ins.",
@@ -55,7 +59,8 @@
         "name": "Micheal Ray Berry public weigh-in record",
         "description": "Daily public weigh-in data from the Micheal Ray Berry Public Accountability Project: date, weight, notes, four-angle daily accountability photos, and inspection videos, documenting a journey from 340 pounds to 175 pounds.",
         "url": "https://michealrayberry.com/",
-        "creator": { "@type": "Person", "name": "Micheal Ray Berry" },
+        "creator": { "@id": "https://michealrayberry.com/#micheal-ray-berry" },
+        "isPartOf": { "@id": "https://michealrayberry.com/#website" },
         "isAccessibleForFree": true,
         "license": "https://michealrayberry.com/",
         "distribution": [{
@@ -70,7 +75,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <script>(function () { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = ['https:/', '/fonts.googleapis', '.com/css2?family=IBM+Plex+Mono:wght@400;600;700', '&family=IBM+Plex+Sans:wght@400;600', '&family=IBM+Plex+Sans+Condensed:wght@700', '&display=swap'].join(''); document.head.appendChild(l); })();</script>
-  <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #FAFAF7; }
     body { font-family: 'IBM Plex Sans', sans-serif; color: #141412; -webkit-font-smoothing: antialiased; }

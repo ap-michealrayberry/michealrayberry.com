@@ -1,6 +1,6 @@
 // Network-first service worker: the record must never be stale, but the app
 // shell still opens offline / on flaky connections.
-const CACHE = 'mrb-v3';
+const CACHE = 'mrb-v4';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js', '/recording-assistant.js'])).then(() => self.skipWaiting()));
 });
