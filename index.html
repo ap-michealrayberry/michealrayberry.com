@@ -253,7 +253,8 @@
   <sc-if value="{{ abandonedPresumed }}" hint-placeholder-val="{{ false }}">
     <div style="background: #141412; color: #FAFAF7; border-bottom: 4px solid #B3261E; padding: 22px 32px; display: flex; flex-direction: column; gap: 8px;" data-screen-label="Presumed abandoned notice">
       <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; letter-spacing: 0.04em; color: #E8837B;">Presumed abandoned</span>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Pending the Accountability Partner's determination, after which this site converts permanently to the abandonment record.</p>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Written notice has been issued and the seven-day opportunity to resume is running.</p>
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.7; max-width: 720px; color: #E8837B;">{{ cureMsg }}</p>
     </div>
   </sc-if>
   <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
@@ -1719,6 +1720,22 @@ class Component extends DCLogic {
     const abandonedConfirmed = sst.abandoned === 'confirmed';
     const abandonedPresumed = sst.abandoned === 'presumed';
     const abandonDate = sst.abandoned_date || '';
+    // §11 requires written notice and a seven-day opportunity to resume before
+    // the project ends. Confirmation is automatic once that window closes — no
+    // AP action is required — so the deadline is stated publicly in advance.
+    const cureEnd = (() => {
+      const d = new Date(abandonDate + 'T00:00:00');
+      if (isNaN(d)) return null;
+      d.setDate(d.getDate() + 7);
+      return d;
+    })();
+    const cureDeadline = cureEnd
+      ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(cureEnd)
+      : '';
+    const cureDaysLeft = cureEnd ? Math.max(0, Math.ceil((cureEnd - now) / 864e5)) : 0;
+    const cureMsg = cureDeadline
+      ? 'A complete Daily Compliance Packet before ' + cureDeadline + ' ends this notice. If none is recorded by then, this site converts automatically to the permanent abandonment record — no further review is required. ' + (cureDaysLeft === 1 ? '1 day remains.' : cureDaysLeft + ' days remain.')
+      : 'A complete Daily Compliance Packet ends this notice. If none is recorded within the seven-day window, this site converts automatically to the permanent abandonment record — no further review is required.';
     const abd = new Date(abandonDate + 'T00:00:00');
     const abandonDay = isNaN(abd) ? '—' : Math.max(1, Math.floor((abd - new Date('2026-07-20T00:00:00')) / 864e5) + 1);
     let apLinks = [];
@@ -1930,7 +1947,7 @@ class Component extends DCLogic {
       isUniform: page === 'uniform',
       isUpdates: page === 'updates',
       wrClosed, wrCurrent,
-      showOverdue, overdueMsg,
+      showOverdue, overdueMsg, cureMsg,
       cleanDays: String(cleanDays),
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,

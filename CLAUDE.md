@@ -79,6 +79,13 @@ possible." Treat discoverability as part of the record's integrity.
 - **Generates, and commits ONLY:**
   - `daily/<date>-day-<NNN>/index.html` — permanent per-day page: canonical, OG,
     Twitter, JSON-LD (WebPage, Person, 4x ImageObject, VideoObject), prev/next.
+  - `daily/<date>-day-<NNN>/index.html` for a MISSED day too, sourced from the
+    AP Violation Log (gid 1365599185). Same URL scheme, so the archive and the
+    prev/next chain have no gaps. §8 limits these pages to three facts: date,
+    nature of the documentation failure, resolved/unresolved. NEVER publish
+    consequence details. A documented day that also carries a violation shows
+    both. Never infer a violation from missing photos — a §9 medical exception
+    is an excused day, and only the AP's log distinguishes the two.
   - `daily/index.html` — archive hub linking every published day (CollectionPage
     + ItemList). `daily/published.json` — the list index.html reads to link its
     Weigh-In Log rows, so a row can never link to a page that does not exist.
@@ -108,8 +115,17 @@ possible." Treat discoverability as part of the record's integrity.
 - **§8 privacy:** public record shows ONLY violation date/nature +
   resolved/unresolved. NEVER amounts, tiers, due dates, paid status.
   Consequences are private. Corrective sessions: private, recorded, to AP only.
-- **§11 abandonment:** 30 missed days → auto PRESUMED (site banner) →
-  AP-confirmed PERMANENT takeover. §9 medical exception is why confirm is manual.
+- **§11 abandonment:** 30 missed days → auto PRESUMED (site banner) + written
+  notice → seven-day opportunity to resume → PERMANENT takeover, **automatic**
+  once the window closes. No AP click is required to confirm.
+  §11 as signed requires "written notice and a seven-day opportunity to resume"
+  BEFORE the project ends, so automation must not confirm on day 30 — notice on
+  day 30, confirm on day 37. Any complete packet inside the window clears it.
+  A §9 medical exception must still be able to clear or reverse the notice;
+  otherwise a medical emergency permanently ends the project unreviewed.
+  STATUS: the site displays this (cure deadline + countdown, no "pending AP"
+  wording). The transition itself lives in `abandonmentCheck` in Apps Script,
+  which is NOT in this repo and still requires the manual confirm step.
 - **§6.3 completion:** 175 held 28 days + official weigh-in → AP declares →
   permanent completion archive.
 - Milestones: 300/275/250/225/200/175 (weigh-in + video each).
