@@ -9,6 +9,10 @@ const SHEET_CSV = process.env.WEIGHINS_CSV ||
   'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1146060827';
 const ATTEST_CSV = process.env.ATTESTATION_CSV ||
   'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&sheet=Attestation';
+// Violation Log (AP-administered). §8 permits publishing ONLY date, nature of the
+// documentation failure, and resolved/unresolved. Never consequence details.
+const PENALTIES_CSV = process.env.PENALTIES_CSV ||
+  'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
 const START_DATE = '2026-07-20';
 const START_WEIGHT = 340;
 const GOAL_WEIGHT = 175;
@@ -211,7 +215,7 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
-function dailyPage({ record, photos, previous, next, attestation }) {
+function dailyPage({ record, photos, previous, next, attestation, violation }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Micheal Ray Berry Day ${day} — ${weight.toFixed(1)} lb | ${longDate(date)}`;
@@ -317,6 +321,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
     h1{font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}.stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px ui-monospace,monospace}
     .intro{max-width:760px;font-size:1.15rem}.attest{border-left:4px solid var(--accent);padding:10px 14px;background:#f1f0ea}
+    .violation{border:1px solid var(--accent);border-left-width:4px;padding:12px 16px;background:#fff;max-width:760px}
     .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:36px 0}.gallery figure{margin:0;border:1px solid var(--ink);background:#fff}
     .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase}
     .video{position:relative;padding-top:56.25%;background:#000;margin:24px 0}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -335,9 +340,103 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
+  ${violation ? `<p class="violation"><strong>Violation on record for this date — ${htmlEscape(violation.resolved ? 'Resolved' : 'Unresolved')}.</strong> ${htmlEscape(violation.violation)} Consequences are administered privately under §8 and are never published. <a href="/penalties">Violation Log</a></p>` : ''}
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
   <p><a href="/manifests/${date}.json">View the machine-readable manifest and SHA-256 evidence hashes</a></p>
+  ${nav}
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
+// A missed day is part of the record. §8 permits exactly three public facts:
+// the date, the nature of the documentation failure, and resolved/unresolved.
+// Consequence details are confidential and must never appear here.
+function violationPage({ record, violation, previous, next }) {
+  const { date, day } = record;
+  const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
+  const status = violation.resolved ? 'Resolved' : 'Unresolved';
+  const title = `Micheal Ray Berry Day ${day} — documentation failure | ${longDate(date)}`;
+  const description = `Day ${day} of Micheal Ray Berry's public accountability record: the required daily documentation was not delivered on ${longDate(date)}. ${violation.violation} Status: ${status.toLowerCase()}.`;
+  const graph = [
+    {
+      '@type': 'WebPage',
+      '@id': canonical,
+      url: canonical,
+      name: title,
+      description,
+      datePublished: date,
+      dateModified: date,
+      about: { '@id': PERSON_ID },
+      isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+    },
+    {
+      '@type': 'Person',
+      '@id': PERSON_ID,
+      name: 'Micheal Ray Berry',
+      alternateName: 'Ray Berry',
+      url: SITE_ORIGIN + '/',
+    },
+  ];
+  const nav = `<nav aria-label="Daily record navigation">
+      ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
+      <a href="/daily/">Full daily record</a>
+      ${next ? `<a rel="next" href="/daily/${next.date}-day-${String(next.day).padStart(3, '0')}/">Day ${next.day} →</a>` : '<span></span>'}
+    </nav>`;
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <meta name="robots" content="index,follow,max-snippet:-1">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
+  <meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="article:published_time" content="${date}T22:00:00-04:00">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="${htmlEscape(title)}">
+  <meta name="twitter:description" content="${htmlEscape(description)}">
+  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <style>
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--accent)}
+    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}
+    .stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px ui-monospace,monospace}
+    .intro{max-width:760px;font-size:1.15rem}
+    .failure{border-left:4px solid var(--accent);padding:14px 18px;background:#f1f0ea;max-width:760px}
+    .failure dt{font:600 12px/1.6 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+    .failure dd{margin:0 0 14px;font-size:1.05rem}.failure dd:last-child{margin-bottom:0}
+    .status{font:600 13px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:${violation.resolved ? '#1b6e3c' : 'var(--accent)'}}
+    nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}
+    nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
+    footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
+    @media(max-width:720px){nav{grid-template-columns:1fr}nav a:nth-child(2),nav a:last-child{text-align:left}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>Day ${day} — no record</h1>
+  <div class="stats"><span>${htmlEscape(longDate(date))}</span><span class="status">${status}</span></div>
+</header>
+<main>
+  <p class="intro">The required daily documentation for Day ${day} of the Micheal Ray Berry Public Accountability Project was not delivered on ${htmlEscape(longDate(date))}. This page exists so the gap is part of the permanent record rather than an absence in it.</p>
+  <dl class="failure">
+    <dt>Date</dt><dd>${htmlEscape(longDate(date))}</dd>
+    <dt>Nature of the documentation failure</dt><dd>${htmlEscape(violation.violation)}</dd>
+    <dt>Status</dt><dd class="status">${status}</dd>
+  </dl>
+  <p>Consequences are administered privately by the Accountability Partner under §8 of the signed agreement and are never published. Resolution closes the obligation; it does not erase this entry.</p>
+  <p><a href="/penalties">View the full Violation Log</a></p>
   ${nav}
 </main>
 <footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
@@ -350,9 +449,23 @@ function archivePage(entries) {
   const title = `Daily Record Archive — Micheal Ray Berry Public Accountability Project`;
   const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${entries.length} permanent daily records, each with four-angle photographs, the recorded weight, and the daily inspection video.`;
   const newest = entries.at(-1);
+  // og:image must come from the newest DOCUMENTED day — violation entries carry
+  // no photos, and entries.at(-1) may well be one.
+  const newestWithPhoto = entries.filter((e) => e.photos).at(-1) || null;
   const items = entries.slice().reverse();
-  const cards = items.map(({ record, photos }) => {
+  const cards = items.map((item) => {
+    const { record } = item;
     const href = `/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`;
+    if (item.type === 'violation') {
+      const status = item.violation.resolved ? 'Resolved' : 'Unresolved';
+      return `<li class="missed">
+      <a href="${href}">
+        <span class="nodoc">No record</span>
+        <span class="meta"><strong>Day ${record.day}</strong><span>${htmlEscape(longDate(record.date))}</span><span class="s">${status}</span></span>
+      </a>
+    </li>`;
+    }
+    const { photos } = item;
     const thumb = photos.front.variants[0] || null;
     const alt = `Micheal Ray Berry front view on ${longDate(record.date)}, Day ${record.day}, at ${record.weight.toFixed(1)} pounds`;
     return `<li>
@@ -362,6 +475,8 @@ function archivePage(entries) {
       </a>
     </li>`;
   }).join('\n');
+  const documented = items.filter((i) => i.type !== 'violation').length;
+  const missed = items.length - documented;
   const graph = [
     {
       '@type': 'CollectionPage',
@@ -401,7 +516,7 @@ function archivePage(entries) {
   <meta property="og:title" content="${htmlEscape(title)}">
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
-  ${newest ? `<meta property="og:image" content="${htmlEscape(newest.photos.front.sourceUrl)}">` : ''}
+  ${newestWithPhoto ? `<meta property="og:image" content="${htmlEscape(newestWithPhoto.photos.front.sourceUrl)}">` : ''}
   <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
   <style>
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
@@ -416,6 +531,11 @@ function archivePage(entries) {
     .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase;border-top:1px solid var(--rule)}
     .meta strong{font-size:15px}.meta .w{color:var(--accent);font-weight:600}
     li a:hover{outline:2px solid var(--accent)}
+    li.missed a{border-color:var(--accent);background:#f1f0ea}
+    .nodoc{display:flex;align-items:center;justify-content:center;aspect-ratio:9/16;color:var(--accent);
+      font:600 13px ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;
+      background:repeating-linear-gradient(45deg,#f1f0ea,#f1f0ea 10px,#e8e6df 10px,#e8e6df 20px)}
+    .meta .s{color:var(--accent);font-weight:600}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
   </style>
 </head>
@@ -425,7 +545,8 @@ function archivePage(entries) {
   <h1>Daily record archive</h1>
 </header>
 <main>
-  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Each entry is a permanent page holding that day's four-angle documentation photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes.</p>
+  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>. The gaps are part of the record.</p>
+  <p><strong>${documented}</strong> documented ${documented === 1 ? 'day' : 'days'} · <strong>${missed}</strong> ${missed === 1 ? 'day' : 'days'} without a record</p>
   <p><a href="/">Return to michealrayberry.com</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
   <ul>
 ${cards}
@@ -497,9 +618,10 @@ function sitemapIndex(latestDate) {
 }
 
 async function main() {
-  const [csv, attestCsv] = await Promise.all([
+  const [csv, attestCsv, penaltyCsv] = await Promise.all([
     fetchText(SHEET_CSV),
     fetchText(ATTEST_CSV, true),
+    fetchText(PENALTIES_CSV, true),
   ]);
   const rows = parseCSV(csv);
   const records = rows.slice(1).map((r) => ({
@@ -530,6 +652,25 @@ async function main() {
     }
   }
 
+  // Violation Log — the AP's determination is authoritative. Never infer a
+  // failure from missing photos: a §9 medical exception is an excused day, not
+  // a violation, and only the AP knows which is which.
+  const violations = new Map();
+  if (penaltyCsv) {
+    for (const row of parseCSV(penaltyCsv).slice(1)) {
+      const c = row.map((x) => String(x || '').trim());
+      // Public format (§8): date · violation · status. Legacy level-format rows
+      // carry 'Level N' in column B and the status in column G.
+      const entry = /^level/i.test(c[1])
+        ? { date: normalizeDate(c[0]), violation: c[2], status: c[6] || 'Unresolved' }
+        : { date: normalizeDate(c[0]), violation: c[1], status: c[2] || c[3] || 'Unresolved' };
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.date) || !entry.violation) continue;
+      // ANCHORED: 'Unresolved' contains the substring 'resolved'.
+      entry.resolved = /^\s*(satisfied|resolved)/i.test(entry.status);
+      violations.set(entry.date, entry);
+    }
+  }
+
   const photoFiles = (await walk(path.join(ROOT, 'photos')))
     .filter((f) => /\.(?:jpe?g|png|webp)$/i.test(f) && !f.includes(`${path.sep}responsive${path.sep}`));
   const finalized = [];
@@ -543,20 +684,57 @@ async function main() {
     finalized.push({ record, photoPaths });
   }
 
+  // One continuous timeline: documented days and violation days share the same
+  // URL scheme and prev/next chain, so the record has no navigational gaps.
+  const finalizedDates = new Set(finalized.map((f) => f.record.date));
+  const recordByDate = new Map(records.map((r) => [r.date, r]));
+  const violationDays = [...violations.values()]
+    .filter((v) => !finalizedDates.has(v.date) && dayNumber(v.date) >= 1)
+    .map((v) => {
+      const r = recordByDate.get(v.date);
+      return {
+        type: 'violation',
+        violation: v,
+        record: { date: v.date, day: dayNumber(v.date), weight: r ? r.weight : null, note: r ? r.note : '' },
+      };
+    });
+  const timeline = [
+    ...finalized.map((f) => ({ type: 'day', ...f })),
+    ...violationDays,
+  ].sort((a, b) => a.record.date.localeCompare(b.record.date));
+
   const generated = [];
+  const publishedViolations = [];
   const changedUrls = new Set();
-  for (let i = 0; i < finalized.length; i++) {
-    const { record, photoPaths } = finalized[i];
+  for (let i = 0; i < timeline.length; i++) {
+    const entry = timeline[i];
+    const previous = timeline[i - 1]?.record || null;
+    const next = timeline[i + 1]?.record || null;
+
+    if (entry.type === 'violation') {
+      const { record, violation } = entry;
+      const dir = `${record.date}-day-${String(record.day).padStart(3, '0')}`;
+      const page = violationPage({ record, violation, previous, next });
+      if (await writeIfChanged(path.join(ROOT, 'daily', dir, 'index.html'), page)) {
+        changedUrls.add(`${SITE_ORIGIN}/daily/${dir}/`);
+      }
+      publishedViolations.push(entry);
+      continue;
+    }
+
+    const { record, photoPaths } = entry;
     const photos = {};
     for (const [angle, source] of Object.entries(photoPaths)) {
       photos[angle] = await generateResponsive(source, record.date, angle, record.day);
       photos[angle].changedUrls.forEach((u) => changedUrls.add(u));
     }
-    const previous = finalized[i - 1]?.record || null;
-    const next = finalized[i + 1]?.record || null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
-    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '' });
+    const page = dailyPage({
+      record, photos, previous, next,
+      attestation: attestMap.get(record.date) || '',
+      violation: violations.get(record.date) || null,
+    });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
 
     const manifest = {
@@ -576,6 +754,11 @@ async function main() {
         video_url: record.video,
         canonical_url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
         attestation: attestMap.get(record.date) || null,
+        // §8: nature and status only. Consequence details are confidential.
+        violation: violations.has(record.date) ? {
+          nature: violations.get(record.date).violation,
+          status: violations.get(record.date).resolved ? 'Resolved' : 'Unresolved',
+        } : null,
       },
       photos: Object.fromEntries(Object.entries(photos).map(([angle, p]) => [angle, {
         url: p.sourceUrl,
@@ -597,23 +780,32 @@ async function main() {
 
   // Archive hub at /daily/ — a crawlable static index linking every published day,
   // plus the machine-readable list the dashboard reads to link its log rows.
-  if (generated.length) {
-    if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), archivePage(generated))) {
+  // Both page types share the archive, the chain and the sitemap. Only
+  // documented days carry photos, so image/video sitemaps stay day-only.
+  const publishedAll = timeline.filter((e) =>
+    e.type === 'violation' || generated.some((g) => g.record.date === e.record.date));
+  if (publishedAll.length) {
+    const hub = archivePage(publishedAll.map((e) => e.type === 'violation'
+      ? { type: 'violation', record: e.record, violation: e.violation }
+      : { type: 'day', record: e.record, photos: generated.find((g) => g.record.date === e.record.date).photos }));
+    if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), hub)) {
       changedUrls.add(`${SITE_ORIGIN}/daily/`);
     }
-    const published = generated.map(({ record }) => ({
-      day: record.day,
-      date: record.date,
-      weight_lb: record.weight,
-      url: `/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
+    const published = publishedAll.map((e) => ({
+      day: e.record.day,
+      date: e.record.date,
+      type: e.type === 'violation' ? 'violation' : 'documented',
+      weight_lb: Number.isFinite(e.record.weight) ? e.record.weight : null,
+      status: e.type === 'violation' ? (e.violation.resolved ? 'Resolved' : 'Unresolved') : null,
+      url: `/daily/${e.record.date}-day-${String(e.record.day).padStart(3, '0')}/`,
     }));
     await writeIfChanged(path.join(ROOT, 'daily', 'published.json'), JSON.stringify(published, null, 2) + '\n');
   }
 
-  const latestDate = generated.at(-1)?.record.date || START_DATE;
+  const latestDate = publishedAll.at(-1)?.record.date || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
-    ['sitemap-daily.xml', dailySitemap(generated.map((g) => g.record))],
+    ['sitemap-daily.xml', dailySitemap(publishedAll.map((e) => e.record))],
     ['sitemap-images.xml', imageSitemap(generated)],
     ['sitemap-videos.xml', videoSitemap(generated)],
     ['sitemap.xml', sitemapIndex(latestDate)],
@@ -625,10 +817,12 @@ async function main() {
   await fs.writeFile(INDEXNOW_OUTPUT, JSON.stringify([...changedUrls].sort(), null, 2) + '\n');
   const output = process.env.GITHUB_OUTPUT;
   if (output) {
-    await fs.appendFile(output, `page_count=${generated.length}\n`);
-    await fs.appendFile(output, `latest_url=${generated.at(-1) ? `${SITE_ORIGIN}/daily/${generated.at(-1).record.date}-day-${String(generated.at(-1).record.day).padStart(3, '0')}/` : SITE_ORIGIN}\n`);
+    const newest = publishedAll.at(-1);
+    await fs.appendFile(output, `page_count=${publishedAll.length}\n`);
+    await fs.appendFile(output, `latest_url=${newest ? `${SITE_ORIGIN}/daily/${newest.record.date}-day-${String(newest.record.day).padStart(3, '0')}/` : SITE_ORIGIN}\n`);
   }
-  console.log(`Finalized records published: ${generated.length}`);
+  console.log(`Documented days published: ${generated.length}`);
+  console.log(`Violation days published: ${publishedViolations.length}`);
   console.log(`IndexNow candidate URLs: ${changedUrls.size}`);
 }
 
