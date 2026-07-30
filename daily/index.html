@@ -27,6 +27,11 @@
     .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase;border-top:1px solid var(--rule)}
     .meta strong{font-size:15px}.meta .w{color:var(--accent);font-weight:600}
     li a:hover{outline:2px solid var(--accent)}
+    li.missed a{border-color:var(--accent);background:#f1f0ea}
+    .nodoc{display:flex;align-items:center;justify-content:center;aspect-ratio:9/16;color:var(--accent);
+      font:600 13px ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;
+      background:repeating-linear-gradient(45deg,#f1f0ea,#f1f0ea 10px,#e8e6df 10px,#e8e6df 20px)}
+    .meta .s{color:var(--accent);font-weight:600}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
   </style>
 </head>
@@ -36,7 +41,8 @@
   <h1>Daily record archive</h1>
 </header>
 <main>
-  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Each entry is a permanent page holding that day's four-angle documentation photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes.</p>
+  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>. The gaps are part of the record.</p>
+  <p><strong>10</strong> documented days · <strong>0</strong> days without a record</p>
   <p><a href="/">Return to michealrayberry.com</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
   <ul>
 <li>
