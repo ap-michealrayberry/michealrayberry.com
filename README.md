@@ -1,40 +1,26 @@
-# Micheal Ray Berry Public Accountability Project — Rebuild v2
+# michealrayberry.com — deploy folder
 
-This directory is an isolated replacement architecture. It does not modify or
-depend on the legacy site's custom `x-dc` runtime.
+Static site for the Public Accountability Project, served by Netlify from the
+GitHub repo. Live data comes from Google Sheets / Apps Script / YouTube / Drive
+(state changes like violations or abandonment need NO deploy — the site reads
+the sheets directly; deploys only ship code/content changes).
 
-## Three interfaces
+Files:
+- index.html — the site (unbundled; loads support.js + recording-assistant.js)
+- support.js, recording-assistant.js, voice-pack.json — runtime + tools
+  (recording-assistant: daily inspection, meal photo, violation portrait,
+  corrective session — all server-attested)
+- Public Training Session.dc.html, Violation Acknowledgment.dc.html — embedded tools
+- ap/ — AP Portal (key-gated operator console; noindex, never cached)
+- manifest.webmanifest, sw.js — install-as-app + offline shell
+- _redirects — real URLs (/record, /agreement, …); /annex + /fagspose → / (301)
+- _headers — security + cache headers
+- 404.html, robots.txt, sitemap.xml, favicon.png, og-image.png
 
-- `public-site/` — read-only public record.
-- `recorder/` — participant-only daily packet capture and preparation.
-- `ap-console/` — AP-only review and administration.
-- `backend/` — version-controlled Google Apps Script API scaffold.
+Not in this folder but in the repo: photos/ (mirrored daily photos) and
+images/ (site imagery incl. violation-portrait.jpg) — committed by Apps Script.
 
-## Important
+Deploy: commit ALL of these files to the repo root (github.com/michealrayberry/
+michealrayberry.com, main branch). Netlify auto-deploys.
 
-The sample project values were imported from the legacy repository
-(July 20, 2026; 340 lb; 175 lb) only to make the prototype render. Verify all
-contract values against the signed agreement before activation.
-
-## Local preview
-
-Serve this directory over HTTP; do not open the HTML files directly.
-
-```bash
-python3 -m http.server 8080 --directory .
-```
-
-Then open:
-
-- Public site: `http://localhost:8080/public-site/`
-- Recorder: `http://localhost:8080/recorder/`
-- AP console: `http://localhost:8080/ap-console/`
-
-## Deployment approach
-
-1. Keep the legacy production site live.
-2. Put this directory on a separate branch.
-3. Deploy each interface to a staging URL.
-4. Import the Apps Script backend after reviewing secrets and Sheet IDs.
-5. Test one complete daily packet end to end.
-6. Only then switch production routing.
+Administered by the Accountability Partner (§13).
