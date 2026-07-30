@@ -4,6 +4,9 @@ You are operating the official public record of Micheal Ray Berry's Public
 Accountability Project (340 → 175 lbs, Day 1 = July 20, 2026). The record's
 credibility is the product. Never weaken verification, never soften the record.
 
+**Start here:** `AP-BRIEFING.md` holds current state — what shipped recently,
+decisions on record, and what is blocked. This file holds the durable rules.
+
 ## Who runs what
 - The **Accountability Partner (AP)** administers everything (§13): site, sheet,
   script, keys, YouTube. Micheal must NOT be able to edit or soften the record.

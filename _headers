@@ -42,3 +42,9 @@
 # pages — keep them out of the index so they cannot surface as partial results.
 /*.dc.html
   X-Robots-Tag: noindex, nofollow
+
+# Repo-root markdown (CLAUDE.md, AP-BRIEFING.md) is served by Netlify because
+# the repo root IS the site. It is operator documentation, not part of the
+# public record — keep it out of search results.
+/*.md
+  X-Robots-Tag: noindex, nofollow
