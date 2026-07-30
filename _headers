@@ -17,34 +17,3 @@
 /ap/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
-
-# Generated record media. Filenames encode day, angle, date and width, so a
-# given URL's bytes never change — a new photo produces a new filename.
-/media/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# Mirrored source photos are equally immutable once committed by the script.
-/photos/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# Permanent daily pages: stable, but revalidate daily so prev/next links to
-# newly published days appear without waiting out a long cache.
-/daily/*
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-
-# Sitemaps are rewritten on every publish run.
-/sitemap.xml
-  Cache-Control: public, max-age=0, must-revalidate
-/sitemap-*.xml
-  Cache-Control: public, max-age=0, must-revalidate
-
-# dc-import components. They are building blocks of index.html, not standalone
-# pages — keep them out of the index so they cannot surface as partial results.
-/*.dc.html
-  X-Robots-Tag: noindex, nofollow
-
-# Repo-root markdown (CLAUDE.md, AP-BRIEFING.md) is served by Netlify because
-# the repo root IS the site. It is operator documentation, not part of the
-# public record — keep it out of search results.
-/*.md
-  X-Robots-Tag: noindex, nofollow

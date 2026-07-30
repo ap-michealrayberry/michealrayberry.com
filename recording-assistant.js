@@ -169,6 +169,16 @@
           Optional, independent of the inspection above. Live capture only — no gallery uploads: the tool fetches a one-time code, checks the frame actually contains food (on-device AI), stamps day · date · time · code into the photo, files it to the record, and logs its fingerprint with server time.
         </p>
       </div>
+      <div class="ra-locbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
+        <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Location check-in</label>
+        <div class="ra-row">
+          <button class="ra-ghost ra-loc">Send Location to the AP</button>
+          <button class="ra-ghost ra-locbeacon">Start Live Sharing</button>
+        </div>
+        <p class="ra-locnote" style="margin-top:8px">
+          Reports this device's current location to the Accountability Partner (private — AP portal only, never the public record). One tap, your consent each time; the browser asks permission. Live Sharing streams continuously while this tool stays open — it stops when the screen sleeps or you leave. Tap again to stop.
+        </p>
+      </div>
       <div class="ra-vpbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
         <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Violation portrait — required while a violation is active</label>
         <div class="ra-row">
@@ -360,6 +370,55 @@
       // ---- Verification: challenge code + content fingerprint attestation ----
       let challenge = null, lastVideoBlob = null;
       const deviceKey = () => { try { return localStorage.getItem('mrb_packet_key') || ''; } catch (e) { return ''; } };
+      // Location check-in — consensual, per-tap; posts to the private AP log.
+      const locBtn = $('.ra-loc'), setLocNote = (m) => { const n = $('.ra-locnote'); if (n) n.textContent = m; };
+      if (locBtn) locBtn.addEventListener('click', () => {
+        if (!navigator.geolocation) { setLocNote('This device does not support location.'); return; }
+        setLocNote('Requesting location… approve the browser prompt.');
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          try {
+            const r = await fetch(ATTEST_ENDPOINT, { method: 'POST', body: JSON.stringify({
+              action: 'location', key: deviceKey(),
+              lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy), label: 'check-in',
+            }) });
+            const j = await r.json();
+            setLocNote(j && j.ok ? 'Location sent to the AP · ' + new Date().toLocaleTimeString() : 'Send failed — ' + ((j && j.error) || 'try again.'));
+          } catch (e) { setLocNote('Send failed — network error.'); }
+        }, (err) => setLocNote('Location denied or unavailable (' + err.code + '). It is required by your consent — allow it and retry.'), { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      });
+      // Live beacon — streams while the tool is open (foreground only; stops on sleep).
+      let beaconWatch = null, beaconLast = 0, beaconWake = null;
+      const beaconBtn = $('.ra-locbeacon');
+      async function postLoc(pos, label) {
+        try {
+          await fetch(ATTEST_ENDPOINT, { method: 'POST', body: JSON.stringify({
+            action: 'location', key: deviceKey(),
+            lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy), label: label,
+          }) });
+        } catch (e) {}
+      }
+      function stopBeacon() {
+        if (beaconWatch !== null) { navigator.geolocation.clearWatch(beaconWatch); beaconWatch = null; }
+        if (beaconWake) { try { beaconWake.release(); } catch (e) {} beaconWake = null; }
+        if (beaconBtn) beaconBtn.textContent = 'Start Live Sharing';
+        setLocNote('Live sharing stopped.');
+      }
+      if (beaconBtn) beaconBtn.addEventListener('click', async () => {
+        if (beaconWatch !== null) { stopBeacon(); return; }
+        if (!navigator.geolocation) { setLocNote('This device does not support location.'); return; }
+        try { if ('wakeLock' in navigator) beaconWake = await navigator.wakeLock.request('screen'); } catch (e) {}
+        beaconBtn.textContent = 'Stop Live Sharing';
+        setLocNote('Live sharing on — streaming to the AP while this stays open.');
+        beaconWatch = navigator.geolocation.watchPosition((pos) => {
+          const now = Date.now();
+          if (now - beaconLast < 8000) return; // throttle to ~1 post / 8s
+          beaconLast = now;
+          postLoc(pos, 'live');
+          setLocNote('Live · last ping ' + new Date().toLocaleTimeString());
+        }, (err) => setLocNote('Live sharing error (' + err.code + ') — allow location and keep the tool open.'),
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 });
+      });
+      window.addEventListener('pagehide', () => { if (beaconWatch !== null) stopBeacon(); });
       async function fetchChallenge(kind) {
         try {
           const r = await fetch(ATTEST_ENDPOINT + '?action=challenge&kind=' + kind + '&key=' + encodeURIComponent(deviceKey()));

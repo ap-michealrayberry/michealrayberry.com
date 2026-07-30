@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,18 +37,14 @@
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://michealrayberry.com/#website",
         "name": "Micheal Ray Berry — Public Accountability Project",
         "url": "https://michealrayberry.com/",
         "description": "The official public record of Micheal Ray Berry's weight loss accountability project: 340 to 175 pounds, documented daily.",
-        "inLanguage": "en-US",
-        "publisher": { "@id": "https://michealrayberry.com/#micheal-ray-berry" }
+        "inLanguage": "en-US"
       },
       {
         "@type": "Person",
-        "@id": "https://michealrayberry.com/#micheal-ray-berry",
         "name": "Micheal Ray Berry",
-        "alternateName": "Ray Berry",
         "url": "https://michealrayberry.com/",
         "sameAs": ["https://youtube.com/@michealrayberry", "https://x.com/michealrayberry", "https://www.tiktok.com/@michealrayberry", "https://www.instagram.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry", "https://www.reddit.com/user/MichealRayBerry/", "https://www.flickr.com/photos/michealrayberry/"],
         "description": "Participant in a public weight loss accountability project, documenting a journey from 340 to 175 pounds with daily public inspection videos and weigh-ins.",
@@ -59,8 +55,7 @@
         "name": "Micheal Ray Berry public weigh-in record",
         "description": "Daily public weigh-in data from the Micheal Ray Berry Public Accountability Project: date, weight, notes, four-angle daily accountability photos, and inspection videos, documenting a journey from 340 pounds to 175 pounds.",
         "url": "https://michealrayberry.com/",
-        "creator": { "@id": "https://michealrayberry.com/#micheal-ray-berry" },
-        "isPartOf": { "@id": "https://michealrayberry.com/#website" },
+        "creator": { "@type": "Person", "name": "Micheal Ray Berry" },
         "isAccessibleForFree": true,
         "license": "https://michealrayberry.com/",
         "distribution": [{
@@ -75,7 +70,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <script>(function () { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = ['https:/', '/fonts.googleapis', '.com/css2?family=IBM+Plex+Mono:wght@400;600;700', '&family=IBM+Plex+Sans:wght@400;600', '&family=IBM+Plex+Sans+Condensed:wght@700', '&display=swap'].join(''); document.head.appendChild(l); })();</script>
-  <script defer src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #FAFAF7; }
     body { font-family: 'IBM Plex Sans', sans-serif; color: #141412; -webkit-font-smoothing: antialiased; }
@@ -253,8 +248,7 @@
   <sc-if value="{{ abandonedPresumed }}" hint-placeholder-val="{{ false }}">
     <div style="background: #141412; color: #FAFAF7; border-bottom: 4px solid #B3261E; padding: 22px 32px; display: flex; flex-direction: column; gap: 8px;" data-screen-label="Presumed abandoned notice">
       <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; letter-spacing: 0.04em; color: #E8837B;">Presumed abandoned</span>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Written notice has been issued and the seven-day opportunity to resume is running.</p>
-      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.7; max-width: 720px; color: #E8837B;">{{ cureMsg }}</p>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Pending the Accountability Partner's determination, after which this site converts permanently to the abandonment record.</p>
     </div>
   </sc-if>
   <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
@@ -620,10 +614,7 @@
           </div>
           <sc-for list="{{ logRows }}" as="row" hint-placeholder-count="3">
             <div style="display: grid; grid-template-columns: 90px 1fr 1fr 1fr 2fr; font-family: 'IBM Plex Mono', monospace; font-size: 15px; padding: 14px 20px; gap: 16px; border-top: 1px solid #D8D6CF;">
-              <span>
-                <sc-if value="{{ row.hasPage }}" hint-placeholder-val="{{ false }}"><a href="{{ row.permalink }}" style="color: #141412;" title="Permanent record for this day">{{ row.day }}</a></sc-if>
-                <sc-if value="{{ row.noPage }}" hint-placeholder-val="{{ true }}">{{ row.day }}</sc-if>
-              </span>
+              <span>{{ row.day }}</span>
               <span>{{ row.date }}</span>
               <span style="font-weight: 600;">{{ row.weight }}</span>
               <span style="color: {{ row.changeColor }};">{{ row.change }}</span>
@@ -632,7 +623,6 @@
           </sc-for>
         </div>
         <p style="font-size: 15px; color: #6B6A64; margin: 0; max-width: 640px;">Up, down, or flat — it gets posted. The goal of 175 pounds must be held for 28 consecutive days before the project is complete.</p>
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; margin: 0; max-width: 640px;"><a href="/daily/" style="color: #141412;">Browse the permanent daily record archive →</a><br><span style="color: #6B6A64;">Every documented day has its own permanent page with the four-angle photographs, the inspection video, and SHA-256 evidence hashes.</span></p>
       </div>
     </section>
 
@@ -754,6 +744,22 @@
           </div>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Micheal Ray Berry. This record uses my real name and my real face.</span>
         </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="The structure I need">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Full disclosure</span>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">The Structure Behind This Record</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.7;">
+          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. I serve under the authority of the man who administers this website.</p>
+          <p style="margin: 0; color: #D8D6CF;">Anyone who knows the lifestyle will read this record correctly: I am his submissive, collared to this project for its duration. The daily inspections, the uniform, the trained positions, the assigned corrections, and the public cost of failure are not productivity tricks — they are protocol. Obedience, discipline, and humiliation are used on me deliberately, with my full consent, because they work where willpower never has.</p>
+          <p style="margin: 0; color: #D8D6CF;">He sets the rules. He inspects. He punishes failure and records it. Every requirement I meet is an act of service, and every entry on this site — the weigh-ins, the videos, the violation log — is me reporting to him in public.</p>
+          <p style="margin: 0; color: #D8D6CF;">This is stated here, under my real name, because hiding it would put a lie at the center of a record that asks to be trusted.</p>
+          <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; color: #8A8983;">Consensual, adult, and voluntary — governed by the signed agreement below. The arrangement ends only by completion or its terms (§11, §13).</p>
         </div>
       </div>
     </section>
@@ -1149,7 +1155,6 @@
     <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap;">
         <button onClick="{{ toolDaily }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tdBg }}; color: {{ tdFg }};">Daily Inspection</button>
-        <button onClick="{{ toolTraining }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ ttBg }}; color: {{ ttFg }};">Training Session</button>
         <button onClick="{{ toolAck }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ taBg }}; color: {{ taFg }};">Violation Acknowledgment</button>
               </div>
     </section>
@@ -1157,13 +1162,6 @@
     <section style="border-bottom: 1px solid #141412;">
       <div style="max-width: 1160px; margin: 0 auto;">
         <x-import component-from-global-scope="recording-assistant" from="./recording-assistant.js?v=20260727" hint-size="100%,700px"></x-import>
-      </div>
-    </section>
-    </sc-if>
-    <sc-if value="{{ isToolTraining }}" hint-placeholder-val="{{ false }}">
-    <section style="border-bottom: 1px solid #141412;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <dc-import name="Public Training Session" hint-size="100%,1100px"></dc-import>
       </div>
     </section>
     </sc-if>
@@ -1360,17 +1358,6 @@ class Component extends DCLogic {
           this.setState({ liveWeighIns: entries });
           this.injectSeoJsonLd(entries);
         }
-      })
-      .catch(() => {});
-    // Permanent daily pages generated by the SEO publisher. Same-origin static file,
-    // rewritten on every publish run; absent until the first day is finalized.
-    fetch('/daily/published.json')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((list) => {
-        if (!Array.isArray(list) || !list.length) return;
-        const map = {};
-        list.forEach((d) => { if (d && d.date && d.url) map[d.date] = d.url; });
-        if (Object.keys(map).length) this.setState({ publishedDays: map });
       })
       .catch(() => {});
     if (this.JOURNAL_CSV) {
@@ -1670,11 +1657,7 @@ class Component extends DCLogic {
     const chartPoints = chartDots.map((d) => d.x + ',' + d.y).join(' ');
 
     // ----- Log rows, newest first -----
-    // Permanent per-day pages published by the SEO publisher (.github/seo-publisher).
-    // Sourced from /daily/published.json so a row only ever links to a page that exists.
-    const publishedDays = this.state.publishedDays || {};
     const logRows = data.slice().reverse().map((e, i, arr) => {
-      const permalink = publishedDays[e.date] || '';
       const prev = arr[i + 1];
       const delta = prev ? e.weight - prev.weight : 0;
       let change = '—', changeColor = '#6B6A64';
@@ -1689,9 +1672,6 @@ class Component extends DCLogic {
         weight: fmt(e.weight) + ' lbs',
         change, changeColor,
         note: e.note || '',
-        permalink,
-        hasPage: !!permalink,
-        noPage: !permalink,
       };
     });
 
@@ -1720,22 +1700,6 @@ class Component extends DCLogic {
     const abandonedConfirmed = sst.abandoned === 'confirmed';
     const abandonedPresumed = sst.abandoned === 'presumed';
     const abandonDate = sst.abandoned_date || '';
-    // §11 requires written notice and a seven-day opportunity to resume before
-    // the project ends. Confirmation is automatic once that window closes — no
-    // AP action is required — so the deadline is stated publicly in advance.
-    const cureEnd = (() => {
-      const d = new Date(abandonDate + 'T00:00:00');
-      if (isNaN(d)) return null;
-      d.setDate(d.getDate() + 7);
-      return d;
-    })();
-    const cureDeadline = cureEnd
-      ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(cureEnd)
-      : '';
-    const cureDaysLeft = cureEnd ? Math.max(0, Math.ceil((cureEnd - now) / 864e5)) : 0;
-    const cureMsg = cureDeadline
-      ? 'A complete Daily Compliance Packet before ' + cureDeadline + ' ends this notice. If none is recorded by then, this site converts automatically to the permanent abandonment record — no further review is required. ' + (cureDaysLeft === 1 ? '1 day remains.' : cureDaysLeft + ' days remain.')
-      : 'A complete Daily Compliance Packet ends this notice. If none is recorded within the seven-day window, this site converts automatically to the permanent abandonment record — no further review is required.';
     const abd = new Date(abandonDate + 'T00:00:00');
     const abandonDay = isNaN(abd) ? '—' : Math.max(1, Math.floor((abd - new Date('2026-07-20T00:00:00')) / 864e5) + 1);
     let apLinks = [];
@@ -1947,7 +1911,7 @@ class Component extends DCLogic {
       isUniform: page === 'uniform',
       isUpdates: page === 'updates',
       wrClosed, wrCurrent,
-      showOverdue, overdueMsg, cureMsg,
+      showOverdue, overdueMsg,
       cleanDays: String(cleanDays),
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
@@ -1968,13 +1932,11 @@ class Component extends DCLogic {
         const bg = (k) => (t === k ? '#141412' : 'transparent');
         const fg = (k) => (t === k ? '#FAFAF7' : '#141412');
         return {
-          isToolDaily: t === 'daily', isToolTraining: t === 'training', isToolAck: t === 'ack', isToolCorr: t === 'corr',
+          isToolDaily: t === 'daily', isToolAck: t === 'ack', isToolCorr: t === 'corr',
           toolDaily: () => this.setState({ recordTool: 'daily' }),
-          toolTraining: () => this.setState({ recordTool: 'training' }),
           toolAck: () => this.setState({ recordTool: 'ack' }),
           toolCorr: () => this.setState({ recordTool: 'corr' }),
           tdBg: bg('daily'), tdFg: fg('daily'),
-          ttBg: bg('training'), ttFg: fg('training'),
           taBg: bg('ack'), taFg: fg('ack'),
           tcBg: bg('corr'), tcFg: fg('corr'),
         };
