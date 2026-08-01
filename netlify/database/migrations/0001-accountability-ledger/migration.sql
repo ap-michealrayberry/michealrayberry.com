@@ -140,7 +140,6 @@ create table if not exists audit.events (
   event_hash text not null unique
 );
 
--- Append-only protection. Application roles should receive INSERT/SELECT only.
 create or replace function audit.reject_mutation()
 returns trigger
 language plpgsql
