@@ -50,7 +50,12 @@ create trigger ap_decision_audit_no_mutation
 before update or delete on private_record.ap_decision_audit
 for each row execute function private_record.reject_immutable_mutation();
 
-create or replace view public_record.public_violation_cases as
+-- PostgreSQL cannot use CREATE OR REPLACE VIEW when an existing column would
+-- be renamed or when new columns are inserted before an existing column.
+-- Drop and recreate the derived public-safe view inside the migration transaction.
+drop view if exists public_record.public_violation_cases;
+
+create view public_record.public_violation_cases as
 select
   v.id as violation_id,
   pd.project_day,
