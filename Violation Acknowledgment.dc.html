@@ -22,7 +22,7 @@
   <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 680px;">
     <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public record version — voluntary practice, per violation</span>
     <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Violation Acknowledgment</h1>
-    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">In the penalty uniform — pink unitard, plain black shoes — one continuous take, front-facing, neutral background. Spoken: you read the statement aloud, 20–30 seconds. AI voice: you stand at attention while the voice states the violation. Date and V-number are burned into the frame.</p>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">In the penalty uniform — pink unitard, plain black shoes — one continuous take, front-facing, neutral background. Spoken: you read the statement aloud, 20–30 seconds. AI voice: you stand at attention while the voice states the violation. Date and V-number are burned into the frame. With corner time on, the same take continues into the assigned silent corner period and closes on camera — one continuous file, the complete resolution. The finished video files itself to the Drive record automatically.</p>
   </div>
 
   <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
@@ -51,6 +51,10 @@
       <input type="checkbox" checked="{{ camera }}" onChange="{{ toggleCamera }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
       <span>Record video (for YouTube)</span>
     </label>
+    <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
+      <input type="checkbox" checked="{{ withCorner }}" onChange="{{ toggleCorner }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
+      <span>Continue into assigned corner time — {{ cornerLabel }}, one continuous take</span>
+    </label>
     <div style="display: flex; flex-direction: column; gap: 6px;">
       <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Script — generated from the log; not editable</span>
       <div style="font-size: 12.5px; line-height: 1.6; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935; white-space: pre-wrap; max-height: 220px; overflow: auto;">{{ scriptPreview }}</div>
@@ -63,10 +67,11 @@
 
   <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
   <div style="display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; max-width: 680px; text-align: center;">
-    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">Acknowledgment in progress</span>
-    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">At attention · face the camera</div>
+    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">{{ activeKicker }}</span>
+    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">{{ activeHeading }}</div>
     <div style="font-size: 16px; color: #3A3935; line-height: 1.6; min-height: 52px; max-width: 620px;">{{ line }}</div>
-    <div style="font-size: 56px; font-weight: 700; line-height: 1; color: #B9B8B2;">{{ clock }}</div>
+    <div style="font-size: 56px; font-weight: 700; line-height: 1; color: {{ clockColor }};">{{ clockBig }}</div>
+    <span style="font-size: 12px; color: #6B6A64; letter-spacing: 0.15em; min-height: 14px;">{{ clockSub }}</span>
     <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; display: {{ camDisplay }}; transform: scaleX(-1);"></video>
     <button onClick="{{ stop }}" style="padding: 12px 36px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">{{ stopLabel }}</button>
   </div>
@@ -74,8 +79,9 @@
 
   <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
   <div style="display: flex; flex-direction: column; gap: 16px; border: 1px solid #141412; padding: 32px 40px; max-width: 560px; width: 100%; box-sizing: border-box; background: #FFFFFF;">
-    <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">Acknowledgment Complete</span>
+    <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">{{ doneTitle }}</span>
     <span style="font-size: 14px; color: #6B6A64; line-height: 1.7;">{{ summary }}</span>
+    <span style="font-size: 12px; letter-spacing: 0.06em; color: #B3261E; min-height: 14px; line-height: 1.6;">{{ upStatus }}</span>
     <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
       <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 28px; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-size: 13px; letter-spacing: 0.1em; text-align: center;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD VIDEO</a>
     </sc-if>
@@ -94,14 +100,53 @@ class Component extends DCLogic {
   DAY1 = '2026-07-20';
   PEN_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
 
-  state = { pens: [], sel: 0, camera: true, status: '', phase: 'setup', line: '', clock: '0:00', dlUrl: '', dlName: '', summary: '', ytTitle: '', mode: 'spoken' };
+  state = { pens: [], sel: 0, camera: true, status: '', phase: 'setup', line: '', clock: '0:00', remaining: '', dlUrl: '', dlName: '', summary: '', ytTitle: '', mode: 'spoken', withCorner: true, cornerActive: false, upStatus: '', doneTitle: 'Acknowledgment Complete' };
+
+  EP = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
+
+  cornerMins() { return [15, 20, 30][this.lvl() - 1]; }
+
+  _b64(part) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(part); }); }
+
+  // Auto-filing: the finished video goes to the Drive record in ~4 MB chunks
+  // relayed through the AP's Apps Script into a Drive resumable session.
+  async fileToRecord(blob, name) {
+    let key = '';
+    try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (!key) { this.setState({ upStatus: 'AUTO-FILING UNAVAILABLE — no device key in this browser (it is set on the /record page). Download the video and upload it to the Drive folder manually.' }); return; }
+    const mime = blob.type || 'video/webm';
+    this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — 0% · keep this page open…' });
+    try {
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'resolution' }) })).json();
+      if (!init || !init.ok || !init.session) throw new Error((init && init.error) || 'init failed');
+      const CH = 4194304; // 4 MiB — multiple of 256 KiB, per Drive resumable-upload rules
+      for (let off = 0; off < blob.size; off += CH) {
+        const chunk_b64 = await this._b64(blob.slice(off, Math.min(off + CH, blob.size)));
+        let j = null;
+        for (let t = 0; t < 3 && !(j && j.ok); t++) {
+          try { j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: off, total: blob.size, mime, chunk_b64 }) })).json(); } catch (e) { j = null; }
+        }
+        if (!(j && j.ok)) throw new Error('chunk failed');
+        this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
+        if (j.done) { this.setState({ upStatus: 'FILED TO THE DRIVE RECORD ✓ — delivered automatically; the download below is a backup.' }); return; }
+      }
+      throw new Error('incomplete');
+    } catch (e) {
+      this.setState({ upStatus: 'AUTO-FILING FAILED — download the video and upload it to the Drive folder manually.' });
+    }
+  }
 
   vn() { return 'V-' + String(this.state.sel + 1).padStart(3, '0'); }
+
+  lvl() { return Math.min(this.state.sel + 1, 3); }
 
   spokenScript() {
     const p = this.state.pens[this.state.sel];
     if (!p) return null;
-    return 'I am Micheal Ray Berry. On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, I failed to meet the following requirement by the 10:00 PM deadline: ' + p.what + '. Violation ' + this.vn() + ' was automatically declared. I am wearing the designated violation uniform and publicly acknowledging that failure. The assigned consequences must be completed and verified before this violation is resolved. This violation and its final resolution will remain in the permanent public record.';
+    const lvl = this.lvl();
+    const mins = [15, 20, 30][lvl - 1];
+    const lvlWord = ['One', 'Two', 'Three'][lvl - 1];
+    return 'I am Micheal Ray Berry. On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, I failed to meet the following requirement by the 10:00 PM deadline: ' + p.what + '. Violation ' + this.vn() + ' was automatically declared under Amendment Number One. This is a Level ' + lvlWord + ' consequence under Section 8.1. I am publicly acknowledging that failure. Resolution requires this acknowledgment, ' + mins + ' continuous minutes of recorded corner time, and the Level ' + lvlWord + ' financial penalty, each completed and verified by the Accountability Partner. This violation, this acknowledgment, and their final resolution remain in the permanent public record.';
   }
 
   parseCSV(text) {
@@ -196,7 +241,7 @@ class Component extends DCLogic {
 
   async startCamera() {
     try {
-      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: false });
+      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: true });
       if (this._camEl) { this._camEl.srcObject = this._stream; this._camEl.play(); }
       return true;
     } catch (e) { this.setState({ camera: false, status: 'Camera unavailable — a recording is needed for YouTube.' }); return false; }
@@ -214,10 +259,16 @@ class Component extends DCLogic {
       ctx.textBaseline = 'middle';
       ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, 0, W, 118);
       ctx.fillStyle = '#FAFAF7'; ctx.font = '700 30px "IBM Plex Sans Condensed","Arial Narrow",sans-serif'; ctx.fillText('MICHEAL RAY BERRY', 24, 34);
-      ctx.fillStyle = '#FF6B61'; ctx.font = '600 17px "IBM Plex Mono",monospace'; ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT · VIOLATION ACKNOWLEDGMENT', 24, 64);
+      ctx.fillStyle = '#FF6B61'; ctx.font = '600 17px "IBM Plex Mono",monospace';
+      ctx.fillText(this._cornerNow ? 'PUBLIC ACCOUNTABILITY PROJECT · CORNER TIME · LEVEL ' + this.lvl() : 'PUBLIC ACCOUNTABILITY PROJECT · VIOLATION ACKNOWLEDGMENT', 24, 64);
       ctx.fillStyle = '#FAFAF7'; ctx.font = '600 16px "IBM Plex Mono",monospace'; ctx.fillText(trig, 24, 92);
       const el = this._fmt(Math.floor((Date.now() - this._start) / 1000));
       ctx.font = '700 26px "IBM Plex Mono",monospace'; ctx.fillText(el, W - ctx.measureText(el).width - 24, 48);
+      if (this._cornerNow && this._cornerEnd && !this._cornerDone) {
+        const remS = this._fmt(Math.ceil(Math.max(0, this._cornerEnd - Date.now()) / 1000));
+        ctx.fillStyle = '#FF6B61'; ctx.font = '700 22px "IBM Plex Mono",monospace';
+        ctx.fillText('REMAINING ' + remS, W - ctx.measureText('REMAINING ' + remS).width - 24, 92);
+      }
       ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, H - 60, W, 60);
       ctx.fillStyle = '#B9B8B2'; ctx.font = '400 20px "IBM Plex Mono",monospace';
       ctx.fillText(new Date().toISOString().slice(0, 10) + ' · MICHEALRAYBERRY.COM', 24, H - 30);
@@ -227,13 +278,18 @@ class Component extends DCLogic {
     ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].some((m) => (MediaRecorder.isTypeSupported(m) ? (mime = m, true) : false));
     this.ensureAudio();
     const stream = c.captureStream(30);
+    try { const micSrc = this._ac.createMediaStreamSource(this._stream); micSrc.connect(this._dest); } catch (e) {}
     if (this._dest) this._dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 8000000 } : {});
+    // Long take when corner time follows — modest bitrate keeps a 30-min file deliverable.
+    const bps = this.state.withCorner ? 1800000 : 4000000;
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: bps } : { videoBitsPerSecond: bps });
     this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
     this._rec.onstop = () => {
       const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
       const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
-      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-violation-acknowledgment-' + p.date + '.' + ext });
+      const name = 'micheal-ray-berry-violation-' + (this._cornerDone ? 'resolution' : 'acknowledgment') + '-' + this.vn().toLowerCase() + '-' + p.date + (this._safety ? '-safety-stop' : '') + '.' + ext;
+      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: name });
+      this.fileToRecord(blob, name);
     };
     this._rec.start(1000); requestAnimationFrame(draw);
   }
@@ -243,7 +299,8 @@ class Component extends DCLogic {
     const lines = spoken ? (this.spokenScript() ? [] : null) : this.script();
     if (!lines) { this.setState({ status: 'Select a violation from the log first.' }); return; }
     if (!this._rehearse && this.state.camera) { const ok = await this.startCamera(); if (!ok) return; }
-    this.setState({ phase: 'active', line: '', clock: '0:00', dlUrl: '' });
+    this._cornerNow = false; this._cornerDone = false; this._safety = false;
+    this.setState({ phase: 'active', line: '', clock: '0:00', remaining: '', cornerActive: false, dlUrl: '', upStatus: '' });
     if (this.state.camera && this._stream) this.beginRecording();
     this._start = Date.now();
     this.beep(880, 160);
@@ -251,7 +308,7 @@ class Component extends DCLogic {
     let i = 0;
     const step = () => {
       if (this.state.phase !== 'active') return;
-      if (i >= lines.length) { setTimeout(() => this.finish(false), 2500); return; }
+      if (i >= lines.length) { setTimeout(() => this.maybeCorner(), 2500); return; }
       const line = lines[i];
       this.setState({ line });
       this.speak(line);
@@ -265,7 +322,7 @@ class Component extends DCLogic {
         if (this.state.phase !== 'active') return;
         this.beep(660, 250);
         this.setState({ line: this.spokenScript() });
-        this._stepTimer = setTimeout(() => this.finish(false), 45000);
+        this._stepTimer = setTimeout(() => this.maybeCorner(), 45000);
       }, 8000);
       return;
     }
@@ -274,17 +331,73 @@ class Component extends DCLogic {
     setTimeout(step, 10000);
   }
 
-  finish(aborted) {
-    clearTimeout(this._stepTimer); clearInterval(this._clockTimer);
+  // After the acknowledgment: the same take continues into the assigned
+  // corner time (Amendment No. 5 — level-based duration), then closes on camera.
+  maybeCorner() {
     if (this.state.phase !== 'active') return;
-    this.setState({ phase: 'done' });
+    if (!this.state.withCorner || this._rehearse || !this.state.camera || !this._stream) { this.finish(false); return; }
+    clearTimeout(this._stepTimer);
+    this._cornerNow = true;
+    this._half = false; this._min1 = false;
+    const mins = this.cornerMins();
+    this.beep(660, 250);
+    this.speak('The acknowledgment is complete. Face the corner. ' + mins + ' continuous minutes of corner time begin now. The recording continues.');
+    this.setState({ cornerActive: true, line: 'Silent corner time — face the corner, stand upright, remain in frame.', remaining: this._fmt(mins * 60) });
+    this._cornerEnd = Date.now() + mins * 60000;
+    this._cornerTimer = setInterval(() => {
+      if (this.state.phase !== 'active') return;
+      const rem = Math.max(0, this._cornerEnd - Date.now());
+      const remS = Math.ceil(rem / 1000);
+      this.setState({ remaining: this._fmt(remS) });
+      if (remS <= mins * 30 && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); }
+      if (remS <= 60 && !this._min1) { this._min1 = true; this.speak('One minute remaining.'); }
+      if (rem <= 0) {
+        clearInterval(this._cornerTimer);
+        this._cornerDone = true;
+        this.beep(660, 250);
+        this.speak('Corner time complete. Turn to the camera and read the closing statement.');
+        this.setState({ line: 'CLOSING — turn to the camera and read aloud: "This resolution session is complete: public acknowledgment and ' + mins + ' continuous minutes of corner time, one unedited take. Violation ' + this.vn() + ' remains unresolved until the Accountability Partner verifies every assigned requirement."', remaining: '0:00' });
+        this._stepTimer = setTimeout(() => this.finish(false), 25000);
+      }
+    }, 500);
+  }
+
+  safetyStop() {
+    this._safety = true;
+    clearInterval(this._cornerTimer);
+    this.finish(false);
+  }
+
+  finish(aborted) {
+    clearTimeout(this._stepTimer); clearInterval(this._clockTimer); clearInterval(this._cornerTimer);
+    if (this.state.phase !== 'active') return;
+    this.setState({ phase: 'done', cornerActive: false });
     if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
     if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
     if (!aborted) { this.beep(660, 200); setTimeout(() => this.beep(880, 300), 300); }
-    if (this._rehearse) { this._rehearse = false; this.setState({ summary: 'Rehearsal complete — nothing was recorded, nothing to upload. Run the real acknowledgment with the camera when ready.', ytTitle: '' }); return; }
+    if (this._rehearse) { this._rehearse = false; this.setState({ doneTitle: 'Rehearsal Complete', summary: 'Rehearsal complete — nothing was recorded, nothing to upload. Run the real acknowledgment with the camera when ready.', ytTitle: '' }); return; }
     const p = this.state.pens[this.state.sel];
+    const mins = this.cornerMins();
+    if (this._safety) {
+      this.speak('Session stopped.');
+      this.setState({
+        doneTitle: 'Safety Stop',
+        summary: 'The session was stopped for safety during corner time. A safety stop is never a violation. The partial recording files to the record automatically for AP review — add a note to the AP on what happened.',
+        ytTitle: '',
+      });
+      return;
+    }
+    if (this._cornerDone) {
+      this.setState({
+        doneTitle: 'Resolution Session Complete',
+        summary: 'One continuous take: public acknowledgment of the violation of ' + p.date + ', then ' + mins + ' minutes of Level ' + this.lvl() + ' corner time, closed on camera. It files to the Drive record automatically (status below). Post it to YouTube with the exact title and send the AP the link — the entry stays unresolved until he verifies every assigned requirement.',
+        ytTitle: 'Micheal Ray Berry — Violation Resolution — Acknowledgment + Level ' + this.lvl() + ' Corner Time — ' + this.vn() + ' — ' + p.date,
+      });
+      return;
+    }
     this.setState({
-      summary: (aborted ? 'Ended early — re-record for a complete acknowledgment. ' : '') + 'Violation of ' + p.date + ' acknowledged on camera. Upload, then give the AP the link if he wants it noted with the entry.',
+      doneTitle: 'Acknowledgment Complete',
+      summary: (aborted ? 'Ended early — re-record for a complete acknowledgment. ' : '') + 'Violation of ' + p.date + ' acknowledged on camera. It files to the Drive record automatically (status below). Upload to YouTube, then give the AP the link if he wants it noted with the entry.' + (this.state.withCorner && aborted ? ' Corner time did not run — the session ended before it began.' : ''),
       ytTitle: this.state.mode === 'spoken'
         ? 'Micheal Ray Berry — Public Violation Acknowledgment — ' + this.vn() + ' — ' + p.date
         : 'Micheal Ray Berry — Violation Acknowledgment — ' + p.what + ' — Day ' + this.dayNum(p.date) + ' — ' + p.date,
@@ -315,14 +428,21 @@ class Component extends DCLogic {
       spokenBg: s.mode === 'spoken' ? '#FBEAE8' : '#FFFFFF',
       voiceBorder: s.mode === 'voice' ? '#B3261E' : '#D8D6CF',
       voiceBg: s.mode === 'voice' ? '#FBEAE8' : '#FFFFFF',
-      stopLabel: s.mode === 'spoken' ? 'STATEMENT COMPLETE — STOP' : 'END EARLY',
+      stopLabel: s.cornerActive ? 'SAFETY STOP' : (s.mode === 'spoken' ? 'STATEMENT COMPLETE — CONTINUE' : 'END EARLY'),
       status: s.status,
+      withCorner: s.withCorner, toggleCorner: () => this.setState({ withCorner: !s.withCorner }),
+      cornerLabel: 'Level ' + this.lvl() + ' · ' + this.cornerMins() + ' min',
+      activeKicker: s.cornerActive ? 'Corner time in progress · ' + this.vn() + ' · Level ' + this.lvl() : 'Acknowledgment in progress',
+      activeHeading: s.cornerActive ? 'Face the corner · stand still' : 'At attention · face the camera',
+      clockBig: s.cornerActive ? s.remaining : s.clock,
+      clockColor: s.cornerActive ? '#141412' : '#B9B8B2',
+      clockSub: s.cornerActive ? 'REMAINING · ELAPSED ' + s.clock : '',
       start: () => { this._rehearse = false; this.start(); },
       rehearse: () => { this._rehearse = true; this.start(); },
-      stop: () => this.finish(this.state.mode !== 'spoken'),
-      reset: () => this.setState({ phase: 'setup' }),
+      stop: () => { if (s.cornerActive) { this.safetyStop(); } else if (s.mode === 'spoken') { clearTimeout(this._stepTimer); this.maybeCorner(); } else { this.finish(true); } },
+      reset: () => { this._cornerNow = false; this._cornerDone = false; this._safety = false; this.setState({ phase: 'setup', cornerActive: false, upStatus: '', dlUrl: '' }); },
       line: s.line, clock: s.clock,
-      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle,
+      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle, upStatus: s.upStatus, doneTitle: s.doneTitle,
     };
   }
 }

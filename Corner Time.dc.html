@@ -74,8 +74,22 @@
   <div style="display: flex; flex-direction: column; gap: 16px; border: 1px solid #141412; padding: 32px 40px; max-width: 560px; width: 100%; box-sizing: border-box; background: #FFFFFF;">
     <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">{{ doneTitle }}</span>
     <span style="font-size: 14px; color: #6B6A64; line-height: 1.7;">{{ summary }}</span>
+    <span style="font-size: 12px; letter-spacing: 0.06em; color: #B3261E; min-height: 14px; line-height: 1.6;">{{ upStatus }}</span>
     <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
       <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 28px; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-size: 13px; letter-spacing: 0.1em; text-align: center;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD VIDEO</a>
+    </sc-if>
+    <sc-if value="{{ hasStills }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Record stills — opening · midpoint · completion, overlay burned in</span>
+        <div style="display: flex; gap: 8px;">
+          <sc-for list="{{ stills }}" as="st" hint-placeholder-count="3">
+            <a href="{{ st.url }}" download="{{ st.name }}" style="flex: 1; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #141412;">
+              <img src="{{ st.url }}" alt="Corner time still — {{ st.label }}" style="width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border: 1px solid #141412; display: block;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-align: center;">{{ st.label }} ↓</span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
     </sc-if>
     <sc-if value="{{ ytTitle }}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -98,7 +112,39 @@ class Component extends DCLogic {
   PEN_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
   LEVEL_MIN = { 1: 15, 2: 20, 3: 30 };
 
-  state = { pens: [], sel: 0, level: 1, status: '', phase: 'setup', line: '', clock: '0:00', remaining: '', dlUrl: '', dlName: '', summary: '', ytTitle: '', verLine: '', doneTitle: '' };
+  state = { pens: [], sel: 0, level: 1, status: '', phase: 'setup', line: '', clock: '0:00', remaining: '', dlUrl: '', dlName: '', summary: '', ytTitle: '', verLine: '', doneTitle: '', upStatus: '' };
+
+  EP = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
+
+  _b64(part) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(part); }); }
+
+  // Auto-filing: the finished video goes to the Drive record in ~4 MB chunks
+  // relayed through the AP's Apps Script into a Drive resumable session.
+  async fileToRecord(blob, name) {
+    let key = '';
+    try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (!key) { this.setState({ upStatus: 'AUTO-FILING UNAVAILABLE — no device key in this browser (it is set on the /record page). Download the video and upload it to the Drive folder manually.' }); return; }
+    const mime = blob.type || 'video/webm';
+    this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — 0% · keep this page open…' });
+    try {
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'resolution' }) })).json();
+      if (!init || !init.ok || !init.session) throw new Error((init && init.error) || 'init failed');
+      const CH = 4194304; // 4 MiB — multiple of 256 KiB, per Drive resumable-upload rules
+      for (let off = 0; off < blob.size; off += CH) {
+        const chunk_b64 = await this._b64(blob.slice(off, Math.min(off + CH, blob.size)));
+        let j = null;
+        for (let t = 0; t < 3 && !(j && j.ok); t++) {
+          try { j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: off, total: blob.size, mime, chunk_b64 }) })).json(); } catch (e) { j = null; }
+        }
+        if (!(j && j.ok)) throw new Error('chunk failed');
+        this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
+        if (j.done) { this.setState({ upStatus: 'FILED TO THE DRIVE RECORD ✓ — delivered automatically; the download below is a backup.' }); return; }
+      }
+      throw new Error('incomplete');
+    } catch (e) {
+      this.setState({ upStatus: 'AUTO-FILING FAILED — download the video and upload it to the Drive folder manually.' });
+    }
+  }
 
   vn() { return 'V-' + String(this.state.sel + 1).padStart(3, '0'); }
   minutes() { return this.LEVEL_MIN[this.state.level]; }
@@ -163,6 +209,7 @@ class Component extends DCLogic {
 
   beginRecording() {
     const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
+    this._canvas = c; this._stills = [];
     const p = this.state.pens[this.state.sel];
     const trig = (this.vn() + ' · CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN').toUpperCase();
     const draw = () => {
@@ -192,14 +239,25 @@ class Component extends DCLogic {
     const stream = c.captureStream(30);
     try { const micSrc = this._ac.createMediaStreamSource(this._stream); micSrc.connect(this._dest); } catch (e) {}
     if (this._dest) this._dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 8000000 } : {});
+    // Long take — modest bitrate keeps a 30-min file deliverable and auto-uploadable.
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 1800000 } : { videoBitsPerSecond: 1800000 });
     this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
     this._rec.onstop = () => {
       const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
       const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
-      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + '-' + new Date().toISOString().slice(0, 10) + '.' + ext });
+      const name = 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + (this._how === 'safety' ? '-safety-stop' : '') + '-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: name });
+      this.fileToRecord(blob, name);
     };
     this._rec.start(1000); requestAnimationFrame(draw);
+  }
+
+  snapStill(label) {
+    try {
+      if (!this._canvas) return;
+      const date = new Date().toISOString().slice(0, 10);
+      this._stills.push({ url: this._canvas.toDataURL('image/jpeg', 0.92), name: 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + '-' + label + '-' + date + '.jpg', label: label.toUpperCase() });
+    } catch (e) {}
   }
 
   async start() {
@@ -218,6 +276,7 @@ class Component extends DCLogic {
       this.beep(660, 250);
       this.speak('Face the corner. The silent corrective period begins now.');
       this.setState({ line: 'Silent corrective period — face the corner, stand upright, remain in frame.' });
+      setTimeout(() => this.snapStill('opening'), 4000);
       this._silenceStarted = true;
       this._endAt = Date.now() + this.minutes() * 60000;
     }, 30000);
@@ -226,11 +285,12 @@ class Component extends DCLogic {
       const rem = Math.max(0, this._endAt - Date.now());
       this.setState({ clock: this._fmt(Math.floor((Date.now() - this._start) / 1000)), remaining: this._fmt(Math.ceil(rem / 1000)) });
       const remS = Math.ceil(rem / 1000);
-      if (remS === Math.floor(this.minutes() * 30) && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); }
+      if (remS === Math.floor(this.minutes() * 30) && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); this.snapStill('midpoint'); }
       if (remS === 60 && !this._min1) { this._min1 = true; this.speak('One minute remaining.'); }
       if (rem <= 0 && !this._closing) {
         this._closing = true;
         this.beep(660, 250);
+        this.snapStill('completion');
         this.speak('The corrective period is complete. Turn to the camera and read the closing acknowledgment.');
         this.setState({ line: 'CLOSING ACKNOWLEDGMENT — turn to the camera and read aloud: "' + this.closingText() + '"', remaining: '0:00' });
         this._phaseTimer = setTimeout(() => this.finish('complete'), 30000);
@@ -243,7 +303,8 @@ class Component extends DCLogic {
     this._silenceStarted = false; this._closing = false;
     if (this.state.phase !== 'active') return;
     this._half = false; this._min1 = false;
-    this.setState({ phase: 'done' });
+    this._how = how; // read by the recorder's onstop for the filed name
+    this.setState({ phase: 'done', upStatus: '' });
     if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
     if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
     try { speechSynthesis.cancel(); } catch (e) {}
@@ -253,7 +314,7 @@ class Component extends DCLogic {
       this.speak('Session stopped.');
       this.setState({
         doneTitle: 'Safety Stop',
-        summary: 'The session was stopped for safety. A safety stop is never a violation. Send the partial recording to the AP with a note on what happened — it goes to review, not to the public record.',
+        summary: 'The session was stopped for safety. A safety stop is never a violation. The partial recording files to the Drive record automatically for AP review (status below) — add a note to the AP on what happened.',
         ytTitle: '', verLine: '',
       });
       return;
@@ -262,7 +323,7 @@ class Component extends DCLogic {
     this.speak('Corner time complete. ' + this.minutes() + ' minutes recorded.');
     this.setState({
       doneTitle: 'Corner Time Complete',
-      summary: 'Opening acknowledgment, ' + this.minutes() + ' continuous silent minutes, and closing acknowledgment recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). Upload to YouTube with the exact title, send the link to the AP. §8.5 status: Submitted. It becomes Completed / AP-Verified only when the AP verifies identity, attire, posture, elapsed time, and completion.',
+      summary: 'Opening acknowledgment, ' + this.minutes() + ' continuous silent minutes, and closing acknowledgment recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). It files to the Drive record automatically (status below). Post to YouTube with the exact title, send the link to the AP. §8.5 status: Submitted. It becomes Completed / AP-Verified only when the AP verifies identity, attire, posture, elapsed time, and completion.',
       ytTitle: 'Micheal Ray Berry — Public Corner Time — ' + this.vn() + ' — Level ' + this.state.level + ' — ' + this.minutes() + ' Minutes — ' + date,
       verLine: 'CORNER TIME — ' + this.minutes() + ' MIN — SUBMITTED — AWAITING AP VERIFICATION',
     });
@@ -291,9 +352,11 @@ class Component extends DCLogic {
       status: s.status,
       start: () => this.start(),
       safetyStop: () => this.finish('safety'),
-      reset: () => this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '' }),
+      reset: () => this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '', upStatus: '' }),
       line: s.line, clock: s.clock, remaining: s.remaining,
-      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle, verLine: s.verLine, doneTitle: s.doneTitle,
+      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle, verLine: s.verLine, doneTitle: s.doneTitle, upStatus: s.upStatus,
+      stills: (this._stills || []).map((st) => ({ url: st.url, name: st.name, label: st.label })),
+      hasStills: !!(this._stills && this._stills.length && s.phase === 'done' && s.ytTitle),
     };
   }
 }
