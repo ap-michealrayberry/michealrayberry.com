@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Violation Record — Micheal Ray Berry</title>
+  <meta name="description" content="Permanent public violation and consequence record for the Micheal Ray Berry Public Accountability Project.">
+  <style>
+    :root{font-family:Arial,sans-serif;color:#141412;background:#fafaf7}body{margin:0}main{max-width:980px;margin:auto;padding:32px 20px 64px}h1,h2{text-transform:uppercase;letter-spacing:.04em}a{color:inherit}.bar{border-top:4px solid #141412;border-bottom:1px solid #141412;padding:14px 0;margin-bottom:28px}.card{border:1px solid #141412;padding:20px;margin:0 0 20px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em}.value{font-weight:700}.status{display:inline-block;border:1px solid #141412;padding:4px 8px;text-transform:uppercase;font-size:.8rem}.pending{border-color:#b3261e;color:#b3261e}.notice{padding:14px;border-left:4px solid #b3261e;background:#fff}.muted{opacity:.72}.components{margin:12px 0 0;padding-left:20px}footer{border-top:1px solid #141412;margin-top:40px;padding-top:16px;font-size:.85rem}</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a href="/">Home</a> · <a href="/progress/">Progress</a> · <a href="/daily-records/">Daily records</a> · <a href="/api/public/violations">JSON API</a></div>
+  <h1>Violation Record</h1>
+  <p class="notice">This page reports factual violation and consequence status. A proposed consequence is not approved, owed, or effective until the Accountability Partner records a decision.</p>
+  <section id="summary" class="card">Loading public violation record…</section>
+  <section id="records"></section>
+  <footer>Private deliberations, signatures, financial amounts, medical information, security information, and private corrective-session evidence are excluded.</footer>
+</main>
+<script>
+(async()=>{
+  const summary=document.querySelector('#summary');
+  const records=document.querySelector('#records');
+  try{
+    const response=await fetch('/api/public/violations',{headers:{Accept:'application/json'}});
+    if(!response.ok) throw new Error('unavailable');
+    const data=await response.json();
+    summary.innerHTML=`<h2>Current status</h2><div class="meta"><div><div class="label">Violations</div><div class="value">${data.summary.violation_count}</div></div><div><div class="label">Unresolved</div><div class="value">${data.summary.unresolved_count}</div></div><div><div class="label">Pending AP decision</div><div class="value">${data.summary.pending_ap_decision_count}</div></div></div>`;
+    if(!data.violations.length){records.innerHTML='<div class="card">No violation records.</div>';return;}
+    records.innerHTML=data.violations.map(v=>{
+      const a=v.assignment;
+      const assignment=a?`<h2>Consequence assignment</h2><div class="meta"><div><div class="label">Proposal status</div><div class="status ${a.proposal_status==='proposed'?'pending':''}">${a.proposal_status}</div></div><div><div class="label">Proposed level</div><div class="value">Level ${a.proposed_level}</div></div><div><div class="label">Proposed corner time</div><div class="value">${a.proposed_corner_time_minutes??'—'} minutes</div></div><div><div class="label">Penalty Uniform proposed</div><div class="value">${a.proposed_penalty_uniform?'Yes':'No'}</div></div></div><p>${a.decision_summary??''}</p>${a.components.length?`<ul class="components">${a.components.map(c=>`<li>${c.component_type}: ${c.status}</li>`).join('')}</ul>`:''}`:'<p>No consequence proposal recorded.</p>';
+      return `<article class="card"><h2>Violation — Day ${v.project_day}</h2><div class="meta"><div><div class="label">Date</div><div class="value">${v.project_date}</div></div><div><div class="label">Status</div><div class="status ${v.final_status==='unresolved'?'pending':''}">${v.final_status}</div></div><div><div class="label">Accumulated count</div><div class="value">${v.accumulated_count}</div></div><div><div class="label">Review deadline</div><div class="value">${v.review_deadline?new Date(v.review_deadline).toLocaleString('en-US',{timeZone:'America/New_York'}):'—'}</div></div></div><h2>Requirement</h2><p>${v.failed_requirement}</p><p class="muted">${v.objective_rule}</p>${assignment}</article>`;
+    }).join('');
+  }catch(error){summary.textContent='Violation record is temporarily unavailable.';records.innerHTML='';}
+})();
+</script>
+</body>
+</html>
