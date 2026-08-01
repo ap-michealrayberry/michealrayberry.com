@@ -2,6 +2,8 @@ import { getDatabase } from "@netlify/database";
 import type { Config, Context } from "@netlify/functions";
 
 const REQUIRED_RELATIONS = [
+  ["public_record", "project_days"],
+  ["public_record", "weight_records"],
   ["public_record", "daily_packets"],
   ["public_record", "violations"],
   ["public_record", "consequences"],
@@ -22,6 +24,8 @@ export default async (request: Request, _context: Context) => {
       select table_schema, table_name
       from information_schema.tables
       where (table_schema, table_name) in (
+        ('public_record', 'project_days'),
+        ('public_record', 'weight_records'),
         ('public_record', 'daily_packets'),
         ('public_record', 'violations'),
         ('public_record', 'consequences'),
