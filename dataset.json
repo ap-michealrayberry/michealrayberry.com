@@ -1,0 +1,47 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Micheal Ray Berry public weigh-in record",
+  "description": "Public project-day and weigh-in records from the Micheal Ray Berry Public Accountability Project.",
+  "url": "https://michealrayberry.com/progress/",
+  "identifier": "mrb-public-progress",
+  "inLanguage": "en-US",
+  "isAccessibleForFree": true,
+  "temporalCoverage": "2026-07-20/..",
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Savannah, Georgia, United States"
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Micheal Ray Berry",
+    "url": "https://michealrayberry.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Micheal Ray Berry Public Accountability Project",
+    "url": "https://michealrayberry.com/"
+  },
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "name": "Public progress JSON",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://michealrayberry.com/api/public/progress"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "Public progress CSV",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://michealrayberry.com/api/public/progress.csv"
+    }
+  ],
+  "variableMeasured": [
+    "project_day",
+    "date",
+    "weight_lb",
+    "note"
+  ],
+  "measurementTechnique": "Daily public weigh-in record",
+  "version": "1.0"
+}
