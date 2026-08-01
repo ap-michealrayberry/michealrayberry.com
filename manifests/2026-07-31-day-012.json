@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project": "Micheal Ray Berry Public Accountability Project",
+  "day": 12,
+  "date": "2026-07-31",
+  "record_type": "violation",
+  "weight_lb": 336.0,
+  "status": "unresolved",
+  "canonical_url": "https://michealrayberry.com/daily/2026-07-31-day-012/",
+  "source_of_record": "Netlify Database",
+  "integrity_scope": "manifest",
+  "evidence_files": [],
+  "note": "Daily Compliance Packet was not received by the 22:00 ET deadline. One confirmed violation event is recorded."
+}
