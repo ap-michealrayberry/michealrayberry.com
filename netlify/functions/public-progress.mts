@@ -25,6 +25,14 @@ function buildSummary(records: ProgressRecord[]) {
   };
 }
 
+function matchesEtag(headerValue: string | null, etag: string) {
+  if (!headerValue) return false;
+  return headerValue
+    .split(",")
+    .map((value) => value.trim())
+    .some((value) => value === "*" || value === etag || value === `W/${etag}`);
+}
+
 export default async (request: Request, _context: Context) => {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response(null, { status: 405, headers: { Allow: "GET, HEAD" } });
@@ -36,7 +44,8 @@ export default async (request: Request, _context: Context) => {
       select p.project_day,
              w.project_date::text as date,
              w.weight_lb::text as weight_lb,
-             w.note
+             w.note,
+             greatest(w.created_at, coalesce(w.imported_at, w.created_at)) as record_updated_at
       from public_record.weight_records w
       join public_record.project_days p using (project_date)
       order by w.project_date
@@ -49,35 +58,48 @@ export default async (request: Request, _context: Context) => {
       note: row.note == null ? null : String(row.note),
     }));
 
-    const payload = {
+    const stablePayload = {
+      schema_version: "1.1",
       status: "ok",
       timezone: "America/New_York",
-      generated_at: new Date().toISOString(),
       summary: buildSummary(records),
       records,
     };
+    const stableBody = JSON.stringify(stablePayload);
+    const etag = `"${createHash("sha256").update(stableBody).digest("hex")}"`;
+    const latestUpdatedAt = weights
+      .map((row) => new Date(String(row.record_updated_at)))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .sort((a, b) => b.getTime() - a.getTime())
+      .at(0);
+    const lastModified = latestUpdatedAt?.toUTCString();
 
-    const body = JSON.stringify(payload);
-    const etag = `"${createHash("sha256").update(body).digest("hex")}"`;
+    const responseHeaders: Record<string, string> = {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
+      ETag: etag,
+      Vary: "Accept-Encoding",
+    };
+    if (lastModified) responseHeaders["Last-Modified"] = lastModified;
 
-    if (request.headers.get("if-none-match") === etag) {
-      return new Response(null, {
-        status: 304,
-        headers: { ETag: etag, "Cache-Control": "public, max-age=300" },
-      });
+    if (matchesEtag(request.headers.get("if-none-match"), etag)) {
+      return new Response(null, { status: 304, headers: responseHeaders });
     }
+
+    const payload = {
+      ...stablePayload,
+      generated_at: new Date().toISOString(),
+    };
+    const body = JSON.stringify(payload);
 
     return new Response(request.method === "HEAD" ? null : body, {
       status: 200,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=300",
-        ETag: etag,
-      },
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error("public-progress query failed", error);
     const body = JSON.stringify({
+      schema_version: "1.1",
       status: "unavailable",
       error: "progress_data_unavailable",
     });
