@@ -1,3 +1,31 @@
 [build]
   command = "npm run build"
   publish = "."
+
+[[headers]]
+  for = "/dataset.json"
+  [headers.values]
+    Content-Type = "application/ld+json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+    Link = "</api/public/progress.csv>; rel=alternate; type=text/csv"
+
+[[headers]]
+  for = "/datapackage.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/progress/*"
+  [headers.values]
+    Link = "</dataset.json>; rel=describedby; type=application/ld+json, </api/public/progress.csv>; rel=alternate; type=text/csv"
+
+[[headers]]
+  for = "/api/public/progress"
+  [headers.values]
+    Link = "</dataset.json>; rel=describedby; type=application/ld+json, </api/public/progress.csv>; rel=alternate; type=text/csv"
+
+[[headers]]
+  for = "/api/public/progress.csv"
+  [headers.values]
+    Link = "</dataset.json>; rel=describedby; type=application/ld+json, </api/public/progress>; rel=alternate; type=application/json"
