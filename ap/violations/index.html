@@ -4,73 +4,78 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>AP Violation Decisions</title>
+  <meta name="referrer" content="no-referrer">
+  <title>AP Operations Portal</title>
   <style>
-    :root{font-family:Arial,sans-serif;color:#141412;background:#fafaf7}body{max-width:1100px;margin:0 auto;padding:24px}h1,h2{text-transform:uppercase}section{border:1px solid #141412;padding:18px;margin:18px 0}label{display:block;margin:12px 0 4px;font-weight:700}input,select,textarea,button{font:inherit;padding:10px;width:100%;box-sizing:border-box}textarea{min-height:90px}button{cursor:pointer;background:#141412;color:#fff;border:0;margin-top:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.muted{color:#555}.danger{border:2px solid #b3261e;padding:12px}.ok{color:#1b6e3c}.error{color:#b3261e}code{word-break:break-all}.hidden{display:none}.history{font-size:.9rem;white-space:pre-wrap}
+    :root{font-family:Arial,sans-serif;color:#171715;background:#f5f4ef;--ink:#171715;--paper:#fff;--muted:#696861;--red:#a72a21;--green:#17663b;--amber:#8a5b00;--line:#d8d6cf}*{box-sizing:border-box}body{margin:0;background:#f5f4ef}.top{background:var(--ink);color:white;padding:12px 22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.wrap{max-width:1440px;margin:auto;padding:22px}.mast{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}h1{margin:0;font-size:clamp(28px,5vw,54px);text-transform:uppercase}h2,h3{text-transform:uppercase;letter-spacing:.03em}.muted{color:var(--muted)}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.metric{background:var(--paper);border:1px solid var(--line);padding:16px}.metric b{display:block;font-size:28px}.panel{background:var(--paper);border:1px solid var(--line);margin:16px 0}.panel>header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.panel>.body{padding:16px}.case{border:1px solid var(--line);padding:14px;margin:10px 0;cursor:pointer;background:#fff}.case.active{outline:3px solid var(--ink)}.pill{display:inline-block;padding:4px 8px;border:1px solid currentColor;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:2px}.ok{color:var(--green)}.warn{color:var(--amber)}.danger{color:var(--red)}label{display:block;margin:11px 0 4px;font-weight:700}input,select,textarea,button{font:inherit;padding:10px;width:100%}textarea{min-height:88px}button{background:var(--ink);color:#fff;border:0;cursor:pointer}button.secondary{background:#fff;color:var(--ink);border:1px solid var(--ink)}button.danger{background:var(--red);color:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{width:auto}.split{display:grid;grid-template-columns:minmax(270px,.8fr) minmax(420px,1.7fr);gap:16px}@media(max-width:900px){.split{grid-template-columns:1fr}}pre{white-space:pre-wrap;word-break:break-word;background:#f2f1ec;padding:12px;border:1px solid var(--line);max-height:360px;overflow:auto}.notice{border-left:5px solid var(--amber);padding:12px;background:#fff8e7}.critical{border-left-color:var(--red);background:#fff0ee}.tabs{display:flex;gap:4px;flex-wrap:wrap}.tabs button{width:auto}.tab{display:none}.tab.active{display:block}.preview{border:2px solid var(--ink);padding:14px;background:#fafafa}.auth{max-width:620px;margin:70px auto;background:white;border:1px solid var(--line);padding:24px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{width:auto}.small{font-size:12px}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
   </style>
 </head>
 <body>
-  <h1>Accountability Partner — Violation Decisions</h1>
-  <p class="muted">Private operator console. The AP key is sent only in the request header and is never stored in the repository.</p>
-
-  <section id="auth">
-    <h2>Authenticate</h2>
-    <label for="key">AP key</label>
-    <input id="key" type="password" autocomplete="current-password">
-    <button id="load">Load violation cases</button>
+<div class="top"><span>Private AP Operations Portal</span><span>America/New_York · noindex · no public navigation</span></div>
+<div class="wrap">
+  <section id="auth" class="auth">
+    <h1 style="font-size:34px">Authenticate</h1>
+    <p class="muted">Enter the production AP key. It is sent only to the protected function and retained in this tab's session storage.</p>
+    <label for="key">AP key</label><input id="key" type="password" autocomplete="current-password">
+    <div class="actions" style="margin-top:12px"><button id="load">Open portal</button><button id="clearKey" class="secondary">Clear saved key</button></div>
     <p id="authStatus"></p>
   </section>
 
-  <main id="console" class="hidden">
-    <section>
-      <h2>Current case</h2>
-      <div id="caseSummary"></div>
-    </section>
+  <main id="portal" class="hidden">
+    <div class="mast"><div><h1>AP Operations</h1><p class="muted">Violation review, consequence decisions, holds, appeals, evidence, and audit history.</p></div><div class="toolbar"><button id="refresh" class="secondary">Refresh</button><button id="export" class="secondary">Export portal JSON</button><button id="lock" class="danger">Lock portal</button></div></div>
+    <div id="metrics" class="grid"></div>
+    <div id="alerts"></div>
 
-    <section>
-      <h2>Record append-only AP decision</h2>
-      <p class="danger"><strong>Permanent action:</strong> after confirmation, the decision and activation cannot be edited or deleted. Corrections require a later override record.</p>
-      <form id="decisionForm">
-        <input id="assignmentId" type="hidden">
-        <div class="grid">
-          <div><label for="decisionType">Decision</label><select id="decisionType" required><option value="">Select</option><option value="approve">Approve</option><option value="reduce">Reduce</option><option value="substitute">Substitute</option><option value="return">Return for correction</option><option value="waive">Waive</option></select></div>
-          <div><label for="level">Approved level</label><select id="level"><option value="">None</option><option value="1">Level One</option><option value="2">Level Two</option><option value="3">Level Three</option></select></div>
-          <div><label for="minutes">Corner time</label><select id="minutes"><option value="">None</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select></div>
-        </div>
-        <div class="grid">
-          <div><label><input id="uniform" type="checkbox" style="width:auto"> Penalty Uniform required</label></div>
-          <div><label><input id="privateCorrective" type="checkbox" style="width:auto"> Private corrective session required</label></div>
-        </div>
-        <div class="grid">
-          <div><label for="uniformStart">Penalty Uniform starts</label><input id="uniformStart" type="datetime-local"></div>
-          <div><label for="deadline">Completion deadline</label><input id="deadline" type="datetime-local"></div>
-        </div>
-        <label for="publicReason">Public rationale</label>
-        <textarea id="publicReason" required minlength="10" placeholder="Factual public explanation. Do not include private, medical, financial, security, or contact information."></textarea>
-        <label for="privateRationale">Private rationale</label>
-        <textarea id="privateRationale" placeholder="Optional. Never returned by the public API."></textarea>
-        <label for="governingDocument">Governing document</label>
-        <select id="governingDocument"><option value="amendment-05-escalated-public-consequences">Amendment No. 5 — Escalated Public Consequences</option><option value="amendment-01-automated-violation">Amendment No. 1 — Automated Violation Declaration</option><option value="agreement-execution-2026-07-20">Execution Agreement</option></select>
-        <label><input id="confirmed" type="checkbox" style="width:auto" required> I confirm this is the AP’s final decision and understand it becomes append-only and active immediately where applicable.</label>
-        <button type="submit">Record decision</button>
-        <p id="decisionStatus"></p>
-      </form>
-    </section>
+    <div class="split">
+      <aside class="panel"><header><h2>Cases</h2><select id="caseFilter"><option value="all">All</option><option value="pending">Pending AP decision</option><option value="active">Active</option><option value="unresolved">Unresolved</option></select></header><div class="body"><div id="caseList"></div></div></aside>
+      <section>
+        <div class="panel"><header><h2>Selected case</h2><span id="selectedStatus"></span></header><div class="body" id="caseDetail"><p class="muted">Select a case.</p></div></div>
+        <div class="tabs"><button data-tab="decision">Decision</button><button data-tab="review">Safety / appeal</button><button data-tab="evidence">Evidence</button><button data-tab="history">History</button><button data-tab="governance">Governance</button></div>
 
-    <section>
-      <h2>Decision and review history</h2>
-      <div id="history" class="history"></div>
-    </section>
+        <section id="tab-decision" class="tab active panel"><header><h2>Record AP decision</h2></header><div class="body">
+          <div class="notice critical"><strong>Append-only action.</strong> A recorded decision cannot be edited or deleted. A later override workflow is required for correction.</div>
+          <form id="decisionForm">
+            <input id="assignmentId" type="hidden">
+            <div class="grid"><div><label for="decisionType">Decision</label><select id="decisionType" required><option value="">Select</option><option value="approve">Approve</option><option value="reduce">Reduce</option><option value="substitute">Substitute</option><option value="return">Return for correction</option><option value="waive">Waive</option></select></div><div><label for="level">Approved level</label><select id="level"><option value="">None</option><option value="1">Level One</option><option value="2">Level Two</option><option value="3">Level Three</option></select></div><div><label for="minutes">Corner time</label><select id="minutes"><option value="">None</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select></div></div>
+            <div class="grid"><div><label><input id="uniform" type="checkbox" style="width:auto"> Penalty Uniform required</label></div><div><label><input id="privateCorrective" type="checkbox" style="width:auto"> Private corrective session required</label></div></div>
+            <div class="grid"><div><label for="uniformStart">Penalty Uniform starts</label><input id="uniformStart" type="datetime-local"></div><div><label for="deadline">Completion deadline</label><input id="deadline" type="datetime-local"></div></div>
+            <label for="publicReason">Public rationale</label><textarea id="publicReason" required minlength="10" placeholder="Factual public explanation only."></textarea>
+            <label for="privateRationale">Private rationale</label><textarea id="privateRationale" placeholder="Optional private AP rationale."></textarea>
+            <label for="governingDocument">Governing document</label><select id="governingDocument"></select>
+            <div class="actions" style="margin:12px 0"><button type="button" id="templateApprove" class="secondary">Load Level One template</button><button type="button" id="previewBtn" class="secondary">Preview decision</button></div>
+            <div id="decisionPreview" class="preview hidden"></div>
+            <label><input id="confirmed" type="checkbox" style="width:auto" required> I confirm this is the AP’s final decision and understand the effect is append-only.</label>
+            <button type="submit">Record decision</button><p id="decisionStatus"></p>
+          </form>
+        </div></section>
+
+        <section id="tab-review" class="tab panel"><header><h2>Safety, medical, accessibility, or technical review</h2></header><div class="body"><form id="reviewForm"><input id="reviewAssignmentId" type="hidden"><input id="reviewViolationId" type="hidden"><div class="grid"><div><label for="reviewType">Review type</label><select id="reviewType"><option value="safety-stop">Safety stop</option><option value="medical-review">Medical review</option><option value="accessibility-review">Accessibility review</option><option value="technical-appeal">Technical appeal</option></select></div><div><label for="reviewStatus">Status</label><select id="reviewStatus"><option value="requested">Requested</option><option value="suspended">Suspended</option><option value="approved">Approved</option><option value="correction-required">Correction required</option><option value="safe-substitute">Safe substitute</option><option value="closed">Closed</option></select></div></div><label for="reviewPublic">Public summary</label><textarea id="reviewPublic" placeholder="Optional public-safe summary."></textarea><label for="reviewPrivate">Private basis</label><textarea id="reviewPrivate" placeholder="Private basis. Never returned publicly."></textarea><label><input id="reviewConfirmed" type="checkbox" style="width:auto" required> Confirm this review record.</label><button type="submit">Record review</button><p id="reviewResult"></p></form></div></section>
+        <section id="tab-evidence" class="tab panel"><header><h2>Evidence and components</h2></header><div class="body" id="evidence"></div></section>
+        <section id="tab-history" class="tab panel"><header><h2>Decision and review history</h2></header><div class="body" id="history"></div></section>
+        <section id="tab-governance" class="tab panel"><header><h2>Governing records</h2></header><div class="body" id="governance"></div></section>
+      </section>
+    </div>
   </main>
-
+</div>
 <script>
-const $=id=>document.getElementById(id);let apKey='';
-async function call(method='GET',body){const r=await fetch('/api/ap/violation-decisions',{method,headers:{'Content-Type':'application/json','X-AP-Key':apKey},body:body?JSON.stringify(body):undefined,cache:'no-store'});const data=await r.json().catch(()=>({status:'invalid_response'}));if(!r.ok)throw new Error(data.status||`HTTP ${r.status}`);return data}
-function localIso(id){const value=$(id).value;return value?new Date(value).toISOString():null}
-function render(data){const c=data.cases[0];if(!c){$('caseSummary').textContent='No violation cases found.';return}$('assignmentId').value=c.assignment_id||'';$('caseSummary').innerHTML=`<p><strong>Date:</strong> ${c.project_date}</p><p><strong>Violation:</strong> ${c.failed_requirement}</p><p><strong>Objective rule:</strong> ${c.objective_rule}</p><p><strong>Status:</strong> ${c.final_status}</p><p><strong>Proposal:</strong> Level ${c.proposed_level}, ${c.proposed_corner_time_minutes} minutes, Penalty Uniform ${c.proposed_penalty_uniform?'proposed':'not proposed'}</p><p><strong>Proposal state:</strong> ${c.proposal_status}</p><p><strong>Review deadline:</strong> ${new Date(c.review_deadline).toLocaleString()}</p>${c.activation_id?'<p class="ok"><strong>Decision already recorded.</strong></p>':''}`;$('decisionForm').classList.toggle('hidden',Boolean(c.activation_id));$('history').textContent=JSON.stringify({decisions:data.decisions,reviews:data.reviews},null,2)}
-$('load').onclick=async()=>{apKey=$('key').value;sessionStorage.setItem('apDecisionKey',apKey);$('authStatus').textContent='Loading…';try{const data=await call();$('authStatus').textContent='Authenticated.';$('authStatus').className='ok';$('console').classList.remove('hidden');render(data)}catch(e){$('authStatus').textContent=e.message;$('authStatus').className='error'}};
-$('decisionForm').onsubmit=async e=>{e.preventDefault();if(!confirm('Record this permanent AP decision now?'))return;$('decisionStatus').textContent='Recording…';const payload={assignment_id:$('assignmentId').value,decision_type:$('decisionType').value,approved_level:$('level').value?Number($('level').value):null,corner_time_minutes:$('minutes').value?Number($('minutes').value):null,penalty_uniform_required:$('uniform').checked,penalty_uniform_starts_at:localIso('uniformStart'),completion_deadline:localIso('deadline'),private_corrective_required:$('privateCorrective').checked,public_reason:$('publicReason').value,private_rationale:$('privateRationale').value||null,governing_document_id:$('governingDocument').value,confirmed:$('confirmed').checked};try{const result=await call('POST',payload);$('decisionStatus').textContent=`Recorded: ${result.decision_id} (${result.activation_status})`;$('decisionStatus').className='ok';render(await call())}catch(err){$('decisionStatus').textContent=err.message;$('decisionStatus').className='error'}};
-const saved=sessionStorage.getItem('apDecisionKey');if(saved){$('key').value=saved}
+const $=id=>document.getElementById(id);let apKey='',data=null,selected=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function call(method='GET',body){const r=await fetch('/api/ap/violation-decisions',{method,headers:{'Content-Type':'application/json','X-AP-Key':apKey},body:body?JSON.stringify(body):undefined,cache:'no-store'});const out=await r.json().catch(()=>({status:'invalid_response'}));if(!r.ok)throw new Error(out.status||`HTTP ${r.status}`);return out}
+function fmt(v){return v?new Date(v).toLocaleString():'—'}function localIso(id){const v=$(id).value;return v?new Date(v).toISOString():null}
+function pill(text,cls=''){return `<span class="pill ${cls}">${esc(text)}</span>`}
+function render(){const s=data.summary;$('metrics').innerHTML=[['Violations',s.violation_count],['Unresolved',s.unresolved_count],['Pending decisions',s.pending_decision_count],['Active assignments',s.active_assignment_count],['Open reviews',s.open_review_count]].map(([a,b])=>`<div class="metric"><span class="muted">${a}</span><b>${b}</b></div>`).join('');$('alerts').innerHTML=s.pending_decision_count?`<div class="notice critical"><strong>${s.pending_decision_count} AP decision pending.</strong> Deployment alone does not activate a consequence.</div>`:'<div class="notice"><strong>No pending AP decisions.</strong></div>';renderCases();renderGovernance();}
+function filteredCases(){const f=$('caseFilter').value;return data.cases.filter(c=>f==='all'||(f==='pending'&&c.assignment_id&&!c.activation_id)||(f==='active'&&c.activation_status==='active')||(f==='unresolved'&&c.final_status==='unresolved'))}
+function renderCases(){const cases=filteredCases();$('caseList').innerHTML=cases.map(c=>`<div class="case ${selected?.violation_id===c.violation_id?'active':''}" data-id="${c.violation_id}"><strong>${esc(c.project_date)}</strong><br>${esc(c.failed_requirement)}<div>${pill(c.final_status,c.final_status==='unresolved'?'danger':'ok')} ${pill(c.activation_status||'pending_ap_decision',c.activation_status?'ok':'warn')}</div></div>`).join('')||'<p class="muted">No cases in this filter.</p>';document.querySelectorAll('.case').forEach(el=>el.onclick=()=>selectCase(el.dataset.id));}
+function selectCase(id){selected=data.cases.find(c=>c.violation_id===id);renderCases();$('assignmentId').value=selected.assignment_id||'';$('reviewAssignmentId').value=selected.assignment_id||'';$('reviewViolationId').value=selected.violation_id||'';$('selectedStatus').innerHTML=pill(selected.activation_status||'pending_ap_decision',selected.activation_status?'ok':'warn');$('caseDetail').innerHTML=`<div class="grid"><div><strong>Project date</strong><p>${esc(selected.project_date)}</p></div><div><strong>Declared</strong><p>${fmt(selected.declared_at)}</p></div><div><strong>Review deadline</strong><p>${fmt(selected.review_deadline)}</p></div><div><strong>Count / level</strong><p>${selected.accumulated_count} / ${selected.consequence_level}</p></div></div><h3>Failed requirement</h3><p>${esc(selected.failed_requirement)}</p><h3>Objective rule</h3><p>${esc(selected.objective_rule)}</p><h3>Proposal</h3><p>Level ${selected.proposed_level||'—'} · ${selected.proposed_corner_time_minutes||'—'} minutes · Penalty Uniform ${selected.proposed_penalty_uniform?'proposed':'not proposed'}</p>${selected.activation_id?`<h3>Recorded AP effect</h3><p>${esc(selected.public_reason)}</p>`:''}`;$('decisionForm').classList.toggle('hidden',Boolean(selected.activation_id));renderEvidence();renderHistory();}
+function renderEvidence(){if(!selected)return;$('evidence').innerHTML=`<h3>Violation evidence</h3>${(selected.evidence||[]).map(e=>`<div class="case"><strong>${esc(e.type)}</strong><p>${esc(e.description)}</p><span class="small muted">${fmt(e.captured_at)}</span></div>`).join('')||'<p class="muted">No evidence rows.</p>'}<h3>Consequence components</h3>${(selected.components||[]).map(c=>`<div class="case"><strong>${esc(c.component_type)}</strong> ${pill(c.status)}<p>Due: ${fmt(c.due_at)} · Duration: ${c.duration_minutes??'—'} minutes · Public: ${c.public_component?'yes':'no'}</p></div>`).join('')||'<p class="muted">No approved components yet.</p>'}`}
+function renderHistory(){if(!selected)return;const ds=data.decisions.filter(d=>d.assignment_id===selected.assignment_id),rs=data.reviews.filter(r=>r.assignment_id===selected.assignment_id||r.violation_id===selected.violation_id);$('history').innerHTML=`<h3>Decisions</h3>${ds.map(d=>`<div class="case"><strong>${esc(d.decision_type)}</strong> ${pill(d.resulting_status)}<p>${esc(d.public_reason)}</p><details><summary>Private rationale</summary><pre>${esc(d.private_rationale||'None')}</pre></details><span class="small muted">${fmt(d.decision_at)}</span></div>`).join('')||'<p class="muted">None.</p>'}<h3>Reviews</h3>${rs.map(r=>`<div class="case"><strong>${esc(r.review_type)}</strong> ${pill(r.status)}<p>${esc(r.public_summary||'No public summary')}</p><details><summary>Private basis</summary><pre>${esc(r.private_basis||'None')}</pre></details></div>`).join('')||'<p class="muted">None.</p>'}`}
+function renderGovernance(){$('governingDocument').innerHTML=data.documents.filter(d=>d.execution_status==='confirmed_signed').map(d=>`<option value="${esc(d.document_id)}">${esc(d.display_title)}</option>`).join('');$('governance').innerHTML='<table class="table"><tr><th>Document</th><th>Status</th><th>Effective</th></tr>'+data.documents.map(d=>`<tr><td>${esc(d.display_title)}</td><td>${esc(d.execution_status)}</td><td>${esc(d.effective_date||'—')}</td></tr>`).join('')+'</table><p class="muted small">Signed bytes, signatures, Appendix A amounts, and private source locators are not exposed here.</p>'}
+async function load(){data=await call();render();if(!selected&&data.cases[0])selectCase(data.cases[0].violation_id)}
+$('load').onclick=async()=>{apKey=$('key').value;sessionStorage.setItem('apDecisionKey',apKey);$('authStatus').textContent='Loading…';try{await load();$('auth').classList.add('hidden');$('portal').classList.remove('hidden')}catch(e){$('authStatus').textContent=e.message;$('authStatus').className='danger'}};$('refresh').onclick=load;$('caseFilter').onchange=renderCases;$('clearKey').onclick=()=>{sessionStorage.removeItem('apDecisionKey');$('key').value=''};$('lock').onclick=()=>{sessionStorage.removeItem('apDecisionKey');location.reload()};$('export').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`ap-portal-${new Date().toISOString()}.json`;a.click();URL.revokeObjectURL(a.href)};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));$('tab-'+b.dataset.tab).classList.add('active')});
+$('templateApprove').onclick=()=>{$('decisionType').value='approve';$('level').value='1';$('minutes').value='15';$('uniform').checked=true;$('publicReason').value='The confirmed July 31 violation is assigned a Level One consequence under the active governing terms.'};$('previewBtn').onclick=()=>{$('decisionPreview').classList.remove('hidden');$('decisionPreview').innerHTML=`<h3>Decision preview</h3><p><strong>${esc($('decisionType').value||'No decision selected')}</strong> · Level ${esc($('level').value||'none')} · ${esc($('minutes').value||'no')} minutes</p><p>${esc($('publicReason').value||'No public rationale entered.')}</p><p>Deadline: ${esc($('deadline').value||'none')} · Uniform start: ${esc($('uniformStart').value||'none')}</p>`};
+$('decisionForm').onsubmit=async e=>{e.preventDefault();if(!selected||!confirm('Record this permanent AP decision now?'))return;$('decisionStatus').textContent='Recording…';const payload={action:'decision',assignment_id:$('assignmentId').value,decision_type:$('decisionType').value,approved_level:$('level').value?Number($('level').value):null,corner_time_minutes:$('minutes').value?Number($('minutes').value):null,penalty_uniform_required:$('uniform').checked,penalty_uniform_starts_at:localIso('uniformStart'),completion_deadline:localIso('deadline'),private_corrective_required:$('privateCorrective').checked,public_reason:$('publicReason').value,private_rationale:$('privateRationale').value||null,governing_document_id:$('governingDocument').value,confirmed:$('confirmed').checked};try{const r=await call('POST',payload);$('decisionStatus').textContent=`Recorded ${r.decision_id} (${r.activation_status})`;$('decisionStatus').className='ok';await load()}catch(err){$('decisionStatus').textContent=err.message;$('decisionStatus').className='danger'}};
+$('reviewForm').onsubmit=async e=>{e.preventDefault();if(!selected||!confirm('Record this review entry?'))return;const payload={action:'review',assignment_id:$('reviewAssignmentId').value||null,violation_id:$('reviewViolationId').value||null,review_type:$('reviewType').value,review_status:$('reviewStatus').value,public_summary:$('reviewPublic').value||null,private_basis:$('reviewPrivate').value||null,confirmed:$('reviewConfirmed').checked};try{const r=await call('POST',payload);$('reviewResult').textContent=`Recorded ${r.review_id}`;$('reviewResult').className='ok';await load()}catch(err){$('reviewResult').textContent=err.message;$('reviewResult').className='danger'}};
+const saved=sessionStorage.getItem('apDecisionKey');if(saved)$('key').value=saved;
 </script>
-</body>
-</html>
+</body></html>
