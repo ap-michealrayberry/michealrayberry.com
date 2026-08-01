@@ -1,0 +1,15 @@
+{
+  "name": "michealrayberry-com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo \"Static production site unchanged; Netlify validates database migrations during deploy.\""
+  },
+  "dependencies": {
+    "@netlify/database": "latest"
+  },
+  "devDependencies": {
+    "netlify-cli": "latest"
+  }
+}
