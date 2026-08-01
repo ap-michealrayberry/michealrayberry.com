@@ -8,7 +8,8 @@
     "verify:public-api": "node scripts/verify-public-api.mjs",
     "verify:public-site": "node scripts/verify-public-site.mjs",
     "verify:daily-records": "node scripts/verify-daily-records.mjs",
-    "verify:production": "npm run verify:public-api && npm run verify:public-site && npm run verify:daily-records"
+    "verify:daily-media": "node scripts/verify-daily-media.mjs",
+    "verify:production": "npm run verify:public-api && npm run verify:public-site && npm run verify:daily-records && npm run verify:daily-media"
   },
   "dependencies": {
     "@netlify/database": "latest"
