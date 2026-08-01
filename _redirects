@@ -5,8 +5,12 @@ https://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
 http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
 
 /home        /            301
+/dashboard   /progress/   301
+/data        /progress/   301
+/data/       /progress/   301
+/weigh-ins   /progress/   301
+/weigh-ins/  /progress/   301
 /record      /index.html  200
-/dashboard   /index.html  200
 /milestones  /index.html  200
 /about       /index.html  200
 /agreement   /index.html  200
