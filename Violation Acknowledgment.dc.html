@@ -22,7 +22,7 @@
   <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 680px;">
     <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public record version — voluntary practice, per violation</span>
     <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Violation Acknowledgment</h1>
-    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Stand at attention facing the camera while the voice states the violation from the public log — factual, severe, never degrading. The exposure comes from the record itself.</p>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">In the penalty uniform — pink unitard, plain black shoes — one continuous take, front-facing, neutral background. Spoken: you read the statement aloud, 20–30 seconds. AI voice: you stand at attention while the voice states the violation. Date and V-number are burned into the frame.</p>
   </div>
 
   <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
@@ -40,12 +40,19 @@
         <div style="border: 1px solid #D8D6CF; background: #F1F0EA; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #3A3935;">The public Violation Log is clean. There is nothing to acknowledge — keep it that way. (The AP logs the violation first; this tool reads it from there.)</div>
       </sc-if>
     </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Mode</span>
+      <div style="display: flex; gap: 8px;">
+        <button onClick="{{ modeSpokenPick }}" style="flex: 1; padding: 11px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.4; cursor: pointer; border: 1px solid {{ spokenBorder }}; background: {{ spokenBg }}; color: #141412;">Spoken — you read the statement</button>
+        <button onClick="{{ modeVoicePick }}" style="flex: 1; padding: 11px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.4; cursor: pointer; border: 1px solid {{ voiceBorder }}; background: {{ voiceBg }}; color: #141412;">AI voice — you stand at attention</button>
+      </div>
+    </div>
     <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer;">
       <input type="checkbox" checked="{{ camera }}" onChange="{{ toggleCamera }}" style="accent-color: #B3261E; width: 16px; height: 16px;">
       <span>Record video (for YouTube)</span>
     </label>
     <div style="display: flex; flex-direction: column; gap: 6px;">
-      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Narration — generated from the log; not editable</span>
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Script — generated from the log; not editable</span>
       <div style="font-size: 12.5px; line-height: 1.6; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935; white-space: pre-wrap; max-height: 220px; overflow: auto;">{{ scriptPreview }}</div>
     </div>
     <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
@@ -61,7 +68,7 @@
     <div style="font-size: 16px; color: #3A3935; line-height: 1.6; min-height: 52px; max-width: 620px;">{{ line }}</div>
     <div style="font-size: 56px; font-weight: 700; line-height: 1; color: #B9B8B2;">{{ clock }}</div>
     <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; display: {{ camDisplay }}; transform: scaleX(-1);"></video>
-    <button onClick="{{ stop }}" style="padding: 12px 36px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">END EARLY</button>
+    <button onClick="{{ stop }}" style="padding: 12px 36px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">{{ stopLabel }}</button>
   </div>
   </sc-if>
 
@@ -87,7 +94,15 @@ class Component extends DCLogic {
   DAY1 = '2026-07-20';
   PEN_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
 
-  state = { pens: [], sel: 0, camera: true, status: '', phase: 'setup', line: '', clock: '0:00', dlUrl: '', dlName: '', summary: '', ytTitle: '' };
+  state = { pens: [], sel: 0, camera: true, status: '', phase: 'setup', line: '', clock: '0:00', dlUrl: '', dlName: '', summary: '', ytTitle: '', mode: 'spoken' };
+
+  vn() { return 'V-' + String(this.state.sel + 1).padStart(3, '0'); }
+
+  spokenScript() {
+    const p = this.state.pens[this.state.sel];
+    if (!p) return null;
+    return 'I am Micheal Ray Berry. On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, I failed to meet the following requirement by the 10:00 PM deadline: ' + p.what + '. Violation ' + this.vn() + ' was automatically declared. I am wearing the designated violation uniform and publicly acknowledging that failure. The assigned consequences must be completed and verified before this violation is resolved. This violation and its final resolution will remain in the permanent public record.';
+  }
 
   parseCSV(text) {
     const rows = []; let row = [], field = '', inQ = false;
@@ -120,10 +135,11 @@ class Component extends DCLogic {
     const unresolved = (p.status || '').toLowerCase().indexOf('unresolved') !== -1;
     return [
       'Micheal Ray Berry. Stand at attention. This is a public violation acknowledgment.',
+      'You are required to be in the penalty uniform. Pink unitard. Plain black shoes. No name tag. Show it to the camera now.',
       'On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, the following requirement was not met: ' + p.what + '.',
       'This was a Violation Event. It has been entered permanently into the public record.',
       unresolved
-        ? 'The applicable consequence is pending. The entry remains unresolved, and it stays unresolved until the consequence is completed.'
+        ? 'The applicable consequence is pending. The entry remains unresolved, and it stays unresolved until the consequence is completed. The penalty uniform is worn for every daily requirement until this entry is satisfied.'
         : 'The applicable consequence has been imposed and is administered privately, as the agreement requires.',
       'You created this system because private promises allowed you to avoid accountability.',
       'You do not get to hide this failure, rename it, delete it, or restart the project.',
@@ -189,7 +205,7 @@ class Component extends DCLogic {
   beginRecording() {
     const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
     const p = this.state.pens[this.state.sel];
-    const trig = ('VIOLATION · ' + p.what + ' · DAY ' + this.dayNum(p.date)).toUpperCase().slice(0, 52);
+    const trig = (this.vn() + ' · ' + p.what + ' · DAY ' + this.dayNum(p.date)).toUpperCase().slice(0, 52);
     const draw = () => {
       if (this.state.phase !== 'active') return;
       const v = this._camEl;
@@ -223,7 +239,8 @@ class Component extends DCLogic {
   }
 
   async start() {
-    const lines = this.script();
+    const spoken = this.state.mode === 'spoken';
+    const lines = spoken ? (this.spokenScript() ? [] : null) : this.script();
     if (!lines) { this.setState({ status: 'Select a violation from the log first.' }); return; }
     if (!this._rehearse && this.state.camera) { const ok = await this.startCamera(); if (!ok) return; }
     this.setState({ phase: 'active', line: '', clock: '0:00', dlUrl: '' });
@@ -242,7 +259,19 @@ class Component extends DCLogic {
       i++;
       this._stepTimer = setTimeout(step, wait * 1000);
     };
-    setTimeout(step, 2000);
+    if (spoken) {
+      this.setState({ line: 'Take position. Center yourself in the frame. At the tone, read the statement aloud — one continuous take, 20 to 30 seconds.' });
+      this._stepTimer = setTimeout(() => {
+        if (this.state.phase !== 'active') return;
+        this.beep(660, 250);
+        this.setState({ line: this.spokenScript() });
+        this._stepTimer = setTimeout(() => this.finish(false), 45000);
+      }, 8000);
+      return;
+    }
+    this.setState({ line: 'Take position. Center yourself in the frame. The acknowledgment begins in ten seconds.' });
+    this.speak('Take position. Center yourself in the frame. The acknowledgment begins in ten seconds.');
+    setTimeout(step, 10000);
   }
 
   finish(aborted) {
@@ -256,7 +285,9 @@ class Component extends DCLogic {
     const p = this.state.pens[this.state.sel];
     this.setState({
       summary: (aborted ? 'Ended early — re-record for a complete acknowledgment. ' : '') + 'Violation of ' + p.date + ' acknowledged on camera. Upload, then give the AP the link if he wants it noted with the entry.',
-      ytTitle: 'Micheal Ray Berry — Violation Acknowledgment — ' + p.what + ' — Day ' + this.dayNum(p.date) + ' — ' + p.date,
+      ytTitle: this.state.mode === 'spoken'
+        ? 'Micheal Ray Berry — Public Violation Acknowledgment — ' + this.vn() + ' — ' + p.date
+        : 'Micheal Ray Berry — Violation Acknowledgment — ' + p.what + ' — Day ' + this.dayNum(p.date) + ' — ' + p.date,
     });
   }
 
@@ -275,11 +306,20 @@ class Component extends DCLogic {
       camera: s.camera, toggleCamera: () => this.setState({ camera: !s.camera, status: '' }),
       camDisplay: s.camera ? 'block' : 'none',
       camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
-      scriptPreview: lines ? lines.join('\n') : 'No violation selected — the log is clean.',
+      scriptPreview: s.mode === 'spoken'
+        ? (this.spokenScript() || 'No violation selected — the log is clean.')
+        : (lines ? lines.join('\n') : 'No violation selected — the log is clean.'),
+      modeSpokenPick: () => this.setState({ mode: 'spoken' }),
+      modeVoicePick: () => this.setState({ mode: 'voice' }),
+      spokenBorder: s.mode === 'spoken' ? '#B3261E' : '#D8D6CF',
+      spokenBg: s.mode === 'spoken' ? '#FBEAE8' : '#FFFFFF',
+      voiceBorder: s.mode === 'voice' ? '#B3261E' : '#D8D6CF',
+      voiceBg: s.mode === 'voice' ? '#FBEAE8' : '#FFFFFF',
+      stopLabel: s.mode === 'spoken' ? 'STATEMENT COMPLETE — STOP' : 'END EARLY',
       status: s.status,
       start: () => { this._rehearse = false; this.start(); },
       rehearse: () => { this._rehearse = true; this.start(); },
-      stop: () => this.finish(true),
+      stop: () => this.finish(this.state.mode !== 'spoken'),
       reset: () => this.setState({ phase: 'setup' }),
       line: s.line, clock: s.clock,
       dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle,
