@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Corner Time — Recording Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Mono', monospace; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 64px; gap: 28px; box-sizing: border-box;">
+  <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 680px;">
+    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">§8.2 · public consequence · published in full · max one session per calendar day</span>
+    <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corner Time</h1>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Project uniform — solid black unitard, plain black shoes (the pink Penalty Uniform instead if the AP has assigned it under Amendment No. 5). Standing upright, facing the designated corner, full body and corner continuously in frame. Structure per §8.2: opening acknowledgment, silent corrective period, closing acknowledgment. One continuous take — pausing, leaving frame, breaking posture, refusing the acknowledgments, or ending early makes the session incomplete.</p>
+  </div>
+
+  <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+  <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 560px; border: 1px solid #141412; padding: 26px 28px; box-sizing: border-box; background: #FFFFFF;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Violation — from the public log</span>
+      <sc-if value="{{ hasPens }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ penList }}" as="p" hint-placeholder-count="1">
+            <button onClick="{{ p.pick }}" style="text-align: left; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid {{ p.border }}; background: {{ p.bg }}; color: #141412;">{{ p.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noPens }}" hint-placeholder-val="{{ true }}">
+        <div style="border: 1px solid #D8D6CF; background: #F1F0EA; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #3A3935;">The public Violation Log is clean. Corner time is only performed against a logged violation with an AP-approved assignment.</div>
+      </sc-if>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Assigned level — as approved by the AP</span>
+      <div style="display: flex; gap: 8px;">
+        <sc-for list="{{ levelList }}" as="l" hint-placeholder-count="3">
+          <button onClick="{{ l.pick }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.5; cursor: pointer; border: 1px solid {{ l.border }}; background: {{ l.bg }}; color: #141412;">{{ l.label }}</button>
+        </sc-for>
+      </div>
+      <span style="font-size: 11.5px; color: #6B6A64; line-height: 1.5;">Set this to the level the AP approved for the selected violation. The duration is fixed by level and cannot be shortened or extended.</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Position check — before you begin</span>
+      <div style="font-size: 12.5px; line-height: 1.7; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935;">Phone propped, portrait orientation · full body visible head to shoes · the corner itself in frame · uniform on · nothing else in the frame. At the tone, read the opening acknowledgment from the screen, then face the corner for the silent period; at the closing tone, turn and read the closing acknowledgment. You may stop for safety at any time — a safety stop is never a violation; it is reviewed by the AP.</div>
+    </div>
+    <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
+    <button onClick="{{ start }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">Begin Corner Time — {{ minutesLabel }}</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; max-width: 680px; text-align: center;">
+    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">Corner time in progress · {{ vnLabel }} · Level {{ levelLabel }}</span>
+    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">Face the corner · stand still</div>
+    <div style="font-size: 16px; color: #3A3935; line-height: 1.6; min-height: 26px;">{{ line }}</div>
+    <div style="font-size: 72px; font-weight: 700; line-height: 1; color: #141412;">{{ remaining }}</div>
+    <span style="font-size: 12px; color: #6B6A64; letter-spacing: 0.15em;">REMAINING · ELAPSED {{ clock }}</span>
+    <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; transform: scaleX(-1);"></video>
+    <button onClick="{{ safetyStop }}" style="padding: 14px 36px; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #B3261E; border: 2px solid #B3261E; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">Safety Stop</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+  <div style="display: flex; flex-direction: column; gap: 16px; border: 1px solid #141412; padding: 32px 40px; max-width: 560px; width: 100%; box-sizing: border-box; background: #FFFFFF;">
+    <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase;">{{ doneTitle }}</span>
+    <span style="font-size: 14px; color: #6B6A64; line-height: 1.7;">{{ summary }}</span>
+    <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 28px; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-size: 13px; letter-spacing: 0.1em; text-align: center;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD VIDEO</a>
+    </sc-if>
+    <sc-if value="{{ ytTitle }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">YouTube title — copy exactly</span>
+        <input type="text" value="{{ ytTitle }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Verification line — for the AP, goes in the log on approval</span>
+        <input type="text" value="{{ verLine }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+      </div>
+    </sc-if>
+    <button onClick="{{ reset }}" style="padding: 12px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; background: none; color: #141412; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="border-color: #141412;">NEW SESSION</button>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  DAY1 = '2026-07-20';
+  PEN_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&gid=1365599185';
+  LEVEL_MIN = { 1: 15, 2: 20, 3: 30 };
+
+  state = { pens: [], sel: 0, level: 1, status: '', phase: 'setup', line: '', clock: '0:00', remaining: '', dlUrl: '', dlName: '', summary: '', ytTitle: '', verLine: '', doneTitle: '' };
+
+  vn() { return 'V-' + String(this.state.sel + 1).padStart(3, '0'); }
+  minutes() { return this.LEVEL_MIN[this.state.level]; }
+
+  openingText() {
+    const p = this.state.pens[this.state.sel];
+    return 'I am Micheal Ray Berry. This Corner Time is assigned under Section 8.2 for violation ' + this.vn() + (p ? ', ' + p.what : '') + '. Level ' + this.state.level + '. ' + this.minutes() + ' continuous minutes. I will now face the corner. The session is recorded and published in full.';
+  }
+  closingText() {
+    return 'This Corner Time session is complete. ' + this.minutes() + ' continuous minutes, recorded without pause. It will be submitted for verification. Violation ' + this.vn() + ' remains unresolved until the Accountability Partner verifies every assigned requirement.';
+  }
+
+  parseCSV(text) {
+    const rows = []; let row = [], field = '', inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) { if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; } else field += c; }
+      else if (c === '"') inQ = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+    if (field || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  async componentDidMount() {
+    try {
+      const pens = this.parseCSV(await (await fetch(this.PEN_CSV)).text()).slice(1)
+        .map((r) => ({ date: (r[0] || '').trim(), what: (r[1] || '').trim(), status: (r[2] || '').trim() }))
+        .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.what);
+      this.setState({ pens, sel: Math.max(0, pens.length - 1) });
+    } catch (e) { this.setState({ status: 'Could not load the violation log: ' + e }); }
+  }
+
+  dayNum(d) { return Math.max(1, Math.round((new Date(d + 'T12:00:00') - new Date(this.DAY1 + 'T12:00:00')) / 864e5) + 1); }
+
+  speak(text) {
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.92; u.pitch = 0.85; speechSynthesis.speak(u); } catch (e) {}
+  }
+
+  ensureAudio() {
+    try {
+      if (!this._ac) this._ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (!this._dest) this._dest = this._ac.createMediaStreamDestination();
+    } catch (e) {}
+  }
+
+  beep(freq, ms) {
+    try { this.ensureAudio(); const o = this._ac.createOscillator(), g = this._ac.createGain(); o.frequency.value = freq; o.connect(g); g.connect(this._ac.destination); if (this._dest) g.connect(this._dest); g.gain.setValueAtTime(0.12, this._ac.currentTime); o.start(); o.stop(this._ac.currentTime + ms / 1000); } catch (e) {}
+  }
+
+  _fmt(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  async startCamera() {
+    try {
+      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: true });
+      if (this._camEl) { this._camEl.srcObject = this._stream; this._camEl.play(); }
+      return true;
+    } catch (e) { this.setState({ status: 'Camera unavailable — corner time must be recorded.' }); return false; }
+  }
+
+  beginRecording() {
+    const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
+    const p = this.state.pens[this.state.sel];
+    const trig = (this.vn() + ' · CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN').toUpperCase();
+    const draw = () => {
+      if (this.state.phase !== 'active') return;
+      const v = this._camEl;
+      if (v && v.videoWidth) { const s = Math.max(W / v.videoWidth, H / v.videoHeight); ctx.save(); ctx.translate(W, 0); ctx.scale(-1, 1); ctx.drawImage(v, (W - v.videoWidth * s) / 2, (H - v.videoHeight * s) / 2, v.videoWidth * s, v.videoHeight * s); ctx.restore(); }
+      else { ctx.fillStyle = '#F1F0EA'; ctx.fillRect(0, 0, W, H); }
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, 0, W, 118);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '700 30px "IBM Plex Sans Condensed","Arial Narrow",sans-serif'; ctx.fillText('MICHEAL RAY BERRY', 24, 34);
+      ctx.fillStyle = '#FF6B61'; ctx.font = '600 17px "IBM Plex Mono",monospace'; ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT · PUBLIC CONSEQUENCE', 24, 64);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '600 16px "IBM Plex Mono",monospace'; ctx.fillText(trig, 24, 92);
+      const el = this._fmt(Math.floor((Date.now() - this._start) / 1000));
+      ctx.font = '700 26px "IBM Plex Mono",monospace'; ctx.fillText(el, W - ctx.measureText(el).width - 24, 48);
+      const rem = Math.max(0, this._endAt - Date.now());
+      const remS = this._fmt(Math.ceil(rem / 1000));
+      ctx.fillStyle = '#FF6B61'; ctx.font = '700 22px "IBM Plex Mono",monospace';
+      ctx.fillText('REMAINING ' + remS, W - ctx.measureText('REMAINING ' + remS).width - 24, 92);
+      ctx.fillStyle = 'rgba(15,15,13,.82)'; ctx.fillRect(0, H - 60, W, 60);
+      ctx.fillStyle = '#B9B8B2'; ctx.font = '400 20px "IBM Plex Mono",monospace';
+      ctx.fillText(new Date().toISOString().slice(0, 10) + ' · MICHEALRAYBERRY.COM', 24, H - 30);
+      requestAnimationFrame(draw);
+    };
+    this._chunks = []; let mime = '';
+    ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].some((m) => (MediaRecorder.isTypeSupported(m) ? (mime = m, true) : false));
+    this.ensureAudio();
+    const stream = c.captureStream(30);
+    try { const micSrc = this._ac.createMediaStreamSource(this._stream); micSrc.connect(this._dest); } catch (e) {}
+    if (this._dest) this._dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 8000000 } : {});
+    this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
+    this._rec.onstop = () => {
+      const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
+      const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + '-' + new Date().toISOString().slice(0, 10) + '.' + ext });
+    };
+    this._rec.start(1000); requestAnimationFrame(draw);
+  }
+
+  async start() {
+    if (!this.state.pens.length) { this.setState({ status: 'No violation in the log — nothing to perform.' }); return; }
+    const ok = await this.startCamera(); if (!ok) return;
+    this.setState({ phase: 'active', line: '', clock: '0:00', dlUrl: '', remaining: this._fmt(this.minutes() * 60) });
+    this.beginRecordingPending = true;
+    this._start = Date.now();
+    this._endAt = this._start + this.minutes() * 60000 + 60000;
+    this._silenceStarted = false; this._closing = false;
+    this.beginRecording();
+    this.beep(880, 160);
+    this.setState({ line: 'OPENING ACKNOWLEDGMENT — read aloud, facing the camera: "' + this.openingText() + '"' });
+    this._phaseTimer = setTimeout(() => {
+      if (this.state.phase !== 'active') return;
+      this.beep(660, 250);
+      this.speak('Face the corner. The silent corrective period begins now.');
+      this.setState({ line: 'Silent corrective period — face the corner, stand upright, remain in frame.' });
+      this._silenceStarted = true;
+      this._endAt = Date.now() + this.minutes() * 60000;
+    }, 30000);
+    this._clockTimer = setInterval(() => {
+      if (!this._silenceStarted) { this.setState({ clock: this._fmt(Math.floor((Date.now() - this._start) / 1000)) }); return; }
+      const rem = Math.max(0, this._endAt - Date.now());
+      this.setState({ clock: this._fmt(Math.floor((Date.now() - this._start) / 1000)), remaining: this._fmt(Math.ceil(rem / 1000)) });
+      const remS = Math.ceil(rem / 1000);
+      if (remS === Math.floor(this.minutes() * 30) && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); }
+      if (remS === 60 && !this._min1) { this._min1 = true; this.speak('One minute remaining.'); }
+      if (rem <= 0 && !this._closing) {
+        this._closing = true;
+        this.beep(660, 250);
+        this.speak('The corrective period is complete. Turn to the camera and read the closing acknowledgment.');
+        this.setState({ line: 'CLOSING ACKNOWLEDGMENT — turn to the camera and read aloud: "' + this.closingText() + '"', remaining: '0:00' });
+        this._phaseTimer = setTimeout(() => this.finish('complete'), 30000);
+      }
+    }, 500);
+  }
+
+  finish(how) {
+    clearInterval(this._clockTimer); clearTimeout(this._phaseTimer);
+    this._silenceStarted = false; this._closing = false;
+    if (this.state.phase !== 'active') return;
+    this._half = false; this._min1 = false;
+    this.setState({ phase: 'done' });
+    if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
+    if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
+    try { speechSynthesis.cancel(); } catch (e) {}
+    const p = this.state.pens[this.state.sel];
+    const date = new Date().toISOString().slice(0, 10);
+    if (how === 'safety') {
+      this.speak('Session stopped.');
+      this.setState({
+        doneTitle: 'Safety Stop',
+        summary: 'The session was stopped for safety. A safety stop is never a violation. Send the partial recording to the AP with a note on what happened — it goes to review, not to the public record.',
+        ytTitle: '', verLine: '',
+      });
+      return;
+    }
+    this.beep(660, 200); setTimeout(() => this.beep(880, 300), 300);
+    this.speak('Corner time complete. ' + this.minutes() + ' minutes recorded.');
+    this.setState({
+      doneTitle: 'Corner Time Complete',
+      summary: 'Opening acknowledgment, ' + this.minutes() + ' continuous silent minutes, and closing acknowledgment recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). Upload to YouTube with the exact title, send the link to the AP. §8.5 status: Submitted. It becomes Completed / AP-Verified only when the AP verifies identity, attire, posture, elapsed time, and completion.',
+      ytTitle: 'Micheal Ray Berry — Public Corner Time — ' + this.vn() + ' — Level ' + this.state.level + ' — ' + this.minutes() + ' Minutes — ' + date,
+      verLine: 'CORNER TIME — ' + this.minutes() + ' MIN — SUBMITTED — AWAITING AP VERIFICATION',
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    return {
+      isSetup: s.phase === 'setup', isActive: s.phase === 'active', isDone: s.phase === 'done',
+      hasPens: s.pens.length > 0, noPens: s.pens.length === 0,
+      penList: s.pens.map((p, i) => ({
+        label: p.date + ' · ' + p.what + ' · ' + (p.status || 'unresolved'),
+        pick: () => this.setState({ sel: i }),
+        border: i === s.sel ? '#B3261E' : '#D8D6CF',
+        bg: i === s.sel ? '#F6DEDC' : '#FAFAF7',
+      })),
+      levelList: [1, 2, 3].map((l) => ({
+        label: 'Level ' + l + ' — ' + this.LEVEL_MIN[l] + ' min',
+        pick: () => this.setState({ level: l }),
+        border: s.level === l ? '#B3261E' : '#D8D6CF',
+        bg: s.level === l ? '#FBEAE8' : '#FFFFFF',
+      })),
+      minutesLabel: this.minutes() + ' minutes',
+      vnLabel: this.vn(), levelLabel: s.level,
+      camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
+      status: s.status,
+      start: () => this.start(),
+      safetyStop: () => this.finish('safety'),
+      reset: () => this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '' }),
+      line: s.line, clock: s.clock, remaining: s.remaining,
+      dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle, verLine: s.verLine, doneTitle: s.doneTitle,
+    };
+  }
+}
+</script>
+</body>
+</html>

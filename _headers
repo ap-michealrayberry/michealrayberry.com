@@ -17,10 +17,3 @@
 /ap/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
-
-/recording-assistant/*
-  X-Robots-Tag: noindex, nofollow
-  Cache-Control: no-store
-
-/media/captures/*
-  X-Robots-Tag: noindex

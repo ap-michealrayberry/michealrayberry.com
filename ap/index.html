@@ -46,7 +46,7 @@
   <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
     <div style="max-width: 480px; margin: 80px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 18px;">
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Restricted console</span>
-      <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #D8D6CF;">This portal administers the record: daily packet review, violation control, position grading, and corrective assignments. It requires the AP key. Micheal's record key does not open it.</p>
+      <p style="margin: 0; font-size: 15px; line-height: 1.7; color: #D8D6CF;">This portal administers the record: daily packet review, violation control, and corrective assignments. It requires the AP key. Micheal's record key does not open it.</p>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A8983;">AP key</label>
         <input type="password" onChange="{{ onKeyField }}" onKeyDown="{{ keyEnter }}" placeholder="set with setApKey() in Apps Script" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px;">
@@ -86,10 +86,6 @@
           <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Dinner</span>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; line-height: 1.5; color: {{ mealColor }};">{{ mealLabel }}</span>
-          </div>
-          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Last location</span>
-            <a href="{{ locMapUrl }}" target="_blank" style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; line-height: 1.4; color: {{ locColor }};">{{ locLabel }}</a>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
@@ -153,28 +149,7 @@
       </section>
 
       <section style="display: flex; flex-direction: column; gap: 16px;">
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Position grading</h2>
-        <sc-if value="{{ hasPositions }}" hint-placeholder-val="{{ false }}">
-          <div style="display: flex; flex-direction: column;">
-            <sc-for list="{{ positions }}" as="p" hint-placeholder-count="2">
-              <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;">
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; min-width: 140px;">{{ p.name }}</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{ p.color }};">{{ p.grade }}</span>
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8983;">{{ p.date }}</span>
-                <span style="font-size: 13px; color: #8A8983; flex: 1;">{{ p.notes }}</span>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
-        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-          <input type="text" onChange="{{ onPosName }}" placeholder="Position (e.g. Inspection)" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
-          <input type="number" min="0" max="100" onChange="{{ onPosGrade }}" placeholder="Grade %" style="width: 90px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
-          <input type="text" onChange="{{ onPosNotes }}" placeholder="Notes (optional)" style="flex: 1; min-width: 200px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
-          <button onClick="{{ saveGrade }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save grade</button>
-        </div>
-      </section>
-
-      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corrective sessions</h2>      <section style="display: flex; flex-direction: column; gap: 16px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corrective sessions</h2>
         <sc-if value="{{ hasCorrective }}" hint-placeholder-val="{{ false }}">
           <div style="display: flex; flex-direction: column;">
@@ -269,19 +244,7 @@
       </section>
 
       <section style="display: flex; flex-direction: column; gap: 16px;">
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Smart home (Home Assistant)</h2>
-        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">The record drives the environment. In Home Assistant, make an automation per event (trigger: Webhook), copy each cloud webhook URL, and map it below — one per line: <b>event | https://webhook-url</b>. Fired automatically: <b>compliant_day</b>, <b>incomplete_day</b>, <b>violation</b>, <b>abandoned</b>, <b>completed</b>. Environment/media/privileges only — never a device that restrains or confines; those stay a live decision with manual release.</p>
-        <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-          <textarea onChange="{{ onHaMap }}" rows="6" placeholder="compliant_day | https://hooks.nabu.casa/...&#10;violation | https://hooks.nabu.casa/...&#10;spotcheck | https://hooks.nabu.casa/..." style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; resize: vertical;">{{ haMapText }}</textarea>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onClick="{{ haSave }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save mappings</button>
-            <button onClick="{{ haTestCompliant }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #9CCC9C; border: 1px solid #4C6E4C; padding: 10px 16px; cursor: pointer;" style-hover="background: #1B6E3C; color: #FAFAF7;">Test compliant_day</button>
-            <button onClick="{{ haTestViolation }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #E8837B; border: 1px solid #B3261E; padding: 10px 16px; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">Test violation</button>
-          </div>
-        </div>
-      </section>
-
-      <section style="display: flex; flex-direction: column; gap: 16px;">
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Handover runbook (§13)</h2>      <section style="display: flex; flex-direction: column; gap: 16px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Handover runbook (§13)</h2>
         <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Everything the AP operates. At handover: take each account, rotate each key, and Micheal keeps only his record key and the camera.</p>
         <div style="display: flex; flex-direction: column;">
@@ -306,7 +269,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { key: '', authed: false, err: '', msg: '', data: null,
-    keyField: '', vDate: '', vText: '', posName: '', posGrade: '', posNotes: '', cAssign: '', cDue: '', preview: false };
+    keyField: '', vDate: '', vText: '', cAssign: '', cDue: '', preview: false };
   EP = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
   componentDidMount() {
     // Keyless PREVIEW: /ap?preview=1 auto-unlocks with sample data (no key, no
@@ -328,14 +291,11 @@ class Component extends DCLogic {
       health: { steps: 6840, zone: 22, mi: 3.1, cal: 2680, wt: 335.6 },
       violations: [{ row: 2, date: today, violation: 'Daily Compliance Packet late (sample)', status: 'Unresolved' },
                    { row: 3, date: '2026-07-25', violation: 'Missed inspection video (sample)', status: 'Resolved · 2026-07-26' }],
-      positions: [{ row: 2, name: 'Attention', grade: 90, date: today, notes: 'sample' },
-                  { row: 3, name: 'Inspection', grade: 90, date: today, notes: 'sample' }],
       corrective: [{ row: 2, date: today, assignment: '30-minute corner-time corrective (sample)', due: today, status: 'Assigned' }],
       mealLibrary: [{ name: 'Grilled chicken breast, steamed vegetables' }, { name: 'Baked fish, roasted vegetables' }, { name: 'Turkey chili' }],
       mealPlan: Array.from({ length: 7 }, (_, i) => { const dt = new Date(); dt.setDate(dt.getDate() + i); const ds = dt.toISOString().slice(0, 10); return { date: ds, meal: i % 2 ? 'Baked fish, roasted vegetables' : 'Grilled chicken breast, steamed vegetables' }; }),
-      location: { at: new Date(Date.now() - 90000).toISOString(), lat: 32.0809, lng: -81.0912, accuracy: 12, label: 'live' },
       missedStreak: 0,
-      siteState: { abandoned: '', completed: '', ap_statement: '', ap_links: '[]', ha_webhooks_text: '' },
+      siteState: { abandoned: '', completed: '', ap_statement: '', ap_links: '[]' },
     };
   }
   async load() {
@@ -394,10 +354,6 @@ class Component extends DCLogic {
         resolve: () => { if (confirm('Mark resolved?\n\n' + v.date + ' — ' + v.violation)) this.post({ action: 'apviolation', op: 'resolve', row: v.row }, 'Resolving…'); } };
     });
     const openCount = violations.filter((v) => v.open).length;
-    const positions = (d.positions || []).map((p) => ({
-      name: p.name, grade: p.grade === '' ? '—' : p.grade + '%', date: p.date || '', notes: p.notes || '',
-      color: p.grade >= 85 ? '#9CCC9C' : (p.grade === '' ? '#8A8983' : '#E8C55F'),
-    }));
     const corrective = (d.corrective || []).map((c) => {
       const open = !/completed/i.test(c.status);
       return { date: c.date, assignment: c.assignment, due: c.due ? 'due ' + c.due : '', status: c.status || 'Assigned', open,
@@ -423,10 +379,8 @@ class Component extends DCLogic {
       violations, hasViolations: violations.length > 0, noViolations: s.data && violations.length === 0,
       openLabel: openCount ? openCount + ' unresolved — violation mode' : 'record clean',
       openColor: openCount ? '#E8837B' : '#9CCC9C',
-      positions, hasPositions: positions.length > 0,
       corrective, hasCorrective: corrective.length > 0,
       onKeyField: set('keyField'), onVDate: set('vDate'), onVText: set('vText'),
-      onPosName: set('posName'), onPosGrade: set('posGrade'), onPosNotes: set('posNotes'),
       onCAssign: set('cAssign'), onCDue: set('cDue'),
       missedStreak: d.missedStreak == null ? '—' : d.missedStreak + ' day' + (d.missedStreak === 1 ? '' : 's'),
       abLabel: stage === 'confirmed' ? 'ABANDONED — PERMANENT' : (stage === 'presumed' ? 'PRESUMED ABANDONED' : 'not in effect'),
@@ -464,16 +418,6 @@ class Component extends DCLogic {
         if (mr.some((a) => (a.kind || '').indexOf('NOT-confirmed') !== -1)) return '#E8837B';
         return '#E8C55F';
       })(),
-      locLabel: (() => {
-        const l = d.location; if (!l) return 'no check-in yet';
-        const ms = Date.now() - new Date(l.at).getTime();
-        const live = (l.label || '').indexOf('live') !== -1 && ms < 120000;
-        const mins = Math.round(ms / 60000);
-        const ago = live ? '● LIVE' : (mins < 60 ? mins + ' min ago' : Math.round(mins / 60) + ' h ago');
-        return Number(l.lat).toFixed(4) + ', ' + Number(l.lng).toFixed(4) + ' · ' + ago;
-      })(),
-      locColor: (() => { const l = d.location; if (!l) return '#8A8983'; const ms = Date.now() - new Date(l.at).getTime(); if ((l.label || '').indexOf('live') !== -1 && ms < 120000) return '#9CCC9C'; return ms < 864e5 ? '#9CCC9C' : '#E8C55F'; })(),
-      locMapUrl: d.location ? 'https://www.google.com/maps?q=' + d.location.lat + ',' + d.location.lng : '#',
       mealOptions: d.mealLibrary || [],
       mealDays: (d.mealPlan || []).map((m) => ({
         label: m.date + (m.date === d.today ? ' · TODAY' : ''),
@@ -482,20 +426,6 @@ class Component extends DCLogic {
         pick: (e) => this.post({ action: 'apmeal', op: 'assign', date: m.date, meal: e.target.value }, 'Assigning…'),
       })),
       regenMeals: () => { if (confirm('Re-apply the library rotation to the coming week? Future days are overwritten; today and past are untouched.')) this.post({ action: 'apmeal', op: 'regen' }, 'Regenerating…'); },
-      haMapText: s.haMap !== undefined ? s.haMap : (st.ha_webhooks_text || ''),
-      onHaMap: set('haMap'),
-      haSave: () => {
-        const txt = s.haMap !== undefined ? s.haMap : '';
-        const map = {};
-        txt.split('\n').map((l) => l.trim()).filter(Boolean).forEach((l) => {
-          const i = l.indexOf('|'); if (i === -1) return;
-          const ev = l.slice(0, i).trim(), url = l.slice(i + 1).trim();
-          if (ev && /^https?:\/\//.test(url)) map[ev] = url;
-        });
-        this.post({ action: 'apsmarthome', op: 'save', map: JSON.stringify(map) }, 'Saving mappings…');
-      },
-      haTestCompliant: () => this.post({ action: 'apsmarthome', op: 'test', event: 'compliant_day' }, 'Firing…'),
-      haTestViolation: () => this.post({ action: 'apsmarthome', op: 'test', event: 'violation' }, 'Firing…'),
       onUpdTitle: set('updTitle'), onUpdBody: set('updBody'),
       postUpdate: () => {
         if (!(s.updTitle || '').trim() || !(s.updBody || '').trim()) { this.setState({ err: 'Title and body are both required.' }); return; }
@@ -544,10 +474,6 @@ class Component extends DCLogic {
         const t = s.vDate || d.today;
         if (confirm('Declare violation?\n\n' + t + ' — ' + s.vText.trim() + '\n\nThis enters the permanent public log and activates violation mode.'))
           this.post({ action: 'apviolation', op: 'declare', date: t, violation: s.vText.trim() }, 'Declaring…');
-      },
-      saveGrade: () => {
-        if (!s.posName.trim() || s.posGrade === '') { this.setState({ err: 'Position and grade are required.' }); return; }
-        this.post({ action: 'apgrade', position: s.posName.trim(), grade: Math.max(0, Math.min(100, parseFloat(s.posGrade))), notes: s.posNotes.trim() }, 'Saving grade…');
       },
       assignCorrective: () => {
         if (!s.cAssign.trim()) { this.setState({ err: 'Describe the assignment first.' }); return; }
