@@ -12,6 +12,8 @@
     "verify:production": "npm run verify:public-api && npm run verify:public-site && npm run verify:daily-records && npm run verify:daily-media"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "@netlify/blobs": "latest",
     "@netlify/database": "latest"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /recording-assistant/
+Disallow: /media/captures/
 
 Sitemap: https://michealrayberry.com/sitemap.xml
