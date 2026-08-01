@@ -56,7 +56,14 @@ function renderRecords(records) {
   const fragment = document.createDocumentFragment();
   records.slice().reverse().forEach((record) => {
     const row = document.createElement("tr");
-    [record.project_day, record.date, pounds(record.weight_lb), record.note ?? "—"].forEach((value) => {
+    const dayCell = document.createElement("td");
+    const dayLink = document.createElement("a");
+    dayLink.href = `/daily-records/?day=${record.project_day}#day-${record.project_day}`;
+    dayLink.textContent = String(record.project_day);
+    dayLink.setAttribute("aria-label", `View daily record for project day ${record.project_day}`);
+    dayCell.append(dayLink);
+    row.append(dayCell);
+    [record.date, pounds(record.weight_lb), record.note ?? "—"].forEach((value) => {
       const cell = document.createElement("td");
       cell.textContent = String(value);
       row.append(cell);
