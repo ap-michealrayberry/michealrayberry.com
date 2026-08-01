@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Public Progress — Micheal Ray Berry</title>
+  <meta name="description" content="Public weight progress for the Micheal Ray Berry Public Accountability Project.">
+  <link rel="canonical" href="https://michealrayberry.com/progress/">
+  <link rel="stylesheet" href="/progress/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">Micheal Ray Berry</a>
+    <span>Public Accountability Project</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Official public record</p>
+      <h1>Weight progress</h1>
+      <p id="status" role="status">Loading verified public data…</p>
+    </section>
+
+    <section class="metrics" aria-label="Progress summary">
+      <article><span>Latest</span><strong id="latest">—</strong></article>
+      <article><span>Net change</span><strong id="change">—</strong></article>
+      <article><span>Lowest</span><strong id="lowest">—</strong></article>
+      <article><span>Recorded days</span><strong id="count">—</strong></article>
+    </section>
+
+    <section class="chart-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Daily public weigh-ins</p>
+          <h2>Recorded trend</h2>
+        </div>
+        <a href="/api/public/progress.csv">Download CSV</a>
+      </div>
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 900 360" role="img" aria-labelledby="chart-title chart-desc">
+          <title id="chart-title">Public weight trend</title>
+          <desc id="chart-desc">A line chart of verified public weight records by project day.</desc>
+        </svg>
+      </div>
+    </section>
+
+    <section class="records-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Source record</p>
+          <h2>Daily entries</h2>
+        </div>
+        <a href="/api/public/status">Data status</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Day</th><th>Date</th><th>Weight</th><th>Note</th></tr></thead>
+          <tbody id="records"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/">Return to the project record</a>
+    <span>Timezone: America/New_York</span>
+  </footer>
+  <script type="module" src="/progress/app.js"></script>
+</body>
+</html>
