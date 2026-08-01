@@ -2,6 +2,45 @@
   command = "npm run build"
   publish = "."
 
+[[redirects]]
+  from = "/dashboard"
+  to = "/progress/"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/progress/"
+  status = 301
+
+[[redirects]]
+  from = "/record"
+  to = "/daily-records/"
+  status = 301
+
+[[redirects]]
+  from = "/record/*"
+  to = "/daily-records/"
+  status = 301
+
+[[redirects]]
+  from = "/penalties"
+  to = "/violations/"
+  status = 301
+
+[[redirects]]
+  from = "/penalties/*"
+  to = "/violations/"
+  status = 301
+
+[[headers]]
+  for = "/ap/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+
 [[headers]]
   for = "/dataset.json"
   [headers.values]
@@ -19,6 +58,11 @@
   for = "/progress/*"
   [headers.values]
     Link = "</dataset.json>; rel=describedby; type=application/ld+json, </api/public/progress.csv>; rel=alternate; type=text/csv"
+
+[[headers]]
+  for = "/project-status/*"
+  [headers.values]
+    Link = "</api/public/progress>; rel=describedby; type=application/json, </api/public/violations>; rel=describedby; type=application/json"
 
 [[headers]]
   for = "/api/public/progress"
