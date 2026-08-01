@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "netlify dev",
     "build": "echo \"Static production site unchanged; Netlify validates database migrations during deploy.\"",
-    "verify:public-api": "node scripts/verify-public-api.mjs"
+    "verify:public-api": "node scripts/verify-public-api.mjs",
+    "verify:public-site": "node scripts/verify-public-site.mjs",
+    "verify:production": "npm run verify:public-api && npm run verify:public-site"
   },
   "dependencies": {
     "@netlify/database": "latest"

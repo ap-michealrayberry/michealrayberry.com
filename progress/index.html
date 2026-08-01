@@ -4,19 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Public Progress — Micheal Ray Berry</title>
-  <meta name="description" content="Public weight progress for the Micheal Ray Berry Public Accountability Project.">
+  <meta name="description" content="Database-backed public weight progress for the Micheal Ray Berry Public Accountability Project.">
   <link rel="canonical" href="https://michealrayberry.com/progress/">
+  <link rel="alternate" type="application/json" href="/api/public/progress" title="Public progress JSON">
+  <link rel="alternate" type="text/csv" href="/api/public/progress.csv" title="Public progress CSV">
+  <link rel="describedby" type="application/ld+json" href="/dataset.json">
   <link rel="stylesheet" href="/progress/styles.css">
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="/">Micheal Ray Berry</a>
-    <span>Public Accountability Project</span>
+    <nav aria-label="Public record navigation">
+      <a href="/">Project</a>
+      <a href="/progress/" aria-current="page">Progress</a>
+      <a href="/penalties">Violations</a>
+      <a href="/agreement">Agreement</a>
+    </nav>
   </header>
 
   <main>
     <section class="hero">
-      <p class="eyebrow">Official public record</p>
+      <p class="eyebrow">Official database-backed public record</p>
       <h1>Weight progress</h1>
       <p id="status" role="status">Loading verified public data…</p>
     </section>
@@ -34,7 +42,7 @@
           <p class="eyebrow">Daily public weigh-ins</p>
           <h2>Recorded trend</h2>
         </div>
-        <a href="/api/public/progress.csv">Download CSV</a>
+        <div class="data-links"><a href="/api/public/progress">JSON</a><a href="/api/public/progress.csv">Download CSV</a></div>
       </div>
       <div class="chart-wrap">
         <svg id="chart" viewBox="0 0 900 360" role="img" aria-labelledby="chart-title chart-desc">
@@ -50,7 +58,7 @@
           <p class="eyebrow">Source record</p>
           <h2>Daily entries</h2>
         </div>
-        <a href="/api/public/status">Data status</a>
+        <div class="data-links"><a href="/api/public/status">Data status</a><a href="/dataset.json">Dataset metadata</a></div>
       </div>
       <div class="table-wrap">
         <table>
@@ -63,7 +71,7 @@
 
   <footer>
     <a href="/">Return to the project record</a>
-    <span>Timezone: America/New_York</span>
+    <span>Source: Netlify Database · Timezone: America/New_York</span>
   </footer>
   <script type="module" src="/progress/app.js"></script>
 </body>
