@@ -1,11 +1,6 @@
-# Typo domain → canonical (301 keeps SEO on michealrayberry.com).
-# NOTE: these four are Netlify syntax. Cloudflare Pages matches PATHS only and
-# ignores hostname rules, so on Cloudflare the typo domain is redirected by a
-# zone-level Single Redirect Rule instead (see AP Setup and Secrets).
-https://michaelrayberry.com/* https://michealrayberry.com/:splat 301!
-http://michaelrayberry.com/* https://michealrayberry.com/:splat 301!
-https://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
-http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
+# michaelrayberry.com (the typo domain) is redirected to the canonical site by
+# a zone-level Single Redirect Rule in Cloudflare, not from here: Pages matches
+# PATHS only and rejects absolute-URL sources. See AP Setup and Secrets.
 
 /home        /            301
 /dashboard   /index.html  200
