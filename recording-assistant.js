@@ -1394,7 +1394,12 @@
         setCorrNote('Requesting verification code…');
         const ch = await fetchChallenge('corrective');
         if (!ch) { setCorrNote('Verification code unavailable — a connection is required. The session cannot start unverified.'); return; }
-        const startLine = 'Corrective session. Corner time, level ' + level + '. ' + mins + ' minutes, continuous, single take. Verification code: ' + ch.code.split('').join(', ') + '. Assume the position: standing in the corner, camera on your back, hands behind the head. Position, movement, and room audio are monitored. Ten seconds to take position. The session begins now.';
+        const startLine = 'Corrective session. This is corner time at level ' + level + ', assigned against ' + ref + '. ' +
+          mins + ' continuous minutes, one unedited take. You do not speak at any point — the voice speaks for the record. ' +
+          'The verification code shown on screen was issued by the record moments ago, so this footage cannot be older than it claims. ' +
+          'Assume the position: standing in the corner, camera on your back, hands behind the head, feet shoulder-width apart. ' +
+          'Position, movement, and room audio are monitored throughout. Three warnings invalidate the session and the full duration restarts from zero. ' +
+          'Ten seconds to take position. The session begins now.';
         const markLines = [];
         for (let m = 5; m < mins; m += 5) markLines.push(m + ' minutes elapsed. ' + (mins - m) + ' minutes remaining. The session continues.');
         setCorrNote('Preparing voice lines…');

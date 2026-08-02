@@ -141,7 +141,7 @@
       </div>
       <nav style="display: flex; gap: 2px; row-gap: 6px; flex-wrap: wrap; align-items: center;">
         <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: #B3261E; border: none; padding: 10px 12px; cursor: pointer; color: #FAFAF7; font-weight: 700;" style-hover="background: #8E1E18;">Active Violation</button>
+        <button onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px solid #141412; padding: 9px 12px; cursor: pointer; color: #141412;" style-hover="background: #141412; color: #FAFAF7;">Open Entry</button>
         </sc-if>
         <button onClick="{{ goHome }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</button>
         <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412; text-decoration: none;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Daily Record</a>
@@ -275,67 +275,11 @@
     </div>
   </sc-if>
   <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-    <div style="background: #141412; color: #FAFAF7; border-bottom: 4px solid #B3261E;">
-      <div style="max-width: 1160px; margin: 0 auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: #E8837B;">Requirement missed · consequence assigned · unresolved</span>
-            <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 40px; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1;">Unresolved Documentation Exception</span>
-          </div>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: #E8837B;">{{ violationCountLabel }}</span>
-        </div>
-        <div style="display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px;">
-        <sc-for list="{{ openViolations }}" as="v" hint-placeholder-count="1">
-          <div style="border-left: 3px solid #FAFAF7; padding: 2px 0 2px 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline; font-family: 'IBM Plex Mono', monospace;">
-            <a href="{{ v.url }}" style="font-size: 12px; letter-spacing: 0.1em; font-weight: 700; background: #FAFAF7; color: #B3261E; padding: 2px 7px; text-decoration: none;" style-hover="background: #141412; color: #FAFAF7;">{{ v.vnum }}</a>
-            <span style="font-size: 13px; font-weight: 600;">{{ v.date }}</span>
-            <span style="font-size: 13px;">{{ v.violation }}</span>
-            <span style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85;">{{ v.openFor }}</span>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 18px; margin: 0 0 4px 17px; font-family: 'IBM Plex Mono', monospace;">
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">CONSEQUENCE LEVEL</span><span style="font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; color: #E8837B;">{{ v.levelLabel }}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">CORNER TIME ASSIGNED</span><span style="font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; color: #E8837B;">{{ v.cornerLabel }}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">DEADLINE</span><span style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em;">{{ v.deadlineLabel }}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">ACKNOWLEDGMENT</span><span style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em;">{{ v.ackLabel }}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">STATUS</span><span style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em;">VERIFICATION PENDING</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.75;">SITEWIDE NOTICE</span><span style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.04em;">{{ v.noticeLabel }}</span></div>
-          </div>
-        </sc-for>
-        <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px;">A requirement of the signed agreement was not met. The consequence above is assigned, not optional, and it is not discharged by explanation or by time passing: it is discharged only by completing the assigned corrective session and having the Accountability Partner verify it. This notice stands on every page of the site until then — or, once the corrective recording is submitted, for a final 24 hours before automatic removal. The permanent entry — date, missed requirement, status, and resolution date — remains in the violation log for the life of the record.</p>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <a href="#penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E; background: #FAFAF7; padding: 10px 16px; text-decoration: none; font-weight: 700;">The violation log →</a>
-          <sc-if value="{{ hasExposed }}" hint-placeholder-val="{{ false }}">
-            <a href="#corrective-record" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FAFAF7; background: #B3261E; border: 1px solid #FAFAF7; padding: 11px 18px; text-decoration: none;" style-hover="background: #8E1E18;">{{ exposedLabel }} →</a>
-          </sc-if>
-          <sc-if value="{{ cornerDemoUrl }}" hint-placeholder-val="{{ false }}">
-            <a href="{{ cornerDemoUrl }}" target="_blank" rel="noopener" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FAFAF7; border: 1px solid #FAFAF7; padding: 10px 16px; text-decoration: none;" style-hover="background: #FAFAF7; color: #141412;">What corner time is →</a>
-          </sc-if>
-        </div>
-        </div>
-        </div>
-      </div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ hasExposed }}" hint-placeholder-val="{{ false }}">
-    <div id="corrective-record" style="background: #141412; color: #FAFAF7; border-bottom: 1px solid #B3261E;">
-      <div style="max-width: 1160px; margin: 0 auto; padding: 30px 32px; display: flex; flex-direction: column; gap: 18px;">
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #FF6B61;">Corrective record — public while unresolved</span>
-          <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; letter-spacing: 0.03em;">{{ exposedLabel }}</span>
-          <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 760px; color: #D8D6CF;">These recordings are private by default. An unresolved violation opens them — <strong style="color: #FAFAF7;">every corrective session on the record, not only the current one</strong> — and they stay open for as long as anything remains unresolved. Completing the assigned session and having the Accountability Partner verify it closes them again. Nothing is deleted; only the visibility is conditional, and it is not controlled by Micheal.</p>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
-          <sc-for list="{{ exposedSessions }}" as="s" hint-placeholder-count="1">
-            <a href="{{ s.url }}" target="_blank" rel="noopener" style="display: flex; flex-direction: column; gap: 6px; border: 1px solid #57544F; padding: 16px 18px; text-decoration: none; color: #FAFAF7;" style-hover="border-color: #FF6B61; background: #1E1D1A;">
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #FF6B61;">{{ s.vnum }} · {{ s.date }}</span>
-              <span style="font-size: 14px; line-height: 1.5;">{{ s.violation }}</span>
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #8A8983;">{{ s.meta }}</span>
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #8A8983;">{{ s.stateLabel }}</span>
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #FAFAF7; margin-top: 4px;">WATCH THE SESSION →</span>
-            </a>
-          </sc-for>
-        </div>
+    <div style="background: #F1F0EA; border-bottom: 1px solid #141412;">
+      <div style="max-width: 1160px; margin: 0 auto; padding: 20px 32px; display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Record status</span>
+        <span style="font-size: 14px; line-height: 1.6; color: #141412;">{{ openSummary }}</span>
+        <a href="#penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #141412; margin-left: auto;" style-hover="color: #B3261E;">The record →</a>
       </div>
     </div>
   </sc-if>
@@ -431,7 +375,7 @@
             <h3 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; margin: 0;">Accountability Enforcement</h3>
             <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5;">
               <li>Missed documentation activates the accountability structure.</li>
-              <li>While a violation is unresolved, the consequence and its recordings are public.</li>
+              <li>Consequences are administered and verified privately by the Accountability Partner.</li>
               <li>The miss itself stays on the public record permanently.</li>
             </ul>
             <p style="margin: auto 0 0; font-size: 15px; color: #6B6A64;">Enforcement is automatic, not negotiated.</p>
@@ -840,7 +784,7 @@
           <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">06</span>
             <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Missed Requirements and Consequences</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Missed requirements are documented publicly. If I fail to meet a requirement, the miss is recorded permanently in the public Violation Log — the date, the nature of the failure, and whether it is resolved. While it stays unresolved the whole consequence is public too: the level, the assigned corner time, the deadline, and the recordings themselves. Resolving it returns the recordings to private; the entry never leaves. Accountability without consequence is just commentary.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Missed requirements are documented publicly. If I fail to meet a requirement, the miss is recorded permanently in the public Violation Log — the date, the requirement missed, the status, when the correction was submitted, when it was resolved, and the Accountability Partner's verification result. The corrective process itself is private. What is public is the fact of the failure and whether it was put right; that is the accountability, and it does not require an audience for the correction.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The purpose is not drama. The purpose is enforcement.</p>
           </div>
           <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
@@ -875,7 +819,7 @@
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">What happens if he misses a requirement?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">A Violation Event is entered permanently in the public log: the date, the nature of the documentation failure, and its status — resolved or unresolved. While it is unresolved the consequence is public as well — the level, the assigned corner time, the deadline, and every corrective recording on the record, not only the current one. Verified resolution puts the recordings back behind the private archive. The entry stays forever.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">A Violation Event is entered permanently in the public log: the date, the requirement missed, the status — open, corrected, or resolved — the submission and resolution timestamps, and the Accountability Partner's verification result. The corrective requirement that follows is administered and verified privately; no corrective recording is ever published. The entry stays forever.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Can he delete this site or quietly quit?</span>
@@ -915,14 +859,14 @@
           <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1>
           <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.65; max-width: 560px;">
             <p style="margin: 0;">The agreement is the governing document of this project. It defines the daily requirements, the documentation standard, the weight-loss schedule, and the consequences that apply when a requirement is missed.</p>
-            <p style="margin: 0;">What follows is the public summary, and below it the full text, of the executed agreement. Corrective requirements are private by default and public for as long as any entry is unresolved; the permanent record shows dates, missed requirements, and statuses. The agreement is published here in full for public verification.</p>
+            <p style="margin: 0;">What follows is the public summary, and below it the full text, of the executed agreement. Corrective requirements are administered and verified privately and are never published; the permanent public record shows the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result. The agreement is published here in full for public verification.</p>
           </div>
           <div style="border: 1px solid #141412; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px; max-width: 560px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Covered by the agreement</span>
             <ul style="margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.7; display: flex; flex-direction: column; gap: 6px;">
               <li>Daily Compliance Packet — weight entry, Daily Inspection video published to the official record, four-angle daily photos, and tracker update by 10:00 PM ET</li>
               <li>Standardized uniform, pose, and four-angle documentation format</li>
-              <li>Consequences (§8): every confirmed violation triggers corner time (10 / 20 / 30 minutes by level). While anything is unresolved the level, duration, deadline, statuses, and the recordings themselves are public; on verified resolution the recordings return to private and the entry — date, missed requirement, status, resolution date — stays permanently</li>
+              <li>Consequences (§8): every confirmed violation triggers a corrective requirement, completed and verified privately. The permanent public entry records the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result</li>
               <li>Milestone resets at 300 / 275 / 250 / 225 / 200 / 175 lbs</li>
               <li>Permanent public record, abandonment terms, and website ownership rules</li>
             </ul>
@@ -977,7 +921,7 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">1. Purpose and Nature of the Agreement</h3>
           <p style="margin: 0;">This is a voluntary, non-commercial personal accountability agreement. Micheal Ray Berry has determined that private plans left room to delay, restart, and disappear when the record became uncomfortable, and enters this Agreement to remove that escape. The Agreement governs documentation and verification: it makes Micheal Ray Berry’s actions visible, measurable, and difficult to quietly abandon. The Project is intentionally designed as a highly automated, append-only, publicly searchable accountability system. Required submissions are captured through standardized tools, timestamped, validated, converted into permanent public records, published, archived, and monitored with the least practical dependence on manual action. The public website and its media archive are intentionally engineered for strong search-engine visibility under Micheal Ray Berry’s real name. It does not prescribe diet, exercise, or rate of loss, which remain governed by §6.4 (medical care). This Agreement supersedes all earlier drafts, versions, and public announcements.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">2. Definitions</h3>
-          <p style="margin: 0;"><strong>Project Day</strong> — each calendar day in the America/New_York time zone, beginning Day 1. <strong>Official Platforms</strong> — the website michealrayberry.com and its AP-administered media archive, together with any Project account the AP designates for republication; only records on Official Platforms count toward compliance. Compliance is satisfied by publication to the official record itself; no third-party video platform is required, and the availability or unavailability of any such platform neither creates nor excuses a Violation Event. <strong>Official Record System</strong> — the AP-administered submission database, weigh-in log, Violation Log, Consequence Log, photo and video archives, Updates log, integrity manifests, and automatically generated website records, without regard to the particular vendor or storage technology used. <strong>Recording Assistant</strong> — the required capture and submission interface at michealrayberry.com/#record, or its AP-designated successor URL, that controls the official sequence, overlays, timestamps, media capture, validation, and transmission of required records. <strong>Daily Compliance Packet</strong> — the four items listed in §3, due every Project Day. <strong>Violation Event</strong> — a documentation failure as defined in §7; weight values are never Violation Events. <strong>Accumulated Violation Count</strong> — the number of Violation Events since Day 1 or the most recent documented milestone reset under §6.2. <strong>Consequence Level</strong> — Level One, Level Two, or Level Three, determined under §8.1. <strong>Corrective Session</strong> — the standardized, continuous, recorded session described in §8.2, delivered to the AP and published for the duration of any Active Violation Period under §8.6. <strong>Active Violation Period</strong> — the period beginning when the AP publishes a confirmed Violation Event and ending only when the AP verifies that every consequence assigned to that event has been completed and marks the event Resolved. <strong>Public Notice</strong> — the factual site notice described in §8.5, displayed while an entry is unresolved. <strong>Consequence Record</strong> — the permanent public entry described in §8.4: date, missed requirement, status, and resolution date.</p>
+          <p style="margin: 0;"><strong>Project Day</strong> — each calendar day in the America/New_York time zone, beginning Day 1. <strong>Official Platforms</strong> — the website michealrayberry.com and its AP-administered media archive, together with any Project account the AP designates for republication; only records on Official Platforms count toward compliance. Compliance is satisfied by publication to the official record itself; no third-party video platform is required, and the availability or unavailability of any such platform neither creates nor excuses a Violation Event. <strong>Official Record System</strong> — the AP-administered submission database, weigh-in log, Violation Log, Consequence Log, photo and video archives, Updates log, integrity manifests, and automatically generated website records, without regard to the particular vendor or storage technology used. <strong>Recording Assistant</strong> — the required capture and submission interface at michealrayberry.com/#record, or its AP-designated successor URL, that controls the official sequence, overlays, timestamps, media capture, validation, and transmission of required records. <strong>Daily Compliance Packet</strong> — the four items listed in §3, due every Project Day. <strong>Violation Event</strong> — a documentation failure as defined in §7; weight values are never Violation Events. <strong>Accumulated Violation Count</strong> — the number of Violation Events since Day 1 or the most recent documented milestone reset under §6.2. <strong>Consequence Level</strong> — Level One, Level Two, or Level Three, determined under §8.1. <strong>Corrective Session</strong> — the standardized, continuous, recorded session described in §8.2, delivered to the AP's private evidence archive and not published. <strong>Active Violation Period</strong> — the period beginning when the AP publishes a confirmed Violation Event and ending only when the AP verifies that every consequence assigned to that event has been completed and marks the event Resolved. <strong>Public Notice</strong> — the factual site notice described in §8.5, displayed while an entry is unresolved. <strong>Consequence Record</strong> — the permanent public entry described in §8.4: date, missed requirement, status, and resolution date.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">3. The Daily Compliance Packet</h3>
           <p style="margin: 0;">Every Project Day, by 10:00 PM Eastern Time, Micheal Ray Berry shall use the official Recording Assistant to complete and transmit all four items: (1) <strong>Daily Inspection Video</strong> — one standardized inspection video captured through the Recording Assistant and published to the official record at michealrayberry.com, where it is self-hosted and permanently addressable; (2) <strong>Daily Accountability Photos</strong> — the standardized four-angle photos (front, left side, rear, right side) captured in the same Recording Assistant session and transmitted to the Official Record System; (3) <strong>Weight Entry</strong> — that day’s weight entered and submitted through the Recording Assistant; and (4) <strong>Daily Record Fields</strong> — every other field presented or assigned through the Recording Assistant completed and submitted. Multiple missed items on the same Project Day constitute one Violation Event. A packet counts as timely only when the Recording Assistant records a successful server-side submission by the deadline. Local capture, an unfinished form, a file remaining on Micheal Ray Berry’s device, or an attempted transmission without a success confirmation does not constitute completion. The Official Record System’s server timestamps, validation results, event history, and integrity records are authoritative evidence. A delay or failure in an automated downstream publication process does not constitute a Violation Event if the Recording Assistant successfully received a complete and timely packet; in that event the AP or automated recovery process shall restore publication without penalty to Micheal Ray Berry.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">4. Documentation Standard</h3>
@@ -989,12 +933,12 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">7. Violation Events</h3>
           <p style="margin: 0;">A Violation Event is exclusively a documentation failure: a required record that is missed, late, incomplete, false, manipulated, concealed, deleted, refused, or submitted outside the required Recording Assistant, including failure to complete an assigned consequence under §8. Ordinary weight fluctuation, plateaus, or temporary gains are progress information and are never Violation Events. The AP determines whether a Violation Event occurred by applying the written requirements of this Agreement to server timestamps, validation events, recordings, Official Record System entries, integrity records, and other objective evidence, and shall provide Micheal Ray Berry a written notice identifying the failed requirement and supporting evidence. Micheal Ray Berry may submit evidence of compliance or a documented exception within 48 hours; after reviewing it, the AP issues a final written determination. Disagreement, embarrassment, regret, or dissatisfaction with a requirement is not grounds to reverse a properly documented determination. <em>See also Amendment No. 1 — Automated Violation Declaration: objective violations are declared automatically by the Official Record System without advance manual approval, subject to the 48-hour review.</em></p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">8. Corrective Requirements, Levels, and the Permanent Record</h3>
-          <p style="margin: 0;"><strong>8.1 Automatic level assignment.</strong> Every confirmed Violation Event triggers a corrective requirement, assigned and verified by the Accountability Partner and published in full while it remains unresolved. The Consequence Level is determined by the Accumulated Violation Count after the Violation Event: the first Violation Event is Level One; the second is Level Two; and the third and every later Violation Event is Level Three. A milestone reset under §6.2 returns the count to zero only for future level assignments. Completion or resolution of a consequence does not erase, reduce, or remove the underlying Violation Event or its Consequence Record.</p>
-          <p style="margin: 0;"><strong>8.2 Corrective sessions.</strong> Level One requires a 10-minute corrective session; Level Two requires 20 minutes; Level Three requires 30 minutes. The session is completed by the AP-assigned deadline in the project uniform, recorded continuously in the standardized format assigned by the AP, and delivered directly to the AP’s evidence archive, from which it is published for the duration of any Active Violation Period under §8.6. The recording must be sufficiently clear to verify identity, attire, elapsed time, and completion. Pausing, editing, leaving frame, concealing identity, or ending early makes the session incomplete, and the AP may require a replacement session when the submitted record does not permit objective verification. Corrective recordings are held in the AP’s evidence archive and published only during an Active Violation Period as provided by §8.6. No single session may exceed 30 minutes, and no more than one session may be required in a calendar day; additional outstanding sessions roll forward to later days.</p>
+          <p style="margin: 0;"><strong>8.1 Automatic level assignment.</strong> Every confirmed Violation Event triggers a corrective requirement, assigned and verified privately by the Accountability Partner. The Consequence Level is determined by the Accumulated Violation Count after the Violation Event: the first Violation Event is Level One; the second is Level Two; and the third and every later Violation Event is Level Three. A milestone reset under §6.2 returns the count to zero only for future level assignments. Completion or resolution of a consequence does not erase, reduce, or remove the underlying Violation Event or its Consequence Record.</p>
+          <p style="margin: 0;"><strong>8.2 Corrective sessions.</strong> Level One requires a 10-minute corrective session; Level Two requires 20 minutes; Level Three requires 30 minutes. The session is completed by the AP-assigned deadline in the project uniform, recorded continuously in the standardized format assigned by the AP, and delivered directly to the AP’s private evidence archive. The recording must be sufficiently clear to verify identity, attire, elapsed time, and completion. Pausing, editing, leaving frame, concealing identity, or ending early makes the session incomplete, and the AP may require a replacement session when the submitted record does not permit objective verification. Corrective recordings are held in the AP’s private evidence archive and are not published. No single session may exceed 30 minutes, and no more than one session may be required in a calendar day; additional outstanding sessions roll forward to later days.</p>
           <p style="margin: 0;"><strong>8.3 Consequence notice and deadline.</strong> The AP’s final determination under §7 shall identify the Violation Event, Accumulated Violation Count, Consequence Level, corrective-session duration, and the deadline for each required act. Except where a documented exception under §9 applies, failure to complete the corrective requirement or provide required proof by the stated deadline constitutes a new Violation Event and receives the next level determined from the then-current Accumulated Violation Count.</p>
-          <p style="margin: 0;"><strong>8.4 Permanent Consequence Record.</strong> Each confirmed Violation Event receives a permanent public entry on michealrayberry.com. The public entry states only: (a) the Project Day and calendar date; (b) the missed requirement; (c) the status — verification pending or Resolved; and (d) the resolution date. The assigned consequence, its level, duration, deadline, completion status, acknowledgment status, and verification status are published alongside the entry throughout any Active Violation Period, and the factual record that a consequence was assigned and completed remains permanently public. Corrective recordings are published while any entry is unresolved and held privately otherwise, under §8.6; verification photographs are never published. Entries are not separately optimized for search engines. Corrections are dated and appended; accurate earlier entries are never silently rewritten, hidden, or deleted.</p>
-          <p style="margin: 0;"><strong>8.5 Public notice.</strong> While a documentation exception is unresolved, michealrayberry.com displays a factual notice on every page stating the date, the missed requirement, the status — verification pending or resolved — and the assigned consequence: its level, duration, deadline, completion status, acknowledgment status, and verification status. The notice also carries the corrective recordings published under §8.6. It contains no photograph and no warning design beyond the site’s ordinary presentation. It is removed when the AP verifies the assigned corrective requirement and marks the entry Resolved, or automatically 24 hours after the completed corrective recording is submitted, while the entry itself remains pending until AP verification. The permanent entry remains in the public log.</p>
-          <p style="margin: 0;"><strong>8.6 Publication boundaries, conditional exposure, privacy, and takedown.</strong> The permanent public entry states only the date, the missed requirement, the status, and the resolution date, in neutral factual language. Corrective recordings and acknowledgment recordings are private by default and held in the AP's evidence archive. They become publicly visible only during an Active Violation Period, and when they do, every corrective recording on the record becomes visible, not only the current one; verification photographs remain private at all times. The exposure ends automatically, and all such recordings return to private, once no entry remains unresolved. The AP alone controls this visibility, and no recording is deleted by it becoming private again. During an unresolved Violation Period the assigned consequence, consequence level, duration, deadline, completion status, acknowledgment status, and verification status are published as part of the active sitewide notice and the violation record, and required consequence recordings may also be published in full. After verified resolution the sitewide notice is removed according to the stated resolution period. The underlying violation entry, and the factual record of the consequence assigned and completed, remain permanently public. Fabricated claims, obscenity, sexual or fetish framing, threats, slurs, disclosure of private employment, health, financial, location, or contact information, doxxing, and invitations for third parties to contact, shame, threaten, or harass Micheal Ray Berry are prohibited. A narrow safety-and-privacy takedown process applies: material that creates a genuine safety, privacy, or employment risk unrelated to the Project’s purpose is reviewed on request and may be redacted or removed by the AP, with the change noted in the log.</p>
+          <p style="margin: 0;"><strong>8.4 Permanent Consequence Record.</strong> Each confirmed Violation Event receives a permanent public entry on michealrayberry.com. The public entry states only: (a) the Project Day and calendar date; (b) the missed requirement; (c) the status — open, corrected, or resolved; (d) the timestamp at which the correction was submitted; (e) the timestamp at which the entry was resolved; and (f) the Accountability Partner's verification result. Where the record for a Project Day is absent or incomplete, the entry states that neutrally as "No record" or "Incomplete record". Corrective recordings, acknowledgment recordings, and verification photographs are held in the AP's private evidence archive and are never published. Entries are not separately optimized for search engines. Corrections are dated and appended; accurate earlier entries are never silently rewritten, hidden, or deleted.</p>
+          <p style="margin: 0;"><strong>8.5 Public notice.</strong> While an entry is open, michealrayberry.com states the record's status in one factual line: the date and the requirement missed, and whether a correction has been submitted. It carries no consequence detail, no recording, no photograph, and no warning design beyond the site's ordinary presentation, and it is removed once the entry is resolved. The permanent entry remains in the public log. It is removed when the AP verifies the assigned corrective requirement and marks the entry Resolved, or automatically 24 hours after the completed corrective recording is submitted, while the entry itself remains pending until AP verification. The permanent entry remains in the public log.</p>
+          <p style="margin: 0;"><strong>8.6 Publication boundaries, privacy, and takedown.</strong> The public record is factual. It states the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result, in neutral language. <strong>Corrective recordings, acknowledgment recordings, and verification photographs are never published</strong> — they are held in the AP's private evidence archive and exist solely so the AP can verify completion. No corrective footage, current or historical, is placed on the public record, and no page of the site displays consequence detail. Corrections to the record are dated and appended so the correction history is itself permanent and auditable; accurate earlier entries are never silently rewritten, hidden, or deleted. Fabricated claims, obscenity, sexual or fetish framing, threats, slurs, disclosure of private employment, health, financial, location, or contact information, doxxing, and invitations for third parties to contact, shame, or harass Micheal Ray Berry are prohibited. A narrow safety-and-privacy takedown process applies: material that creates a genuine safety, privacy, or employment risk unrelated to the Project's purpose is reviewed on request and may be redacted or removed by the AP, with the change noted in the log. Fabricated claims, obscenity, sexual or fetish framing, threats, slurs, disclosure of private employment, health, financial, location, or contact information, doxxing, and invitations for third parties to contact, shame, threaten, or harass Micheal Ray Berry are prohibited. A narrow safety-and-privacy takedown process applies: material that creates a genuine safety, privacy, or employment risk unrelated to the Project’s purpose is reviewed on request and may be redacted or removed by the AP, with the change noted in the log.</p>
           <p style="margin: 0;"><strong>8.7 Weight reviews.</strong> Ordinary weight fluctuation, a plateau, or a gain is not a Violation Event and does not alter the Accumulated Violation Count. Any separate corrective action based on a weight-review standard must be created by signed amendment and may not be represented as a Level One, Level Two, or Level Three violation consequence unless that amendment expressly makes it part of this section.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">9. Documented Exceptions</h3>
           <p style="margin: 0;">A requirement may be excused or postponed only because of a documented medical event, a genuine emergency, a verified failure of an Official Platform, or a verified failure of required Project equipment or systems (the designated scale, the Recording Assistant, camera, or archive) outside Micheal Ray Berry’s reasonable control, reported to the AP as soon as reasonably possible and ordinarily within 24 hours, supported by reasonable proof. When the interruption ends, the AP designates one outcome: (a) the requirement is excused, where later completion would be impossible, medically inappropriate, or misleading; (b) the requirement is completed within 24 hours as a clearly labeled late replacement record; or (c) an equivalent record is completed within 24 hours. Travel, ordinary work demands, scheduling conflicts, embarrassment, lack of preparation, or avoidable technical problems are not documented exceptions. The public log identifies an accepted exception without disclosing private medical details.</p>
@@ -1010,7 +954,7 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">12. General Terms</h3>
           <p style="margin: 0;"><strong>12.1 Amendments</strong> only by written instrument signed by both parties; each amendment is noted in the public Updates log by title and date. <strong>12.2 AP privacy.</strong> The AP is not publicly named. Public contact routes to ap@michealrayberry.com. <strong>12.3 Good faith.</strong> Both parties shall act in good faith toward the Project’s purpose: a truthful, complete, permanent public record. If any provision is found unenforceable, the remainder stands. <strong>12.4 Voluntary participation.</strong> Micheal Ray Berry may be released from this Agreement only by completion (§6.3), by signed mutual termination noted in the public record, or by termination without completion (§11) with its stated permanent effects.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">13. Acknowledgment and Execution</h3>
-          <p style="margin: 0;">I, Micheal Ray Berry, have read every section of this Agreement and I understand exactly what I am signing. I understand that every confirmed Violation Event produces a Level One, Level Two, or Level Three corrective requirement, verified by the Accountability Partner, and a factual public log entry — date, missed requirement, status, and resolution date — that becomes part of the permanent public record. I understand that while any entry remains unresolved the assigned consequence is published in full, and every corrective recording on the record is publicly visible — not only the one I am currently serving — and that this exposure ends only when the Accountability Partner verifies that nothing remains unresolved. I understand that completing a corrective requirement marks the entry resolved only when every assigned requirement is complete and never erases the entry. I understand that I may not edit, soften, suppress, or remove the record because of embarrassment, regret, dissatisfaction, or loss of motivation; content may be removed, relocated, redacted, or replaced only under the limited circumstances expressly permitted by §10.3 and the safety-and-privacy process in §8.6. I understand that there are only three ways out: I finish, both parties release me in writing, or the Project ends without verified completion and is recorded that way, factually. I am not signing this in a moment of motivation; I am signing it so that the version of me who loses motivation has no exit. No one has pressured me. This is my own decision, made with a clear mind, and I accept every consequence of it.</p>
+          <p style="margin: 0;">I, Micheal Ray Berry, have read every section of this Agreement and I understand exactly what I am signing. I understand that every confirmed Violation Event produces a Level One, Level Two, or Level Three corrective requirement, completed and verified privately by the Accountability Partner, and a factual public log entry — date, requirement missed, status, submission and resolution timestamps, and verification result — that becomes part of the permanent public record. I understand that the corrective requirement itself is private, that no corrective recording is published, and that what is public is the fact of the failure and whether it was corrected. I understand that completing a corrective requirement marks the entry resolved only when every assigned requirement is complete and never erases the entry. I understand that I may not edit, soften, suppress, or remove the record because of embarrassment, regret, dissatisfaction, or loss of motivation; content may be removed, relocated, redacted, or replaced only under the limited circumstances expressly permitted by §10.3 and the safety-and-privacy process in §8.6. I understand that there are only three ways out: I finish, both parties release me in writing, or the Project ends without verified completion and is recorded that way, factually. I am not signing this in a moment of motivation; I am signing it so that the version of me who loses motivation has no exit. No one has pressured me. This is my own decision, made with a clear mind, and I accept every consequence of it.</p>
           <p style="margin: 0;">The Accountability Partner has read this Agreement in full, accepts the duties of administering the public record fairly and without exception, and agrees to hold the line even — especially — when asked not to.</p>
           <p style="margin: 12px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Execution copy — effective upon execution by both parties. Signatures held by the Accountability Partner. Day 1: July 20, 2026 · Starting weight: 340.0 lb · Goal: 175.0 lb.</p>
         </div>
@@ -1053,13 +997,13 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border: 1px solid #141412; margin-top: 48px;">
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #D8D6CF;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Every violation triggers</span>
-            <span style="font-size: 18px; font-weight: 600;">Corner Time — Public While Unresolved</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Every confirmed Violation Event triggers corner time (§8.1), assigned and verified by the Accountability Partner. The level follows the accumulated count — first: Level One (10 min), second: Level Two (20 min), third and later: Level Three (30 min). While anything is unresolved the level, duration, deadline, statuses, and every corrective recording on the record are public; verified resolution returns the recordings to private. The permanent entry — date, missed requirement, status, resolution date — never leaves. A completed requirement never erases it.</p>
+            <span style="font-size: 18px; font-weight: 600;">A Corrective Requirement — Private</span>
+            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Every confirmed Violation Event triggers a corrective requirement (§8.1), completed and verified privately by the Accountability Partner. The public entry records the date, the requirement missed, the status — open, corrected, or resolved — when the correction was submitted, when it was resolved, and the verification result. No corrective recording is published. A completed requirement never erases the entry.</p>
           </div>
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #D8D6CF;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The public record</span>
             <span style="font-size: 18px; font-weight: 600;">Date · Violation · Status</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Each entry shows the date, the nature of the documentation failure, and whether it is <em>resolved</em> or <em>unresolved</em>. Outside an Active Violation Period the permanent entry displays these factual fields. During an Active Violation Period the additional consequence information and recordings specified in §8.6 are also published. The entry is permanent — resolution closes the obligation; it never erases the record.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Each entry shows the date, the requirement missed, the status — open, corrected, or resolved — the submission and resolution timestamps, and the Accountability Partner's verification result. Where a day has no record, or an incomplete one, the entry says so plainly. Nothing about the corrective process itself is published. The entry is permanent — resolution closes the obligation; it never erases the record. The entry is permanent — resolution closes the obligation; it never erases the record.</p>
           </div>
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Milestone resets</span>
@@ -1077,19 +1021,35 @@
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Violation Log</h2>
         <div style="border: 1px solid #141412;">
-          <div style="display: grid; grid-template-columns: 50px 1fr 3fr 1fr; background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; padding: 12px 20px; gap: 14px;">
+          <div style="display: grid; grid-template-columns: 50px 1fr 2.4fr 0.9fr 1.05fr 1.05fr 1.2fr; background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; padding: 12px 20px; gap: 14px;">
             <span>No.</span>
             <span>Date</span>
-            <span>Violation</span>
+            <span>Requirement missed</span>
             <span>Status</span>
+            <span>Submitted</span>
+            <span>Resolved</span>
+            <span>AP verification</span>
           </div>
           <sc-if value="{{ hasPenalties }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ penaltyRows }}" as="pen" hint-placeholder-count="1">
-              <div style="display: grid; grid-template-columns: 50px 1fr 3fr 1fr; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 14px 20px; gap: 14px; border-top: 1px solid #D8D6CF;">
+              <div style="display: grid; grid-template-columns: 50px 1fr 2.4fr 0.9fr 1.05fr 1.05fr 1.2fr; font-family: 'IBM Plex Mono', monospace; font-size: 13.5px; padding: 14px 20px; gap: 14px; border-top: 1px solid #D8D6CF; align-items: start;">
                 <span style="color: #B3261E; font-weight: 600;">{{ pen.num }}</span>
                 <span>{{ pen.date }}</span>
-                <span>{{ pen.violation }}</span>
-                <span style="font-weight: 600; color: {{ pen.statusColor }};">{{ pen.status }}</span>
+                <span style="display: flex; flex-direction: column; gap: 6px;">
+                  <span style="line-height: 1.5;">{{ pen.violation }}</span>
+                  <sc-if value="{{ pen.hasCorrections }}" hint-placeholder-val="{{ false }}">
+                    <span style="display: flex; flex-direction: column; gap: 3px; border-left: 2px solid #D8D6CF; padding-left: 10px;">
+                      <span style="font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Correction history</span>
+                      <sc-for list="{{ pen.corrections }}" as="c" hint-placeholder-count="0">
+                        <span style="font-size: 12px; line-height: 1.5; color: #3A3935;">{{ c }}</span>
+                      </sc-for>
+                    </span>
+                  </sc-if>
+                </span>
+                <span style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: {{ pen.statusColor }};">{{ pen.status }}</span>
+                <span style="color: #3A3935;">{{ pen.submitted }}</span>
+                <span style="color: #3A3935;">{{ pen.resolved }}</span>
+                <span style="color: #3A3935; line-height: 1.5;">{{ pen.verification }}</span>
               </div>
             </sc-for>
           </sc-if>
@@ -1474,7 +1434,10 @@ class Component extends DCLogic {
             if (/^level/i.test(c[1])) {
               return { date: c[0], violation: c[2], status: /satisfied/i.test(c[6] || '') ? 'Resolved' : (c[6] || 'Unresolved') };
             }
-            return { date: c[0], violation: c[1], status: c[2] || 'Unresolved', level: c[3] || '', corner: c[4] || '', fin: c[5] || '', deadline: c[6] || '', ack: c[7] || '', rec: c[8] || '' };
+            /* Public columns: A date · B requirement missed · C status ·
+               D submitted · E resolved · F AP verification · G correction
+               history (semicolon-separated, appended, never rewritten). */
+            return { date: c[0], violation: c[1], status: c[2] || 'Unresolved', submitted: c[3] || '', resolved: c[4] || '', verification: c[5] || '', corrections: c[6] || '' };
           })
           .filter((e) => e.date && e.violation);
         this.setState({ livePenalties: entries });
@@ -1570,7 +1533,7 @@ class Component extends DCLogic {
         dashboard: ['Weigh-In Dashboard & Daily Record \u2014 Micheal Ray Berry', 'Every daily weigh-in, four-angle photo set, and inspection video from the Public Accountability Project, updated daily by 10 PM ET.', 'dashboard'],
         about: ['About the Project \u2014 Micheal Ray Berry Public Accountability Project', 'Why this project exists, how the accountability structure works, and the three possible outcomes: full compliance, enforcement, or a permanently public abandonment record.', 'about'],
         agreement: ['The Signed Accountability Agreement \u2014 Micheal Ray Berry', 'The complete signed Public Accountability Agreement: daily compliance packet, documentation standard, official weigh-ins, violations, and the Accountability Partner\u2019s authority.', 'agreement'],
-        penalties: ['Violation Log \u2014 Micheal Ray Berry Public Accountability Project', 'The public violation record: every documentation failure by date and nature, resolved or unresolved. While anything is unresolved the assigned corner time and its recordings are public.', 'penalties'],
+        penalties: ['Violation Log \u2014 Micheal Ray Berry Public Accountability Project', 'The public violation record: every documentation failure by date and requirement, with its status, correction timestamps, and verification result.', 'penalties'],
         uniform: ['Documentation Standard & Uniform \u2014 Micheal Ray Berry', 'The standardized uniform, pose, and four-angle documentation format every daily inspection follows.', 'uniform'],
         updates: ['Updates & Milestones \u2014 Micheal Ray Berry Public Accountability Project', 'Official updates from the record: milestones, weekly reviews, and project events.', 'updates'],
         record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
@@ -1726,9 +1689,9 @@ class Component extends DCLogic {
     // ----- Penalties (permanent record) -----
     // Live source: the public "MRB Accountability — Penalties" Google Sheet (AP-administered).
     // Public columns per §8 of the agreement: date · violation · status ('Unresolved' or 'Resolved · date').
-    // The permanent entry is date · violation · status. The consequence detail
-    // beside it (level, duration, deadline, recordings) is published only while
-    // something is unresolved — see exposedSessions below.
+    // The public record is factual only: date, requirement missed, status,
+    // submission and resolution timestamps, and the AP's verification result.
+    // Corrective sessions are private (§8.6) and are never published.
     const penalties = this.state.livePenalties || [];
     // While any violation is unresolved, the site-wide violation notice shows.
     // NB: anchored regex — 'Unresolved' contains the substring 'resolved'.
@@ -1739,7 +1702,7 @@ class Component extends DCLogic {
       const m = String(p.status || '').match(/submitted[^0-9]*(\d{4}-\d{2}-\d{2})(?:[ T](\d{1,2}):(\d{2}))?/i);
       if (!m) return null;
       const at = new Date(m[1] + 'T' + (m[2] ? String(m[2]).padStart(2, '0') + ':' + m[3] : '12:00') + ':00');
-      return isNaN(at) ? null : { ends: at.getTime() + 86400000 };
+      return isNaN(at) ? null : { ends: at.getTime() + 86400000, stamp: m[1] + (m[2] ? ' ' + String(m[2]).padStart(2, '0') + ':' + m[3] : '') };
     };
     const openList = penalties.filter((p) => {
       if (/^\s*(satisfied|resolved)/i.test(p.status || '')) return false;
@@ -1770,35 +1733,17 @@ class Component extends DCLogic {
       return { date: p.date, violation: p.violation, openFor, vnum, levelLabel, cornerLabel, deadlineLabel, ackLabel, apLabel, noticeLabel, url: '/violations/' + vnum.toLowerCase() + '/' };
     });
     const violationCountLabel = openList.length === 1 ? '1 unresolved entry' : openList.length + ' unresolved entries';
-    /* Exposure window: while ANY entry is unresolved, every corrective-session
-       recording on the record is public — not just the open one. Clearing the
-       last unresolved entry hides all of them again. The recordings themselves
-       are never deleted; only their public visibility is conditional. */
-    const exposedSessions = inViolation
-      ? penalties
-          .filter((p) => String(p.rec || '').trim())
-          .map((p, i) => {
-            const n = penalties.indexOf(p) + 1;
-            const lv = parseInt(((p.level || '').match(/[123]/) || [''])[0], 10) || Math.min(n, 3);
-            return {
-              vnum: 'V-' + String(n).padStart(3, '0'),
-              date: p.date,
-              violation: p.violation,
-              url: String(p.rec).trim(),
-              meta: 'LEVEL ' + ['ONE', 'TWO', 'THREE'][lv - 1] + ' \u00b7 ' + ((p.corner || '').toUpperCase() || [10, 20, 30][lv - 1] + ' MIN'),
-              stateLabel: /^\s*(satisfied|resolved)/i.test(p.status || '') ? 'RESOLVED ENTRY \u00b7 EXPOSED WHILE ANOTHER IS OPEN' : 'UNRESOLVED',
-            };
-          })
-          .reverse()
-      : [];
-    const exposedCount = exposedSessions.length;
-    const exposedLabel = exposedCount === 1 ? '1 corrective session is public' : exposedCount + ' corrective sessions are public';
-    // Optional demonstration video explaining what corner time is, placed by
-    // the AP in Site State (key: corner_demo_url). It is a demonstration, not
-    // a corrective-session recording. Real sessions are published through the
-    // Violation Log's recording column while any entry is unresolved (§8.6),
-    // never through this field.
-    const cornerDemoUrl = String((this.state.siteState || {}).corner_demo_url || '').trim();
+    /* Neutral, factual, and site-wide only as a single line: the date and the
+       requirement missed, plus the current status. No consequence detail, no
+       recordings, no banner treatment — the record states what happened, and
+       the corrective process that follows is private (§8.6). */
+    const openSummary = openList.length
+      ? openList.slice(0, 2).map((p) => {
+          const s = subInfo(p);
+          const state = s ? 'corrected — submitted ' + s.stamp + ', awaiting AP verification' : 'open';
+          return p.date + ' — ' + p.violation + ' · ' + state;
+        }).join('   ·   ') + (openList.length > 2 ? '   ·   +' + (openList.length - 2) + ' more' : '')
+      : '';
     /* Video is self-hosted on the project's own storage — the record does not
        depend on a third-party platform staying up or leaving the video up.
        The intro is set by the AP in Site State; the inspection player always
@@ -1825,7 +1770,9 @@ class Component extends DCLogic {
     }));
     const recordStatus = !recordsLoaded
       ? 'Official Public Record — Loading official record…'
-      : (inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active');
+      : (inViolation
+          ? 'Official Public Record — ' + (openList.length === 1 ? 'Open entry' : openList.length + ' open entries')
+          : 'Official Public Record — No open entries');
 
     // ----- Live deadline status: overdue banner is automatic, sitewide -----
     const etHour = (() => {
@@ -1965,12 +1912,45 @@ class Component extends DCLogic {
           ? 'CAPTURE ATTESTED \u2713 \u2014 one-time code + file fingerprints logged with Google server time'
           : 'ATTESTATION LOGGED \u2014 ' + attMap[expDay.date])
       : '';
-    const penaltyRows = penalties.map((p, i) => ({
-      num: String(i + 1).padStart(3, '0'),
-      date: p.date, violation: p.violation,
-      status: p.status || 'Unresolved',
-      statusColor: /^\s*(satisfied|resolved)/i.test(p.status || '') ? '#3A6B3A' : '#B3261E',
-    }));
+    /* The public record is six factual fields. Status is normalised to the
+       three published states — open, corrected, resolved — rather than echoing
+       whatever phrasing the sheet happens to hold, so the vocabulary on the
+       page always matches the vocabulary in the agreement. Columns D-G of the
+       Violation Log supply the timestamps, the verification result, and the
+       appended correction history; a blank column renders as "—" rather than
+       inventing a value. */
+    const stateOf = (raw) => {
+      const s = String(raw || '').trim();
+      if (/^\s*(satisfied|resolved|closed)/i.test(s) && !/unresolved/i.test(s)) return 'resolved';
+      if (/submitted|corrected|pending/i.test(s)) return 'corrected';
+      return 'open';
+    };
+    const neutralWhat = (raw) => {
+      const s = String(raw || '').trim();
+      // Auto-declared packet misses are stated as an absence of record, not as
+      // an accusation — the record says what is missing, nothing more.
+      if (/incomplete/i.test(s)) return 'Incomplete record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '').replace(/^Missed 10 PM ET deadline\s*—\s*/i, '');
+      if (/no packet|not submitted|missing/i.test(s)) return 'No record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '');
+      return s.replace(/\s*\[auto-declared\]\s*/i, '');
+    };
+    const STATE_STYLE = { open: '#B3261E', corrected: '#8A6A1E', resolved: '#3A6B3A' };
+    const penaltyRows = penalties.map((p, i) => {
+      const st = stateOf(p.status);
+      const sub = subInfo(p);
+      const corrections = String(p.corrections || '').split(';').map((x) => x.trim()).filter(Boolean);
+      return {
+        num: String(i + 1).padStart(3, '0'),
+        date: p.date,
+        violation: neutralWhat(p.violation),
+        status: st,
+        statusColor: STATE_STYLE[st],
+        submitted: (p.submitted || (sub ? sub.stamp : '') || '—'),
+        resolved: (p.resolved || (st === 'resolved' ? (String(p.status).match(/(\d{4}-\d{2}-\d{2})/) || ['—'])[0] : '') || '—'),
+        verification: (p.verification || (st === 'resolved' ? 'Verified by the AP' : st === 'corrected' ? 'Awaiting AP verification' : '—')),
+        corrections,
+        hasCorrections: corrections.length > 0,
+      };
+    });
 
     // ----- Milestone ladder (reached when lowest recorded weight crosses) -----
     const lowest = data.length ? Math.min.apply(null, data.map((e) => e.weight)) : startWeight;
@@ -2034,8 +2014,7 @@ class Component extends DCLogic {
       cleanDays: recordsLoaded ? String(cleanDays) : '—',
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
-      inViolation, openViolations, violationCountLabel, recordStatus, cornerDemoUrl,
-      exposedSessions, hasExposed: exposedCount > 0, exposedLabel,
+      inViolation, openViolations, violationCountLabel, recordStatus, openSummary,
       introVideoUrl, noIntroVideo: !introVideoUrl, introPoster,
       latestVideoUrl, noLatestVideo: !latestVideoUrl, latestVideoLabel,
       // src/poster are set here, never as attribute holes — see the players above.

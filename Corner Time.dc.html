@@ -427,7 +427,7 @@ class Component extends DCLogic {
       if (this._wasDemo) {
         // Public explainer — goes to the bucket, never to the evidence archive.
         this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-corner-time-explained-' + date + '.' + ext });
-        this.uploadDemoToR2(blob, this._how === 'demo');
+        this.uploadDemoToR2(blob);
         return;
       }
       const name = 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + (this._how === 'safety' ? '-safety-stop' : '') + '-' + date + '.' + ext;
@@ -451,7 +451,7 @@ class Component extends DCLogic {
      exact object key; the file never passes through a relay, so size is
      unbounded. The returned public URL is what the AP pastes into the
      notice's demonstration field. */
-  async uploadDemoToR2(blob, full) {
+  async uploadDemoToR2(blob) {
     let key = '';
     try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
     if (!key) { this.setState({ upStatus: 'UPLOAD UNAVAILABLE — no device key in this browser. Download the file and upload it by hand.' }); return; }
@@ -476,20 +476,9 @@ class Component extends DCLogic {
         xhr.send(blob);
       });
       this._demoUrl = sign.publicUrl;
-      // Only a complete take is allowed to replace what the notice links to;
-      // a partial one is uploaded and reported, and the AP decides.
-      let linked = false;
-      if (full) {
-        try {
-          const r = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'demoset', key, url: sign.publicUrl }) })).json();
-          linked = !!(r && r.ok);
-        } catch (e) {}
-      }
-      this.setState({
-        upStatus: linked
-          ? 'UPLOADED ✓ AND LINKED — the demonstration is live on the violation notice. ' + sign.publicUrl
-          : 'UPLOADED ✓ (not linked — partial take) — ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video" if you want it on the notice.',
-      });
+      // Nothing about the corrective process is published, so the file is
+      // simply stored and reported to the AP — it is never linked publicly.
+      this.setState({ upStatus: 'UPLOADED ✓ — stored for the AP: ' + sign.publicUrl + '  ·  it is not published anywhere on the site.' });
     } catch (e) {
       this.setState({ upStatus: 'UPLOAD FAILED (' + e + ') — download the file below and upload it by hand.' });
     }
