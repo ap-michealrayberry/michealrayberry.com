@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 
+// Netlify sets no workspace var; the build runs from the repo root.
 const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://michealrayberry.com').replace(/\/$/, '');
 const SHEET_CSV = process.env.WEIGHINS_CSV ||

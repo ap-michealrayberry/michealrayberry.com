@@ -1,2 +1,18 @@
+# Netlify build — generates the per-day record pages on every deploy.
+# This replaces the GitHub Actions workflow, so no .github folder is needed
+# (GitHub's drag-and-drop uploader silently skips dot-folders).
+#
+# On each deploy Netlify: installs sharp, runs scripts/publish.mjs to build
+# /daily/<date>-day-NNN/ pages, responsive WebP variants, manifests and
+# sitemaps from the record spreadsheet + mirrored photos, then pings
+# IndexNow with whatever changed. Nightly rebuilds come from the Apps
+# Script build hook (setNetlifyBuildHook), and every photo the mirror
+# commits triggers one automatically.
+
 [build]
+  command = "npm install --no-audit --no-fund && node scripts/publish.mjs && node scripts/submit-indexnow.mjs"
   publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"
+  SITE_ORIGIN = "https://michealrayberry.com"
