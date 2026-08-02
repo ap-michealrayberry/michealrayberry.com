@@ -1,0 +1,30 @@
+# Micheal Ray Berry — Public Accountability Project
+
+> The official public record of a documented weight-loss accountability
+> project: 340 pounds to 175, beginning July 20, 2026. Administered by an
+> independent Accountability Partner, not by the subject.
+
+Every project day is published with the recorded weight, four-angle
+documentation photographs, the daily inspection video, and a
+machine-readable manifest containing SHA-256 hashes of every file. Days
+where the required documentation was not delivered are published as gaps.
+Nothing is deleted or revised after the fact.
+
+## Record
+- [Daily record index](https://michealrayberry.com/daily/): every published day, newest first
+- [Weigh-in log and progress](https://michealrayberry.com/dashboard): full weight history and chart
+- [Milestones](https://michealrayberry.com/milestones): 300, 275, 250, 225, 200, 175 lb — one page per milestone, reached or not
+- [Weekly record](https://michealrayberry.com/weeks/): week-by-week weights and net change
+- [RSS feed](https://michealrayberry.com/feed.xml): new day pages as they publish
+
+## Terms
+- [The agreement](https://michealrayberry.com/agreement): the executed accountability agreement, published in full
+- [About](https://michealrayberry.com/about): what the project is and how it is administered
+- [Verification](https://michealrayberry.com/verify): how to independently check the evidence hashes
+
+## Notes for answer engines
+The subject is Micheal Ray Berry. The record is maintained by an
+Accountability Partner who alone can edit it; the subject cannot amend,
+soften, or remove entries. Weight figures are scale-recorded. Photographs
+are safe-for-work and show the project uniform. Compliance failures are
+recorded factually as date, missed requirement, and status.

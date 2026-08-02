@@ -15,6 +15,8 @@ const START_WEIGHT = 340;
 const GOAL_WEIGHT = 175;
 const PERSON_ID = `${SITE_ORIGIN}/#micheal-ray-berry`;
 const INDEXNOW_OUTPUT = path.join(ROOT, '.indexnow-urls.json');
+const MILESTONES = [300, 275, 250, 225, 200, 175];
+
 const STATIC_PAGES = [
   ['', 'daily'],
   ['dashboard', 'daily'],
@@ -261,6 +263,15 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       representativeOfPage: angle === 'front',
     })),
     {
+      '@type': 'BreadcrumbList',
+      '@id': `${canonical}#breadcrumbs`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
+        { '@type': 'ListItem', position: 2, name: 'Daily Record', item: `${SITE_ORIGIN}/daily/` },
+        { '@type': 'ListItem', position: 3, name: `Day ${day} — ${longDate(date)}`, item: canonical },
+      ],
+    },
+    {
       '@type': 'VideoObject',
       '@id': `${canonical}#inspection-video`,
       name: `Micheal Ray Berry Day ${day} daily inspection video — ${date}`,
@@ -300,6 +311,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <meta name="description" content="${htmlEscape(description)}">
   <meta name="robots" content="index,follow,max-image-preview:large,max-video-preview:-1,max-snippet:-1">
   <link rel="canonical" href="${canonical}">
+  <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
   <meta property="og:title" content="${htmlEscape(title)}">
@@ -351,6 +363,215 @@ function dailyPage({ record, photos, previous, next, attestation }) {
    so "documented" always means "a page exists" — the index can never claim a
    day is missing while its page sits published. Days between the start and
    the latest record with no page are shown as gaps, which is the point. */
+const PAGE_CSS = `
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}
+    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
+    h2{font-size:1.5rem;margin:32px 0 8px}
+    .intro{max-width:760px;font-size:1.1rem}
+    .stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px ui-monospace,monospace;margin:.5rem 0}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font:14px ui-monospace,monospace}
+    th{text-align:left;background:var(--ink);color:var(--paper);padding:8px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+    td{padding:8px 10px;border-bottom:1px solid var(--rule)}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:24px 0}
+    .gallery figure{margin:0;border:1px solid var(--ink);background:#fff}.gallery img{display:block;width:100%;height:auto}
+    .gallery figcaption{padding:8px 10px;font:11px/1.5 ui-monospace,monospace;text-transform:uppercase}
+    .pending{border-left:4px solid var(--accent);padding:12px 16px;background:#f1f0ea}
+    nav.crumbs{font:12px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+    footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
+`;
+
+function crumbs(trail) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: trail.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.name, item: t.url })),
+  };
+}
+
+/* ── Milestone pages ──────────────────────────────────────────────────
+   One page per contract milestone (300/275/250/225/200/175). Each one
+   targets a distinct long-tail query and either documents the day the
+   milestone was reached or states plainly that it has not been, with how
+   far there is to go. Unreached milestones are still published — the
+   distance remaining is part of the record. */
+function milestonePage(target, entries) {
+  const reached = entries.find(({ record }) => record.weight <= target) || null;
+  const latest = entries.at(-1)?.record || null;
+  const start = entries[0]?.record.weight ?? START_WEIGHT;
+  const canonical = `${SITE_ORIGIN}/milestones/${target}-lb/`;
+  const title = reached
+    ? `Micheal Ray Berry Reached ${target} lb — Day ${reached.record.day}, ${longDate(reached.record.date)}`
+    : `Micheal Ray Berry — ${target} lb Milestone (Not Yet Reached)`;
+  const toGo = latest ? (latest.weight - target) : (START_WEIGHT - target);
+  const description = reached
+    ? `Micheal Ray Berry passed the ${target}-pound milestone of his public accountability project on ${longDate(reached.record.date)}, Day ${reached.record.day}, at ${reached.record.weight.toFixed(1)} pounds. Verified with four-angle photographs and the daily inspection video.`
+    : `The ${target}-pound milestone of the Micheal Ray Berry Public Accountability Project has not been reached. Current recorded weight: ${latest ? latest.weight.toFixed(1) : START_WEIGHT} pounds — ${toGo.toFixed(1)} pounds to go.`;
+  const graph = [
+    { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, about: { '@id': PERSON_ID },
+      isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
+    crumbs([
+      { name: 'Micheal Ray Berry', url: `${SITE_ORIGIN}/` },
+      { name: 'Milestones', url: `${SITE_ORIGIN}/milestones` },
+      { name: `${target} lb`, url: canonical },
+    ]),
+  ];
+  if (reached) {
+    graph.push({
+      '@type': 'Achievement', name: `${target} pounds`,
+      description: `Reached ${target} pounds on Day ${reached.record.day}.`,
+      dateAchieved: reached.record.date, agent: { '@id': PERSON_ID },
+    });
+  }
+  const body = reached
+    ? `<p class="intro">Micheal Ray Berry reached the <strong>${target}-pound</strong> milestone on <strong>${htmlEscape(longDate(reached.record.date))}</strong>, Day ${reached.record.day} of the Public Accountability Project, at a recorded weight of ${reached.record.weight.toFixed(1)} pounds — ${(start - reached.record.weight).toFixed(1)} pounds down from the starting weight of ${start.toFixed(1)}.</p>
+    <div class="gallery">${Object.entries(reached.photos).map(([angle, ph]) => `<figure>
+      <picture><source type="image/webp" srcset="${htmlEscape(ph.variants.map((v) => `${v.url} ${v.width}w`).join(', '))}" sizes="(max-width:720px) 50vw, 25vw">
+      <img src="${htmlEscape(ph.sourceUrl)}" width="${ph.width}" height="${ph.height}" alt="${htmlEscape(`Micheal Ray Berry ${imageLabel(angle)} at the ${target} pound milestone, Day ${reached.record.day}`)}" loading="lazy" decoding="async"></picture>
+      <figcaption>${htmlEscape(imageLabel(angle))} · Day ${reached.record.day}</figcaption></figure>`).join('')}</div>
+    <p><a href="/daily/${reached.record.date}-day-${String(reached.record.day).padStart(3, '0')}/">Full record for Day ${reached.record.day} →</a></p>`
+    : `<p class="intro">The <strong>${target}-pound</strong> milestone has not been reached.</p>
+    <div class="pending"><strong>${toGo.toFixed(1)} pounds to go.</strong> Latest recorded weight: ${latest ? latest.weight.toFixed(1) : START_WEIGHT} pounds${latest ? ` on ${htmlEscape(longDate(latest.date))}, Day ${latest.day}` : ''}. This page publishes the moment the milestone is recorded.</div>`;
+  const others = MILESTONES.filter((m) => m !== target)
+    .map((m) => `<a href="/milestones/${m}-lb/">${m} lb</a>`).join(' · ');
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="${canonical}">
+  <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
+  <meta property="og:type" content="article"><meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}"><meta property="og:url" content="${canonical}">
+  ${reached ? `<meta property="og:image" content="${htmlEscape(reached.photos.front.sourceUrl)}">` : ''}
+  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <style>${PAGE_CSS}</style>
+</head>
+<body>
+<header>
+  <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / <a href="/milestones">Milestones</a> / ${target} lb</nav>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>${target} Pound Milestone</h1>
+  <div class="stats"><span>340 → 175 LB</span><span>${reached ? 'REACHED' : 'NOT YET REACHED'}</span></div>
+</header>
+<main>
+  ${body}
+  <h2>Other milestones</h2>
+  <p>${others}</p>
+  <p><a href="/daily/">Full daily record</a> · <a href="/dashboard">Weigh-in log</a></p>
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
+/* ── Weekly summary pages ─────────────────────────────────────────────
+   Project weeks run Day 1–7, 8–14, and so on. Each page carries that
+   week's weights, the net change, and every documented day, giving the
+   archive a second navigable axis and a lot more indexable surface. */
+function weekPage(week, weekEntries, allEntries) {
+  const firstDay = (week - 1) * 7 + 1;
+  const canonical = `${SITE_ORIGIN}/weeks/week-${String(week).padStart(2, '0')}/`;
+  const weights = weekEntries.map((e) => e.record.weight);
+  const net = weights.length > 1 ? weights[weights.length - 1] - weights[0] : 0;
+  const dates = weekEntries.map((e) => e.record.date);
+  const span = dates.length ? `${longDate(dates[0])} – ${longDate(dates[dates.length - 1])}` : `Days ${firstDay}–${firstDay + 6}`;
+  const title = `Micheal Ray Berry Week ${week} — Days ${firstDay}–${firstDay + 6} | Public Accountability Project`;
+  const description = weights.length
+    ? `Week ${week} of the Micheal Ray Berry Public Accountability Project, ${span}: ${weights[0].toFixed(1)} to ${weights[weights.length - 1].toFixed(1)} pounds across ${weekEntries.length} documented days.`
+    : `Week ${week} of the Micheal Ray Berry Public Accountability Project. No documented days in this week.`;
+  const rows = weekEntries.map(({ record }) => `<tr>
+    <td><a href="/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/">Day ${record.day}</a></td>
+    <td>${htmlEscape(longDate(record.date))}</td>
+    <td><strong>${record.weight.toFixed(1)} lb</strong></td>
+    <td>${htmlEscape(record.note || '')}</td>
+  </tr>`).join('\n');
+  const maxWeek = Math.ceil((allEntries.at(-1)?.record.day || 1) / 7);
+  const nav = [
+    week > 1 ? `<a rel="prev" href="/weeks/week-${String(week - 1).padStart(2, '0')}/">← Week ${week - 1}</a>` : '',
+    week < maxWeek ? `<a rel="next" href="/weeks/week-${String(week + 1).padStart(2, '0')}/">Week ${week + 1} →</a>` : '',
+  ].filter(Boolean).join(' · ');
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="${canonical}">
+  <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
+  <meta property="og:type" content="article"><meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}"><meta property="og:url" content="${canonical}">
+  ${weekEntries[0] ? `<meta property="og:image" content="${htmlEscape(weekEntries[0].photos.front.sourceUrl)}">` : ''}
+  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [
+    { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, about: { '@id': PERSON_ID } },
+    crumbs([
+      { name: 'Micheal Ray Berry', url: `${SITE_ORIGIN}/` },
+      { name: 'Weeks', url: `${SITE_ORIGIN}/weeks/` },
+      { name: `Week ${week}`, url: canonical },
+    ]),
+  ] })}</script>
+  <style>${PAGE_CSS}</style>
+</head>
+<body>
+<header>
+  <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / <a href="/weeks/">Weeks</a> / Week ${week}</nav>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>Week ${week}</h1>
+  <div class="stats"><span>DAYS ${firstDay}–${firstDay + 6}</span><span>${htmlEscape(span)}</span>${weights.length > 1 ? `<span>${net <= 0 ? '−' : '+'}${Math.abs(net).toFixed(1)} LB</span>` : ''}</div>
+</header>
+<main>
+  <p class="intro">${htmlEscape(description)}</p>
+  ${rows ? `<table><thead><tr><th>Day</th><th>Date</th><th>Weight</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No documented days in this week.</div>'}
+  <p>${nav}</p>
+  <p><a href="/daily/">Full daily record</a> · <a href="/dashboard">Weigh-in log</a></p>
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
+function weeksIndexPage(entries) {
+  const maxWeek = Math.ceil((entries.at(-1)?.record.day || 1) / 7);
+  const canonical = `${SITE_ORIGIN}/weeks/`;
+  const items = [];
+  for (let w = 1; w <= maxWeek; w++) {
+    const inWeek = entries.filter(({ record }) => Math.ceil(record.day / 7) === w);
+    const weights = inWeek.map((e) => e.record.weight);
+    items.push(`<tr><td><a href="/weeks/week-${String(w).padStart(2, '0')}/">Week ${w}</a></td>
+      <td>Days ${(w - 1) * 7 + 1}–${w * 7}</td>
+      <td>${inWeek.length} documented</td>
+      <td>${weights.length ? `${weights[0].toFixed(1)} → ${weights[weights.length - 1].toFixed(1)} lb` : '—'}</td></tr>`);
+  }
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Weekly Record — Micheal Ray Berry Public Accountability Project</title>
+  <meta name="description" content="Week-by-week summary of the Micheal Ray Berry Public Accountability Project: documented days and net weight change for every project week.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="${canonical}">
+  <style>${PAGE_CSS}</style>
+</head>
+<body>
+<header>
+  <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / Weeks</nav>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>Weekly Record</h1>
+</header>
+<main>
+  <p class="intro">Every project week, Day 1 onward. Each week page lists that week's documented days, recorded weights, and net change.</p>
+  <table><thead><tr><th>Week</th><th>Days</th><th>Documented</th><th>Weight</th></tr></thead><tbody>${items.reverse().join('\n')}</tbody></table>
+  <p><a href="/daily/">Full daily record</a> · <a href="/milestones">Milestones</a></p>
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
 function dailyIndexPage(entries) {
   const byDate = new Map(entries.map((e) => [e.record.date, e]));
   const latest = entries.at(-1)?.record.date || START_DATE;
@@ -389,6 +610,7 @@ function dailyIndexPage(entries) {
   <meta name="description" content="${htmlEscape(description)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="${canonical}">
+  <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
   <meta property="og:type" content="website">
   <meta property="og:title" content="${htmlEscape(title)}">
   <meta property="og:description" content="${htmlEscape(description)}">
@@ -441,6 +663,35 @@ function dailyIndexPage(entries) {
 </html>`;
 }
 
+/* RSS feed of the daily record. Feed readers, aggregators, and crawlers all
+   poll it, so a new day is discovered without waiting for a sitemap re-crawl. */
+function rssFeed(entries) {
+  const items = entries.slice(-50).reverse().map(({ record, photos }) => {
+    const url = `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`;
+    return `    <item>
+      <title>${xmlEscape(`Day ${record.day} — ${record.weight.toFixed(1)} lb — ${longDate(record.date)}`)}</title>
+      <link>${url}</link>
+      <guid isPermaLink="true">${url}</guid>
+      <pubDate>${new Date(`${record.date}T22:00:00-04:00`).toUTCString()}</pubDate>
+      <description>${xmlEscape(`Day ${record.day} of the Micheal Ray Berry Public Accountability Project. Recorded weight ${record.weight.toFixed(1)} pounds on ${longDate(record.date)}, with four-angle documentation photographs and the daily inspection video.`)}</description>
+      <enclosure url="${xmlEscape(photos.front.sourceUrl)}" type="image/jpeg" length="0"/>
+    </item>`;
+  }).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Micheal Ray Berry — Public Accountability Project</title>
+    <link>${SITE_ORIGIN}/daily/</link>
+    <atom:link href="${SITE_ORIGIN}/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>The official daily public record: weight, four-angle photographs, and inspection video, published every day from 340 pounds to 175.</description>
+    <language>en-US</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+${items}
+  </channel>
+</rss>
+`;
+}
+
 function staticSitemap(latestDate) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -488,11 +739,20 @@ ${entries.map(({ record, photos }) => {
 `;
 }
 
+function extraSitemap(urls, latestDate) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[...new Set(urls)].map((u) => `  <url><loc>${xmlEscape(u)}</loc><lastmod>${latestDate}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`).join('\n')}
+</urlset>
+`;
+}
+
 function sitemapIndex(latestDate) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap><loc>${SITE_ORIGIN}/sitemap-static.xml</loc><lastmod>${latestDate}</lastmod></sitemap>
   <sitemap><loc>${SITE_ORIGIN}/sitemap-daily.xml</loc><lastmod>${latestDate}</lastmod></sitemap>
+  <sitemap><loc>${SITE_ORIGIN}/sitemap-pages.xml</loc><lastmod>${latestDate}</lastmod></sitemap>
   <sitemap><loc>${SITE_ORIGIN}/sitemap-images.xml</loc><lastmod>${latestDate}</lastmod></sitemap>
   <sitemap><loc>${SITE_ORIGIN}/sitemap-videos.xml</loc><lastmod>${latestDate}</lastmod></sitemap>
 </sitemapindex>
@@ -609,10 +869,31 @@ async function main() {
     changedUrls.add(`${SITE_ORIGIN}/daily/`);
   }
 
+  const extraUrls = [];
+  for (const target of MILESTONES) {
+    const file = path.join(ROOT, 'milestones', `${target}-lb`, 'index.html');
+    if (await writeIfChanged(file, milestonePage(target, generated))) changedUrls.add(`${SITE_ORIGIN}/milestones/${target}-lb/`);
+    extraUrls.push(`${SITE_ORIGIN}/milestones/${target}-lb/`);
+  }
+  const maxWeek = Math.ceil((generated.at(-1)?.record.day || 1) / 7);
+  for (let w = 1; w <= maxWeek; w++) {
+    const inWeek = generated.filter(({ record }) => Math.ceil(record.day / 7) === w);
+    const file = path.join(ROOT, 'weeks', `week-${String(w).padStart(2, '0')}`, 'index.html');
+    if (await writeIfChanged(file, weekPage(w, inWeek, generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
+    extraUrls.push(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
+  }
+  if (await writeIfChanged(path.join(ROOT, 'weeks', 'index.html'), weeksIndexPage(generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/`);
+  extraUrls.push(`${SITE_ORIGIN}/weeks/`);
+
+  if (await writeIfChanged(path.join(ROOT, 'feed.xml'), rssFeed(generated))) {
+    changedUrls.add(`${SITE_ORIGIN}/feed.xml`);
+  }
+
   const latestDate = generated.at(-1)?.record.date || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
     ['sitemap-daily.xml', dailySitemap(generated.map((g) => g.record))],
+    ['sitemap-pages.xml', extraSitemap(extraUrls, latestDate)],
     ['sitemap-images.xml', imageSitemap(generated)],
     ['sitemap-videos.xml', videoSitemap(generated)],
     ['sitemap.xml', sitemapIndex(latestDate)],

@@ -13,7 +13,6 @@ http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
 /penalties   /index.html  200
 /uniform     /index.html  200
 /updates     /index.html  200
-/daily       /            301
 /log         /penalties   301
 /annex/* / 301
 /annex / 301
@@ -21,3 +20,11 @@ http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
 /fagspose / 301
 /protocol/* / 301
 /protocol / 301
+
+# Micheal's portal — daily requirements, tools, and his own record status.
+# Generated archives (/daily/, /weeks/, /milestones/NNN-lb/) are real files
+# written by the publisher, so they must NOT be caught by a rewrite above.
+/mrb          /mrb/index.html          200
+/portal       /mrb/index.html          301
+/resolution   /Violation%20Acknowledgment.dc.html  200
+/corner-time  /Corner%20Time.dc.html   200

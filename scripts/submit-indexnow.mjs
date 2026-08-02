@@ -39,6 +39,5 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error('IndexNow submission failed (site still deploys):', error);
 });

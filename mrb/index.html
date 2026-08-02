@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>MRB Portal — Daily Requirements</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+    ::placeholder { color: #9B9A94; }
+  </style>
+</helmet>
+
+<sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+  <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #141412; background: #FFFFFF; padding: 30px 28px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: #B3261E;">Micheal Ray Berry only</span>
+    <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0; letter-spacing: 0.02em;">MRB Portal</h1>
+    <p style="margin: 0; font-size: 13.5px; line-height: 1.65; color: #3A3935;">Enter the device key issued by the Accountability Partner. It is stored on this device only and files records — it cannot edit, resolve, or remove anything in the record.</p>
+    <input type="password" value="{{ keyInput }}" onInput="{{ onKey }}" onKeyDown="{{ onKeyDown }}" placeholder="Device key" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 12px 14px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+    <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ authMsg }}</span>
+    <button onClick="{{ unlock }}" style="padding: 14px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #B3261E;">Unlock</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ unlocked }}" hint-placeholder-val="{{ false }}">
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 28px 20px 72px; gap: 22px; box-sizing: border-box;">
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid #141412; padding-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: #B3261E;">Micheal Ray Berry · daily requirements</span>
+      <button onClick="{{ lock }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: none; color: #6B6A64; cursor: pointer; padding: 0;" style-hover="color: #B3261E;">Lock</button>
+    </div>
+    <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 40px; text-transform: uppercase; margin: 0; letter-spacing: 0.02em; line-height: 1;">Day {{ dayNum }}</h1>
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">{{ todayLong }} · {{ weightLine }}</div>
+  </div>
+
+  <div style="width: 100%; max-width: 760px; border: 2px solid {{ deadlineColor }}; background: {{ deadlineBg }}; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: {{ deadlineColor }};">{{ deadlineLabel }}</span>
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: 0.02em; line-height: 1.1;">{{ countdown }}</span>
+    </div>
+    <span style="font-size: 12.5px; line-height: 1.6; color: #3A3935; max-width: 380px;">{{ deadlineNote }}</span>
+  </div>
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Today's compliance packet — {{ packetCount }}</span>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px;">
+      <sc-for list="{{ packetItems }}" as="it" hint-placeholder-count="6">
+        <div style="border: 1px solid {{ it.color }}; background: {{ it.bg }}; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">{{ it.label }}</span>
+          <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 16px; text-transform: uppercase; color: {{ it.color }};">{{ it.state }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Recording tools</span>
+    <a href="/record" style="border: 2px solid #141412; background: #141412; color: #FAFAF7; padding: 20px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 5px;" style-hover="background: #B3261E; border-color: #B3261E;">
+      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: 0.02em;">Daily Inspection</span>
+      <span style="font-size: 13px; line-height: 1.6; opacity: 0.85;">Weight entry, the guided four-angle photo sequence, and the inspection video — in one pass. Files itself to the record and satisfies the packet.</span>
+    </a>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px;">
+      <a href="/resolution" style="border: 1px solid #B3261E; color: #141412; padding: 16px 18px; text-decoration: none; display: flex; flex-direction: column; gap: 4px; background: #FFFFFF;" style-hover="background: #F6DEDC;">
+        <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase;">Violation Resolution</span>
+        <span style="font-size: 12.5px; line-height: 1.55; color: #3A3935;">Acknowledgment and assigned corner time in one continuous take. AI-voiced; you do not speak.</span>
+      </a>
+      <a href="/corner-time" style="border: 1px solid #B3261E; color: #141412; padding: 16px 18px; text-decoration: none; display: flex; flex-direction: column; gap: 4px; background: #FFFFFF;" style-hover="background: #F6DEDC;">
+        <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase;">Corner Time</span>
+        <span style="font-size: 12.5px; line-height: 1.55; color: #3A3935;">A standalone corner-time session when the AP assigns one on its own. Monitored, timed, filed automatically.</span>
+      </a>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasCorrective }}" hint-placeholder-val="{{ false }}">
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Assigned to you — private, not published</span>
+    <sc-for list="{{ correctiveList }}" as="c" hint-placeholder-count="1">
+      <div style="border: 1px solid #141412; background: #FFFFFF; padding: 14px 16px; display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 3px; max-width: 480px;">
+          <span style="font-size: 14px; line-height: 1.55; font-weight: 600;">{{ c.assignment }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #6B6A64;">{{ c.meta }}</span>
+        </div>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: {{ c.color }}; white-space: nowrap;">{{ c.status }}</span>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Violation log — {{ violSummary }}</span>
+    <sc-if value="{{ hasViolations }}" hint-placeholder-val="{{ false }}">
+      <sc-for list="{{ violationList }}" as="v" hint-placeholder-count="1">
+        <div style="border-left: 3px solid {{ v.color }}; border-top: 1px solid #D8D6CF; border-right: 1px solid #D8D6CF; border-bottom: 1px solid #D8D6CF; background: #FFFFFF; padding: 12px 16px; display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: 3px; max-width: 500px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; color: #6B6A64;">{{ v.date }} · DAY {{ v.day }}</span>
+            <span style="font-size: 13.5px; line-height: 1.55;">{{ v.what }}</span>
+          </div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: {{ v.color }}; white-space: nowrap;">{{ v.status }}</span>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ noViolations }}" hint-placeholder-val="{{ true }}">
+      <div style="border: 1px solid #D8D6CF; background: #F1F0EA; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #3A3935;">The log is clean. Keep it that way — the packet is due tonight at 10 PM ET.</div>
+    </sc-if>
+    <span style="font-size: 12px; line-height: 1.6; color: #6B6A64;">Only the Accountability Partner can resolve an entry. Completing what was assigned does not change a status until he verifies it.</span>
+  </div>
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Progress</span>
+    <div style="border: 1px solid #141412; background: #FFFFFF; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;">
+        <span>START {{ startW }}</span>
+        <span style="font-weight: 700;">NOW {{ nowW }}</span>
+        <span>GOAL 175.0</span>
+      </div>
+      <div style="height: 10px; background: #F1F0EA; border: 1px solid #D8D6CF; position: relative;">
+        <div style="position: absolute; inset: 0 auto 0 0; width: {{ progressPct }}; background: #B3261E;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #3A3935;">
+        <span>{{ lostLine }}</span>
+        <span>{{ nextMilestone }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #D8D6CF; padding-top: 16px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirements — every day, no exceptions</span>
+    <div style="font-size: 13px; line-height: 1.75; color: #3A3935;">
+      <div>Weight entry, the four-angle inspection, and the tracker update are all due by <strong>10:00 PM ET</strong>. Several misses on the same day count as one violation; a miss on two days counts as two.</div>
+      <div>Uniform is the black unitard with plain black shoes. No name tag.</div>
+      <div>Nothing you file can be edited or withdrawn afterwards. If something goes wrong, record it anyway and tell the AP — a documented problem is not the same as a missed requirement.</div>
+      <div>Reach the AP at <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</div>
+    </div>
+    <span style="font-size: 12px; color: #6B6A64; line-height: 1.6;">{{ syncNote }}</span>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:820,&quot;height&quot;:1200}}">
+class Component extends DCLogic {
+  EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
+  START = '2026-07-20';
+  MILESTONES = [300, 275, 250, 225, 200, 175];
+
+  state = { key: '', keyInput: '', authMsg: '', data: null, now: Date.now(), loading: false };
+
+  componentDidMount() {
+    let k = '';
+    try { k = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (k) { this.setState({ key: k }); this.load(k); }
+    this._tick = setInterval(() => this.setState({ now: Date.now() }), 1000);
+    this._poll = setInterval(() => { if (this.state.key) this.load(this.state.key); }, 120000);
+  }
+  componentWillUnmount() { clearInterval(this._tick); clearInterval(this._poll); }
+
+  async load(key) {
+    this.setState({ loading: true });
+    try {
+      const r = await fetch(this.EP + '?action=mystate&key=' + encodeURIComponent(key));
+      const j = await r.json();
+      if (!j.ok) { this.setState({ authMsg: 'Key not accepted. Check it with the AP.', key: '', loading: false }); return; }
+      try { localStorage.setItem('mrb_packet_key', key); } catch (e) {}
+      this.setState({ data: j, key, authMsg: '', loading: false, synced: new Date() });
+    } catch (e) {
+      this.setState({ authMsg: 'Could not reach the record. Check your connection.', loading: false });
+    }
+  }
+
+  dayNum(iso) { return Math.floor((new Date(iso + 'T12:00:00Z') - new Date(this.START + 'T12:00:00Z')) / 864e5) + 1; }
+  longDate(iso) {
+    try { return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(iso + 'T12:00:00Z')); }
+    catch (e) { return iso; }
+  }
+
+  // Milliseconds until 10:00 PM America/New_York today, computed from the
+  // real offset rather than a hardcoded -4 so it stays right across DST.
+  msToDeadline() {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour12: false,
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(now).reduce((a, p) => (a[p.type] = p.value, a), {});
+    const etSecs = (Number(parts.hour) % 24) * 3600 + Number(parts.minute) * 60 + Number(parts.second);
+    return (22 * 3600 - etSecs) * 1000;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const d = s.data;
+    const unlocked = !!d;
+    const base = {
+      locked: !unlocked, unlocked,
+      keyInput: s.keyInput, authMsg: s.authMsg,
+      onKey: (e) => this.setState({ keyInput: e.target.value }),
+      onKeyDown: (e) => { if (e.key === 'Enter') this.load(s.keyInput.trim()); },
+      unlock: () => this.load(s.keyInput.trim()),
+      lock: () => { try { localStorage.removeItem('mrb_packet_key'); } catch (e) {} this.setState({ data: null, key: '', keyInput: '' }); },
+    };
+    if (!unlocked) return base;
+
+    const p = d.packet || {};
+    const photos = ['front', 'left', 'rear', 'right'];
+    const done = (ok) => ({ color: ok ? '#2E6F3E' : '#B3261E', bg: ok ? '#EAF3EC' : '#F6DEDC', state: ok ? 'Done' : 'Due' });
+    const items = [
+      Object.assign({ label: 'Weight' }, done(!!String(p.weight || '').trim())),
+      ...photos.map((a) => Object.assign({ label: a }, done(!!p[a]))),
+      Object.assign({ label: 'Video' }, done(!!p.video)),
+    ];
+    const complete = items.filter((i) => i.state === 'Done').length;
+    const allDone = complete === items.length;
+
+    const ms = this.msToDeadline();
+    const late = ms < 0;
+    const abs = Math.abs(ms);
+    const hh = Math.floor(abs / 3600000), mm = Math.floor((abs % 3600000) / 60000), ss = Math.floor((abs % 60000) / 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+
+    const latest = d.latest;
+    const start = Number(d.start) || 340;
+    const now = latest ? Number(latest.weight) : start;
+    const pct = Math.max(0, Math.min(100, ((start - now) / (start - 175)) * 100));
+    const nextMs = this.MILESTONES.filter((m) => m < now).sort((a, b) => b - a)[0];
+
+    const vlist = (d.violations || []).slice().sort((a, b) => (a.date < b.date ? 1 : -1));
+    const unresolved = vlist.filter((v) => !/resolved|satisfied/i.test(v.status)).length;
+    const clist = (d.corrective || []).filter((c) => !/complete|verified/i.test(c.status));
+
+    return Object.assign(base, {
+      dayNum: d.day,
+      todayLong: this.longDate(d.today),
+      weightLine: latest ? latest.weight.toFixed(1) + ' lb recorded ' + (latest.date === d.today ? 'today' : 'on ' + latest.date) : 'No weight recorded yet',
+
+      packetItems: items,
+      packetCount: complete + ' of ' + items.length + ' complete',
+
+      countdown: allDone ? 'Packet complete' : (late ? pad(hh) + ':' + pad(mm) + ':' + pad(ss) + ' past due' : pad(hh) + ':' + pad(mm) + ':' + pad(ss)),
+      deadlineLabel: allDone ? 'Filed for today' : (late ? 'Deadline passed · 10:00 PM ET' : 'Time remaining · due 10:00 PM ET'),
+      deadlineColor: allDone ? '#2E6F3E' : '#B3261E',
+      deadlineBg: allDone ? '#EAF3EC' : '#FFFFFF',
+      deadlineNote: allDone
+        ? 'Everything required today has been filed. The AP verifies it after the fact; nothing further is needed from you tonight.'
+        : (late
+          ? 'The deadline has passed. File anyway — a late record is still the record, and the AP decides what it counts as.'
+          : 'Weight entry, four-angle inspection, and tracker update. Multiple misses on the same day count as one violation.'),
+
+      hasCorrective: clist.length > 0,
+      correctiveList: clist.map((c) => ({
+        assignment: c.assignment,
+        meta: 'Assigned ' + (c.date || '—') + (c.due ? ' · due ' + c.due : ''),
+        status: (c.status || 'Assigned').toUpperCase(),
+        color: /overdue/i.test(c.status) ? '#B3261E' : '#141412',
+      })),
+
+      hasViolations: vlist.length > 0,
+      noViolations: vlist.length === 0,
+      violSummary: vlist.length ? unresolved + ' unresolved of ' + vlist.length : 'clean',
+      violationList: vlist.map((v) => ({
+        date: v.date, day: this.dayNum(v.date), what: v.what,
+        status: (v.status || 'Unresolved').toUpperCase(),
+        color: /resolved|satisfied/i.test(v.status) ? '#2E6F3E' : '#B3261E',
+      })),
+
+      startW: start.toFixed(1),
+      nowW: now.toFixed(1),
+      progressPct: pct.toFixed(1) + '%',
+      lostLine: (start - now) >= 0 ? (start - now).toFixed(1) + ' lb down from start' : Math.abs(start - now).toFixed(1) + ' lb up from start',
+      nextMilestone: nextMs ? (now - nextMs).toFixed(1) + ' lb to ' + nextMs : 'Holding at goal — 28 consecutive days required',
+
+      syncNote: s.synced ? 'Record last read ' + s.synced.toLocaleTimeString() + '. This page is read-only.' : 'This page is read-only.',
+    });
+  }
+}
+</script>
+</body>
+</html>

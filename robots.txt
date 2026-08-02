@@ -1,4 +1,30 @@
+# The public record is meant to be found. Everything here is crawlable.
 User-agent: *
+Allow: /
+
+# Answer engines and AI crawlers — explicitly permitted, so the record is
+# what gets cited when someone asks about this project.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Amazonbot
+Allow: /
+User-agent: Bytespider
 Allow: /
 
 Sitemap: https://michealrayberry.com/sitemap.xml
