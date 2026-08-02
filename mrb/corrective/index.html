@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Corrective Session — Recording Assistant</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div style="background: #141412; color: #FAFAF7; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; flex-wrap: wrap;">
+    <a href="/mrb" style="color: #FAFAF7; text-decoration: none;" style-hover="color: #FF6B61;">← Portal</a>
+    <span style="color: #8A8983;">Corrective session · private</span>
+  </div>
+
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width: 460px; margin: 72px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Device not authorised</span>
+      <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 30px; text-transform: uppercase; margin: 0; letter-spacing: 0.03em;">Corrective Session</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">Enter the device key issued for this phone. It is stored on this device only, and the Accountability Partner can revoke it at any time.</p>
+      <input type="password" value="{{ keyInput }}" onChange="{{ onKey }}" placeholder="Device key" autoComplete="off" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 13px 14px; border: 1px solid #141412; background: #FFFFFF; color: #141412;">
+      <button onClick="{{ unlock }}" style="padding: 15px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #B3261E;">{{ unlockLabel }}</button>
+      <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ authMsg }}</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width: 620px; margin: 0 auto; padding: 26px 20px 60px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(28px, 6vw, 42px); text-transform: uppercase; line-height: 1; margin: 0;">Corrective Session</h1>
+        <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">One continuous, unedited take, fully AI-voiced — you do not speak. The recording goes to the Accountability Partner's private archive so he can verify completion. It is never published, and no part of it appears on the public record.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Entry being corrected</span>
+        <sc-if value="{{ hasEntries }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <sc-for list="{{ entries }}" as="v" hint-placeholder-count="1">
+              <button onClick="{{ v.pick }}" style="text-align: left; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid {{ v.border }}; background: {{ v.bg }}; color: #141412;">{{ v.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noEntries }}" hint-placeholder-val="{{ true }}">
+          <div style="border: 1px solid #D8D6CF; background: #F1F0EA; padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #3A3935;">No open entry in the record. Nothing to correct — keep it that way.</div>
+        </sc-if>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Assigned by the AP</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onClick="{{ pickCorner }}" style="flex: 1; min-width: 150px; padding: 13px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid {{ cornerBorder }}; background: {{ cornerBg }}; color: #141412;">Corner time</button>
+          <button onClick="{{ pickStrokes }}" style="flex: 1; min-width: 150px; padding: 13px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid {{ strokesBorder }}; background: {{ strokesBg }}; color: #141412;">Penalty strokes</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <sc-for list="{{ levels }}" as="lv" hint-placeholder-count="3">
+            <button onClick="{{ lv.pick }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; cursor: pointer; border: 1px solid {{ lv.border }}; background: {{ lv.bg }}; color: #141412;">{{ lv.label }}</button>
+          </sc-for>
+        </div>
+        <span style="font-size: 12.5px; line-height: 1.6; color: #3A3935;">{{ assignmentLine }}</span>
+      </div>
+
+      <sc-if value="{{ isStrokes }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Counting</span>
+          <div style="display: flex; gap: 8px;">
+            <button onClick="{{ pickAuto }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; cursor: pointer; border: 1px solid {{ autoBorder }}; background: {{ autoBg }}; color: #141412;">Counted by sound</button>
+            <button onClick="{{ pickPaced }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; cursor: pointer; border: 1px solid {{ pacedBorder }}; background: {{ pacedBg }}; color: #141412;">Paced by the voice</button>
+          </div>
+          <span style="font-size: 12.5px; line-height: 1.6; color: #3A3935;">{{ countLine }}</span>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Camera</span>
+        <div style="display: flex; gap: 8px;">
+          <button onClick="{{ pickRear }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; cursor: pointer; border: 1px solid {{ rearBorder }}; background: {{ rearBg }}; color: #141412;">Rear camera</button>
+          <button onClick="{{ pickFront }}" style="flex: 1; padding: 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; cursor: pointer; border: 1px solid {{ frontBorder }}; background: {{ frontBg }}; color: #141412;">Front camera</button>
+        </div>
+        <span style="font-size: 12.5px; line-height: 1.6; color: #3A3935;">Prop the phone behind you with the rear camera facing the corner — it has the wider lens and the better sensor, and the whole body stays in frame. The preview below shows exactly what will be recorded, uncropped.</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Framing check</span>
+        <div style="position: relative; width: 100%; aspect-ratio: 3 / 4; background: #141412; border: 1px solid #141412;">
+          <video playsinline muted autoPlay ref="{{ previewRef }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #141412;"></video>
+        </div>
+        <button onClick="{{ startPreview }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">{{ previewLabel }}</button>
+      </div>
+
+      <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ status }}</span>
+      <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, nothing recorded</button>
+      <button onClick="{{ begin }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">{{ beginLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 22px 20px 40px; text-align: center;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6B6A64;">{{ activeKicker }}</span>
+      <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(26px, 6vw, 40px); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05;">{{ activeHeading }}</div>
+      <div style="font-size: 55px; font-weight: 700; line-height: 1; font-family: 'IBM Plex Mono', monospace;">{{ bigCounter }}</div>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #6B6A64; min-height: 16px;">{{ counterSub }}</span>
+      <div style="font-size: 15px; line-height: 1.6; color: #3A3935; max-width: 560px; min-height: 48px;">{{ line }}</div>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: {{ monColor }}; min-height: 16px;">{{ monLine }}</span>
+      <div style="position: relative; width: 190px; aspect-ratio: 3 / 4; border: 1px solid #141412; background: #141412;">
+        <video playsinline muted autoPlay ref="{{ camRef }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;"></video>
+      </div>
+      <button onClick="{{ stop }}" style="padding: 14px 32px; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #B3261E; border: 2px solid #B3261E; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">{{ stopLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width: 560px; margin: 40px auto; padding: 0 20px 60px; width: 100%; box-sizing: border-box;">
+      <div style="border: 1px solid #141412; background: #FFFFFF; padding: 28px 26px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 25px; text-transform: uppercase; line-height: 1.1;">{{ doneTitle }}</span>
+        <span style="font-size: 14px; color: #3A3935; line-height: 1.65;">{{ summary }}</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: #B3261E; min-height: 16px; line-height: 1.6;">{{ upStatus }}</span>
+        <sc-if value="{{ verLine }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">For the AP — submission line</span>
+            <input type="text" value="{{ verLine }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+          </div>
+        </sc-if>
+        <sc-if value="{{ dlUrl }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ dlUrl }}" download="{{ dlName }}" style="padding: 12px 0; border: 1px solid #B3261E; color: #B3261E; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-align: center;" style-hover="background: #B3261E; color: #FAFAF7;">DOWNLOAD BACKUP COPY</a>
+        </sc-if>
+        <button onClick="{{ reset }}" style="padding: 12px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; background: none; color: #141412; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="border-color: #141412;">NEW SESSION</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
+  LOG_CSV = 'https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv&sheet=Violation%20Log';
+  START = '2026-07-20';
+  MINUTES = { 1: 10, 2: 20, 3: 30 };
+  STROKES = { 1: 12, 2: 24, 3: 36 };
+
+  state = {
+    key: '', keyInput: '', authMsg: '', checking: false,
+    entries: [], sel: 0, mode: 'corner', level: 1, facing: 'environment', autoCount: true,
+    phase: 'setup', status: '', previewOn: false,
+    line: '', bigCounter: '', counterSub: '', monLine: '', monIssue: null,
+    dlUrl: '', dlName: '', summary: '', doneTitle: '', verLine: '', upStatus: '', earMode: false,
+  };
+
+  /* ── access ─────────────────────────────────────────────────── */
+  componentDidMount() {
+    let k = '';
+    try { k = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (k) this.verify(k);
+  }
+  async verify(key) {
+    this.setState({ checking: true, authMsg: '' });
+    try {
+      const j = await (await fetch(this.EP + '?action=mystate&key=' + encodeURIComponent(key))).json();
+      if (!j || !j.ok) {
+        try { localStorage.removeItem('mrb_packet_key'); } catch (e) {}
+        this.setState({ key: '', checking: false, authMsg: 'Key not accepted. Ask the AP to confirm or reissue it.' });
+        return;
+      }
+      try { localStorage.setItem('mrb_packet_key', key); } catch (e) {}
+      this.setState({ key, checking: false, authMsg: '' });
+      this.loadEntries();
+    } catch (e) {
+      this.setState({ checking: false, authMsg: 'Could not reach the record. A connection is required.' });
+    }
+  }
+
+  parseCSV(text) {
+    const rows = []; let row = [], field = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) { if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; } else field += c; }
+      else if (c === '"') q = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+    if (field || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+  async loadEntries() {
+    try {
+      const rows = this.parseCSV(await (await fetch(this.LOG_CSV)).text()).slice(1)
+        .map((r, i) => ({ n: i + 1, date: (r[0] || '').trim(), what: (r[1] || '').trim(), status: (r[2] || '').trim() }))
+        .filter((v) => /^\d{4}-\d{2}-\d{2}$/.test(v.date) && v.what);
+      const open = rows.filter((v) => !(/^\s*(resolved|satisfied|closed)/i.test(v.status) && !/unresolved/i.test(v.status)));
+      const list = open.length ? open : rows;
+      this.setState({ entries: list, sel: Math.max(0, list.length - 1), level: Math.min(open.length || 1, 3) });
+    } catch (e) { this.setState({ status: 'Could not load the record: ' + e }); }
+  }
+
+  cur() { return this.state.entries[this.state.sel] || null; }
+  vn() { const c = this.cur(); return 'V-' + String(c ? c.n : 1).padStart(3, '0'); }
+  mins() { return this.MINUTES[this.state.level]; }
+  strokes() { return this.STROKES[this.state.level]; }
+  fmt(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  /* ── voice ──────────────────────────────────────────────────────
+     ONE audio path. ElevenLabs (or the device voice) plays out loud and
+     the camera microphone records it from the room — the synthesized
+     audio is never ALSO mixed into the recording graph, which is what
+     produced two offset copies of every line in the previous build.
+     A generation token cancels anything still queued when the session
+     moves on, so a slow line cannot talk over the next one. */
+  async speak(text) {
+    const gen = this._gen;
+    try { if (this._audio) { this._audio.pause(); this._audio = null; } } catch (e) {}
+    try { speechSynthesis.cancel(); } catch (e) {}
+    // The stroke detector must never hear the voice: numbers spoken aloud are
+    // transients above 1200 Hz, and the mic runs without echo cancellation.
+    // The gate is raised before playback and lowered a beat after it ends.
+    this._speaking = true;
+    const release = () => {
+      clearTimeout(this._speakTail);
+      this._speakTail = setTimeout(() => { this._speaking = false; this._speechEndedAt = Date.now(); }, 350);
+    };
+    let key = '';
+    try { key = localStorage.getItem('mrb_el_key') || ''; } catch (e) {}
+    const voice = (() => { try { return localStorage.getItem('mrb_el_voice') || 'pNInz6obpgDQGcFmaJgB'; } catch (e) { return 'pNInz6obpgDQGcFmaJgB'; } })();
+    if (key) {
+      try {
+        this._vc = this._vc || {};
+        if (!this._vc[text]) {
+          const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=mp3_44100_64', {
+            method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+          });
+          if (!r.ok) throw new Error(r.status);
+          this._vc[text] = URL.createObjectURL(await r.blob());
+        }
+        if (gen !== this._gen) { release(); return; }
+        this._audio = new Audio(this._vc[text]);
+        this._audio.volume = 1;
+        this._audio.onended = release;
+        this._audio.onerror = release;
+        await this._audio.play();
+        return;
+      } catch (e) {}
+    }
+    if (gen !== this._gen) { release(); return; }
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.94; u.pitch = 0.9; u.volume = 1;
+      u.onend = release;
+      u.onerror = release;
+      speechSynthesis.speak(u);
+      // Safety net: some engines never fire onend, and a stuck gate would
+      // silence the detector for the rest of the session.
+      clearTimeout(this._speakMax);
+      this._speakMax = setTimeout(release, Math.max(3000, text.split(' ').length * 500));
+    } catch (e) { release(); }
+  }
+  beep(freq, ms) {
+    try {
+      this._ac = this._ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (this._ac.state === 'suspended') this._ac.resume();
+      const o = this._ac.createOscillator(), g = this._ac.createGain();
+      o.frequency.value = freq; o.connect(g); g.connect(this._ac.destination);
+      g.gain.setValueAtTime(0.14, this._ac.currentTime);
+      o.start(); o.stop(this._ac.currentTime + ms / 1000);
+    } catch (e) {}
+  }
+
+  /* ── camera ─────────────────────────────────────────────────────
+     Rear camera by default. No width/height ideals are requested: asking
+     for a specific size makes the browser pick a cropped sensor mode, and
+     that is why the old build looked zoomed in. The natural stream is
+     letterboxed into the frame instead, so nothing is ever cut off. */
+  async openCamera() {
+    try { if (this._stream) this._stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
+    this._stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: this.state.facing } },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+    });
+    [this._prevEl, this._camEl].forEach((el) => { if (el) { el.srcObject = this._stream; el.play().catch(() => {}); } });
+    return this._stream;
+  }
+  closeCamera() {
+    try { if (this._stream) this._stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
+    this._stream = null;
+  }
+
+  /* ── acoustic stroke detection ──────────────────────────────────
+     A stroke is a sharp transient: a fast rise in broadband energy that
+     decays immediately. Detected by comparing the current frame's energy
+     against a slow-moving floor of the recent room level, so it adapts to
+     a quiet bedroom or a noisy one without a threshold to tune. A 900 ms
+     refractory window after each hit prevents an echo or the follow-through
+     registering as a second stroke, and the voice counting aloud cannot
+     trigger it because speech rises and falls far more slowly than an
+     impact. Below 1.5 s of level history nothing is counted at all, so the
+     first moments after the mic opens cannot produce a phantom count. */
+  startListening(onStroke) {
+    try {
+      // No audio track means the detector can never fire; report failure now
+      // rather than listening to silence for the length of the session.
+      if (!this._stream || !this._stream.getAudioTracks().length) return false;
+      this._ac = this._ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (this._ac.state === 'suspended') this._ac.resume();
+      const src = this._ac.createMediaStreamSource(this._stream);
+      const hp = this._ac.createBiquadFilter();
+      hp.type = 'highpass'; hp.frequency.value = 1200; // above the voice band
+      const an = this._ac.createAnalyser();
+      an.fftSize = 1024; an.smoothingTimeConstant = 0;
+      src.connect(hp); hp.connect(an);
+      const buf = new Float32Array(an.fftSize);
+      this._floor = 0; this._frames = 0; this._lastHit = 0;
+      this._listenInt = setInterval(() => {
+        an.getFloatTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        const rms = Math.sqrt(sum / buf.length);
+        this._frames++;
+        this._floor = this._floor ? this._floor * 0.97 + rms * 0.03 : rms;
+        const now = Date.now();
+        // Frames during speech are dropped entirely, and the refractory clock
+        // runs from whichever came last — the hit or the end of speech — so a
+        // number that finishes playing after the window cannot self-trigger.
+        if (this._speaking) { this._lastHit = Math.max(this._lastHit, now); return; }
+        const since = now - Math.max(this._lastHit, this._speechEndedAt || 0);
+        const ready = this._frames > 45 && since > 900;
+        if (ready && rms > Math.max(this._floor * 5.5, 0.035)) {
+          this._lastHit = now;
+          onStroke();
+        }
+      }, 33);
+      return true;
+    } catch (e) { return false; }
+  }
+  stopListening() { clearInterval(this._listenInt); this._listenInt = null; }
+
+  /* ── position monitor ───────────────────────────────────────── */
+  async loadPose() {
+    if (this._pose) return;
+    const v = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+    const files = await v.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+    const opts = (d) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate: d }, runningMode: 'VIDEO', numPoses: 1 });
+    try { this._pose = await v.PoseLandmarker.createFromOptions(files, opts('GPU')); }
+    catch (e) { this._pose = await v.PoseLandmarker.createFromOptions(files, opts('CPU')); }
+  }
+  monTick() {
+    if (!this._monOn || !this._pose || !this._camEl) return;
+    let lm = null;
+    try { const r = this._pose.detectForVideo(this._camEl, performance.now()); lm = r.landmarks && r.landmarks[0]; } catch (e) { return; }
+    const issues = [];
+    if (!lm) issues.push('OUT OF FRAME');
+    else {
+      const vis = (i) => (lm[i].visibility == null ? 1 : lm[i].visibility);
+      if (vis(11) < 0.5 && vis(12) < 0.5) issues.push('OUT OF FRAME');
+      else if (this.state.mode === 'corner') {
+        const sw = Math.max(0.02, Math.abs(lm[11].x - lm[12].x));
+        const near = (w, e) => Math.hypot(lm[w].x - lm[e].x, lm[w].y - lm[e].y) < sw * 0.95 && lm[w].y < Math.max(lm[11].y, lm[12].y);
+        if (!((near(15, 7) || near(15, 8)) && (near(16, 7) || near(16, 8)))) issues.push('HANDS OFF HEAD');
+        const cx = (lm[23].x + lm[24].x) / 2, cy = (lm[23].y + lm[24].y) / 2;
+        if (this._lastC) {
+          const d = Math.hypot(cx - this._lastC.x, cy - this._lastC.y);
+          this._ema = (this._ema || 0) * 0.8 + d * 0.2;
+          if (this._ema > 0.014) issues.push('EXCESSIVE MOVEMENT');
+        }
+        this._lastC = { x: cx, y: cy };
+      }
+    }
+    const now = Date.now();
+    if (issues.length) {
+      this._monIssue = issues[0];
+      if (!this._breachAt) { this._breachAt = now; this._warned = false; }
+      const sec = (now - this._breachAt) / 1000;
+      if (sec > 3 && !this._warned) {
+        this._warned = true;
+        this._strikes = (this._strikes || 0) + 1;
+        if (this._strikes >= 3) { this.invalidate('three warnings — ' + issues[0].toLowerCase()); return; }
+        this.beep(330, 280);
+        this.speak('Warning ' + (this._strikes === 1 ? 'one' : 'two') + '. ' + this.fixLine(issues[0]));
+      }
+      if (sec > 20) { this.invalidate('sustained breach — ' + issues[0].toLowerCase()); return; }
+    } else { this._monIssue = null; this._breachAt = null; }
+    this.setState({
+      monLine: (this._monIssue || 'POSITION OK') + ' · WARNINGS ' + (this._strikes || 0) + '/3',
+      monIssue: this._monIssue,
+    });
+  }
+  fixLine(issue) {
+    if (issue === 'HANDS OFF HEAD') return 'Place both hands behind your head and keep them there.';
+    if (issue === 'OUT OF FRAME') return 'Step back into frame. Full body visible.';
+    return 'Return to position and remain still.';
+  }
+  invalidate(reason) {
+    this._invalid = reason; this._discard = true;
+    this.speak('Session invalidated. Nothing is saved. The full session restarts from zero.');
+    this.finish('invalid');
+  }
+
+  /* ── private upload (chunked relay to the AP's archive) ─────── */
+  _b64(part) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(part); }); }
+  async fileToArchive(blob, name) {
+    const key = this.state.key;
+    const mime = blob.type || 'video/webm';
+    this.setState({ upStatus: 'DELIVERING TO THE AP ARCHIVE — 0% · keep this page open…' });
+    try {
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'corrective' }) })).json();
+      if (!init || !init.ok || !init.session) throw new Error((init && init.error) || 'init failed');
+      const CH = 4194304;
+      for (let off = 0; off < blob.size; off += CH) {
+        const chunk_b64 = await this._b64(blob.slice(off, Math.min(off + CH, blob.size)));
+        let j = null;
+        for (let t = 0; t < 3 && !(j && j.ok); t++) {
+          try { j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: off, total: blob.size, mime, chunk_b64 }) })).json(); } catch (e) { j = null; }
+        }
+        if (!(j && j.ok)) throw new Error('chunk failed');
+        this.setState({ upStatus: 'DELIVERING TO THE AP ARCHIVE — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
+        if (j.done) { this.setState({ upStatus: 'DELIVERED TO THE AP ARCHIVE ✓ — private; the download below is your backup.' }); return; }
+      }
+      throw new Error('incomplete');
+    } catch (e) {
+      this.setState({ upStatus: 'DELIVERY FAILED — download the backup copy and send it to the AP directly.' });
+    }
+  }
+
+  /* ── recording ──────────────────────────────────────────────── */
+  beginRecording() {
+    const v = this._camEl;
+    const vw = v && v.videoWidth ? v.videoWidth : 720;
+    const vh = v && v.videoHeight ? v.videoHeight : 1280;
+    // The canvas matches the camera's own aspect ratio, so the frame is
+    // recorded exactly as the preview shows it — never cropped to fit.
+    const c = document.createElement('canvas');
+    c.width = vw; c.height = vh;
+    const ctx = c.getContext('2d');
+    this._canvas = c;
+    const ref = this.vn();
+    const label = this.state.mode === 'corner'
+      ? 'CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.mins() + ' MIN'
+      : 'PENALTY STROKES · LEVEL ' + this.state.level + ' · ' + this.strokes();
+    const F = Math.max(14, Math.round(vw / 40));
+    const draw = () => {
+      if (this.state.phase !== 'active') return;
+      if (v && v.videoWidth) ctx.drawImage(v, 0, 0, c.width, c.height);
+      else { ctx.fillStyle = '#141412'; ctx.fillRect(0, 0, c.width, c.height); }
+      ctx.textBaseline = 'middle';
+      const bandH = F * 3.4;
+      ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, 0, c.width, bandH);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '700 ' + Math.round(F * 1.25) + 'px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';
+      ctx.fillText('MICHEAL RAY BERRY', F, bandH * 0.34);
+      ctx.fillStyle = '#FF6B61'; ctx.font = '600 ' + Math.round(F * 0.72) + 'px "IBM Plex Mono",monospace';
+      ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT · PRIVATE CORRECTIVE RECORD', F, bandH * 0.68);
+      const code = this._code ? 'CODE ' + this._code : '';
+      if (code) { ctx.fillStyle = '#FAFAF7'; ctx.font = '700 ' + Math.round(F) + 'px "IBM Plex Mono",monospace'; ctx.fillText(code, c.width - ctx.measureText(code).width - F, bandH * 0.42); }
+      ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, c.height - bandH, c.width, bandH);
+      const el = this.fmt(Math.floor((Date.now() - this._start) / 1000));
+      const main = ref + ' — ' + label + ' · ' + (this._counterText || el);
+      ctx.fillStyle = '#FAFAF7'; ctx.font = '600 ' + Math.round(F) + 'px "IBM Plex Mono",monospace';
+      ctx.fillText(main, F, c.height - bandH * 0.62);
+      ctx.fillStyle = '#B9B8B2'; ctx.font = '400 ' + Math.round(F * 0.72) + 'px "IBM Plex Mono",monospace';
+      ctx.fillText(new Date().toISOString().slice(0, 10) + ' · ELAPSED ' + el + ' · NOT FOR PUBLICATION', F, c.height - bandH * 0.28);
+      if (this._monOn) {
+        const m = (this._monIssue || 'POSITION OK') + ' · WARNINGS ' + (this._strikes || 0) + '/3';
+        ctx.font = '600 ' + Math.round(F * 0.72) + 'px "IBM Plex Mono",monospace';
+        const w = ctx.measureText(m).width;
+        ctx.fillStyle = 'rgba(10,12,14,0.7)'; ctx.fillRect((c.width - w) / 2 - F * 0.6, c.height - bandH - F * 2.4, w + F * 1.2, F * 1.7);
+        ctx.fillStyle = this._monIssue ? '#F2B01E' : '#7BC67E';
+        ctx.textAlign = 'center'; ctx.fillText(m, c.width / 2, c.height - bandH - F * 1.55); ctx.textAlign = 'left';
+      }
+      requestAnimationFrame(draw);
+    };
+    this._chunks = [];
+    let mime = '';
+    ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].some((m) => (MediaRecorder.isTypeSupported(m) ? (mime = m, true) : false));
+    const stream = c.captureStream(30);
+    // Room audio only — the spoken lines are picked up acoustically, so the
+    // recording carries exactly one copy of the voice whichever engine spoke.
+    try { (this._stream ? this._stream.getAudioTracks() : []).forEach((t) => stream.addTrack(t)); } catch (e) {}
+    this._rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 1800000 } : { videoBitsPerSecond: 1800000 });
+    this._rec.ondataavailable = (e) => { if (e.data.size) this._chunks.push(e.data); };
+    this._rec.onstop = () => {
+      if (this._discard) { this._chunks = []; return; }
+      const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
+      const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
+      const name = 'mrb-corrective-' + this.state.mode + '-' + this.vn().toLowerCase() + '-' + new Date().toISOString().slice(0, 10) + (this._safety ? '-safety-stop' : '') + '.' + ext;
+      this.setState({ dlUrl: URL.createObjectURL(blob), dlName: name });
+      this.fileToArchive(blob, name);
+    };
+    this._rec.start(1000);
+    requestAnimationFrame(draw);
+  }
+
+  /* ── session ────────────────────────────────────────────────── */
+  async begin(rehearse) {
+    if (!this.cur()) { this.setState({ status: 'Select the entry this session corrects.' }); return; }
+    this._rehearse = !!rehearse;
+    this._gen = (this._gen || 0) + 1;
+    this._discard = false; this._invalid = ''; this._safety = false;
+    this._strikes = 0; this._monIssue = null; this._breachAt = null; this._lastC = null; this._monOn = false;
+    this._code = '';
+    if (!rehearse) {
+      this.setState({ status: 'Opening camera…' });
+      try { await this.openCamera(); } catch (e) { this.setState({ status: 'Camera unavailable — the session must be recorded.' }); return; }
+      this.setState({ status: 'Loading position monitor…' });
+      try { await this.loadPose(); } catch (e) { this.closeCamera(); this.setState({ status: 'Position monitor failed to load — a connection is required. The session cannot run unmonitored.' }); return; }
+      try {
+        const ch = await (await fetch(this.EP + '?action=challenge&key=' + encodeURIComponent(this.state.key) + '&kind=corrective')).json();
+        if (ch && ch.ok) this._code = ch.code;
+      } catch (e) {}
+    }
+    this.setState({ phase: 'active', status: '', previewOn: false, line: '', bigCounter: '', counterSub: '', monLine: '', dlUrl: '', upStatus: '', verLine: '' });
+    this._start = Date.now();
+    if (!rehearse) this.beginRecording();
+    this.beep(880, 160);
+    this.state.mode === 'corner' ? this.runCorner() : this.runStrokes();
+  }
+
+  say(text, ms) {
+    return new Promise((resolve) => {
+      if (this.state.phase !== 'active') return resolve();
+      this.setState({ line: text });
+      this.speak(text);
+      this._stepTimer = setTimeout(resolve, ms || Math.max(4200, text.split(' ').length * 430));
+    });
+  }
+
+  async runCorner() {
+    const mins = this.mins(), c = this.cur();
+    await this.say('Corrective session. This is corner time at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. You do not speak at any point. The voice speaks for the record.');
+    if (this.state.phase !== 'active') return;
+    await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
+    if (this.state.phase !== 'active') return;
+    await this.say('Take position. Face the corner. Hands behind your head, fingers interlocked. Feet shoulder-width apart. Stand upright.');
+    if (this.state.phase !== 'active') return;
+    await this.say(mins + ' continuous minutes, silent and still, monitored throughout. Three warnings invalidate the session and the full duration restarts from zero. Beginning now.', 5200);
+    if (this.state.phase !== 'active') return;
+
+    this._monOn = true;
+    this._monInt = setInterval(() => this.monTick(), 400);
+    const end = Date.now() + mins * 60000;
+    this._half = false; this._min1 = false; this._marks = {};
+    this._tick = setInterval(() => {
+      if (this.state.phase !== 'active') return;
+      const remS = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      this._counterText = 'REMAINING ' + this.fmt(remS);
+      this.setState({ bigCounter: this.fmt(remS), counterSub: 'REMAINING · ELAPSED ' + this.fmt(Math.floor((Date.now() - this._start) / 1000)) });
+      const elapsedMin = Math.floor((mins * 60 - remS) / 60);
+      if (elapsedMin > 0 && elapsedMin % 5 === 0 && elapsedMin < mins && !this._marks[elapsedMin] && elapsedMin * 2 !== mins) {
+        this._marks[elapsedMin] = 1;
+        this.speak(elapsedMin + ' minutes elapsed. ' + (mins - elapsedMin) + ' remaining. Hold the position.');
+      }
+      if (remS <= mins * 30 && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); }
+      if (remS <= 60 && !this._min1) { this._min1 = true; this.speak('One minute remaining. Do not move until instructed.'); }
+      if (remS <= 0) { clearInterval(this._tick); this.closeCorner(); }
+    }, 500);
+  }
+
+  async closeCorner() {
+    this._monOn = false; clearInterval(this._monInt);
+    this.beep(660, 250);
+    await this.say('The corrective period is complete. Turn around and face the camera. Stand at attention.', 6000);
+    if (this.state.phase !== 'active') return;
+    await this.say('This session is complete: ' + this.mins() + ' continuous minutes against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 8000);
+    this.finish('complete');
+  }
+
+  async runStrokes() {
+    const total = this.strokes(), c = this.cur();
+    const auto = this.state.autoCount;
+    await this.say('Corrective session. Penalty strokes at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. ' + total + ' strokes, self-administered. You do not speak.');
+    if (this.state.phase !== 'active') return;
+    await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
+    if (this.state.phase !== 'active') return;
+    await this.say(auto
+      ? 'Take position in frame, facing away from the camera, and remain in frame for the whole count. The microphone counts each stroke as it lands, and the voice confirms the number. Work at your own pace; the session ends when the count is met. Beginning now.'
+      : 'Take position in frame, facing away from the camera, and remain in frame for the whole count. One stroke on each number. Beginning now.', 6500);
+    if (this.state.phase !== 'active') return;
+
+    this._monOn = true;
+    this._monInt = setInterval(() => this.monTick(), 500);
+
+    if (auto) {
+      await this.countByEar(total);
+    } else {
+      for (let n = 1; n <= total; n++) {
+        if (this.state.phase !== 'active') return;
+        this._counterText = 'STROKE ' + n + ' OF ' + total;
+        this.setState({ bigCounter: n + ' / ' + total, counterSub: 'STROKES · ELAPSED ' + this.fmt(Math.floor((Date.now() - this._start) / 1000)), line: 'Stroke ' + n + ' of ' + total + '.' });
+        this.beep(520, 120);
+        this.speak(String(n));
+        await new Promise((r) => { this._stepTimer = setTimeout(r, 3400); });
+        if (n === Math.floor(total / 2)) { this.speak('Halfway. Continue.'); await new Promise((r) => { this._stepTimer = setTimeout(r, 2600); }); }
+      }
+    }
+    this._monOn = false; clearInterval(this._monInt);
+    if (this.state.phase !== 'active') return;
+    this.beep(660, 250);
+    await this.say('The count is complete. Turn and face the camera. Stand at attention.', 6000);
+    if (this.state.phase !== 'active') return;
+    await this.say('This session is complete: ' + total + ' strokes against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 8000);
+    this.finish('complete');
+  }
+
+  /* Waits for `total` detected impacts. The voice confirms each number as it
+     lands, so the tape carries an audible running count the AP can check
+     against the footage. If nothing is heard for 45 seconds the voice says so
+     — a missed detection should be obvious in the moment, not discovered at
+     the end — and the session can still be completed by hand from the tally. */
+  countByEar(total) {
+    return new Promise((resolve) => {
+      let n = 0;
+      let lastAt = Date.now();
+      let nudged = false;
+      const paint = () => {
+        this._counterText = 'STROKE ' + n + ' OF ' + total;
+        this.setState({
+          bigCounter: n + ' / ' + total,
+          counterSub: 'COUNTED BY SOUND · ELAPSED ' + this.fmt(Math.floor((Date.now() - this._start) / 1000)),
+          line: n === 0 ? 'Listening. The count starts on the first stroke.' : 'Counted ' + n + ' of ' + total + '.',
+        });
+      };
+      paint();
+      const done = () => {
+        this.stopListening();
+        clearInterval(this._earWatch);
+        this._manualHit = null; this._manualFinish = null;
+        this.setState({ earMode: false });
+        resolve();
+      };
+      const hit = () => {
+        if (this.state.phase !== 'active') return done();
+        // Detections (or taps) after the assigned count are ignored: the tally
+        // is evidence, and it must never read 37 of 36. The detector is also
+        // stopped the moment the count is met, so the closing lines cannot be
+        // heard as further strokes.
+        if (n >= total) return;
+        n++; lastAt = Date.now(); nudged = false;
+        paint();
+        this.speak(String(n));
+        if (n === Math.floor(total / 2)) setTimeout(() => this.speak('Halfway. Continue.'), 1400);
+        if (n >= total) { this.stopListening(); setTimeout(done, 1800); }
+      };
+      // Manual advance, always available on the active screen: if the room
+      // defeats the detector, the set can still be completed and filed as
+      // complete rather than ending as a safety stop.
+      this._manualHit = hit;
+      this._manualFinish = () => { if (this.state.phase === 'active') done(); };
+      this.setState({ earMode: true });
+      const ok = this.startListening(hit);
+      if (!ok) {
+        // No microphone access: fall back to the paced count rather than
+        // stalling on a detector that will never fire.
+        this.speak('The microphone is unavailable. Counting at a fixed pace instead.');
+        this.stopListening();
+        this._manualHit = null; this._manualFinish = null;
+        this.setState({ earMode: false });
+        (async () => {
+          for (let i = 1; i <= total; i++) {
+            if (this.state.phase !== 'active') break;
+            n = i; paint(); this.beep(520, 120); this.speak(String(i));
+            await new Promise((r) => { this._stepTimer = setTimeout(r, 3400); });
+          }
+          resolve();
+        })();
+        return;
+      }
+      this._earWatch = setInterval(() => {
+        if (this.state.phase !== 'active') return done();
+        this.setState({ counterSub: 'COUNTED BY SOUND · ELAPSED ' + this.fmt(Math.floor((Date.now() - this._start) / 1000)) });
+        if (!nudged && Date.now() - lastAt > 45000) {
+          nudged = true;
+          this.speak(n === 0
+            ? 'Nothing has been detected yet. Continue; the count begins on the first stroke it hears.'
+            : 'Counted ' + n + ' of ' + total + '. Continue.');
+        }
+      }, 1000);
+    });
+  }
+
+  finish(how) {
+    clearTimeout(this._stepTimer); clearInterval(this._tick); clearInterval(this._monInt);
+    clearInterval(this._earWatch); this.stopListening();
+    this._monOn = false;
+    if (this.state.phase !== 'active') return;
+    this._gen = (this._gen || 0) + 1;
+    try { if (this._audio) this._audio.pause(); } catch (e) {}
+    try { speechSynthesis.cancel(); } catch (e) {}
+    this.setState({ phase: 'done' });
+    if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
+    this.closeCamera();
+    const mode = this.state.mode === 'corner' ? this.mins() + ' minutes of corner time' : this.strokes() + ' penalty strokes';
+    const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    if (this._rehearse) {
+      this._rehearse = false;
+      this.setState({ doneTitle: 'Rehearsal Complete', summary: 'Rehearsal only — nothing was recorded and nothing was sent. Run the real session when ready.', verLine: '', upStatus: '' });
+      return;
+    }
+    if (how === 'invalid') {
+      this.setState({ doneTitle: 'Session Invalidated', summary: 'The position monitor invalidated the session: ' + this._invalid + '. Nothing was saved and nothing was sent. The full session restarts from zero.', verLine: '', upStatus: '' });
+      return;
+    }
+    if (how === 'safety') {
+      this.speak('Session stopped.');
+      this.setState({ doneTitle: 'Safety Stop', summary: 'Stopped for safety. A safety stop is never a violation. The partial recording is delivered to the AP for review — add a note telling him what happened.', verLine: '' });
+      return;
+    }
+    if (how === 'early') {
+      this.setState({ doneTitle: 'Session Incomplete', summary: 'Ended before the assignment was complete. An incomplete session does not satisfy the requirement — it restarts from zero. The partial recording is still delivered.', verLine: '' });
+      return;
+    }
+    this.setState({
+      doneTitle: 'Session Complete',
+      summary: 'One continuous take: ' + mode + ' against ' + this.vn() + '. It is delivered to the AP\u2019s private archive (status below) and is not published anywhere. The entry shows as corrected once the submission is logged, and resolved only when the AP verifies it.',
+      verLine: this.vn() + ' · ' + (this.state.mode === 'corner' ? 'CORNER TIME' : 'PENALTY STROKES') + ' LEVEL ' + this.state.level + ' · SUBMITTED ' + stamp + ' · AWAITING AP VERIFICATION',
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const on = (b) => (b ? '#B3261E' : '#D8D6CF');
+    const bg = (b) => (b ? '#F6DEDC' : '#FAFAF7');
+    const c = this.cur();
+    return {
+      locked: !s.key,
+      isSetup: !!s.key && s.phase === 'setup',
+      isActive: s.phase === 'active',
+      isDone: s.phase === 'done',
+      keyInput: s.keyInput,
+      onKey: (e) => this.setState({ keyInput: e.target.value }),
+      unlock: () => { const k = (s.keyInput || '').trim(); if (k) this.verify(k); },
+      unlockLabel: s.checking ? 'Checking…' : 'Unlock the tools',
+      authMsg: s.authMsg,
+
+      entries: s.entries.map((v, i) => ({
+        label: v.date + ' · ' + v.what.replace(/\s*\[auto-declared\]\s*/i, '') + ' · ' + (v.status || 'open'),
+        pick: () => this.setState({ sel: i }),
+        border: i === s.sel ? '#B3261E' : '#D8D6CF',
+        bg: i === s.sel ? '#F6DEDC' : '#FAFAF7',
+      })),
+      hasEntries: s.entries.length > 0, noEntries: s.entries.length === 0,
+
+      pickCorner: () => this.setState({ mode: 'corner' }),
+      pickStrokes: () => this.setState({ mode: 'strokes' }),
+      cornerBorder: on(s.mode === 'corner'), cornerBg: bg(s.mode === 'corner'),
+      strokesBorder: on(s.mode === 'strokes'), strokesBg: bg(s.mode === 'strokes'),
+      levels: [1, 2, 3].map((n) => ({
+        label: 'Level ' + n + ' · ' + (s.mode === 'corner' ? this.MINUTES[n] + ' min' : this.STROKES[n]),
+        pick: () => this.setState({ level: n }),
+        border: on(s.level === n), bg: bg(s.level === n),
+      })),
+      assignmentLine: s.mode === 'corner'
+        ? 'Level ' + s.level + ' — ' + this.mins() + ' continuous minutes facing the corner, hands behind the head, monitored throughout.'
+        : 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, self-administered, in frame throughout.',
+      isStrokes: s.mode === 'strokes',
+      pickAuto: () => this.setState({ autoCount: true }),
+      pickPaced: () => this.setState({ autoCount: false }),
+      autoBorder: on(s.autoCount), autoBg: bg(s.autoCount),
+      pacedBorder: on(!s.autoCount), pacedBg: bg(!s.autoCount),
+      countLine: s.autoCount
+        ? 'The microphone listens for each stroke and the voice confirms the number as it lands. Work at your own pace — the session ends when the count is met.'
+        : 'The voice calls each number on a fixed cadence and you strike on the count.',
+
+      pickRear: async () => { this.setState({ facing: 'environment' }); if (s.previewOn) { try { await this.openCamera(); } catch (e) {} } },
+      pickFront: async () => { this.setState({ facing: 'user' }); if (s.previewOn) { try { await this.openCamera(); } catch (e) {} } },
+      rearBorder: on(s.facing === 'environment'), rearBg: bg(s.facing === 'environment'),
+      frontBorder: on(s.facing === 'user'), frontBg: bg(s.facing === 'user'),
+      previewRef: (el) => { this._prevEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play().catch(() => {}); } },
+      previewLabel: s.previewOn ? 'Stop preview' : 'Check framing',
+      startPreview: async () => {
+        if (s.previewOn) { this.closeCamera(); this.setState({ previewOn: false }); return; }
+        try { await this.openCamera(); this.setState({ previewOn: true, status: '' }); }
+        catch (e) { this.setState({ status: 'Camera unavailable — check permissions.' }); }
+      },
+
+      status: s.status,
+      rehearse: () => this.begin(true),
+      begin: () => this.begin(false),
+      beginLabel: s.mode === 'corner'
+        ? 'Begin — ' + this.mins() + ' min corner time'
+        : 'Begin — ' + this.strokes() + ' strokes' + (s.autoCount ? ', counted by sound' : ''),
+
+      activeKicker: (s.mode === 'corner' ? 'Corner time' : 'Penalty strokes') + ' · ' + this.vn() + ' · Level ' + s.level,
+      activeHeading: s.mode === 'corner' ? 'Face the corner · stand still' : 'In frame · follow the count',
+      bigCounter: s.bigCounter, counterSub: s.counterSub, line: s.line,
+      monLine: s.monLine, monColor: s.monIssue ? '#B3261E' : '#3A6B3A',
+      camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play().catch(() => {}); } },
+      stopLabel: 'Safety stop',
+      stop: () => this.finish(this._monOn ? 'safety' : 'early'),
+      earMode: s.earMode,
+      manualHit: () => { if (this._manualHit) this._manualHit(); },
+      manualFinish: () => { if (this._manualFinish) this._manualFinish(); },
+
+      doneTitle: s.doneTitle, summary: s.summary, upStatus: s.upStatus, verLine: s.verLine,
+      dlUrl: s.dlUrl, dlName: s.dlName,
+      reset: () => this.setState({ phase: 'setup', dlUrl: '', upStatus: '', verLine: '', line: '', bigCounter: '', monLine: '' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

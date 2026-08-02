@@ -252,12 +252,10 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       alternateName: 'Ray Berry',
       url: SITE_ORIGIN + '/',
       image: front,
-      sameAs: [
-        'https://youtube.com/@michealrayberry',
-        'https://x.com/michealrayberry',
-        'https://www.instagram.com/michealrayberry',
-        'https://www.tiktok.com/@michealrayberry',
-      ],
+      // Only accounts the project actually uses. Declaring a channel that
+      // does not carry the record tells Google the canonical source is
+      // somewhere it is not.
+      sameAs: ['https://x.com/michealrayberry'],
     },
     ...Object.entries(photos).map(([angle, p]) => ({
       '@type': 'ImageObject',
@@ -272,6 +270,22 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       creator: { '@id': PERSON_ID },
       representativeOfPage: angle === 'front',
     })),
+    {
+      '@type': 'Article',
+      '@id': `${canonical}#article`,
+      headline: title,
+      description,
+      articleSection: 'Daily Record',
+      datePublished: `${date}T22:00:00-04:00`,
+      dateModified: `${date}T22:00:00-04:00`,
+      author: { '@id': PERSON_ID },
+      publisher: { '@id': `${SITE_ORIGIN}/#website` },
+      mainEntityOfPage: { '@id': canonical },
+      image: Object.keys(photos).map((a) => ({ '@id': `${canonical}#${a}-photo` })),
+      video: { '@id': `${canonical}#inspection-video` },
+      about: { '@id': PERSON_ID },
+      isAccessibleForFree: true,
+    },
     {
       '@type': 'BreadcrumbList',
       '@id': `${canonical}#breadcrumbs`,
@@ -720,6 +734,96 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
 `;
 }
 
+/* A Project Day with no complete record still gets a page. Two reasons: the
+   prev/next chain stays unbroken (a crawler following Day 10 → Day 13 sees a
+   sequence with a hole and no explanation), and the absence is itself part of
+   the record — stated neutrally, exactly as the agreement requires. These
+   pages carry no photographs, no video, and no consequence detail. */
+function noRecordPage({ date, day, previous, next, reason }) {
+  const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
+  const title = `Day ${day} — No record — ${longDate(date)} — Micheal Ray Berry`;
+  const description = `Day ${day} of the Micheal Ray Berry Public Accountability Project, ${longDate(date)}: no complete record was filed for this date.`;
+  const graph = [
+    {
+      '@type': 'WebPage',
+      '@id': canonical,
+      url: canonical,
+      name: title,
+      description,
+      datePublished: date,
+      dateModified: date,
+      about: { '@id': PERSON_ID },
+      isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${canonical}#breadcrumbs`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
+        { '@type': 'ListItem', position: 2, name: 'Daily Record', item: `${SITE_ORIGIN}/daily/` },
+        { '@type': 'ListItem', position: 3, name: `Day ${day} — ${longDate(date)}`, item: canonical },
+      ],
+    },
+  ];
+  const week = Math.ceil(day / 7);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}">
+  <meta property="og:url" content="${canonical}">
+  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <style>
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}header a{color:inherit}
+    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}
+    .card{border:1px solid var(--ink);background:#f1f0ea;border-left:6px solid var(--accent);padding:22px 24px;margin:32px 0;max-width:760px}
+    .card p{margin:0 0 12px}.card p:last-child{margin:0}
+    nav{display:flex;justify-content:space-between;gap:16px;margin:36px 0 12px;font:600 14px ui-monospace,monospace}
+    nav a{color:var(--ink)}footer{border-top:1px solid var(--rule);color:var(--muted);font-size:14px}
+    a{color:var(--ink)}a:hover{color:var(--accent)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow"><a href="/">Micheal Ray Berry</a> · Public Accountability Project</div>
+    <h1>Day ${day} — No record</h1>
+    <p>${htmlEscape(longDate(date))}</p>
+  </header>
+  <main>
+    <div class="card">
+      <p><strong>No complete record was filed for this date.</strong> ${htmlEscape(reason)}</p>
+      <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, due by 10 PM Eastern. This page exists because the day exists: a gap in the record is documented rather than omitted.</p>
+    </div>
+    <nav aria-label="Daily record navigation">
+      ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
+      <a href="/daily/">All days</a>
+      ${next ? `<a rel="next" href="/daily/${next.date}-day-${String(next.day).padStart(3, '0')}/">Day ${next.day} →</a>` : '<span></span>'}
+    </nav>
+    <p><a href="/weeks/week-${String(week).padStart(2, '0')}/">Week ${week}</a> · <a href="/penalties">Violation log</a> · <a href="/">michealrayberry.com</a></p>
+  </main>
+  <footer>The official public record of Micheal Ray Berry's Public Accountability Project.</footer>
+</body>
+</html>
+`;
+}
+
+// Inverse of dayNumber(): the calendar date a Project Day falls on, used when
+// a gap day has no row in the sheet to read a date from.
+function dateForDay(day) {
+  const start = new Date(`${START_DATE}T12:00:00Z`);
+  start.setUTCDate(start.getUTCDate() + (day - 1));
+  return start.toISOString().slice(0, 10);
+}
+
 function dailySitemap(records) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -835,6 +939,29 @@ async function main() {
     finalized.push({ record, photoPaths });
   }
 
+  /* Every Project Day from 1 to the latest documented one, in order — days
+     with a complete packet and days without. The chain is built over this
+     list, so prev/next is continuous and a crawler never sees Day 10 link
+     straight to Day 13. */
+  const lastDay = finalized.at(-1)?.record.day || 0;
+  const byDay = new Map(finalized.map((f) => [f.record.day, f]));
+  const rowByDay = new Map(records.map((r) => [r.day, r]));
+  const sequence = [];
+  for (let d = 1; d <= lastDay; d++) {
+    const done = byDay.get(d);
+    if (done) { sequence.push({ day: d, date: done.record.date, complete: true, entry: done }); continue; }
+    const row = rowByDay.get(d);
+    const date = row ? row.date : dateForDay(d);
+    // Say precisely what is absent — a missing video reads differently from
+    // a day with nothing filed at all.
+    const reason = !row
+      ? 'No weigh-in, photographs, or inspection video were filed for this Project Day.'
+      : (!row.video
+        ? 'A weight was recorded, but the required inspection video was not filed.'
+        : 'The inspection video was filed, but the four required accountability photographs were not.');
+    sequence.push({ day: d, date, complete: false, reason });
+  }
+
   const generated = [];
   const changedUrls = new Set();
   for (let i = 0; i < finalized.length; i++) {
@@ -844,8 +971,9 @@ async function main() {
       photos[angle] = await generateResponsive(source, record.date, angle, record.day);
       photos[angle].changedUrls.forEach((u) => changedUrls.add(u));
     }
-    const previous = finalized[i - 1]?.record || null;
-    const next = finalized[i + 1]?.record || null;
+    const pos = sequence.findIndex((s) => s.day === record.day);
+    const previous = pos > 0 ? sequence[pos - 1] : null;
+    const next = pos >= 0 && pos < sequence.length - 1 ? sequence[pos + 1] : null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
     const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '' });
@@ -887,6 +1015,19 @@ async function main() {
     generated.push({ record, photos });
   }
 
+  for (let i = 0; i < sequence.length; i++) {
+    const s = sequence[i];
+    if (s.complete) continue;
+    const slug = `${s.date}-day-${String(s.day).padStart(3, '0')}`;
+    const file = path.join(ROOT, 'daily', slug, 'index.html');
+    const page = noRecordPage({
+      date: s.date, day: s.day, reason: s.reason,
+      previous: i > 0 ? sequence[i - 1] : null,
+      next: i < sequence.length - 1 ? sequence[i + 1] : null,
+    });
+    if (await writeIfChanged(file, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${slug}/`);
+  }
+
   if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated))) {
     changedUrls.add(`${SITE_ORIGIN}/daily/`);
   }
@@ -914,7 +1055,7 @@ async function main() {
   const latestDate = generated.at(-1)?.record.date || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
-    ['sitemap-daily.xml', dailySitemap(generated.map((g) => g.record))],
+    ['sitemap-daily.xml', dailySitemap(sequence.map((s) => ({ date: s.date, day: s.day })))],
     ['sitemap-pages.xml', extraSitemap(extraUrls, latestDate)],
     ['sitemap-images.xml', imageSitemap(generated)],
     ['sitemap-videos.xml', videoSitemap(generated)],

@@ -141,7 +141,7 @@
       </div>
       <nav style="display: flex; gap: 2px; row-gap: 6px; flex-wrap: wrap; align-items: center;">
         <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px solid #141412; padding: 9px 12px; cursor: pointer; color: #141412;" style-hover="background: #141412; color: #FAFAF7;">Open Entry</button>
+        <button onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; border: none; padding: 10px 12px; cursor: pointer; color: #FFFFFF;" style-hover="background: #8E1E18;">Active Violation</button>
         </sc-if>
         <button onClick="{{ goHome }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</button>
         <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412; text-decoration: none;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Daily Record</a>
@@ -275,11 +275,14 @@
     </div>
   </sc-if>
   <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-    <div style="background: #F1F0EA; border-bottom: 1px solid #141412;">
-      <div style="max-width: 1160px; margin: 0 auto; padding: 20px 32px; display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Record status</span>
-        <span style="font-size: 14px; line-height: 1.6; color: #141412;">{{ openSummary }}</span>
-        <a href="#penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #141412; margin-left: auto;" style-hover="color: #B3261E;">The record →</a>
+    <div style="background: #FBEAE8; border-bottom: 1px solid #B3261E; border-left: 8px solid #B3261E;">
+      <div style="max-width: 1160px; margin: 0 auto; padding: 22px 32px; display: flex; align-items: flex-start; gap: 26px; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 280px;">
+          <span style="align-self: flex-start; background: #B3261E; color: #FFFFFF; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; padding: 6px 11px;">Active Violation</span>
+          <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(22px, 3.4vw, 30px); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05; color: #B3261E;">Public Violation — Active</span>
+          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #141412; max-width: 760px; text-wrap: pretty;">{{ noticeBody }}</p>
+        </div>
+        <a href="#penalties" onClick="{{ goPenalties }}" style="align-self: center; background: #B3261E; color: #FFFFFF; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 20px; white-space: nowrap;" style-hover="background: #8E1E18;">View violation record →</a>
       </div>
     </div>
   </sc-if>
@@ -1737,13 +1740,53 @@ class Component extends DCLogic {
        requirement missed, plus the current status. No consequence detail, no
        recordings, no banner treatment — the record states what happened, and
        the corrective process that follows is private (§8.6). */
+    const stateOf = (raw) => {
+      const s = String(raw || '').trim();
+      if (/^\s*(satisfied|resolved|closed)/i.test(s) && !/unresolved/i.test(s)) return 'resolved';
+      if (/submitted|corrected|pending/i.test(s)) return 'corrected';
+      return 'open';
+    };
+    const neutralWhat = (raw) => {
+      const s = String(raw || '').trim();
+      // Auto-declared packet misses are stated as an absence of record, not as
+      // an accusation — the record says what is missing, nothing more.
+      if (/incomplete/i.test(s)) return 'Incomplete record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '').replace(/^Missed 10 PM ET deadline\s*—\s*/i, '');
+      if (/no packet|not submitted|missing/i.test(s)) return 'No record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '');
+      return s.replace(/\s*\[auto-declared\]\s*/i, '');
+    };
+    /* The notice states the failure plainly — who, what requirement, which
+       deadline, how many items — and its status. Every clause is drawn from
+       the record itself: no consequence detail, no characterisation of the
+       person, nothing that is not already in the log. */
     const openSummary = openList.length
       ? openList.slice(0, 2).map((p) => {
           const s = subInfo(p);
           const state = s ? 'corrected — submitted ' + s.stamp + ', awaiting AP verification' : 'open';
-          return p.date + ' — ' + p.violation + ' · ' + state;
+          return p.date + ' — ' + neutralWhat(p.violation) + ' · ' + state;
         }).join('   ·   ') + (openList.length > 2 ? '   ·   +' + (openList.length - 2) + ' more' : '')
       : '';
+    const noticeBody = (() => {
+      if (!openList.length) return '';
+      const p = openList[0];
+      const longDate = (d) => {
+        const dt = new Date(d + 'T12:00:00');
+        return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      };
+      const raw = String(p.violation || '');
+      const count = (raw.match(/\((\d+)\s*items?\)/i) || [])[1];
+      const missing = count
+        ? (count === '1' ? 'One required item remains missing.' : count + ' required items remain missing.')
+        : (/attestation/i.test(raw) ? 'The required capture attestation was not logged.' : 'The required documentation was not filed.');
+      const sub = subInfo(p);
+      const status = sub
+        ? 'A correction was submitted on ' + sub.stamp + ' and is awaiting verification by the Accountability Partner. The violation remains open until that verification is complete.'
+        : 'This violation is open, unresolved, and permanently recorded. Assigned consequences remain pending until completed and verified.';
+      const others = openList.length > 1
+        ? ' ' + (openList.length - 1) + ' further ' + (openList.length === 2 ? 'entry remains' : 'entries remain') + ' open on the record.'
+        : '';
+      return 'Micheal Ray Berry failed to complete the required Daily Compliance Packet by the ' + longDate(p.date) +
+        ' deadline. ' + missing + ' ' + status + others;
+    })();
     /* Video is self-hosted on the project's own storage — the record does not
        depend on a third-party platform staying up or leaving the video up.
        The intro is set by the AP in Site State; the inspection player always
@@ -1771,7 +1814,7 @@ class Component extends DCLogic {
     const recordStatus = !recordsLoaded
       ? 'Official Public Record — Loading official record…'
       : (inViolation
-          ? 'Official Public Record — ' + (openList.length === 1 ? 'Open entry' : openList.length + ' open entries')
+          ? 'Official Public Record — ACTIVE VIOLATION' + (openList.length > 1 ? ' (' + openList.length + ')' : '')
           : 'Official Public Record — No open entries');
 
     // ----- Live deadline status: overdue banner is automatic, sitewide -----
@@ -1919,20 +1962,6 @@ class Component extends DCLogic {
        Violation Log supply the timestamps, the verification result, and the
        appended correction history; a blank column renders as "—" rather than
        inventing a value. */
-    const stateOf = (raw) => {
-      const s = String(raw || '').trim();
-      if (/^\s*(satisfied|resolved|closed)/i.test(s) && !/unresolved/i.test(s)) return 'resolved';
-      if (/submitted|corrected|pending/i.test(s)) return 'corrected';
-      return 'open';
-    };
-    const neutralWhat = (raw) => {
-      const s = String(raw || '').trim();
-      // Auto-declared packet misses are stated as an absence of record, not as
-      // an accusation — the record says what is missing, nothing more.
-      if (/incomplete/i.test(s)) return 'Incomplete record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '').replace(/^Missed 10 PM ET deadline\s*—\s*/i, '');
-      if (/no packet|not submitted|missing/i.test(s)) return 'No record — ' + s.replace(/\s*\[auto-declared\]\s*/i, '');
-      return s.replace(/\s*\[auto-declared\]\s*/i, '');
-    };
     const STATE_STYLE = { open: '#B3261E', corrected: '#8A6A1E', resolved: '#3A6B3A' };
     const penaltyRows = penalties.map((p, i) => {
       const st = stateOf(p.status);
@@ -2014,7 +2043,7 @@ class Component extends DCLogic {
       cleanDays: recordsLoaded ? String(cleanDays) : '—',
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
-      inViolation, openViolations, violationCountLabel, recordStatus, openSummary,
+      inViolation, openViolations, violationCountLabel, recordStatus, openSummary, noticeBody,
       introVideoUrl, noIntroVideo: !introVideoUrl, introPoster,
       latestVideoUrl, noLatestVideo: !latestVideoUrl, latestVideoLabel,
       // src/poster are set here, never as attribute holes — see the players above.
