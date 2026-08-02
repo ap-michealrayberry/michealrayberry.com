@@ -153,7 +153,9 @@ class Component extends DCLogic {
   LOG_CSV = 'https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv&sheet=Violation%20Log';
   START = '2026-07-20';
   MINUTES = { 1: 10, 2: 20, 3: 30 };
-  STROKES = { 1: 12, 2: 24, 3: 36 };
+  // Machine counts by level. The equipment delivers every stroke; the count is
+  // what the level assigns, and the machine's own counter is the evidence.
+  STROKES = { 1: 25, 2: 50, 3: 100 };
 
   state = {
     key: '', keyInput: '', authMsg: '', checking: false,
@@ -407,10 +409,13 @@ class Component extends DCLogic {
       monIssue: this._monIssue,
     });
   }
+  /* Warning vocabulary. Each one names the breach and the correction, so the
+     tape records what was wrong rather than a generic reprimand — and so the
+     AP can tell a framing problem from a position problem when reviewing. */
   fixLine(issue) {
-    if (issue === 'HANDS OFF HEAD') return 'Place both hands behind your head and keep them there.';
-    if (issue === 'OUT OF FRAME') return 'Step back into frame. Full body visible.';
-    return 'Return to position and remain still.';
+    if (issue === 'HANDS OFF HEAD') return 'Correct your position immediately. Hands behind your head, fingers interlocked.';
+    if (issue === 'OUT OF FRAME') return 'Your full body is no longer visible. Return to the marked area immediately.';
+    return 'Correct your position immediately. Hands behind your head, body fully visible, eyes in the assigned direction.';
   }
   invalidate(reason) {
     this._invalid = reason; this._discard = true;
@@ -570,7 +575,9 @@ class Component extends DCLogic {
       try { await this.loadPose(); } catch (e) { this.closeCamera(); this.setState({ status: 'Position monitor failed to load — a connection is required. The session cannot run unmonitored.' }); return; }
       try {
         const ch = await (await fetch(this.EP + '?action=challenge&key=' + encodeURIComponent(this.state.key) + '&kind=corrective')).json();
-        if (ch && ch.ok) this._code = ch.code;
+        // Spoken once in the opening and burned into every frame: the code did
+        // not exist until moments before the take, so the footage cannot be older.
+        this._code = ch && ch.ok ? ch.code : '';
       } catch (e) {}
     }
     this.setState({ phase: 'active', status: '', previewOn: false, line: '', bigCounter: '', counterSub: '', monLine: '', dlUrl: '', upStatus: '', verLine: '' });
@@ -595,12 +602,10 @@ class Component extends DCLogic {
     const mins = this.mins(), c = this.cur();
     this._chained = !!chained;
     if (!chained) {
-      await this.say('Corrective session. This is corner time at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. You do not speak at any point. The voice speaks for the record.');
-      if (this.state.phase !== 'active') return;
-      await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
+      await this.openingRecord();
       if (this.state.phase !== 'active') return;
     }
-    await this.say('Take position. Face the corner. Hands behind your head, fingers interlocked. Feet shoulder-width apart. Stand upright.');
+    await this.say('Turn around. Face the corner. Do not lean against either wall. Keep your feet planted inside the marked area. Hands behind your head, fingers interlocked. The ' + mins + '-minute corner time period begins now.', 9000);
     if (this.state.phase !== 'active') return;
     await this.say(mins + ' continuous minutes, silent and still, monitored throughout. Three warnings invalidate the session and the full duration restarts from zero. Beginning now.', 5200);
     if (this.state.phase !== 'active') return;
@@ -609,18 +614,37 @@ class Component extends DCLogic {
     this._monInt = setInterval(() => this.monTick(), 400);
     const end = Date.now() + mins * 60000;
     this._half = false; this._min1 = false; this._marks = {};
+    this._q1 = false; this._q3 = false; this._s30 = false; this._s15 = false; this._s5 = false;
     this._tick = setInterval(() => {
       if (this.state.phase !== 'active') return;
       const remS = Math.max(0, Math.ceil((end - Date.now()) / 1000));
       this._counterText = 'REMAINING ' + this.fmt(remS);
       this.setState({ bigCounter: this.fmt(remS), counterSub: 'REMAINING · ELAPSED ' + this.fmt(Math.floor((Date.now() - this._start) / 1000)) });
+      /* Quarter marks carry the substance; the bare minute ticks fill the gaps
+         between them so the tape is never silent for long, which also proves
+         the session ran continuously rather than being cut and rejoined. */
       const elapsedMin = Math.floor((mins * 60 - remS) / 60);
-      if (elapsedMin > 0 && elapsedMin % 5 === 0 && elapsedMin < mins && !this._marks[elapsedMin] && elapsedMin * 2 !== mins) {
+      const frac = 1 - remS / (mins * 60);
+      if (!this._q1 && frac >= 0.25) {
+        this._q1 = true;
+        this.speak('Micheal Ray Berry, remain facing the corner. Another adult has to review this recording because ordinary assurances were no longer sufficient. The requirement was known. The deadline passed. The required evidence was absent or incomplete. You could have avoided this entire session by completing one defined responsibility on time. Instead you are standing in a corner, in the Penalty Uniform, while an automated voice supervises your position. Hands stay in place. Eyes to the corner.');
+      } else if (remS <= mins * 30 && !this._half) {
+        this._half = true;
+        this.speak('Half of the assigned time is complete. Do not relax your position. Before the deadline you controlled the outcome; after it, the consequence controls your time. You built this structure because private promises could be delayed, minimised, or abandoned. This session exists for the moment your preferred account of yourself stops matching your documented conduct. Regret after the deadline is not compliance, embarrassment does not shorten the timer, and partial performance is not completion. Remain still.');
+      } else if (!this._q3 && frac >= 0.75) {
+        this._q3 = true;
+        this.speak('Three quarters of the assigned time is complete. Do not look toward the camera. The recording already shows an adult who required external supervision to complete a consequence attached to a basic rule. You do not certify yourself and you do not clear your own status: you complete the assignment and wait for the Accountability Partner\u2019s determination. Hold the position. Every remaining minute exists because the requirement was not met when it should have been.');
+      } else if (elapsedMin > 0 && elapsedMin % 5 === 0 && elapsedMin < mins && !this._marks[elapsedMin] && remS > 75) {
         this._marks[elapsedMin] = 1;
         this.speak(elapsedMin + ' minutes elapsed. ' + (mins - elapsedMin) + ' remaining. Hold the position.');
       }
-      if (remS <= mins * 30 && !this._half) { this._half = true; this.speak('Halfway. Hold position.'); }
-      if (remS <= 60 && !this._min1) { this._min1 = true; this.speak('One minute remaining. Do not move until instructed.'); }
+      if (remS <= 60 && !this._min1) {
+        this._min1 = true;
+        this.speak('One minute remains. Do not turn early — this final minute is part of the consequence. The record shows a known obligation missed, an automated system activating the corrective process, and Micheal Ray Berry under recorded supervision until the assigned time was satisfied. Completion will not erase the violation; it changes the status to awaiting verification.');
+      }
+      if (remS <= 30 && !this._s30) { this._s30 = true; this.speak('Thirty seconds. The next time you face a deadline, remember how avoidable this recording was.'); }
+      if (remS <= 15 && !this._s15) { this._s15 = true; this.speak('Fifteen seconds. Hold position.'); }
+      if (remS <= 5 && !this._s5) { this._s5 = true; this.speak('Five. Four. Three. Two. One.'); }
       if (remS <= 0) { clearInterval(this._tick); this.closeCorner(); }
     }, 500);
   }
@@ -628,34 +652,91 @@ class Component extends DCLogic {
   async closeCorner() {
     this._monOn = false; clearInterval(this._monInt);
     this.beep(660, 250);
-    await this.say('The corrective period is complete. Turn around and face the camera. Stand at attention.', 6000);
+    await this.say('The assigned corner time has elapsed.', 4500);
     if (this.state.phase !== 'active') return;
-    await this.say('This session is complete: ' + (this._chained ? this.strokes() + ' strokes and ' + this.mins() + ' continuous minutes' : this.mins() + ' continuous minutes') + ' against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 9000);
+    await this.closingRecord();
+  }
+
+  /* Closing record. Restates the violation, the requirement, the deadline and
+     what was performed, then ends on the one fact the session cannot change:
+     nothing here clears the entry. Spoken to camera so the closing frame
+     matches the opening frame — the AP can confirm the same person, uniform
+     and position at both ends of an unbroken take. */
+  async closingRecord() {
+    const c = this.cur();
+    const what = String(c.what || '').replace(/\s*\[auto-declared\]\s*/i, '');
+    const performed = this.state.mode === 'corner'
+      ? 'Level ' + this.state.level + ' corner time lasting ' + this.mins() + ' minutes'
+      : this.state.mode === 'strokes'
+        ? 'a ' + this.strokes() + '-count machine penalty sequence'
+        : 'a ' + this.strokes() + '-count machine penalty sequence followed by Level ' + this.state.level + ' corner time lasting ' + this.mins() + ' minutes';
+    await this.say('Turn around slowly. Face the camera. Hands behind your head. Stand fully inside frame. Look directly into the lens.', 8000);
+    if (this.state.phase !== 'active') return;
+    await this.say('This is the closing record for violation ' + this.vn() + '. The missed requirement was ' + what + '. It was not completed by the deadline. As a result, Micheal Ray Berry was required to complete ' + performed + '.', 12000);
+    if (this.state.phase !== 'active') return;
+    await this.say('The recording will now be submitted to the Accountability Partner. Only the Accountability Partner may classify this session as verified, incomplete, invalid, or requiring repetition. Micheal Ray Berry does not leave this session cleared. He leaves it awaiting independent judgment.', 12000);
+    if (this.state.phase !== 'active') return;
+    await this.say('Keep looking at the camera. This is what one avoidable failure required. Five. Four. Three. Two. One. You may lower your hands. Recording complete.', 10000);
     this.finish('complete');
   }
 
-  /* Both parts in one unbroken take. Strokes are administered first and the
+  /* Both parts in one unbroken take. The machine sequence runs first and the
      corner time follows immediately, because the corner period is the part
      that must be continuous and unbroken to count — putting it last means a
      single stop can never split it. The recording never pauses between them. */
   async runBoth() {
     await this.runStrokes(true);
     if (this.state.phase !== 'active') return;
-    await this.say('The count is complete. The second part of the assignment follows immediately, in the same recording.', 6000);
+    await this.say('The second part of the assignment follows immediately, in the same recording. It does not stop and it does not restart.', 7000);
     if (this.state.phase !== 'active') return;
     this.runCorner(true);
+  }
+
+  /* Opening and verification. Spoken once at the head of every session, before
+     either part begins, so the tape opens by stating exactly what is being
+     recorded and why — the AP can verify the assignment from the audio alone,
+     without the sheet in front of him. */
+  async openingRecord() {
+    const c = this.cur();
+    const what = String(c.what || '').replace(/\s*\[auto-declared\]\s*/i, '');
+    const assignment = this.state.mode === 'corner'
+      ? 'Level ' + this.state.level + ', consisting of ' + this.mins() + ' continuous minutes of corner time'
+      : this.state.mode === 'strokes'
+        ? 'Level ' + this.state.level + ', consisting of a ' + this.strokes() + '-count machine penalty sequence'
+        : 'Level ' + this.state.level + ', consisting of a ' + this.strokes() + '-count machine penalty sequence followed by ' + this.mins() + ' continuous minutes of corner time';
+    await this.say('Recording started. This is the corrective record for Micheal Ray Berry. Violation ' + this.vn() + '. Missed requirement: ' + what + '. Required deadline: ten PM Eastern on ' + c.date + '.');
+    if (this.state.phase !== 'active') return;
+    await this.say('Assigned consequence: ' + assignment + '.' + (this._code ? ' Challenge code ' + String(this._code).split('').join(', ') + ', issued by the record moments ago and shown on screen.' : ''), 8000);
+    if (this.state.phase !== 'active') return;
+    await this.say('Micheal Ray Berry, face the camera. Stand completely inside frame. Feet shoulder-width apart, hands behind your head, fingers interlocked. Your entire body must remain visible. Look directly into the camera.', 9000);
+    if (this.state.phase !== 'active') return;
+    await this.say('You knew the requirement. You knew the deadline. You knew that failing it would activate a recorded consequence. Nothing about this session was unexpected.', 8500);
+    if (this.state.phase !== 'active') return;
+    await this.say('This recording exists because knowing the rule was not enough. Your intention was not enough. Your assurance that you would handle it was not enough.', 8500);
+    if (this.state.phase !== 'active') return;
+    await this.say('An adult now requires a marked floor position, a designated uniform, an automated voice, a counting machine, a continuous recording, and another adult\u2019s verification, because one clearly defined obligation was not completed.', 10000);
+    if (this.state.phase !== 'active') return;
+    await this.say('The black Penalty Uniform is confirmed on camera. There is no explanation segment in this session. Excuses do not alter verified facts. The record requires three things only: the missed obligation, the assigned consequence, and evidence of complete performance.', 11000);
+    if (this.state.phase !== 'active') return;
+    await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.', 8500);
   }
 
   async runStrokes(chained) {
     const total = this.strokes(), c = this.cur();
     const auto = this.state.autoCount;
-    await this.say('Corrective session. Penalty strokes at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. ' + total + ' strokes, self-administered. You do not speak.');
+    // Always first — in 'strokes' and as part 1 of 'both' — so the opening is
+    // spoken exactly once per session and never skipped.
+    await this.openingRecord();
     if (this.state.phase !== 'active') return;
-    await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
+    await this.say('The counter must read zero of ' + total + '. Remain in position. The ' + total + '-count sequence begins now.', 7000);
     if (this.state.phase !== 'active') return;
-    await this.say(auto
-      ? 'Take position in frame, facing away from the camera, and remain in frame for the whole count. The microphone counts each stroke as it lands, and the voice confirms the number. Work at your own pace; the session ends when the count is met. Beginning now.'
-      : 'Take position in frame, facing away from the camera, and remain in frame for the whole count. One stroke on each number. Beginning now.', 6500);
+    /* Equipment check before the count starts: the session is only legitimate
+       if the machine is secured and cannot reach the participant outside the
+       assigned strokes — the same reason the machine warning exists. */
+    await this.say('Confirm the machine is positioned and secured, and that the counter reads zero. Position yourself at the machine, facing away from the camera. Both the counter and your body must remain in frame for the whole sequence.' +
+      (auto
+        ? ' The microphone counts each strike as it lands and the voice confirms the number.'
+        : ' The voice calls each number as the machine delivers it.'), 10000);
     if (this.state.phase !== 'active') return;
 
     this._monOn = true;
@@ -671,17 +752,36 @@ class Component extends DCLogic {
         this.beep(520, 120);
         this.speak(String(n));
         await new Promise((r) => { this._stepTimer = setTimeout(r, 3400); });
-        if (n === Math.floor(total / 2)) { this.speak('Halfway. Continue.'); await new Promise((r) => { this._stepTimer = setTimeout(r, 2600); }); }
+        const mark = this.strokeMark(n, total);
+        if (mark) { this.speak(mark); await new Promise((r) => { this._stepTimer = setTimeout(r, Math.max(4000, mark.split(' ').length * 420)); }); }
       }
     }
     this._monOn = false; clearInterval(this._monInt);
     if (this.state.phase !== 'active') return;
     this.beep(660, 250);
-    if (chained) return;
-    await this.say('The count is complete. Turn and face the camera. Stand at attention.', 6000);
+    await this.say('Mechanical sequence complete. The counter must read ' + total + ' of ' + total + '.', 5500);
     if (this.state.phase !== 'active') return;
-    await this.say('This session is complete: ' + total + ' strokes against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 8000);
-    this.finish('complete');
+    await this.say('Micheal Ray Berry has completed a ' + total + '-count machine penalty sequence in the designated uniform, under automated instruction, for review by the Accountability Partner. There is no impressive explanation for why this recording became necessary. It exists because the requirement remained incomplete after the deadline.', 12000);
+    if (this.state.phase !== 'active') return;
+    await this.say('This sequence does not resolve or erase the violation. It documents the ' + (chained ? 'first completed portion of' : 'completion of') + ' the assigned consequence.', 7000);
+    if (this.state.phase !== 'active') return;
+    if (chained) return;
+    await this.closingRecord();
+  }
+
+  /* Commentary spoken at fixed fractions of the assigned count. Proportional
+     rather than at fixed numbers, so a 12-count and a 36-count session are
+     paced the same way. Returns null on ordinary numbers — most of the count
+     is just the number, and the lines land rarely enough to keep their
+     weight. */
+  strokeMark(n, total) {
+    const at = (f) => n === Math.max(1, Math.round(total * f));
+    if (at(0.2)) return 'Recorded reminders that completing the obligation on time would have prevented this entire sequence.';
+    if (at(0.4)) return 'Micheal Ray Berry remains on camera, in the Penalty Uniform, because an unsupported promise carried less evidentiary weight than a machine counter. The machine does not negotiate. The recording does not forget. The Accountability Partner will see precisely what was required after the deadline passed.';
+    if (at(0.5)) return 'Halfway. The machine feels nothing. The camera records everything. Only Micheal has to stand there and experience the private embarrassment of needing an automated count to mark one avoidable failure. Hold your position.';
+    if (at(0.7)) return 'The original obligation was easier than this. Completing it before the deadline would have prevented every part of this record.';
+    if (at(0.9)) return 'The last of the count. Keep your body inside the marked area.';
+    return null;
   }
 
   /* Waits for `total` detected impacts. The voice confirms each number as it
@@ -720,7 +820,8 @@ class Component extends DCLogic {
         n++; lastAt = Date.now(); nudged = false;
         paint();
         this.speak(String(n));
-        if (n === Math.floor(total / 2)) setTimeout(() => this.speak('Halfway. Continue.'), 1400);
+        const mark = this.strokeMark(n, total);
+        if (mark) setTimeout(() => this.speak(mark), 1400);
         if (n >= total) { this.stopListening(); setTimeout(done, 1800); }
       };
       // Manual advance, always available on the active screen: if the room
@@ -774,8 +875,8 @@ class Component extends DCLogic {
     const mode = this.state.mode === 'corner'
       ? this.mins() + ' minutes of corner time'
       : this.state.mode === 'strokes'
-        ? this.strokes() + ' penalty strokes'
-        : this.strokes() + ' penalty strokes followed by ' + this.mins() + ' minutes of corner time';
+        ? this.strokes() + '-count machine sequence'
+        : this.strokes() + '-count machine sequence followed by ' + this.mins() + ' minutes of corner time';
     const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
     if (this._rehearse) {
       this._rehearse = false;
@@ -787,7 +888,7 @@ class Component extends DCLogic {
       return;
     }
     if (how === 'safety') {
-      this.speak('Session stopped.');
+      this.speak('Safety stop acknowledged. The timer is stopped. Sit or move to a safe position. No accountability rule overrides immediate physical safety.');
       this.setState({ doneTitle: 'Safety Stop', summary: 'Stopped for safety. A safety stop is never a violation. The partial recording is delivered to the AP for review — add a note telling him what happened.', verLine: '' });
       return;
     }
@@ -842,15 +943,15 @@ class Component extends DCLogic {
       assignmentLine: s.mode === 'corner'
         ? 'Level ' + s.level + ' — ' + this.mins() + ' continuous minutes facing the corner, hands behind the head, monitored throughout.'
         : s.mode === 'strokes'
-          ? 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, self-administered, in frame throughout.'
-          : 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, then ' + this.mins() + ' continuous minutes of corner time, both in one unbroken recording.',
+          ? 'Level ' + s.level + ' — ' + this.strokes() + '-count machine sequence, counter and body in frame throughout.'
+          : 'Level ' + s.level + ' — ' + this.strokes() + '-count machine sequence, then ' + this.mins() + ' continuous minutes of corner time, both in one unbroken recording.',
       isStrokes: s.mode === 'strokes' || s.mode === 'both',
       pickAuto: () => this.setState({ autoCount: true }),
       pickPaced: () => this.setState({ autoCount: false }),
       autoBorder: on(s.autoCount), autoBg: bg(s.autoCount),
       pacedBorder: on(!s.autoCount), pacedBg: bg(!s.autoCount),
       countLine: s.autoCount
-        ? 'The microphone listens for each stroke and the voice confirms the number as it lands. Work at your own pace — the session ends when the count is met.'
+        ? 'The microphone listens for each strike and the voice confirms the number as it lands. The sequence ends when the assigned count is met.'
         : 'The voice calls each number on a fixed cadence and you strike on the count.',
 
       pickRear: async () => { this.setState({ facing: 'environment' }); if (s.previewOn) { try { await this.openCamera(); } catch (e) {} } },
