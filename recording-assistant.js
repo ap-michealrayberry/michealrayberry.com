@@ -195,7 +195,7 @@
           <div class="ra-field">
             <label>Level assigned by AP</label>
             <select class="ra-clevel">
-              <option value="1">Level 1 · 15 min</option>
+              <option value="1">Level 1 · 10 min</option>
               <option value="2">Level 2 · 20 min</option>
               <option value="3">Level 3 · 30 min</option>
             </select>
@@ -1163,7 +1163,7 @@
       });
 
       // ---- Corrective session (private · §8): continuous timed single take ----
-      const CORR_LEVELS = { 1: 15, 2: 20, 3: 30 }; // minutes, per unified consequence structure
+      const CORR_LEVELS = { 1: 10, 2: 20, 3: 30 }; // minutes, per unified consequence structure
       let corrective = null, corrRecorder = null, corrChunks = [], corrInt = null;
       let poseLM = null, corrMonInt = null, micStream = null, micAnalyser = null;
       const setCorrNote = (m) => { $('.ra-corrnote').textContent = m; };
