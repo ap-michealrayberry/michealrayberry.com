@@ -1,3 +1,16 @@
+# Header rules for Cloudflare Pages.
+#
+# Comments must stay at the top of this file. A '#' line inside or directly
+# above a path block makes Cloudflare skip that block silently — that is what
+# reduced this file to 5 of its 10 rules in an earlier deploy.
+#
+# The CSP is a containment boundary rather than an XSS cure: the scripted
+# surfaces need inline+eval for the runtime, so the policy pins where scripts,
+# media, and form posts may come from. Every origin listed is one the site uses.
+#
+# /ap, /mrb and /verify are private consoles: noindex and never cached.
+# The archive never changes once written, so it is cached hard.
+
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
@@ -6,10 +19,6 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Cross-Origin-Opener-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
-# Scripted surfaces need inline+eval (Babel in the runtime), so this is a
-# containment boundary rather than an XSS cure: it pins where scripts, media,
-# and form posts may come from, so an injected tag cannot exfiltrate to an
-# arbitrary host. Every origin listed is one the site genuinely uses.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https://pub-944fe11d344847f68307fb252477ba11.r2.dev; connect-src 'self' blob: data: https://docs.google.com https://script.google.com https://script.googleusercontent.com https://api.elevenlabs.io https://cdn.jsdelivr.net https://storage.googleapis.com https://*.r2.cloudflarestorage.com https://pub-944fe11d344847f68307fb252477ba11.r2.dev; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
 
 /index.html
@@ -20,7 +29,6 @@
 
 /*.json
   Cache-Control: public, max-age=3600
-
 
 /ap/*
   X-Robots-Tag: noindex, nofollow
@@ -34,10 +42,11 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
 
-# The archive never changes once written, so it can be cached hard.
 /daily/*
   Cache-Control: public, max-age=3600
+
 /weeks/*
   Cache-Control: public, max-age=3600
+
 /photos/*
   Cache-Control: public, max-age=31536000, immutable
