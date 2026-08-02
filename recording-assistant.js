@@ -412,7 +412,7 @@
           xhr.onload = () => (xhr.status === 200 || xhr.status === 201
             ? resolve()
             : reject(new Error('R2 ' + xhr.status + ' ' + String(xhr.responseText || '').slice(0, 120))));
-          xhr.onerror = () => reject(new Error('network error during upload'));
+          xhr.onerror = () => reject(new Error('the storage bucket refused the upload (CORS) \u2014 add https://michealrayberry.com to the R2 bucket\u2019s CORS policy with PUT allowed'));
           xhr.send(blob);
         });
         return sign.publicUrl;

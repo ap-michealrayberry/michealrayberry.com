@@ -55,6 +55,7 @@
     </div>
     <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
     <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, one-minute period, nothing recorded</button>
+    <button onClick="{{ testUpload }}" style="padding: 9px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #141412; border-color: #141412;">Test the upload path</button>
     <button onClick="{{ startDemo }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px dashed #B9B8B2; cursor: pointer;" style-hover="color: #141412; border-color: #141412;">Record the public demonstration — AI-narrated explainer, uploads to the project's own storage</button>
     <button onClick="{{ start }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">Begin Corner Time — {{ minutesLabel }}</button>
   </div>
@@ -62,13 +63,18 @@
 
   <sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
   <div style="display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; max-width: 680px; text-align: center;">
-    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">Corner time in progress · {{ vnLabel }} · Level {{ levelLabel }}</span>
-    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">Face the corner · stand still</div>
+    <span style="font-size: 12px; letter-spacing: 0.24em; color: #6B6A64; text-transform: uppercase;">{{ activeKicker }}</span>
+    <div style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em;">{{ activeHeading }}</div>
     <div style="font-size: 16px; color: #3A3935; line-height: 1.6; min-height: 26px;">{{ line }}</div>
-    <div style="font-size: 72px; font-weight: 700; line-height: 1; color: #141412;">{{ remaining }}</div>
-    <span style="font-size: 12px; color: #6B6A64; letter-spacing: 0.15em;">REMAINING · ELAPSED {{ clock }}</span>
+    <sc-if value="{{ isSessionRun }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size: 72px; font-weight: 700; line-height: 1; color: #141412;">{{ remaining }}</div>
+      <span style="font-size: 12px; color: #6B6A64; letter-spacing: 0.15em;">REMAINING · ELAPSED {{ clock }}</span>
+    </sc-if>
+    <sc-if value="{{ isDemoRun }}" hint-placeholder-val="{{ false }}">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64; letter-spacing: 0.15em;">ELAPSED {{ clock }} · NOTHING IS BEING SERVED</span>
+    </sc-if>
     <video playsinline muted ref="{{ camRef }}" style="width: 200px; aspect-ratio: 9 / 16; object-fit: cover; background: #F1F0EA; border: 1px solid #141412; transform: scaleX(-1);"></video>
-    <button onClick="{{ safetyStop }}" style="padding: 14px 36px; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #B3261E; border: 2px solid #B3261E; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">Safety Stop</button>
+    <button onClick="{{ safetyStop }}" style="padding: 14px 36px; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; background: #FFFFFF; color: #B3261E; border: 2px solid #B3261E; cursor: pointer;" style-hover="background: #B3261E; color: #FAFAF7;">{{ stopLabel }}</button>
   </div>
   </sc-if>
 
@@ -93,11 +99,7 @@
         </div>
       </div>
     </sc-if>
-    <sc-if value="{{ ytTitle }}" hint-placeholder-val="{{ false }}">
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">YouTube title — copy exactly</span>
-        <input type="text" value="{{ ytTitle }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
-      </div>
+    <sc-if value="{{ verLine }}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 6px;">
         <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Verification line — for the AP, goes in the log on approval</span>
         <input type="text" value="{{ verLine }}" readOnly="{{ true }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
@@ -368,9 +370,11 @@ class Component extends DCLogic {
     const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
     this._canvas = c; this._stills = [];
     const p = this.state.pens[this.state.sel];
-    const trig = this._demo
-      ? 'DEMONSTRATION · CORNER TIME EXPLAINED · NOT A SESSION'
-      : (this.vn() + ' · CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN').toUpperCase();
+    const tag = this._demo ? 'DEMONSTRATION' : 'CORNER TIME';
+    // A public explainer carries no entry from the violation log.
+    const sub = this._demo
+      ? 'CORNER TIME EXPLAINED · NOT A SESSION'
+      : String((p && p.what) || 'CORNER TIME').toUpperCase().slice(0, 34);
     const draw = () => {
       if (this.state.phase !== 'active') return;
       const v = this._camEl;
@@ -384,7 +388,7 @@ class Component extends DCLogic {
       ctx.fillStyle = '#FF6B61'; ctx.font = '600 16px "IBM Plex Mono",monospace';
       ctx.fillText('PUBLIC ACCOUNTABILITY PROJECT', 27, 63);
       ctx.fillStyle = '#FAFAF7'; ctx.font = '700 23px "IBM Plex Mono",monospace';
-      ctx.fillText('CORNER TIME', W - ctx.measureText('CORNER TIME').width - 27, 41);
+      ctx.fillText(tag, W - ctx.measureText(tag).width - 27, 41);
       if (this._monOn) {
         // Monitor status — burned in so the tape itself shows enforcement.
         const monTxt = (this._monIssue || 'POSITION OK') + ' · WARNINGS ' + (this._strikes || 0) + '/3' + (this._uniform ? ' · UNIFORM ' + this._uniform : '');
@@ -403,7 +407,7 @@ class Component extends DCLogic {
       ctx.fillStyle = '#FAFAF7'; ctx.font = '600 23px "IBM Plex Mono",monospace';
       ctx.fillText(mainLine, 27, H - 55);
       ctx.fillStyle = '#B9B8B2'; ctx.font = '400 16px "IBM Plex Mono",monospace';
-      ctx.fillText(new Date().toISOString().slice(0, 10) + ' · ' + String(p && p.what || '').toUpperCase().slice(0, 34) + ' · MICHEALRAYBERRY.COM', 27, H - 27);
+      ctx.fillText(new Date().toISOString().slice(0, 10) + ' · ' + sub + ' · MICHEALRAYBERRY.COM', 27, H - 27);
       requestAnimationFrame(draw);
     };
     this._chunks = []; let mime = '';
@@ -423,7 +427,7 @@ class Component extends DCLogic {
       if (this._wasDemo) {
         // Public explainer — goes to the bucket, never to the evidence archive.
         this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-corner-time-explained-' + date + '.' + ext });
-        this.uploadDemoToR2(blob);
+        this.uploadDemoToR2(blob, this._how === 'demo');
         return;
       }
       const name = 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + (this._how === 'safety' ? '-safety-stop' : '') + '-' + date + '.' + ext;
@@ -447,7 +451,7 @@ class Component extends DCLogic {
      exact object key; the file never passes through a relay, so size is
      unbounded. The returned public URL is what the AP pastes into the
      notice's demonstration field. */
-  async uploadDemoToR2(blob) {
+  async uploadDemoToR2(blob, full) {
     let key = '';
     try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
     if (!key) { this.setState({ upStatus: 'UPLOAD UNAVAILABLE — no device key in this browser. Download the file and upload it by hand.' }); return; }
@@ -466,22 +470,73 @@ class Component extends DCLogic {
           if (e.lengthComputable) this.setState({ upStatus: 'UPLOADING THE DEMONSTRATION — ' + Math.round((e.loaded / e.total) * 100) + '%…' });
         };
         xhr.onload = () => (xhr.status === 200 || xhr.status === 201 ? resolve() : reject(new Error('R2 ' + xhr.status)));
-        xhr.onerror = () => reject(new Error('network error'));
+        // A browser PUT that dies with no status is nearly always the bucket
+        // refusing the CORS preflight, not a bad connection.
+        xhr.onerror = () => reject(new Error('the storage bucket refused the upload (CORS) — add https://michealrayberry.com to the R2 bucket\u2019s CORS policy with PUT allowed'));
+        xhr.ontimeout = () => reject(new Error('the upload timed out'));
         xhr.send(blob);
       });
       this._demoUrl = sign.publicUrl;
+      // Only a complete take is allowed to replace what the notice links to;
+      // a partial one is uploaded and reported, and the AP decides.
       let linked = false;
-      try {
-        const r = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'demoset', key, url: sign.publicUrl }) })).json();
-        linked = !!(r && r.ok);
-      } catch (e) {}
+      if (full) {
+        try {
+          const r = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'demoset', key, url: sign.publicUrl }) })).json();
+          linked = !!(r && r.ok);
+        } catch (e) {}
+      }
       this.setState({
         upStatus: linked
           ? 'UPLOADED ✓ AND LINKED — the demonstration is live on the violation notice. ' + sign.publicUrl
-          : 'UPLOADED ✓ — ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video".',
+          : 'UPLOADED ✓ (not linked — partial take) — ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video" if you want it on the notice.',
       });
     } catch (e) {
       this.setState({ upStatus: 'UPLOAD FAILED (' + e + ') — download the file below and upload it by hand.' });
+    }
+  }
+
+  async testUpload() {
+    this.setState({ status: 'Testing the upload path…' });
+    let key = '';
+    try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (!key) { this.setState({ status: 'FAIL — no device key in this browser. Open /inspection and enter it once.' }); return; }
+    let sign;
+    try {
+      sign = await (await fetch(this.EP, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'r2sign', key, kind: 'demo', date: new Date().toISOString().slice(0, 10), mime: 'video/mp4' }),
+      })).json();
+    } catch (e) {
+      this.setState({ status: 'FAIL at signing — could not reach the record endpoint (' + e + ').' }); return;
+    }
+    if (!sign || !sign.ok) {
+      const err = String((sign && sign.error) || 'no response');
+      // 'unauthorized' is the DEVICE key being wrong — it never reaches R2.
+      if (/unauthor/i.test(err)) {
+        const entered = window.prompt('This device is not authorised. Enter the device key (the AP sets it with setDeviceKey in the script):', '');
+        if (entered && entered.trim()) {
+          try { localStorage.setItem('mrb_packet_key', entered.trim()); } catch (e) {}
+          this.setState({ status: 'Device key saved — tap "Test the upload path" again.' });
+        } else {
+          this.setState({ status: 'FAIL — this device is not authorised. Ask the AP for the device key, or have them run setDeviceKey in the script.' });
+        }
+        return;
+      }
+      this.setState({ status: 'FAIL at signing — ' + err + (/R2 not configured/i.test(err) ? '. Run setR2 in the script with the bucket credentials.' : '.') });
+      return;
+    }
+    try {
+      const r = await fetch(sign.uploadUrl, {
+        method: 'PUT',
+        headers: { 'x-amz-content-sha256': 'UNSIGNED-PAYLOAD' },
+        body: new Blob([new Uint8Array([0])], { type: 'video/mp4' }),
+      });
+      if (r.ok) { this.setState({ status: 'UPLOAD PATH OK ✓ — signing and the bucket both work from ' + location.origin + '.' }); return; }
+      const body = (await r.text()).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+      this.setState({ status: 'FAIL at the bucket — HTTP ' + r.status + '. ' + body });
+    } catch (e) {
+      this.setState({ status: 'FAIL at the bucket — blocked before any response. Origin is ' + location.origin + '; that exact origin must be in the R2 bucket\u2019s CORS AllowedOrigins. (' + e + ')' });
     }
   }
 
@@ -573,18 +628,27 @@ class Component extends DCLogic {
     if (this.state.phase !== 'active') return;
     this._half = false; this._min1 = false;
     this._how = how; // read by the recorder's onstop for the filed name
-    this._wasDemo = (how === 'demo'); // latched: onstop fires after this call returns
+    this._wasDemo = (how === 'demo' || !!this._demo); // latched by MODE: an aborted demo is still a demo
     this.setState({ phase: 'done', upStatus: '' });
     if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
     if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
     try { speechSynthesis.cancel(); } catch (e) {}
     const p = this.state.pens[this.state.sel];
     const date = new Date().toISOString().slice(0, 10);
-    if (how === 'demo') {
+    if (this._demo) {
+      const aborted = (how !== 'demo');
       this._demo = false;
       this._cornerNow = false;
       this.beep(660, 200);
-      this.speak('Demonstration complete.');
+      this.speak(aborted ? 'Demonstration stopped.' : 'Demonstration complete.');
+      if (aborted) {
+        this.setState({
+          doneTitle: 'Demonstration Stopped',
+          summary: 'The demonstration was stopped part-way. It is an explainer, not a session — nothing counts toward the record either way. The partial file uploads to the project\u2019s own storage but is NOT put on the notice; record the full script, or link this one yourself from the portal.',
+          ytTitle: '', verLine: '',
+        });
+        return;
+      }
       this.setState({
         doneTitle: 'Demonstration Recorded',
         summary: 'A public explainer, not a session — no violation is attached and nothing counts toward the record. It uploads straight to the project\u2019s own storage and links itself into the violation notice when it finishes. The AP can replace or clear it at any time from the portal.',
@@ -620,7 +684,8 @@ class Component extends DCLogic {
     this.setState({
       doneTitle: 'Corner Time Complete',
       summary: 'Opening statement, ' + this.minutes() + ' continuous silent minutes, and closing statement recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). It delivers itself to the AP’s private archive (status below); nothing is published. Status: Submitted — the sitewide notice starts its 24-hour removal countdown when the submission is logged. The entry becomes Resolved only when the AP verifies identity, attire, posture, elapsed time, and completion.',
-      ytTitle: '', verLine: '',
+      ytTitle: '',
+      verLine: this.vn() + ' · CORNER TIME LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN · SUBMITTED ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' · AWAITING AP VERIFICATION',
     });
   }
 
@@ -643,11 +708,16 @@ class Component extends DCLogic {
       })),
       minutesLabel: this.minutes() + ' minutes',
       vnLabel: this.vn(), levelLabel: s.level,
+      isDemoRun: !!this._demo, isSessionRun: !this._demo,
+      activeKicker: this._demo ? 'Demonstration recording · not a session' : 'Corner time in progress · ' + this.vn() + ' · Level ' + s.level,
+      activeHeading: this._demo ? 'Follow the narration' : 'Face the corner · stand still',
+      stopLabel: this._demo ? 'END DEMONSTRATION' : 'SAFETY STOP',
       camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
       status: s.status,
       start: () => { this._rehearse = false; this._demo = false; this.start(); },
       rehearse: () => { this._rehearse = true; this._demo = false; this.start(); },
       startDemo: () => this.startDemo(),
+      testUpload: () => this.testUpload(),
       safetyStop: () => this.finish('safety'),
       reset: () => { this._demo = false; this._cornerNow = false; this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '', upStatus: '' }); },
       line: s.line, clock: s.clock, remaining: s.remaining,
@@ -658,7 +728,7 @@ class Component extends DCLogic {
         // carries an img src that the browser tries to fetch before hydration.
         imgEl: React.createElement('img', { src: st.url, alt: 'Corner time still — ' + st.label, style: { width: '100%', aspectRatio: '9 / 16', objectFit: 'cover', border: '1px solid #141412', display: 'block' } }),
       })),
-      hasStills: !!(this._stills && this._stills.length && s.phase === 'done' && s.ytTitle),
+      hasStills: !!(this._stills && this._stills.length && s.phase === 'done' && s.doneTitle === 'Corner Time Complete'),
     };
   }
 }
