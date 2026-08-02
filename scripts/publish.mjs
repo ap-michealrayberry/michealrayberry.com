@@ -313,11 +313,13 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     : (embed
       ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
       : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`);
+  const week = Math.ceil(day / 7);
   const nav = `<nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
-      <a href="/dashboard">Full daily record</a>
+      <a href="/daily/">All days</a>
       ${next ? `<a rel="next" href="/daily/${next.date}-day-${String(next.day).padStart(3, '0')}/">Day ${next.day} →</a>` : '<span></span>'}
-    </nav>`;
+    </nav>
+    <p class="also"><a href="/weeks/week-${String(week).padStart(2, '0')}/">Week ${week}</a> · <a href="/milestones/${MILESTONES.filter((m) => m < weight).sort((a, b) => b - a)[0] || 175}-lb/">Next milestone</a> · <a href="/dashboard">Weigh-in log</a> · <a href="/">michealrayberry.com</a></p>`;
   return `<!doctype html>
 <html lang="en-US">
 <head>
@@ -352,6 +354,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
     .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
+    .also{font:12px/1.8 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
     @media(max-width:720px){.gallery{grid-template-columns:1fr}nav{grid-template-columns:1fr;text-align:left!important}nav a:nth-child(2),nav a:last-child{text-align:left}}
   </style>
@@ -672,7 +675,7 @@ function dailyIndexPage(entries) {
 <main>
   <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>. The gaps are part of the record.</p>
   <p class="count"><strong>${documented}</strong> documented days · <strong>${gaps}</strong> days without a record</p>
-  <p><a href="/">Return to michealrayberry.com</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
+  <p><a href="/">Return to michealrayberry.com</a> · <a href="/weeks/">Weekly record</a> · <a href="/milestones">Milestones</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
   <ul>${cards}</ul>
 </main>
 <footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>

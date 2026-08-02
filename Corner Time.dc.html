@@ -55,6 +55,7 @@
     </div>
     <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
     <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, one-minute period, nothing recorded</button>
+    <button onClick="{{ startDemo }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px dashed #B9B8B2; cursor: pointer;" style-hover="color: #141412; border-color: #141412;">Record the public demonstration — AI-narrated explainer, uploads to the project's own storage</button>
     <button onClick="{{ start }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">Begin Corner Time — {{ minutesLabel }}</button>
   </div>
   </sc-if>
@@ -116,6 +117,22 @@ class Component extends DCLogic {
   state = { pens: [], sel: 0, level: 1, status: '', phase: 'setup', line: '', clock: '0:00', remaining: '', dlUrl: '', dlName: '', summary: '', ytTitle: '', verLine: '', doneTitle: '', upStatus: '' };
 
   EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
+
+  /* DEMONSTRATION MODE — an explanatory recording for the public notice.
+     Fully AI-voiced (Micheal never speaks). It explains what corner time is,
+     then shows a short worked example of the position, and uploads straight
+     to the public bucket from this device. It is never a real session: no
+     violation is attached, no timer counts against the record, and it is
+     filed under demo/ rather than as evidence. */
+  DEMO_SCRIPT = [
+    { t: 'This is a demonstration recording. It explains the corrective procedure used in this project. No violation is being served here, and nothing in this recording counts toward any consequence.', hold: 'Stand at attention, facing the camera.' },
+    { t: 'When a requirement of the signed agreement is missed, the Accountability Partner records a violation on the public log. Every confirmed violation carries corner time: ten minutes at Level One, twenty at Level Two, thirty at Level Three. The level follows the number of violations on the record, and it is not negotiable.', hold: 'At attention. Do not speak.' },
+    { t: 'Corner time is performed in the project uniform, in one continuous unedited take, facing a corner, hands behind the head, silent and still for the full assigned duration. The recording assistant monitors position, posture, and uniform throughout. Three warnings invalidate the session and the full duration restarts from zero.', hold: 'At attention.' },
+    { t: 'The position is as follows. Face the corner. Feet shoulder-width apart. Hands behind the head, fingers interlocked. Eyes forward, into the corner. Hold it now for the demonstration.', hold: 'Turn to the corner and take the position.', act: 'corner' },
+    { t: 'This is the position that is held, without movement or speech, for the entire assigned period. In a real session there is no music, no narration, and no interruption — only the timer and the monitor.', hold: 'Hold the position, facing the corner.' },
+    { t: 'At the end of the period the assistant instructs a turn to the camera for a closing statement, and the finished recording is filed automatically. Corrective recordings are private by default. They become public only while a violation remains unresolved — and when they do, every corrective recording on the record becomes visible, not only the current one. Resolving the record makes them private again.', hold: 'Turn back to the camera. At attention.', act: 'face' },
+    { t: 'That is the procedure. It exists so that a missed requirement has a cost that is real, immediate, and visible. Demonstration complete.', hold: 'At attention. The recording ends.' },
+  ];
 
   _b64(part) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(part); }); }
 
@@ -347,7 +364,9 @@ class Component extends DCLogic {
     const W = 720, H = 1280, c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
     this._canvas = c; this._stills = [];
     const p = this.state.pens[this.state.sel];
-    const trig = (this.vn() + ' · CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN').toUpperCase();
+    const trig = this._demo
+      ? 'DEMONSTRATION · CORNER TIME EXPLAINED · NOT A SESSION'
+      : (this.vn() + ' · CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.minutes() + ' MIN').toUpperCase();
     const draw = () => {
       if (this.state.phase !== 'active') return;
       const v = this._camEl;
@@ -373,7 +392,10 @@ class Component extends DCLogic {
       }
       ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, H - 85, W, 85);
       const rem = Math.max(0, this._endAt - Date.now());
-      const mainLine = this.vn() + ' — LEVEL ' + this.state.level + ' · REMAINING ' + this._fmt(Math.ceil(rem / 1000));
+      // A public explainer never carries a live violation number or a timer.
+      const mainLine = this._demo
+        ? 'DEMONSTRATION — CORNER TIME EXPLAINED · NOT A SESSION'
+        : this.vn() + ' — LEVEL ' + this.state.level + ' · REMAINING ' + this._fmt(Math.ceil(rem / 1000));
       ctx.fillStyle = '#FAFAF7'; ctx.font = '600 23px "IBM Plex Mono",monospace';
       ctx.fillText(mainLine, 27, H - 55);
       ctx.fillStyle = '#B9B8B2'; ctx.font = '400 16px "IBM Plex Mono",monospace';
@@ -393,7 +415,14 @@ class Component extends DCLogic {
       if (this._discard) { this._chunks = []; return; } // invalidated: strict — nothing saved
       const blob = new Blob(this._chunks, { type: this._rec.mimeType || 'video/webm' });
       const ext = (this._rec.mimeType || '').indexOf('mp4') !== -1 ? 'mp4' : 'webm';
-      const name = 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + (this._how === 'safety' ? '-safety-stop' : '') + '-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+      const date = new Date().toISOString().slice(0, 10);
+      if (this._wasDemo) {
+        // Public explainer — goes to the bucket, never to the evidence archive.
+        this.setState({ dlUrl: URL.createObjectURL(blob), dlName: 'micheal-ray-berry-corner-time-explained-' + date + '.' + ext });
+        this.uploadDemoToR2(blob);
+        return;
+      }
+      const name = 'micheal-ray-berry-corner-time-' + this.vn().toLowerCase() + (this._how === 'safety' ? '-safety-stop' : '') + '-' + date + '.' + ext;
       this.setState({ dlUrl: URL.createObjectURL(blob), dlName: name });
       this.fileToRecord(blob, name);
     };
@@ -409,6 +438,67 @@ class Component extends DCLogic {
   }
 
   rehearsalMs() { return this._rehearse ? 60000 : this.minutes() * 60000; }
+
+  /* Direct browser → R2 upload. Apps Script signs a 15-minute PUT for one
+     exact object key; the file never passes through a relay, so size is
+     unbounded. The returned public URL is what the AP pastes into the
+     notice's demonstration field. */
+  async uploadDemoToR2(blob) {
+    let key = '';
+    try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (!key) { this.setState({ upStatus: 'UPLOAD UNAVAILABLE — no device key in this browser. Download the file and upload it by hand.' }); return; }
+    this.setState({ upStatus: 'UPLOADING THE DEMONSTRATION — 0%…' });
+    try {
+      const sign = await (await fetch(this.EP, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'r2sign', key, kind: 'demo', date: new Date().toISOString().slice(0, 10), mime: blob.type || 'video/mp4' }),
+      })).json();
+      if (!sign || !sign.ok) throw new Error((sign && sign.error) || 'could not sign upload');
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', sign.uploadUrl, true);
+        xhr.setRequestHeader('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) this.setState({ upStatus: 'UPLOADING THE DEMONSTRATION — ' + Math.round((e.loaded / e.total) * 100) + '%…' });
+        };
+        xhr.onload = () => (xhr.status === 200 || xhr.status === 201 ? resolve() : reject(new Error('R2 ' + xhr.status)));
+        xhr.onerror = () => reject(new Error('network error'));
+        xhr.send(blob);
+      });
+      this._demoUrl = sign.publicUrl;
+      this.setState({ upStatus: 'UPLOADED ✓ — public URL: ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video".' });
+    } catch (e) {
+      this.setState({ upStatus: 'UPLOAD FAILED (' + e + ') — download the file below and upload it by hand.' });
+    }
+  }
+
+  async startDemo() {
+    const ok = await this.startCamera();
+    if (!ok) return;
+    this._demo = true; this._rehearse = false; this._discard = false; this._invalid = ''; this._demoUrl = '';
+    this.setState({ status: '', phase: 'active', line: '', clock: '0:00', remaining: '—', dlUrl: '', upStatus: '' });
+    this._start = Date.now();
+    this._endAt = this._start + 1;
+    this.beginRecording();
+    this._clockTimer = setInterval(() => this.setState({ clock: this._fmt(Math.floor((Date.now() - this._start) / 1000)) }), 1000);
+    this.beep(880, 160);
+    let i = 0;
+    const step = () => {
+      if (this.state.phase !== 'active') return;
+      if (i >= this.DEMO_SCRIPT.length) { setTimeout(() => this.finish('demo'), 3000); return; }
+      const ln = this.DEMO_SCRIPT[i];
+      if (ln.act === 'corner') this._cornerNow = true;
+      if (ln.act === 'face') this._cornerNow = false;
+      this.setState({ line: ln.hold });
+      this.speak(ln.t);
+      const wait = Math.max(7, Math.round(ln.t.split(' ').length / 2.2 + 3));
+      i++;
+      this._phaseTimer = setTimeout(step, wait * 1000);
+    };
+    this.speak('Demonstration recording. Take position facing the camera. It begins in ten seconds.');
+    this.setState({ line: 'DEMONSTRATION — take position facing the camera. Beginning in ten seconds.' });
+    this._phaseTimer = setTimeout(step, 10000);
+  }
 
   async start() {
     if (!this.state.pens.length) { this.setState({ status: 'No violation in the log — nothing to perform.' }); return; }
@@ -469,12 +559,25 @@ class Component extends DCLogic {
     if (this.state.phase !== 'active') return;
     this._half = false; this._min1 = false;
     this._how = how; // read by the recorder's onstop for the filed name
+    this._wasDemo = (how === 'demo'); // latched: onstop fires after this call returns
     this.setState({ phase: 'done', upStatus: '' });
     if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
     if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
     try { speechSynthesis.cancel(); } catch (e) {}
     const p = this.state.pens[this.state.sel];
     const date = new Date().toISOString().slice(0, 10);
+    if (how === 'demo') {
+      this._demo = false;
+      this._cornerNow = false;
+      this.beep(660, 200);
+      this.speak('Demonstration complete.');
+      this.setState({
+        doneTitle: 'Demonstration Recorded',
+        summary: 'A public explainer, not a session — no violation is attached and nothing counts toward the record. It uploads straight to the project\u2019s own storage; the public URL appears below once it finishes. Paste that URL into the AP Portal under "Corner-time demonstration video" and it appears on the violation notice.',
+        ytTitle: '', verLine: '',
+      });
+      return;
+    }
     if (this._rehearse) {
       this._rehearse = false;
       this.beep(660, 200);
@@ -528,10 +631,11 @@ class Component extends DCLogic {
       vnLabel: this.vn(), levelLabel: s.level,
       camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play(); } },
       status: s.status,
-      start: () => { this._rehearse = false; this.start(); },
-      rehearse: () => { this._rehearse = true; this.start(); },
+      start: () => { this._rehearse = false; this._demo = false; this.start(); },
+      rehearse: () => { this._rehearse = true; this._demo = false; this.start(); },
+      startDemo: () => this.startDemo(),
       safetyStop: () => this.finish('safety'),
-      reset: () => this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '', upStatus: '' }),
+      reset: () => { this._demo = false; this._cornerNow = false; this.setState({ phase: 'setup', dlUrl: '', ytTitle: '', verLine: '', upStatus: '' }); },
       line: s.line, clock: s.clock, remaining: s.remaining,
       dlUrl: s.dlUrl, dlName: s.dlName, summary: s.summary, ytTitle: s.ytTitle, verLine: s.verLine, doneTitle: s.doneTitle, upStatus: s.upStatus,
       stills: (this._stills || []).map((st) => ({

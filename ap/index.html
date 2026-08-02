@@ -184,6 +184,9 @@
         <div style="border: 1px solid #3A3935; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">AP statement — shown on the abandonment record</span>
           <textarea value="{{ abStatement }}" onChange="{{ onAbStatement }}" rows="3" placeholder="Optional. Published verbatim on the takeover page." style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px; resize: vertical;"></textarea>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Corner-time demonstration video — shown on the violation notice</span>
+          <input type="text" value="{{ demoUrl }}" onChange="{{ onDemoUrl }}" placeholder="https://…  (a demonstration only — never a session recording)" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 10px 12px;">
+          <button onClick="{{ saveDemoUrl }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid #57544F; color: #FAFAF7; padding: 9px 14px; cursor: pointer; align-self: flex-start;" style-hover="border-color: #9CCC9C;">Save demonstration link</button>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">AP-placed links — one per line: Label | https://url</span>
           <textarea value="{{ abLinksText }}" onChange="{{ onAbLinks }}" rows="3" placeholder="Official statement | https://…" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; resize: vertical;"></textarea>
           <button onClick="{{ abSave }}" style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Save statement + links</button>
@@ -360,6 +363,12 @@ class Component extends DCLogic {
       abStatement: s.abStatement !== undefined ? s.abStatement : (st.ap_statement || ''),
       abLinksText: s.abLinks !== undefined ? s.abLinks : abLinksText,
       onAbStatement: set('abStatement'), onAbLinks: set('abLinks'),
+      demoUrl: s.demoUrl !== undefined ? s.demoUrl : (st.corner_demo_url || ''),
+      onDemoUrl: set('demoUrl'),
+      saveDemoUrl: () => {
+        var url = this.state.demoUrl !== undefined ? this.state.demoUrl : (st.corner_demo_url || '');
+        this.post({ action: 'apcornerdemo', url: url }, 'Saving…');
+      },
       abPresume: () => { if (confirm('Set the site to PRESUMED ABANDONED?\n\nReversible. Use for a manual §11 call (e.g. delete/conceal attempt) ahead of the 30-day automatic trigger.')) this.post({ action: 'apabandon', op: 'presume' }, 'Setting…'); },
       abConfirm: () => {
         if (!confirm('CONFIRM ABANDONMENT — §11 TERMINATION.\n\nThe site permanently converts to the abandonment record. This is designed to be one-way.')) return;
