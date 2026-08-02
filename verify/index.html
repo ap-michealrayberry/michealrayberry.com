@@ -70,7 +70,7 @@
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Inspect the raw log yourself</span>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935; max-width: 640px;">The attestation log is public and machine-readable: <a href="https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&amp;sheet=Attestation">download it as CSV</a>. Columns: server timestamp, project day, event, challenge code, session kind, video and photo SHA-256 fingerprints.</p>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935; max-width: 640px;">The attestation log is public and machine-readable: <a href="https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv&amp;sheet=Attestation">download it as CSV</a>. Columns: server timestamp, project day, event, challenge code, session kind, video and photo SHA-256 fingerprints.</p>
     </div>
   </main>
 
@@ -82,7 +82,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { checking: false, checkingMsg: '', result: null };
-  ATTEST_CSV = 'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv&sheet=Attestation';
+  ATTEST_CSV = 'https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv&sheet=Attestation';
   parseCSV(text) {
     const rows = [];
     let row = [], cur = '', q = false;

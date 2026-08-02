@@ -61,7 +61,7 @@
         "distribution": [{
           "@type": "DataDownload",
           "encodingFormat": "text/csv",
-          "contentUrl": "https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv"
+          "contentUrl": "https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv"
         }]
       }
     ]
@@ -222,9 +222,7 @@
               <sc-for list="{{ apLinks }}" as="l" hint-placeholder-count="1">
                 <a href="{{ l.url }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; border: 1px solid #3A3935; padding: 14px 18px; text-decoration: none; color: #FAFAF7;" style-hover="border-color: #B3261E;">
                   <span style="font-size: 15px; font-weight: 600; flex: 1;">{{ l.label }}</span>
-                  <sc-if value="{{ l.adult }}" hint-placeholder-val="{{ false }}">
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; background: #B3261E; color: #FAFAF7; padding: 3px 8px;">18+ ADULT</span>
-                  </sc-if>
+                  
                   <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">→</span>
                 </a>
               </sc-for>
@@ -1219,20 +1217,20 @@ function normalizeDriveUrl(url) {
 class Component extends DCLogic {
   state = { page: 'home', liveWeighIns: null, livePenalties: null, liveUpdates: null, liveJournal: null, liveAmendments: null, expandedDay: null };
 
-  /* ─────────── RECORD SOURCE — the only lines to edit after a rebuild ───────────
-     createRecordSpreadsheet() in Apps Script logs the new SHEET ID and one gid
-     per tab. Paste the ID here and the two public gids below; nothing else in
-     this file needs to change. Read-only CSV; no key involved. */
-  SHEET_ID = '1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM';
-  GID_WEIGHINS = '1146060827';
-  GID_VIOLATIONS = '1365599185';
-
+  /* ─────────── RECORD SOURCE — the only line to edit after a rebuild ───────────
+     createRecordSpreadsheet() in Apps Script logs the new SHEET ID; paste it
+     here and nothing else in this file changes. Read-only CSV, no key. */
+  SHEET_ID = '1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM';
+  /* Tabs are read BY NAME — the record spreadsheet is built by
+     createRecordSpreadsheet(), so these names are exact and gids never
+     need chasing. Renaming a tab in the sheet is the only thing that
+     would break a read. */
   CSV_BASE = 'https://docs.google.com/spreadsheets/d/' + this.SHEET_ID + '/gviz/tq?tqx=out:csv';
-  WEIGHINS_CSV = this.CSV_BASE + '&gid=' + this.GID_WEIGHINS;
-  PENALTIES_CSV = this.CSV_BASE + '&gid=' + this.GID_VIOLATIONS;
-  /* Optional tabs. The rebuilt record does not include them; leave blank and
-     their sections stay empty, or paste a gid to switch one back on. */
-  UPDATES_CSV = '';
+  WEIGHINS_CSV = this.CSV_BASE + '&sheet=Weigh-ins';
+  PENALTIES_CSV = this.CSV_BASE + '&sheet=Violation%20Log';
+  UPDATES_CSV = this.CSV_BASE + '&sheet=Updates';
+  /* Optional tabs the rebuilt record does not include; leave blank and their
+     sections stay empty, or paste a gid to switch one back on. */
   JOURNAL_CSV = '';
   AMENDMENTS_CSV = '';
 

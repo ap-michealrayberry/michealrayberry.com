@@ -28,10 +28,10 @@
   ];
   const TITLE_SEC = 2.5; // opening title card (also becomes the feed thumbnail)
   const SHEET_CSV =
-    'https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM/gviz/tq?tqx=out:csv';
+    'https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv';
   // AP's Apps Script web app — issues one-time challenge codes and records
   // capture attestations (SHA-256 fingerprints) with Google server time.
-  const ATTEST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbybendih-XezdIrI2mHGIRwg0ggoqkO5tiYss2Gs7mqdZ4154icD0tQYJtAT_q3bS_s4w/exec';
+  const ATTEST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
 
   const CSS = `
     .ra-root{background:#FAFAF7;color:#141412;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;width:100%;}
