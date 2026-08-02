@@ -186,7 +186,7 @@
         </div>
         <a class="ra-dl ra-vpdl ra-hide" download style="margin-top:10px">Download Portrait</a>
         <p class="ra-vpnote" style="margin-top:8px">
-          Standardized pink-unitard portrait, inspection stance, facing the camera. Factual and fully clothed; stamped with the violation number and date (§8: no consequence details). It is filed to the record and appears in the public violation notice until the violation is resolved.
+          Standardized project-uniform portrait, inspection stance, facing the camera. Factual and fully clothed; stamped with the violation number and date (§8: no consequence details). It is filed privately with the violation entry for the AP’s review — it is not published.
         </p>
       </div>
       <div class="ra-corrbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
@@ -1158,7 +1158,7 @@
         const filed = await postPacket({ name: 'violation-portrait.jpg', image_b64: String(dataUrl).split(',')[1] });
         const att = await attestPost({ kind: 'violation-portrait-v' + vnum, code: ch.code, weight: '', video_sha256: '', photo_sha256s: [hash] });
         setVpNote(filed && att
-          ? 'Filed and attested. The portrait publishes to the violation notice on the next site deploy.'
+          ? 'Filed and attested. It is held privately with the violation entry for the AP.'
           : 'Captured, but filing failed — download it and send it to the AP directly.');
       });
 

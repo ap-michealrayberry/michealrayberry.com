@@ -20,9 +20,9 @@
 
 <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 64px; gap: 28px; box-sizing: border-box;">
   <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 680px;">
-    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public consequence · published in full · max one session per calendar day</span>
+    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Corrective requirement · recorded · privately verified · max one session per calendar day</span>
     <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corner Time</h1>
-    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Pink Penalty Uniform required — pink unitard, plain black shoes, no name tag; the camera checks for it. Standing upright, facing the designated corner, full body and corner continuously in frame. Structure: opening statement, silent corrective period, closing statement — fully AI-voiced, and you do not speak at any point (the guiding voice, AI or device, is captured on the recording). One continuous take — pausing, leaving frame, breaking posture, or ending early makes the session incomplete.</p>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">Project uniform — solid black unitard, plain black shoes; the camera checks for it. Standing upright, facing the designated corner, full body and corner continuously in frame. Structure: opening statement, silent corrective period, closing statement — fully AI-voiced, and you do not speak at any point (the guiding voice, AI or device, is captured on the recording). One continuous take — pausing, leaving frame, breaking posture, or ending early makes the session incomplete.</p>
   </div>
 
   <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
@@ -126,9 +126,9 @@ class Component extends DCLogic {
     try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
     if (!key) { this.setState({ upStatus: 'AUTO-FILING UNAVAILABLE — no device key in this browser (it is set on the /record page). Download the video and upload it to the Drive folder manually.' }); return; }
     const mime = blob.type || 'video/webm';
-    this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — 0% · keep this page open…' });
+    this.setState({ upStatus: 'DELIVERING TO THE AP’S PRIVATE ARCHIVE — 0% · keep this page open…' });
     try {
-      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'resolution' }) })).json();
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'corrective' }) })).json();
       if (!init || !init.ok || !init.session) throw new Error((init && init.error) || 'init failed');
       const CH = 4194304; // 4 MiB — multiple of 256 KiB, per Drive resumable-upload rules
       for (let off = 0; off < blob.size; off += CH) {
@@ -138,12 +138,12 @@ class Component extends DCLogic {
           try { j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: off, total: blob.size, mime, chunk_b64 }) })).json(); } catch (e) { j = null; }
         }
         if (!(j && j.ok)) throw new Error('chunk failed');
-        this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
-        if (j.done) { this.setState({ upStatus: 'FILED TO THE DRIVE RECORD ✓ — delivered automatically; the download below is a backup.' }); return; }
+        this.setState({ upStatus: 'DELIVERING TO THE AP’S PRIVATE ARCHIVE — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
+        if (j.done) { this.setState({ upStatus: 'DELIVERED TO THE AP’S PRIVATE ARCHIVE ✓ — the download below is a backup.' }); return; }
       }
       throw new Error('incomplete');
     } catch (e) {
-      this.setState({ upStatus: 'AUTO-FILING FAILED — download the video and upload it to the Drive folder manually.' });
+      this.setState({ upStatus: 'AUTO-DELIVERY FAILED — download the video and deliver it to the AP directly.' });
     }
   }
 
@@ -155,7 +155,7 @@ class Component extends DCLogic {
   openingText() {
     const p = this.state.pens[this.state.sel];
     const spokenDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    return 'This is the official Corner Time record for Micheal Ray Berry, Public Accountability Project. Day ' + this.todayDay() + '. Today is ' + spokenDate + '. Micheal Ray Berry. Face the camera. Hands behind your head, fingers interlocked. You do not speak during this session — the voice speaks for the record. This Corner Time is assigned for violation ' + this.vn() + (p ? ', ' + p.what : '') + '. Level ' + this.state.level + '. ' + this.minutes() + ' continuous minutes, recorded and published in full.';
+    return 'This is the official Corner Time record for Micheal Ray Berry, Public Accountability Project. Day ' + this.todayDay() + '. Today is ' + spokenDate + '. Micheal Ray Berry. Face the camera. Hands behind your head, fingers interlocked. You do not speak during this session — the voice speaks for the record. This Corner Time is assigned for violation ' + this.vn() + (p ? ', ' + p.what : '') + '. Level ' + this.state.level + '. ' + this.minutes() + ' continuous minutes, recorded and delivered privately to the Accountability Partner for verification.';
   }
   closingText() {
     return 'This Corner Time session is complete. ' + this.minutes() + ' continuous minutes, recorded without pause. It will be submitted for verification. Violation ' + this.vn() + ' remains unresolved until the Accountability Partner verifies every assigned requirement.';
@@ -303,7 +303,7 @@ class Component extends DCLogic {
   }
 
   // Samples the torso (between shoulders and hips when pose is available) and
-  // classifies the uniform: black standard / pink penalty / not confirmed.
+  // confirms the project uniform: black unitard, or not confirmed.
   uniformCheck() {
     try {
       const v = this._camEl; if (!v || !v.videoWidth) return;
@@ -323,8 +323,8 @@ class Component extends DCLogic {
       for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
       r /= n; g /= n; b /= n;
       const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      if (r > 120 && r - g > 30 && b > g - 20) { this._uniform = 'PINK \u2713'; this.speak('Penalty uniform confirmed. Pink.'); }
-      else { this._uniform = 'NOT CONFIRMED'; this.speak('Penalty uniform not confirmed — the pink Penalty Uniform is required. The Accountability Partner verifies attire from the recording.'); }
+      if (lum < 65) { this._uniform = 'BLACK \u2713'; this.speak('Uniform check confirmed. Black unitard.'); }
+      else { this._uniform = 'NOT CONFIRMED'; this.speak('Uniform not confirmed on camera. The Accountability Partner verifies attire from the recording.'); }
     } catch (e) {}
   }
 
@@ -478,7 +478,7 @@ class Component extends DCLogic {
     if (this._rehearse) {
       this._rehearse = false;
       this.beep(660, 200);
-      this.setState({ doneTitle: 'Rehearsal Complete', summary: 'Rehearsal only — nothing was recorded, nothing was filed, and it does not satisfy any assignment. Run the real session when ready: pink Penalty Uniform, corner in frame, ' + this.minutes() + ' continuous minutes.', ytTitle: '', verLine: '', upStatus: '' });
+      this.setState({ doneTitle: 'Rehearsal Complete', summary: 'Rehearsal only — nothing was recorded, nothing was filed, and it does not satisfy any assignment. Run the real session when ready: project uniform, corner in frame, ' + this.minutes() + ' continuous minutes.', ytTitle: '', verLine: '', upStatus: '' });
       return;
     }
     if (how === 'invalid') {
@@ -493,7 +493,7 @@ class Component extends DCLogic {
       this.speak('Session stopped.');
       this.setState({
         doneTitle: 'Safety Stop',
-        summary: 'The session was stopped for safety. A safety stop is never a violation. The partial recording files to the Drive record automatically for AP review (status below) — add a note to the AP on what happened.',
+        summary: 'The session was stopped for safety. A safety stop is never a violation. The partial recording delivers to the AP’s private archive automatically for review (status below) — add a note to the AP on what happened.',
         ytTitle: '', verLine: '',
       });
       return;
@@ -502,9 +502,8 @@ class Component extends DCLogic {
     this.speak('Corner time complete. ' + this.minutes() + ' minutes recorded.');
     this.setState({
       doneTitle: 'Corner Time Complete',
-      summary: 'Opening acknowledgment, ' + this.minutes() + ' continuous silent minutes, and closing acknowledgment recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). It files to the Drive record automatically (status below). Post to YouTube with the exact title, send the link to the AP. Status: Submitted — the sitewide violation notice starts its 24-hour removal countdown when the submission is logged. The entry becomes Resolved only when the AP verifies identity, attire, posture, elapsed time, and completion.',
-      ytTitle: 'Micheal Ray Berry — Public Corner Time — ' + this.vn() + ' — Level ' + this.state.level + ' — ' + this.minutes() + ' Minutes — ' + date,
-      verLine: 'CORNER TIME — ' + this.minutes() + ' MIN — SUBMITTED — AWAITING AP VERIFICATION',
+      summary: 'Opening statement, ' + this.minutes() + ' continuous silent minutes, and closing statement recorded against ' + this.vn() + ' (' + p.date + ' · ' + p.what + '). It delivers itself to the AP’s private archive (status below); nothing is published. Status: Submitted — the sitewide notice starts its 24-hour removal countdown when the submission is logged. The entry becomes Resolved only when the AP verifies identity, attire, posture, elapsed time, and completion.',
+      ytTitle: '', verLine: '',
     });
   }
 

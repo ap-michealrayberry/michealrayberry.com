@@ -20,9 +20,9 @@
 
 <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 64px; gap: 28px; box-sizing: border-box;">
   <div style="text-align: center; display: flex; flex-direction: column; gap: 8px; max-width: 700px;">
-    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Public record version — one session per violation · acknowledgment + corner time</span>
+    <span style="font-size: 11px; letter-spacing: 0.3em; color: #B3261E; text-transform: uppercase;">Corrective session — acknowledgment + corner time · one per violation · privately verified</span>
     <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 34px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Violation Resolution</h1>
-    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">One continuous, unedited take, fully AI-voiced — you do not speak at any point. The voice states the violation while you stand at attention in the pink Penalty Uniform, then directs the assigned corner time and closes the session. Record photos are taken automatically — front at attention and in position in the corner — and file to the log, and the finished video files itself to the Drive record. During corner time the camera monitors position, posture (hands behind the head), stillness, and uniform — three warnings invalidate the session and nothing is saved.</p>
+    <p style="font-size: 13px; color: #6B6A64; margin: 0; line-height: 1.6;">One continuous, unedited take, fully AI-voiced — you do not speak at any point. The voice states the violation while you stand at attention in the project uniform, then directs the assigned corner time and closes the session. Record photos are taken automatically — front at attention and in position in the corner — and the photos and finished video deliver themselves to the AP’s private archive; nothing is published. During corner time the camera monitors position, posture (hands behind the head), stillness, and uniform — three warnings invalidate the session and nothing is saved.</p>
   </div>
 
   <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
@@ -45,7 +45,7 @@
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px;">
       <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Position check — before you begin</span>
-      <div style="font-size: 12.5px; line-height: 1.7; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935;">Phone propped, portrait orientation · full body visible head to shoes · a usable corner in frame · pink Penalty Uniform on · nothing else in the frame. You will not read or speak anything: stand at attention facing the camera while the voice states the record, then follow its directions into the corner. Warnings are spoken; the safety stop is always available and is never a violation.</div>
+      <div style="font-size: 12.5px; line-height: 1.7; padding: 10px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #3A3935;">Phone propped, portrait orientation · full body visible head to shoes · a usable corner in frame · project uniform on · nothing else in the frame. You will not read or speak anything: stand at attention facing the camera while the voice states the record, then follow its directions into the corner. Warnings are spoken; the safety stop is always available and is never a violation.</div>
     </div>
     <span style="font-size: 12px; color: #B3261E; min-height: 14px;">{{ status }}</span>
     <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, nothing recorded</button>
@@ -75,7 +75,7 @@
     </sc-if>
     <sc-if value="{{ hasStills }}" hint-placeholder-val="{{ false }}">
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Record photos — filed to the log automatically, overlay burned in</span>
+        <span style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Record photos — delivered privately to the AP, overlay burned in</span>
         <div style="display: flex; gap: 8px;">
           <sc-for list="{{ stills }}" as="st" hint-placeholder-count="0">
             <a href="{{ st.url }}" download="{{ st.name }}" style="flex: 1; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: #141412;">
@@ -123,19 +123,18 @@ class Component extends DCLogic {
     return [
       { t: 'This is the official Violation Resolution record for Micheal Ray Berry, Public Accountability Project. Day ' + todayDay + '. Today is ' + spokenDate + '.' },
       { t: 'Micheal Ray Berry. Stand at attention. Face the camera. Feet together, hands at your sides, eyes forward. You do not speak during this session. The voice speaks for the record.' },
-      { t: 'This is a public violation resolution session, conducted under the Public Accountability Agreement executed July 20, 2026, as amended, and recorded in one continuous, unedited take.' },
+      { t: 'This is a violation resolution session, conducted under the Public Accountability Agreement executed July 20, 2026, as amended, and recorded in one continuous, unedited take.' },
       { t: 'On ' + p.date + ', Day ' + this.dayNum(p.date) + ' of the project, the following requirement was not met: ' + p.what + '.' },
       { t: 'That failure was a Violation Event. It was entered permanently into the public record as violation ' + this.vn() + '. It cannot be renamed, softened, or removed. Not by excuse, not by delay, and not by you.' },
-      { t: 'This is a Level ' + lvlWord + ' consequence. Resolution requires three things: this public acknowledgment, ' + mins + ' continuous minutes of monitored corner time, and verification of both by the Accountability Partner. Nothing less resolves the entry.' },
-      { t: 'You are required to be in the pink Penalty Uniform. Pink unitard. Plain black shoes. No name tag. Hold still. The record photo is being taken now.', a: 'front' },
-      { t: 'You built this system yourself, because private promises let you fail in private. Public failure is the mechanism you chose. This is what it looks like.' },
+      { t: 'This is a Level ' + lvlWord + ' consequence. Resolution requires three things: this recorded acknowledgment, ' + mins + ' continuous minutes of monitored corner time, and verification of both by the Accountability Partner. Nothing less resolves the entry.' },
+      { t: 'You are required to be in the project uniform. Black unitard. Plain black shoes. Hold still. The record photo is being taken now.', a: 'front' },
       { t: 'The acknowledgment is noted for the record. The consequence begins now.' },
     ];
   }
   closingLines() {
     const mins = this.cornerMins();
     return [
-      { t: 'This resolution session is complete. One continuous take: public acknowledgment, and ' + mins + ' monitored minutes of corner time against violation ' + this.vn() + '.', a: 'completion' },
+      { t: 'This resolution session is complete. One continuous take: recorded acknowledgment, and ' + mins + ' monitored minutes of corner time against violation ' + this.vn() + '.', a: 'completion' },
       { t: 'Violation ' + this.vn() + ' remains unresolved until the Accountability Partner verifies identity, uniform, posture, elapsed time, and completion. The record remains. The project continues. The next deadline is tonight, ten PM Eastern.' },
     ];
   }
@@ -269,7 +268,7 @@ class Component extends DCLogic {
       if (sec > 15) return this.invalidate('sustained breach (' + issues[0].toLowerCase() + ')');
     } else { this._monIssue = null; this._breachAt = null; }
   }
-  // Samples the torso (pose-located when available) — pink Penalty Uniform required.
+  // Samples the torso (pose-located when available) — confirms the project uniform (black).
   uniformCheck() {
     try {
       const v = this._camEl; if (!v || !v.videoWidth) return;
@@ -288,8 +287,9 @@ class Component extends DCLogic {
       let r = 0, g = 0, b = 0; const n = d.length / 4;
       for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
       r /= n; g /= n; b /= n;
-      if (r > 120 && r - g > 30 && b > g - 20) { this._uniform = 'PINK \u2713'; this.speak('Penalty uniform confirmed. Pink.'); }
-      else { this._uniform = 'NOT CONFIRMED'; this.speak('Penalty uniform not confirmed on camera. Attire is verified by the Accountability Partner from the recording.'); }
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (lum < 65) { this._uniform = 'BLACK \u2713'; this.speak('Uniform check confirmed. Black unitard.'); }
+      else { this._uniform = 'NOT CONFIRMED'; this.speak('Uniform not confirmed on camera. Attire is verified by the Accountability Partner from the recording.'); }
     } catch (e) {}
   }
   // One-off pose read so the uniform box is placed correctly during the front photo.
@@ -313,9 +313,9 @@ class Component extends DCLogic {
     const key = this._key();
     if (!key) { this.setState({ upStatus: 'AUTO-FILING UNAVAILABLE — no device key in this browser (it is set on the /record page). Download the video and upload it to the Drive folder manually.' }); return; }
     const mime = blob.type || 'video/webm';
-    this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — 0% · keep this page open…' });
+    this.setState({ upStatus: 'DELIVERING TO THE AP’S PRIVATE ARCHIVE — 0% · keep this page open…' });
     try {
-      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'resolution' }) })).json();
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'corrective' }) })).json();
       if (!init || !init.ok || !init.session) throw new Error((init && init.error) || 'init failed');
       const CH = 4194304; // 4 MiB — multiple of 256 KiB, per Drive resumable-upload rules
       for (let off = 0; off < blob.size; off += CH) {
@@ -325,20 +325,25 @@ class Component extends DCLogic {
           try { j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: off, total: blob.size, mime, chunk_b64 }) })).json(); } catch (e) { j = null; }
         }
         if (!(j && j.ok)) throw new Error('chunk failed');
-        this.setState({ upStatus: 'FILING TO THE DRIVE RECORD — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
-        if (j.done) { this.setState({ upStatus: 'FILED TO THE DRIVE RECORD ✓ — video and record photos delivered automatically; the downloads are backups.' }); return; }
+        this.setState({ upStatus: 'DELIVERING TO THE AP’S PRIVATE ARCHIVE — ' + Math.min(100, Math.round(((off + CH) / blob.size) * 100)) + '% · keep this page open…' });
+        if (j.done) { this.setState({ upStatus: 'DELIVERED TO THE AP’S PRIVATE ARCHIVE ✓ — video and record photos; the downloads are backups.' }); return; }
       }
       throw new Error('incomplete');
     } catch (e) {
-      this.setState({ upStatus: 'AUTO-FILING FAILED — download the video and upload it to the Drive folder manually.' });
+      this.setState({ upStatus: 'AUTO-DELIVERY FAILED — download the video and deliver it to the AP directly.' });
     }
   }
   async filePhoto(dataUrl, name) {
     try {
       const key = this._key();
       if (!key) return false;
-      const r = await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'packet', key, date: new Date().toISOString().slice(0, 10), name, image_b64: String(dataUrl).split(',')[1] }) });
-      return !!(await r.json()).ok;
+      const blob = await (await fetch(dataUrl)).blob();
+      const mime = blob.type || 'image/jpeg';
+      const init = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidinit', key, name, size: blob.size, mime, kind: 'corrective' }) })).json();
+      if (!init || !init.ok || !init.session) return false;
+      const chunk_b64 = await this._b64(blob);
+      const j = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'vidchunk', key, session: init.session, offset: 0, total: blob.size, mime, chunk_b64 }) })).json();
+      return !!(j && j.ok && j.done);
     } catch (e) { return false; }
   }
   snapStill(label) {
@@ -549,8 +554,8 @@ class Component extends DCLogic {
     }
     this.setState({
       doneTitle: 'Resolution Session Complete',
-      summary: 'One continuous, AI-voiced take: public acknowledgment of the violation of ' + p.date + ', then ' + mins + ' monitored minutes of Level ' + this.lvl() + ' corner time, closed on camera. The video and record photos file to the Drive record automatically (status below). Post the video to YouTube with the exact title and send the AP the link — the entry stays unresolved until he verifies every assigned requirement.',
-      ytTitle: 'Micheal Ray Berry — Violation Resolution — Acknowledgment + Level ' + this.lvl() + ' Corner Time — ' + this.vn() + ' — ' + p.date,
+      summary: 'One continuous, AI-voiced take: recorded acknowledgment of the violation of ' + p.date + ', then ' + mins + ' monitored minutes of Level ' + this.lvl() + ' corner time, closed on camera. The video and record photos deliver to the AP\u2019s private archive automatically (status below); nothing is published. The sitewide notice starts its 24-hour removal countdown when the submission is logged; the entry stays unresolved until the AP verifies every assigned requirement.',
+      ytTitle: '',
     });
   }
 
