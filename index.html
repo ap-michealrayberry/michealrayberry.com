@@ -1234,6 +1234,17 @@ class Component extends DCLogic {
   JOURNAL_CSV = '';
   AMENDMENTS_CSV = '';
 
+  /* Accepts 2026-07-22, 7/22/2026, or a Date-ish string and returns ISO. */
+  normDate(v) {
+    const t = String(v == null ? '' : v).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+    const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return m[3] + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0');
+    const d = new Date(t);
+    if (!isNaN(d)) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    return t;
+  }
+
   parseCSV(text) {
     // Handles quoted fields with commas; returns array of row arrays.
     const rows = [];
@@ -1345,7 +1356,9 @@ class Component extends DCLogic {
         if (!t) return;
         const rows = this.parseCSV(t).slice(1); // drop header
         const entries = rows
-          .map((r) => ({ date: (r[0] || '').trim(), weight: parseFloat(r[1]), note: (r[2] || '').trim(), photo: (r[3] || '').trim(), left: (r[4] || '').trim(), rear: (r[5] || '').trim(), right: (r[6] || '').trim(), video: (r[7] || '').trim() }))
+          // Sheets may hand back a real date (7/22/2026) instead of an ISO
+          // string, so every date is normalized before it is validated.
+          .map((r) => ({ date: this.normDate(r[0]), weight: parseFloat(r[1]), note: (r[2] || '').trim(), photo: (r[3] || '').trim(), left: (r[4] || '').trim(), rear: (r[5] || '').trim(), right: (r[6] || '').trim(), video: (r[7] || '').trim() }))
           .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && !isNaN(e.weight));
         if (entries.length) {
           this.setState({ liveWeighIns: entries });
@@ -1418,6 +1431,7 @@ class Component extends DCLogic {
         const entries = rows
           .map((r) => {
             const c = r.map((x) => String(x || '').trim());
+            c[0] = this.normDate(c[0]);
             // Public format (§8): date · violation · status. Legacy level-format rows (level in col B) still parse.
             if (/^level/i.test(c[1])) {
               return { date: c[0], violation: c[2], status: /satisfied/i.test(c[6] || '') ? 'Resolved' : (c[6] || 'Unresolved') };
