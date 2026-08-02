@@ -5,18 +5,25 @@
 
   const START_DATE = '2026-07-20';
   // Guided inspection sequence: take-position intro, then five angle segments.
+  /* Guided inspection sequence. Each segment names the angle and states what
+     that angle exists to verify, so the recording is self-documenting: anyone
+     watching it later can hear what was required, not just see a man turning.
+     Durations are generous enough that the line finishes before the turn is
+     called — the device voice is slower than ElevenLabs, and the script has to
+     work on either. Segment 0's line is assembled at record time (buildIntro)
+     because it carries the day, date, and weight. */
   const SEGMENTS = [
-    { label: 'INSPECTION POSITION', tag: 'FRONT VIEW · HANDS BEHIND HEAD', dur: 13, speak: '' }, // intro built at record time — doubles as the front view (he starts facing the camera)
-    { label: 'LEFT SIDE', tag: 'VIEW 2 OF 4', dur: 7,
-      speak: 'Left.' },
-    { label: 'REAR', tag: 'VIEW 3 OF 4', dur: 7,
-      speak: 'Rear.' },
-    { label: 'RIGHT SIDE', tag: 'VIEW 4 OF 4', dur: 7,
-      speak: 'Right.' },
-    { label: 'FRONT', tag: 'CLOSING VIEW', dur: 5,
-      speak: 'Front.' },
-    { label: 'COMPLETE', tag: 'DAILY INSPECTION', dur: 18,
-      speak: 'All four required views have been recorded. Today\u2019s inspection records the result exactly as it is. The remaining daily requirements must be completed by ten PM. Up, down, or flat, it gets posted. Daily Inspection complete.' },
+    { label: 'INSPECTION POSITION', tag: 'FRONT VIEW · HANDS BEHIND HEAD', dur: 26, speak: '' },
+    { label: 'LEFT SIDE', tag: 'VIEW 2 OF 4', dur: 11,
+      speak: 'Turn to your left. Hold the position. This view records the left profile.' },
+    { label: 'REAR', tag: 'VIEW 3 OF 4', dur: 11,
+      speak: 'Turn to the rear. Hold the position. This view records the back, shoulders to heels.' },
+    { label: 'RIGHT SIDE', tag: 'VIEW 4 OF 4', dur: 11,
+      speak: 'Turn to your right. Hold the position. This view records the right profile.' },
+    { label: 'FRONT', tag: 'CLOSING VIEW', dur: 11,
+      speak: 'Return to the front. Face the camera. Hands behind the head. This closing view confirms identity against the opening frame.' },
+    { label: 'COMPLETE', tag: 'DAILY INSPECTION', dur: 22,
+      speak: 'All four required views are recorded. This inspection documents the result exactly as it is, with no adjustment and no commentary. The remaining requirements of the Daily Compliance Packet are due by ten PM Eastern: the four accountability photographs, the weight entry, and the record update. Nothing is complete until the record accepts all of them. Up, down, or flat, it gets posted. Daily Inspection complete.' },
   ];
   const SEQ_TOTAL = SEGMENTS.reduce((t, s) => t + s.dur, 0);
   // Photo phase after the video: posed, sharp stills — subject holds still per angle.
@@ -284,6 +291,9 @@
       function ensureAC() {
         try {
           audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+          // A context created before a user gesture starts suspended and
+          // silently discards everything routed through it.
+          if (audioCtx.state === 'suspended') audioCtx.resume();
           elDest = elDest || audioCtx.createMediaStreamDestination();
         } catch (e) {}
       }
@@ -574,9 +584,14 @@
         try {
           // 1080p for the live/recording phase — downscaling a 4K feed every frame
           // was the main stutter source. The photo phase bumps the track to 4K.
+          /* Audio is captured, with echo cancellation OFF. The ElevenLabs voice
+             is routed into the recording directly, but the device fallback voice
+             only exists as sound in the room — and the browser would treat that
+             as speaker bleed and subtract it, leaving a silent recording on any
+             day the API is unavailable. */
           stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
-            audio: false,
+            audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
           });
         } catch (e) {
           setNote('Camera failed: ' + e.message + ' — needs HTTPS and camera permission.');
@@ -1439,10 +1454,19 @@
         photos = [];
         if (!rehearse) {
         const canvasStream = view.captureStream(30);
-        /* With an ElevenLabs key on this device, the spoken prompts and beeps are
-           routed into the recording — the published video carries the narration.
-           Device-voice fallback cannot be captured; that recording stays silent. */
+        /* Narration reaches the tape by two independent paths, so the recording
+           is never silent: the ElevenLabs voice and the beeps are routed into
+           the audio graph directly, and the camera's microphone (captured with
+           echo cancellation disabled) picks up the device fallback voice from
+           the room on any day the API is unavailable. */
         ensureAC();
+        try {
+          const micTracks = stream ? stream.getAudioTracks() : [];
+          if (micTracks.length && audioCtx && elDest) {
+            const micSrc = audioCtx.createMediaStreamSource(new MediaStream(micTracks));
+            micSrc.connect(elDest);
+          }
+        } catch (e) {}
         if (elDest) elDest.stream.getAudioTracks().forEach((t) => canvasStream.addTrack(t));
 
         const mime =
@@ -1564,9 +1588,13 @@
         const w = parseFloat($('.ra-w').value);
         const spokenDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         const wSpoken = isNaN(w) ? '' : (w % 1 === 0 ? String(Math.round(w)) : w.toFixed(1)); // "335", not "335 point zero"
-        SEGMENTS[0].speak = 'This is the official Daily Inspection for Micheal Ray Berry. Day ' + dayNum + '. Today is ' + spokenDate + '.' +
-          (wSpoken ? ' Documented weight: ' + wSpoken + ' pounds.' : '') +
-          (challenge ? ' Verification code: ' + challenge.code.split('').join(', ') + '.' : '');
+        /* The verification code is burned into the frame, not spoken: it is
+           evidence for the AP, not narration, and reading four digits aloud
+           in every recording adds nothing a viewer can use. */
+        SEGMENTS[0].speak = 'This is the official Daily Inspection for Micheal Ray Berry, Day ' + dayNum + ' of the Public Accountability Project. Today is ' + spokenDate + '.' +
+          (wSpoken ? ' Documented weight this morning: ' + wSpoken + ' pounds.' : '') +
+          ' Stand at attention facing the camera. Feet together, hands behind the head, eyes forward. You do not speak during this recording. The voice speaks for the record.' +
+          ' This is one continuous take. Four views are required, and the verification code shown on screen was issued moments ago by the record itself, so this footage cannot be older than it claims. Beginning with the front view. Hold the position.';
       }
 
       $('.ra-start').addEventListener('click', async () => {

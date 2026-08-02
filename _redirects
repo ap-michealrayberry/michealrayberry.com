@@ -24,7 +24,8 @@ http://www.michaelrayberry.com/* https://michealrayberry.com/:splat 301!
 # Generated archives (/daily/, /weeks/, /milestones/NNN-lb/) are real files
 # written by the publisher, so they must NOT be caught by a rewrite above.
 /mrb          /mrb/index.html          200
-/inspection   /index.html              200
+/mrb/inspection  /mrb/inspection/index.html  200
+/inspection   /mrb/inspection/         301
 /record       /mrb/index.html          301
 /portal       /mrb/index.html          301
 /resolution   /Violation%20Acknowledgment.dc.html  200

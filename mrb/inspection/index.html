@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>Daily Inspection — Recording Assistant</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #141412; } a:hover { color: #B3261E; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div style="background: #141412; color: #FAFAF7; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; flex-wrap: wrap;">
+    <a href="/mrb" style="color: #FAFAF7; text-decoration: none;" style-hover="color: #FF6B61;">← Portal</a>
+    <span style="color: #8A8983;">Daily Inspection · {{ dayLabel }}</span>
+  </div>
+
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width: 460px; margin: 72px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Device not authorised</span>
+      <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 30px; text-transform: uppercase; margin: 0; letter-spacing: 0.03em;">Recording Assistant</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">The capture tools are not public. Enter the device key the Accountability Partner issued for this phone. It is stored on this device only, and the AP can revoke it at any time.</p>
+      <input type="password" value="{{ keyInput }}" onChange="{{ onKey }}" placeholder="Device key" autoComplete="off" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 13px 14px; border: 1px solid #141412; background: #FFFFFF; color: #141412;">
+      <button onClick="{{ unlock }}" style="padding: 15px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #B3261E;">{{ unlockLabel }}</button>
+      <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ authMsg }}</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ false }}">
+    <div style="padding: 26px 20px 8px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
+      <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(30px, 6vw, 46px); text-transform: uppercase; line-height: 1; margin: 0;">Daily Inspection</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">One session records the whole packet: the four-angle inspection video, the four accountability photographs, and today's weight. The voice runs the sequence — you never speak. The verification code is issued by the record moments before recording and is burned into every frame, so the footage cannot be older than it claims. The video files itself to the record when the session ends.</p>
+    </div>
+    <div style="flex: 1; min-height: 0;">
+      <x-import component-from-global-scope="recording-assistant" from="../../recording-assistant.js" hint-size="100%,600px"></x-import>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
+  START = '2026-07-20';
+
+  state = { key: '', keyInput: '', authMsg: '', checking: false };
+
+  componentDidMount() {
+    // The portal stores the key after validating it, so arriving from /mrb
+    // unlocks without a second prompt. A direct hit still has to authenticate.
+    let k = '';
+    try { k = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
+    if (k) this.verify(k);
+  }
+
+  async verify(key) {
+    this.setState({ checking: true, authMsg: '' });
+    try {
+      // Validated with mystate, not a challenge: a challenge would write a
+      // 'challenge-issued' row into the Attestation log on every gate check,
+      // and that log is evidence — it must contain real captures only.
+      const r = await fetch(this.EP + '?action=mystate&key=' + encodeURIComponent(key));
+      const j = await r.json();
+      if (!j || !j.ok) {
+        try { localStorage.removeItem('mrb_packet_key'); } catch (e) {}
+        this.setState({ key: '', checking: false, authMsg: 'Key not accepted. Ask the AP to confirm or reissue it.' });
+        return;
+      }
+      try { localStorage.setItem('mrb_packet_key', key); } catch (e) {}
+      this.setState({ key, checking: false, authMsg: '' });
+    } catch (e) {
+      this.setState({ checking: false, authMsg: 'Could not reach the record. A connection is required — the inspection cannot run unverified.' });
+    }
+  }
+
+  dayNum() {
+    return Math.max(1, Math.floor((Date.now() - new Date(this.START + 'T00:00:00').getTime()) / 864e5) + 1);
+  }
+
+  renderVals() {
+    const s = this.state;
+    return {
+      locked: !s.key, unlocked: !!s.key,
+      dayLabel: 'Day ' + this.dayNum(),
+      keyInput: s.keyInput,
+      onKey: (e) => this.setState({ keyInput: e.target.value }),
+      unlock: () => { const k = (s.keyInput || '').trim(); if (k) this.verify(k); },
+      unlockLabel: s.checking ? 'Checking…' : 'Unlock the tools',
+      authMsg: s.authMsg,
+    };
+  }
+}
+</script>
+</body>
+</html>

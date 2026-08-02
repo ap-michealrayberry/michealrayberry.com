@@ -46,7 +46,7 @@
         "@type": "Person",
         "name": "Micheal Ray Berry",
         "url": "https://michealrayberry.com/",
-        "sameAs": ["https://youtube.com/@michealrayberry", "https://x.com/michealrayberry", "https://www.tiktok.com/@michealrayberry", "https://www.instagram.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry", "https://www.reddit.com/user/MichealRayBerry/", "https://www.flickr.com/photos/michealrayberry/"],
+        "sameAs": ["https://x.com/michealrayberry", "https://www.tiktok.com/@michealrayberry", "https://www.instagram.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry", "https://www.reddit.com/user/MichealRayBerry/", "https://www.flickr.com/photos/michealrayberry/"],
         "description": "Participant in a public weight loss accountability project, documenting a journey from 340 to 175 pounds with daily public inspection videos and weigh-ins.",
         "homeLocation": { "@type": "Place", "name": "Savannah, GA" }
       },
@@ -457,7 +457,7 @@
           <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 40px; text-transform: uppercase; margin: 0;">Project Introduction</h2>
           <div style="position: relative; width: 100%; aspect-ratio: 16 / 9; background: #141412;">
             <sc-if value="{{ introVideoUrl }}" hint-placeholder-val="{{ false }}">
-              <video src="{{ introVideoUrl }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" poster="{{ introPoster }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
+              <video ref="{{ introVideoRef }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
             </sc-if>
             <sc-if value="{{ noIntroVideo }}" hint-placeholder-val="{{ true }}">
               <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Project statement — pending publication</div>
@@ -468,7 +468,7 @@
           <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 40px; text-transform: uppercase; margin: 0;">Daily Inspection</h2>
           <div style="position: relative; width: 100%; aspect-ratio: 16 / 9; background: #141412;">
             <sc-if value="{{ latestVideoUrl }}" hint-placeholder-val="{{ false }}">
-              <video src="{{ latestVideoUrl }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
+              <video ref="{{ latestVideoRef }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
             </sc-if>
             <sc-if value="{{ noLatestVideo }}" hint-placeholder-val="{{ true }}">
               <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Awaiting today's inspection</div>
@@ -853,7 +853,7 @@
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">08</span>
             <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Why the Record Is Permanent</h2>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">A record I could delete later is not a record — it is a draft. If an exit existed, every hard day would point toward it: quit, clean up, pretend it never happened. Permanence closes that door. Quitting no longer erases anything, so the only version of the future where these photos end well is the one where the later photos show 175.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">That is why the record is deliberately built to operate without my cooperation. It is administered by the Accountability Partner, not by me. It is mirrored across independent archives — this website, the public tracker, YouTube, and a public photo archive — each with its own copy, none of which I control. It is indexed by search engines under my real name, on purpose, so it can be found by anyone who looks. I cannot soften it, edit it, or take it down, and any attempt to would itself become part of the record.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65;">That is why the record is deliberately built to operate without my cooperation. It is administered by the Accountability Partner, not by me. It is mirrored across independent archives — this website, the public tracker, the video archive, and a public photo archive — each with its own copy, none of which I control. It is indexed by search engines under my real name, on purpose, so it can be found by anyone who looks. I cannot soften it, edit it, or take it down, and any attempt to would itself become part of the record.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">Maximum exposure is not a side effect. It is the mechanism. The more findable this record is, the more it costs to abandon — and the more the only way out is through.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The archive cannot be edited. The next photo can.</p>
           </div>
@@ -867,7 +867,7 @@
         <div style="display: flex; flex-direction: column; gap: 0; border: 1px solid #141412; max-width: 860px;">
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this real?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Real name, real face, real signed agreement, daily since July 20, 2026. Every claim on this site is verifiable against the public tracker, the photo archive, and the YouTube channel.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Real name, real face, real signed agreement, daily since July 20, 2026. Every claim on this site is verifiable against the public tracker, the photo archive, and the video archive.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this voluntary?</span>
@@ -990,7 +990,7 @@
           <p style="margin: 0;">A Violation Event is exclusively a documentation failure: a required record that is missed, late, incomplete, false, manipulated, concealed, deleted, refused, or submitted outside the required Recording Assistant, including failure to complete an assigned consequence under §8. Ordinary weight fluctuation, plateaus, or temporary gains are progress information and are never Violation Events. The AP determines whether a Violation Event occurred by applying the written requirements of this Agreement to server timestamps, validation events, recordings, Official Record System entries, integrity records, and other objective evidence, and shall provide Micheal Ray Berry a written notice identifying the failed requirement and supporting evidence. Micheal Ray Berry may submit evidence of compliance or a documented exception within 48 hours; after reviewing it, the AP issues a final written determination. Disagreement, embarrassment, regret, or dissatisfaction with a requirement is not grounds to reverse a properly documented determination. <em>See also Amendment No. 1 — Automated Violation Declaration: objective violations are declared automatically by the Official Record System without advance manual approval, subject to the 48-hour review.</em></p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">8. Corrective Requirements, Levels, and the Permanent Record</h3>
           <p style="margin: 0;"><strong>8.1 Automatic level assignment.</strong> Every confirmed Violation Event triggers a corrective requirement, assigned and verified by the Accountability Partner and published in full while it remains unresolved. The Consequence Level is determined by the Accumulated Violation Count after the Violation Event: the first Violation Event is Level One; the second is Level Two; and the third and every later Violation Event is Level Three. A milestone reset under §6.2 returns the count to zero only for future level assignments. Completion or resolution of a consequence does not erase, reduce, or remove the underlying Violation Event or its Consequence Record.</p>
-          <p style="margin: 0;"><strong>8.2 Corrective sessions.</strong> Level One requires a 10-minute corrective session; Level Two requires 20 minutes; Level Three requires 30 minutes. The session is completed by the AP-assigned deadline in the project uniform, recorded continuously in the standardized format assigned by the AP, and delivered directly to the AP’s evidence archive, from which it is published for the duration of any Active Violation Period under §8.6. The recording must be sufficiently clear to verify identity, attire, elapsed time, and completion. Pausing, editing, leaving frame, concealing identity, or ending early makes the session incomplete, and the AP may require a replacement session when the submitted record does not permit objective verification. Corrective recordings are accessible only to the AP and are never published. No single session may exceed 30 minutes, and no more than one session may be required in a calendar day; additional outstanding sessions roll forward to later days.</p>
+          <p style="margin: 0;"><strong>8.2 Corrective sessions.</strong> Level One requires a 10-minute corrective session; Level Two requires 20 minutes; Level Three requires 30 minutes. The session is completed by the AP-assigned deadline in the project uniform, recorded continuously in the standardized format assigned by the AP, and delivered directly to the AP’s evidence archive, from which it is published for the duration of any Active Violation Period under §8.6. The recording must be sufficiently clear to verify identity, attire, elapsed time, and completion. Pausing, editing, leaving frame, concealing identity, or ending early makes the session incomplete, and the AP may require a replacement session when the submitted record does not permit objective verification. Corrective recordings are held in the AP’s evidence archive and published only during an Active Violation Period as provided by §8.6. No single session may exceed 30 minutes, and no more than one session may be required in a calendar day; additional outstanding sessions roll forward to later days.</p>
           <p style="margin: 0;"><strong>8.3 Consequence notice and deadline.</strong> The AP’s final determination under §7 shall identify the Violation Event, Accumulated Violation Count, Consequence Level, corrective-session duration, and the deadline for each required act. Except where a documented exception under §9 applies, failure to complete the corrective requirement or provide required proof by the stated deadline constitutes a new Violation Event and receives the next level determined from the then-current Accumulated Violation Count.</p>
           <p style="margin: 0;"><strong>8.4 Permanent Consequence Record.</strong> Each confirmed Violation Event receives a permanent public entry on michealrayberry.com. The public entry states only: (a) the Project Day and calendar date; (b) the missed requirement; (c) the status — verification pending or Resolved; and (d) the resolution date. The assigned consequence, its level, duration, deadline, completion status, acknowledgment status, and verification status are published alongside the entry throughout any Active Violation Period, and the factual record that a consequence was assigned and completed remains permanently public. Corrective recordings are published while any entry is unresolved and held privately otherwise, under §8.6; verification photographs are never published. Entries are not separately optimized for search engines. Corrections are dated and appended; accurate earlier entries are never silently rewritten, hidden, or deleted.</p>
           <p style="margin: 0;"><strong>8.5 Public notice.</strong> While a documentation exception is unresolved, michealrayberry.com displays a factual notice on every page stating the date, the missed requirement, the status — verification pending or resolved — and the assigned consequence: its level, duration, deadline, completion status, acknowledgment status, and verification status. The notice also carries the corrective recordings published under §8.6. It contains no photograph and no warning design beyond the site’s ordinary presentation. It is removed when the AP verifies the assigned corrective requirement and marks the entry Resolved, or automatically 24 hours after the completed corrective recording is submitted, while the entry itself remains pending until AP verification. The permanent entry remains in the public log.</p>
@@ -999,7 +999,7 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">9. Documented Exceptions</h3>
           <p style="margin: 0;">A requirement may be excused or postponed only because of a documented medical event, a genuine emergency, a verified failure of an Official Platform, or a verified failure of required Project equipment or systems (the designated scale, the Recording Assistant, camera, or archive) outside Micheal Ray Berry’s reasonable control, reported to the AP as soon as reasonably possible and ordinarily within 24 hours, supported by reasonable proof. When the interruption ends, the AP designates one outcome: (a) the requirement is excused, where later completion would be impossible, medically inappropriate, or misleading; (b) the requirement is completed within 24 hours as a clearly labeled late replacement record; or (c) an equivalent record is completed within 24 hours. Travel, ordinary work demands, scheduling conflicts, embarrassment, lack of preparation, or avoidable technical problems are not documented exceptions. The public log identifies an accepted exception without disclosing private medical details.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">10. The Public Record and Platform Control</h3>
-          <p style="margin: 0;"><strong>10.1 Platform administration and access.</strong> The AP administers michealrayberry.com, the Recording Assistant, the Official Record System, the photo and video archives, the Violation Log, the Consequence Log, and their access permissions. Micheal Ray Berry may access only the submission interfaces required to complete the Daily Compliance Packet and assigned consequence evidence. He may not edit, soften, delete, overwrite, or restrict previously submitted or published records, violation entries, consequence entries, AP-controlled fields, integrity records, or archival materials, and shall not seek broader administrative access enabling him to do so. <strong>10.1a Administrative continuity.</strong> The AP shall maintain current backups and secure recovery credentials for all AP-administered Project systems, including the website, domain, Recording Assistant, Official Record System, automation services, Consequence Log, and media archives. This does not include, and confers no recovery access to, Micheal Ray Berry’s personal YouTube or X accounts. Recovery access may be deposited with a mutually approved neutral person or secure credential-management service and may be used only if the AP is unavailable, incapacitated, resigns, or fails to maintain the systems. Recovery access is never exercised by Micheal Ray Berry, and its use may not alter or suppress an accurate Project record. <strong>10.1b Submission-only role.</strong> Micheal Ray Berry holds no ownership, administrative, hosting, domain-registrar, billing, database, automation, deployment, or configuration control over michealrayberry.com, its hosting, its domain, the Recording Assistant, or the Official Record System, all of which are owned and administered solely by the AP for the Project’s duration (§13). He retains ownership of his personal Official-Platform accounts used to publish the record — the YouTube channel @michealrayberry and the X account @michealrayberry — under §10.2; posting to those accounts is his own compliance act and his role, not the AP’s. His role as to AP-administered systems is limited to submission: recording and transmitting the Daily Compliance Packet, assigned consequence records, and his personal journal entries through approved interfaces. Control of the domain alone does not satisfy this section; the AP’s control extends to every layer capable of altering, removing, restricting, or interrupting the AP-administered record.</p>
+          <p style="margin: 0;"><strong>10.1 Platform administration and access.</strong> The AP administers michealrayberry.com, the Recording Assistant, the Official Record System, the photo and video archives, the Violation Log, the Consequence Log, and their access permissions. Micheal Ray Berry may access only the submission interfaces required to complete the Daily Compliance Packet and assigned consequence evidence. He may not edit, soften, delete, overwrite, or restrict previously submitted or published records, violation entries, consequence entries, AP-controlled fields, integrity records, or archival materials, and shall not seek broader administrative access enabling him to do so. <strong>10.1a Administrative continuity.</strong> The AP shall maintain current backups and secure recovery credentials for all AP-administered Project systems, including the website, domain, Recording Assistant, Official Record System, automation services, Consequence Log, and media archives. This does not include, and confers no recovery access to, Micheal Ray Berry’s personal social accounts. Recovery access may be deposited with a mutually approved neutral person or secure credential-management service and may be used only if the AP is unavailable, incapacitated, resigns, or fails to maintain the systems. Recovery access is never exercised by Micheal Ray Berry, and its use may not alter or suppress an accurate Project record. <strong>10.1b Submission-only role.</strong> Micheal Ray Berry holds no ownership, administrative, hosting, domain-registrar, billing, database, automation, deployment, or configuration control over michealrayberry.com, its hosting, its domain, the Recording Assistant, or the Official Record System, all of which are owned and administered solely by the AP for the Project’s duration (§13). He retains ownership of his personal accounts — including the X account @michealrayberry — under §10.2; posting to those accounts is his own compliance act and his role, not the AP’s. His role as to AP-administered systems is limited to submission: recording and transmitting the Daily Compliance Packet, assigned consequence records, and his personal journal entries through approved interfaces. Control of the domain alone does not satisfy this section; the AP’s control extends to every layer capable of altering, removing, restricting, or interrupting the AP-administered record.</p>
           <p style="margin: 0;"><strong>10.2</strong> Micheal Ray Berry retains his personal accounts. Publishing the daily video to the official record is itself a compliance act under §3; posting the same material to any personal account is optional and is neither required for compliance nor sufficient to establish it. <strong>10.2a Authorized republication.</strong> The AP may repost public Project records to Official Platforms, official Project-controlled social-media accounts, AP-controlled Project accounts and websites that do not publicly identify the AP (unless the AP voluntarily chooses to identify themselves), and reasonable archival mirrors used to preserve or promote the Project. Reposted material remains substantially unaltered, accompanied only by factual, nonsexual Project context. The AP may not license, sell, monetize, materially alter, or provide Project content to humiliation, fetish, adult, harassment, or impersonation accounts. No repost may disclose private contact or employment information, location data beyond the city already public, or information unrelated to the Project. The AP may remove, relocate, or restrict a duplicate repost when reasonably necessary to address harassment, impersonation, doxxing, platform-policy violations, legal requirements, or a credible safety concern, preserving the underlying Consequence Record and its required facts in an appropriate archive.</p>
           <p style="margin: 0;"><strong>10.3 Archival permanence.</strong> The Project maintains a permanent, accurate archival record of material compliance events, Consequence Records, milestone results, completion, or termination; it survives this Agreement and remains online indefinitely. The parties are not required to preserve every duplicate post, mirror, social-media upload, or obsolete platform account. Content may be removed, relocated, redacted, or replaced when reasonably necessary because of account compromise, harassment, impersonation, accidental disclosure of private information, platform requirements, legal obligations, cybersecurity concerns, or credible personal-safety concerns — preserving the truth and continuity of the record to the greatest reasonable extent. If a required record must be removed from one location, the AP shall preserve it at another appropriate Project-controlled location when lawful and reasonably safe, or retain a permanent factual verification entry if continued publication of the recording itself is prohibited or creates a credible safety risk. Nothing in this section authorizes either party to falsify results, conceal a Violation Event or Consequence Record, remove its required factual fields, or falsely represent that the Project was completed.</p>
           <p style="margin: 0;"><strong>10.4 Content standard.</strong> Every part of the public record is and remains safe-for-work: the project uniform provides full coverage, and no recording, photo, repost, or log entry may contain explicit, sexualized, insulting, or gratuitously degrading material. Documentation of the body in the project uniform under the §4 standard and a factual log entry under §8 are not degrading material. Content violating this standard may not be published by either party. If discovered, it is removed and, where reasonably possible, replaced with compliant documentation; such removal is permitted under §10.3 and does not authorize alteration or suppression of an otherwise accurate Project record.</p>
@@ -1059,7 +1059,7 @@
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #D8D6CF;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The public record</span>
             <span style="font-size: 18px; font-weight: 600;">Date · Violation · Status</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Each entry shows the date, the nature of the documentation failure, and whether it is <em>resolved</em> or <em>unresolved</em>. Nothing else is published. The entry is permanent — resolution closes the obligation; it never erases the record.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Each entry shows the date, the nature of the documentation failure, and whether it is <em>resolved</em> or <em>unresolved</em>. Outside an Active Violation Period the permanent entry displays these factual fields. During an Active Violation Period the additional consequence information and recordings specified in §8.6 are also published. The entry is permanent — resolution closes the obligation; it never erases the record.</p>
           </div>
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Milestone resets</span>
@@ -1192,7 +1192,7 @@
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Daily Inspection Archive</h2>
         <div style="position: relative; width: 100%; max-width: 880px; aspect-ratio: 16 / 9; background: #141412;">
           <sc-if value="{{ latestVideoUrl }}" hint-placeholder-val="{{ false }}">
-            <video src="{{ latestVideoUrl }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
+            <video ref="{{ latestVideoRef }}" controls="{{ true }}" preload="metadata" playsinline="{{ true }}" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #141412; object-fit: contain;"></video>
           </sc-if>
           <sc-if value="{{ noLatestVideo }}" hint-placeholder-val="{{ true }}">
             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A8983;">Awaiting today's inspection</div>
@@ -1206,45 +1206,7 @@
 
   </main>
 
-  <sc-if value="{{ isRecord }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Record">
-    <section style="border-bottom: 1px solid #141412; padding: 56px 32px 40px;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">One session — inspection video + four daily photos</p>
-        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 32px;">Recording Assistant</h1>
-      </div>
-    </section>
-    <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap;">
-        <button onClick="{{ toolDaily }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tdBg }}; color: {{ tdFg }};">Daily Inspection</button>
-        <button onClick="{{ toolAck }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ taBg }}; color: {{ taFg }};">Violation Resolution</button>
-        <button onClick="{{ toolCorr }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tcBg }}; color: {{ tcFg }};">Corner Time</button>
-              </div>
-    </section>
-    <sc-if value="{{ isToolDaily }}" hint-placeholder-val="{{ true }}">
-    <section style="border-bottom: 1px solid #141412;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <x-import component-from-global-scope="recording-assistant" from="./recording-assistant.js?v=20260727" hint-size="100%,700px"></x-import>
-      </div>
-    </section>
-    </sc-if>
-    <sc-if value="{{ isToolAck }}" hint-placeholder-val="{{ false }}">
-    <section style="border-bottom: 1px solid #141412; background: #F1F0EA;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <dc-import name="Violation Acknowledgment" hint-size="100%,1000px"></dc-import>
-      </div>
-    </section>
-    </sc-if>
-    <sc-if value="{{ isToolCorr }}" hint-placeholder-val="{{ false }}">
-    <section style="border-bottom: 1px solid #141412; background: #F1F0EA;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <dc-import name="Corner Time" hint-size="100%,1000px"></dc-import>
-      </div>
-    </section>
-    </sc-if>
 
-      </div>
-  </sc-if>
 
   <!-- ============ FOOTER ============ -->
   <footer style="background: #141412; color: #FAFAF7; padding: 56px 32px 40px;">
@@ -1259,7 +1221,6 @@
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Official record</span>
             <div style="display: flex; gap: 20px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;">
               <a href="https://michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">Website</a>
-              <a href="https://youtube.com/@michealrayberry" target="_blank" style="color: #FAFAF7;" style-hover="color: #B3261E;">YouTube</a>
               <a href="https://x.com/michealrayberry" target="_blank" style="color: #FAFAF7;" style-hover="color: #B3261E;">X</a>
             </div>
           </div>
@@ -1414,19 +1375,9 @@ class Component extends DCLogic {
           const p = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
           const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
-          // The Recording Assistant is not a public page. It answers only on
-          // /inspection, which is linked from the portal at /mrb and marked
-          // noindex, so it never appears in the nav or in search results.
-          if (p === 'inspection') {
-            this.setState({ page: 'record' });
-            try {
-              let m = document.querySelector('meta[name="robots"]');
-              if (!m) { m = document.createElement('meta'); m.name = 'robots'; document.head.appendChild(m); }
-              m.content = 'noindex,nofollow';
-            } catch (e) {}
-            document.title = 'Recording Assistant — Micheal Ray Berry';
-            return;
-          }
+          // The Recording Assistant is not part of the public site at all. It
+          // lives inside the portal at /mrb, behind the device key; no public
+          // route resolves to it.
           if (!p) { this.setState({ page: 'home' }); this.applyPageSeo('home'); return; }
         }
         // The Recording Assistant is reached from the portal at /mrb, never
@@ -1699,6 +1650,11 @@ class Component extends DCLogic {
       ? 'Project starts in ' + Math.ceil((START_DATE - now) / 86400000) + ' day' + (Math.ceil((START_DATE - now) / 86400000) === 1 ? '' : 's')
       : 'Day ' + dayNumber + ' of project';
 
+    /* The record is only authoritative once BOTH live sources have answered.
+       Before that the fallback seed would read "340.0 · Active · N clean days"
+       — an announcement of compliance the record has not verified. Until the
+       gate opens, figures render as "—" and the status says Loading. */
+    const recordsLoaded = this.state.liveWeighIns !== null && this.state.livePenalties !== null;
     const data = this.weighIns().slice().sort((a, b) => a.date.localeCompare(b.date));
     const last = data.length ? data[data.length - 1] : null;
     const current = last ? last.weight : startWeight;
@@ -1867,7 +1823,9 @@ class Component extends DCLogic {
       date: p.date, violation: p.violation, status: p.status || 'Unresolved',
       color: /^\s*(satisfied|resolved)/i.test(p.status || '') ? '#8A8983' : '#E8837B',
     }));
-    const recordStatus = inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active';
+    const recordStatus = !recordsLoaded
+      ? 'Official Public Record — Loading official record…'
+      : (inViolation ? 'Official Public Record — IN VIOLATION' : 'Official Public Record — Active');
 
     // ----- Live deadline status: overdue banner is automatic, sitewide -----
     const etHour = (() => {
@@ -1929,8 +1887,8 @@ class Component extends DCLogic {
     // ----- Updates (official entries by the AP; personal notes by Micheal, permanent once posted) -----
     const fallbackUpdates = [{
       date: 'July 20, 2026', type: 'official', title: 'Entry 001 — Project Commencement',
-      body: 'The project begins. Starting weight recorded at 340 pounds. The accountability agreement is signed and published. Daily Inspection videos post to the official YouTube channel; weights post to the public tracker on this record.',
-      link: 'https://youtube.com/@michealrayberry',
+      body: 'The project begins. Starting weight recorded at 340 pounds. The accountability agreement is signed and published. Daily Inspection videos publish to the official record here; weights post to the public tracker on this record.',
+      link: '/daily/',
     }];
     const officials = (this.state.liveUpdates && this.state.liveUpdates.length ? this.state.liveUpdates : fallbackUpdates).slice();
     const journal = (this.state.liveJournal || []).slice();
@@ -1955,7 +1913,7 @@ class Component extends DCLogic {
       author: isPersonal ? 'by Micheal Ray Berry' : 'by the AP',
       hasLink: !!u.link,
       link: u.link,
-      linkLabel: u.link.indexOf('youtu') !== -1 ? 'YouTube' : 'Link',
+      linkLabel: 'Link',
       borderColor: isPersonal ? '#D8D6CF' : '#141412',
       bg: isPersonal ? '#F1F0EA' : '#FAFAF7',
       titleColor: isPersonal ? '#3A3935' : '#141412',
@@ -2048,10 +2006,10 @@ class Component extends DCLogic {
       completionStatement: sst.completion_statement || '',
       enterArchive: () => this.setState({ completedDismissed: true }),
       startLabel: fmt(startWeight),
-      currentLabel: fmt(current),
+      currentLabel: recordsLoaded ? fmt(current) : '—',
       goalLabel: fmt(goalWeight),
-      lostLabel: fmt(lost),
-      remainingLabel: fmt(remaining),
+      lostLabel: recordsLoaded ? fmt(lost) : '—',
+      remainingLabel: recordsLoaded ? fmt(remaining) : '—',
       pctLabel: pct.toFixed(1) + '%',
       pctWidth: Math.max(0.5, pct) + '%',
       goalY: yOf(goalWeight).toFixed(1),
@@ -2073,13 +2031,23 @@ class Component extends DCLogic {
       isUpdates: page === 'updates',
       wrClosed, wrCurrent,
       showOverdue, overdueMsg,
-      cleanDays: String(cleanDays),
+      cleanDays: recordsLoaded ? String(cleanDays) : '—',
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
       inViolation, openViolations, violationCountLabel, recordStatus, cornerDemoUrl,
       exposedSessions, hasExposed: exposedCount > 0, exposedLabel,
       introVideoUrl, noIntroVideo: !introVideoUrl, introPoster,
       latestVideoUrl, noLatestVideo: !latestVideoUrl, latestVideoLabel,
+      // src/poster are set here, never as attribute holes — see the players above.
+      introVideoRef: (el) => {
+        if (!el) return;
+        if (introVideoUrl && el.src !== introVideoUrl) el.src = introVideoUrl;
+        if (introPoster && el.poster !== introPoster) el.poster = introPoster;
+      },
+      latestVideoRef: (el) => {
+        if (!el) return;
+        if (latestVideoUrl && el.src !== latestVideoUrl) el.src = latestVideoUrl;
+      },
       abandonedConfirmed, abandonedPresumed, abandonDate, abandonDay,
       abandonViolationCount: penalties.length,
       abandonStatement: sst.ap_statement || '',
@@ -2089,22 +2057,6 @@ class Component extends DCLogic {
       milestoneRows,
       isMilestones: page === 'milestones',
       goMilestones: () => this.go('milestones'),
-      isRecord: page === 'record',
-      goRecord: () => this.go('record'),
-      ...(() => {
-        const t = this.state.recordTool || 'daily';
-        const bg = (k) => (t === k ? '#141412' : 'transparent');
-        const fg = (k) => (t === k ? '#FAFAF7' : '#141412');
-        return {
-          isToolDaily: t === 'daily', isToolAck: t === 'ack', isToolCorr: t === 'corr',
-          toolDaily: () => this.setState({ recordTool: 'daily' }),
-          toolAck: () => this.setState({ recordTool: 'ack' }),
-          toolCorr: () => this.setState({ recordTool: 'corr' }),
-          tdBg: bg('daily'), tdFg: fg('daily'),
-          taBg: bg('ack'), taFg: fg('ack'),
-          tcBg: bg('corr'), tcFg: fg('corr'),
-        };
-      })(),
       photoRows,
       updateRows,
       hasPhotos: photoRows.some((c) => c.isPhoto),
@@ -2120,7 +2072,6 @@ class Component extends DCLogic {
       goPenalties: () => this.go('penalties'),
       goUniform: () => this.go('uniform'),
       goUpdates: () => this.go('updates'),
-      goRecord: () => this.go('record'),
     };
   }
 }
