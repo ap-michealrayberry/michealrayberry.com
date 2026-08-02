@@ -26,6 +26,7 @@ const STATIC_PAGES = [
   ['updates', 'daily'],
   ['record', 'weekly'],
   ['verify', 'monthly'],
+  ['daily/', 'daily'],
 ];
 
 function xmlEscape(value = '') {
@@ -346,6 +347,100 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 </html>`;
 }
 
+/* The /daily/ index. Built from the same list that produced the day pages,
+   so "documented" always means "a page exists" — the index can never claim a
+   day is missing while its page sits published. Days between the start and
+   the latest record with no page are shown as gaps, which is the point. */
+function dailyIndexPage(entries) {
+  const byDate = new Map(entries.map((e) => [e.record.date, e]));
+  const latest = entries.at(-1)?.record.date || START_DATE;
+  const days = [];
+  for (let d = new Date(`${START_DATE}T12:00:00Z`); ; d.setUTCDate(d.getUTCDate() + 1)) {
+    const iso = d.toISOString().slice(0, 10);
+    days.push({ date: iso, day: dayNumber(iso), entry: byDate.get(iso) || null });
+    if (iso >= latest) break;
+  }
+  days.reverse();
+  const documented = days.filter((d) => d.entry).length;
+  const gaps = days.length - documented;
+  const canonical = `${SITE_ORIGIN}/daily/`;
+  const title = 'Daily Record — Micheal Ray Berry Public Accountability Project';
+  const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${documented} documented days with four-angle photographs, recorded weight, inspection video, and SHA-256 evidence manifests.`;
+  const cards = days.map(({ date, day, entry }) => {
+    const href = `/daily/${date}-day-${String(day).padStart(3, '0')}/`;
+    if (!entry) {
+      return `<li class="card gap"><div class="thumb"><span>NO RECORD</span></div>
+        <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">No record</span></div></li>`;
+    }
+    const front = entry.photos.front;
+    const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
+    return `<li class="card"><a href="${href}">
+      <picture><source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width:720px) 50vw, 25vw">
+      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front view, Day ${day}, ${longDate(date)}`)}" loading="lazy" decoding="async"></picture>
+      <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="wt">${entry.record.weight.toFixed(1)} lb</span></div>
+    </a></li>`;
+  }).join('\n');
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(description)}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(description)}">
+  <meta property="og:url" content="${canonical}">
+  <script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': canonical,
+    url: canonical,
+    name: title,
+    description,
+    about: { '@id': PERSON_ID },
+    hasPart: days.filter((d) => d.entry).map((d) => ({
+      '@type': 'WebPage',
+      url: `${SITE_ORIGIN}/daily/${d.date}-day-${String(d.day).padStart(3, '0')}/`,
+      name: `Day ${d.day} — ${longDate(d.date)}`,
+    })),
+  })}</script>
+  <style>
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    header,main,footer{max-width:1200px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}
+    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
+    .intro{max-width:760px}.count{font:600 14px ui-monospace,monospace;letter-spacing:.08em}
+    ul{list-style:none;padding:0;margin:28px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+    .card{border:1px solid var(--ink);background:#fff}.card a{display:block;color:inherit;text-decoration:none}
+    .card img{display:block;width:100%;height:auto}
+    .card .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase}
+    .card .wt{font-weight:700}.card.gap{border-color:var(--accent)}
+    .card .thumb{aspect-ratio:9/16;background:repeating-linear-gradient(45deg,#f1f0ea,#f1f0ea 10px,#e8e6df 10px,#e8e6df 20px);display:flex;align-items:center;justify-content:center}
+    .card .thumb span{font:700 13px ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
+    .card .flag{color:var(--accent);font-weight:700}
+    footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Official public record · MichealRayBerry.com</div>
+  <h1>Daily Record</h1>
+</header>
+<main>
+  <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>. The gaps are part of the record.</p>
+  <p class="count"><strong>${documented}</strong> documented days · <strong>${gaps}</strong> days without a record</p>
+  <p><a href="/">Return to michealrayberry.com</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
+  <ul>${cards}</ul>
+</main>
+<footer>© 2026 Micheal Ray Berry · Public Accountability Project · <a href="/">michealrayberry.com</a></footer>
+</body>
+</html>`;
+}
+
 function staticSitemap(latestDate) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -406,9 +501,16 @@ function sitemapIndex(latestDate) {
 
 async function main() {
   const [csv, attestCsv] = await Promise.all([
-    fetchText(SHEET_CSV),
+    fetchText(SHEET_CSV, true),
     fetchText(ATTEST_CSV, true),
   ]);
+  if (!csv) {
+    // Sheet unreachable (not shared, or Google hiccuping). Publishing new
+    // day pages is skipped; the existing site deploys untouched.
+    console.warn('Record sheet unreadable — skipping page generation this build.');
+    console.warn('Fix: Share > General access > Anyone with the link > Viewer.');
+    return;
+  }
   const rows = parseCSV(csv);
   const records = rows.slice(1).map((r) => ({
     date: normalizeDate(r[0]),
@@ -503,6 +605,10 @@ async function main() {
     generated.push({ record, photos });
   }
 
+  if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated))) {
+    changedUrls.add(`${SITE_ORIGIN}/daily/`);
+  }
+
   const latestDate = generated.at(-1)?.record.date || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
@@ -525,7 +631,8 @@ async function main() {
   console.log(`IndexNow candidate URLs: ${changedUrls.size}`);
 }
 
+// The publisher is additive: it only ever generates extra pages. A failure
+// here must never block the deploy of the site itself.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error('Publisher failed (site still deploys):', error);
 });
