@@ -241,6 +241,7 @@ class Component extends DCLogic {
   ensureAudio() {
     try {
       if (!this._ac) this._ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (this._ac.state === 'suspended') this._ac.resume();
       if (!this._dest) this._dest = this._ac.createMediaStreamDestination();
     } catch (e) {}
   }
@@ -354,7 +355,10 @@ class Component extends DCLogic {
 
   async startCamera() {
     try {
-      this._stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' }, audio: true });
+      this._stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: 'user' },
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
       if (this._camEl) { this._camEl.srcObject = this._stream; this._camEl.play(); }
       return true;
     } catch (e) { this.setState({ status: 'Camera unavailable — corner time must be recorded.' }); return false; }
@@ -466,13 +470,23 @@ class Component extends DCLogic {
         xhr.send(blob);
       });
       this._demoUrl = sign.publicUrl;
-      this.setState({ upStatus: 'UPLOADED ✓ — public URL: ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video".' });
+      let linked = false;
+      try {
+        const r = await (await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'demoset', key, url: sign.publicUrl }) })).json();
+        linked = !!(r && r.ok);
+      } catch (e) {}
+      this.setState({
+        upStatus: linked
+          ? 'UPLOADED ✓ AND LINKED — the demonstration is live on the violation notice. ' + sign.publicUrl
+          : 'UPLOADED ✓ — ' + sign.publicUrl + '  ·  paste it into the AP Portal under "Corner-time demonstration video".',
+      });
     } catch (e) {
       this.setState({ upStatus: 'UPLOAD FAILED (' + e + ') — download the file below and upload it by hand.' });
     }
   }
 
   async startDemo() {
+    this.ensureAudio(); // resume the context while the click gesture is live
     const ok = await this.startCamera();
     if (!ok) return;
     this._demo = true; this._rehearse = false; this._discard = false; this._invalid = ''; this._demoUrl = '';
@@ -573,7 +587,7 @@ class Component extends DCLogic {
       this.speak('Demonstration complete.');
       this.setState({
         doneTitle: 'Demonstration Recorded',
-        summary: 'A public explainer, not a session — no violation is attached and nothing counts toward the record. It uploads straight to the project\u2019s own storage; the public URL appears below once it finishes. Paste that URL into the AP Portal under "Corner-time demonstration video" and it appears on the violation notice.',
+        summary: 'A public explainer, not a session — no violation is attached and nothing counts toward the record. It uploads straight to the project\u2019s own storage and links itself into the violation notice when it finishes. The AP can replace or clear it at any time from the portal.',
         ytTitle: '', verLine: '',
       });
       return;
