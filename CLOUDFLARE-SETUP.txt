@@ -1,0 +1,104 @@
+MOVING THE SITE TO CLOUDFLARE PAGES
+===================================
+
+Cloudflare Pages reads the same repo and honours the existing _redirects and
+_headers files, so nothing in the site needs rewriting. The reason to move is
+bandwidth: Netlify's free tier stops at 100 GB/month, Cloudflare Pages is
+unlimited.
+
+1  CREATE THE PAGES PROJECT
+   Cloudflare dashboard > Workers & Pages > Create > Pages >
+   Connect to Git > ap-michealrayberry/michealrayberry.com
+     Production branch:   main
+     Build command:       npm install --no-audit --no-fund && node scripts/publish.mjs && node scripts/submit-indexnow.mjs
+     Build output dir:    .
+     Environment variable: SITE_ORIGIN = https://michealrayberry.com
+                           NODE_VERSION = 20
+   Save and deploy. It will build at <project>.pages.dev first — check that
+   URL before touching DNS.
+
+2  R2 BUCKET FOR VIDEO
+   R2 > Create bucket > name it  mrb-video
+   Bucket > Settings > Public access > Connect a domain >
+     video.michealrayberry.com     (Cloudflare adds the DNS record itself)
+   R2 > Manage API tokens > Create API token
+     Permission: Object Read & Write, limited to mrb-video
+     Copy the Access Key ID and the Secret Access Key.
+   Account ID is shown in the R2 sidebar.
+
+   In Apps Script:
+     setR2('<accountId>', '<accessKeyId>', '<secretAccessKey>')
+     r2Test()            -> should log "R2 OK" and a URL that opens
+     r2MirrorVideos()    -> backfills OLD videos from Drive, 3 per run.
+                            Skips anything over 45 MB (Apps Script's relay
+                            limit) — those must be uploaded to the bucket by
+                            hand, or simply left on Drive.
+
+   NEW recordings do not use that path at all: the Recording Assistant asks
+   the script to sign a 15-minute upload URL and sends the file straight from
+   the phone to R2, so there is no size limit and no credential on the device.
+
+   R2 > Settings > CORS policy — required for the browser upload:
+     [{ "AllowedOrigins": ["https://michealrayberry.com"],
+        "AllowedMethods": ["PUT"],
+        "AllowedHeaders": ["*"],
+        "MaxAgeSeconds": 3600 }]
+
+   NOTE — until Sep 13, 2026 the bucket has no custom subdomain (see below).
+   In R2 > Settings > Public access, enable the r2.dev subdomain and run:
+     setR2Public('https://pub-XXXXXXXX.r2.dev')
+   In September, after DNS moves, connect video.michealrayberry.com and run:
+     setR2Public('https://video.michealrayberry.com')
+   Existing rows keep working either way; new uploads use the new base.
+
+3  DNS CUTOVER  —  BLOCKED UNTIL SEP 13, 2026
+
+   Wix does not allow nameservers to be changed, and the domain is under
+   ICANN's 60-day transfer lock until Sep 13, 2026. Cloudflare Pages cannot
+   serve an apex domain from external DNS, so michealrayberry.com stays on
+   Netlify until then. The Pages project runs in parallel as a live mirror at
+   michealrayberry-com.pages.dev — useful for checking a build before it
+   reaches the public site.
+
+   ON OR AFTER SEP 13, 2026:
+     a. Wix > Domains > ... > Transfer away from Wix. Unlock, get the auth
+        code (EPP), and confirm the admin email is one you can read.
+     b. Cloudflare > Domains > Transfer > paste the code. 5-7 days; at-cost
+        renewal (~$10/yr instead of Wix's ~$20).
+     c. The zone already exists in Cloudflare with the records imported, so
+        the transfer completing IS the cutover.
+     d. Pages > Custom domains > add michealrayberry.com and www.
+     e. R2 > connect video.michealrayberry.com, then setR2Public(...).
+     f. Verify ap@michealrayberry.com still receives mail, then pause Netlify.
+
+   ORIGINAL CUTOVER STEPS (for reference once the lock lifts)
+   The domain is registered at Wix. Two options:
+
+   (a) Keep DNS at Wix — in Cloudflare Pages > Custom domains, add
+       michealrayberry.com and www, then set at Wix:
+         A     @     <IP Cloudflare shows>
+         CNAME www   <project>.pages.dev
+   (b) Move DNS to Cloudflare (faster, and needed for R2's custom domain to
+       be simplest) — add the site to Cloudflare, let it import the existing
+       records, VERIFY THE MX AND TXT RECORDS FOR GOOGLE WORKSPACE ARE
+       PRESENT, then change the nameservers at Wix.
+
+   Either way, do not remove the MX or TXT records — ap@michealrayberry.com
+   runs on Google Workspace and email breaks without them.
+
+4  AFTER CUTOVER
+   - Netlify: pause the site (do not delete it for a week or two).
+   - Apps Script: the old Netlify build hook no longer applies. Cloudflare
+     Pages > Settings > Builds > Deploy hooks > create one, then run
+     setNetlifyBuildHook('<the new hook URL>') — same property, new URL.
+   - Check michealrayberry.com/daily/ and one day page for a working video.
+
+WHAT CHANGED ABOUT VIDEO
+   Inspection videos are no longer published to YouTube. They upload to R2
+   and are embedded directly from video.michealrayberry.com, so the video
+   search result points at this domain. Existing YouTube and Drive links in
+   older rows still render as embeds; nothing is lost.
+
+   NOTE: the signed agreement names YouTube as an Official Platform. Removing
+   it needs an AP-signed amendment logged in the Updates tab before the site
+   copy is changed to match.

@@ -26,7 +26,6 @@ const STATIC_PAGES = [
   ['penalties', 'daily'],
   ['uniform', 'weekly'],
   ['updates', 'daily'],
-  ['record', 'weekly'],
   ['verify', 'monthly'],
   ['daily/', 'daily'],
 ];
@@ -132,7 +131,18 @@ function driveId(url = '') {
   return match ? match[1] : '';
 }
 
+/* Self-hosted video (Cloudflare R2, served from video.michealrayberry.com)
+   is the preferred form: the video rich result then belongs to this domain
+   rather than to a third-party player. YouTube and Drive links still render
+   as embeds so older rows keep working. */
+function isSelfHosted(url) {
+  // Either the eventual custom subdomain or the bucket's r2.dev URL, which is
+  // what is in use until DNS can move to Cloudflare.
+  return /^https?:\/\/(video\.michealrayberry\.com|pub-[0-9a-f]+\.r2\.dev)\//i.test(String(url || ''));
+}
+
 function videoEmbed(url) {
+  if (isSelfHosted(url)) return '';
   const yid = youtubeId(url);
   if (yid) return `https://www.youtube-nocookie.com/embed/${yid}`;
   const did = driveId(url);
@@ -280,6 +290,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       uploadDate: date,
       contentUrl: video,
       ...(embed ? { embedUrl: embed } : {}),
+      ...(isSelfHosted(video) ? { encodingFormat: 'video/mp4' } : {}),
       creator: { '@id': PERSON_ID },
     },
   ];
@@ -294,9 +305,14 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       <figcaption>Micheal Ray Berry — ${htmlEscape(imageLabel(angle))}, Day ${day}, ${htmlEscape(longDate(date))}.</figcaption>
     </figure>`;
   }).join('\n');
-  const videoHtml = embed
-    ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
-    : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`;
+  const videoHtml = isSelfHosted(video)
+    ? `<div class="video"><video controls preload="none" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}">
+        <source src="${htmlEscape(video)}" type="video/mp4">
+        <a href="${htmlEscape(video)}">Download the Day ${day} inspection video</a>
+      </video></div>`
+    : (embed
+      ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+      : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`);
   const nav = `<nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
       <a href="/dashboard">Full daily record</a>
@@ -333,7 +349,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     .intro{max-width:760px;font-size:1.15rem}.attest{border-left:4px solid var(--accent);padding:10px 14px;background:#f1f0ea}
     .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:36px 0}.gallery figure{margin:0;border:1px solid var(--ink);background:#fff}
     .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase}
-    .video{position:relative;padding-top:56.25%;background:#000;margin:24px 0}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
+    .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
     @media(max-width:720px){.gallery{grid-template-columns:1fr}nav{grid-template-columns:1fr;text-align:left!important}nav a:nth-child(2),nav a:last-child{text-align:left}}
@@ -730,7 +747,9 @@ ${entries.map(({ record, photos }) => {
       <video:thumbnail_loc>${xmlEscape(photos.front.sourceUrl)}</video:thumbnail_loc>
       <video:title>${xmlEscape(`Micheal Ray Berry Day ${record.day} daily inspection video`)}</video:title>
       <video:description>${xmlEscape(`Four-angle daily inspection video for Day ${record.day} of the Micheal Ray Berry Public Accountability Project at ${record.weight.toFixed(1)} pounds.`)}</video:description>
-      ${embed ? `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>` : `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`}
+      ${isSelfHosted(record.video) || !embed
+        ? `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`
+        : `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>`}
       <video:publication_date>${record.date}T22:00:00-04:00</video:publication_date>
     </video:video>
   </url>`;

@@ -67,7 +67,7 @@
 
   <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
     <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Recording tools</span>
-    <a href="/record" style="border: 2px solid #141412; background: #141412; color: #FAFAF7; padding: 20px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 5px;" style-hover="background: #B3261E; border-color: #B3261E;">
+    <a href="/inspection" style="border: 2px solid #141412; background: #141412; color: #FAFAF7; padding: 20px 24px; text-decoration: none; display: flex; flex-direction: column; gap: 5px;" style-hover="background: #B3261E; border-color: #B3261E;">
       <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: 0.02em;">Daily Inspection</span>
       <span style="font-size: 13px; line-height: 1.6; opacity: 0.85;">Weight entry, the guided four-angle photo sequence, and the inspection video — in one pass. Files itself to the record and satisfies the packet.</span>
     </a>
@@ -233,9 +233,15 @@ class Component extends DCLogic {
     const pct = Math.max(0, Math.min(100, ((start - now) / (start - 175)) * 100));
     const nextMs = this.MILESTONES.filter((m) => m < now).sort((a, b) => b - a)[0];
 
+    // "Unresolved" contains "resolved" and "Incomplete" contains "complete",
+    // so these checks must exclude the negated form explicitly — a substring
+    // match here would render a live violation as satisfied.
+    const isResolved = (t) => { const s = String(t || ''); return /satisfied|closed/i.test(s) || (/resolved/i.test(s) && !/unresolved/i.test(s)); };
+    const isDoneCorr = (t) => { const s = String(t || ''); return /verified/i.test(s) || (/complete/i.test(s) && !/incomplete/i.test(s)); };
+
     const vlist = (d.violations || []).slice().sort((a, b) => (a.date < b.date ? 1 : -1));
-    const unresolved = vlist.filter((v) => !/resolved|satisfied/i.test(v.status)).length;
-    const clist = (d.corrective || []).filter((c) => !/complete|verified/i.test(c.status));
+    const unresolved = vlist.filter((v) => !isResolved(v.status)).length;
+    const clist = (d.corrective || []).filter((c) => !isDoneCorr(c.status));
 
     return Object.assign(base, {
       dayNum: d.day,
@@ -269,7 +275,7 @@ class Component extends DCLogic {
       violationList: vlist.map((v) => ({
         date: v.date, day: this.dayNum(v.date), what: v.what,
         status: (v.status || 'Unresolved').toUpperCase(),
-        color: /resolved|satisfied/i.test(v.status) ? '#2E6F3E' : '#B3261E',
+        color: isResolved(v.status) ? '#2E6F3E' : '#B3261E',
       })),
 
       startW: start.toFixed(1),

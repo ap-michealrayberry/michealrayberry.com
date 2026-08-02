@@ -131,8 +131,7 @@
         <button onClick="{{ goUniform }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</button>
         <button onClick="{{ goUpdates }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 10px 9px; cursor: pointer; color: #141412;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Updates</button>
         <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 9px; color: #141412; text-decoration: none;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Daily</a>
-                <button onClick="{{ goRecord }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px solid #141412; padding: 9px 12px; cursor: pointer; color: #141412; margin-left: 6px;" style-hover="background: #141412; color: #FAFAF7;">Record</button>
-      </nav>
+                      </nav>
     </div>
   </header>
 
@@ -1194,7 +1193,7 @@
       </div>
       <div style="border-top: 1px solid #3A3935; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">
         <span style="display: flex; gap: 6px 20px; flex-wrap: wrap;"><span style="white-space: nowrap;">Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">ap@michealrayberry.com</a></span><span style="white-space: nowrap;">Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">contact@michealrayberry.com</a></span></span>
-        <span style="white-space: nowrap; display: flex; gap: 16px;"><a href="https://github.com/michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten" style="color: #6B6A64;" style-hover="color: #B3261E;">Site History</a><a href="#record" onClick="{{ goRecord }}" style="color: #6B6A64;" style-hover="color: #B3261E;">Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
+        <span style="white-space: nowrap; display: flex; gap: 16px;"><a href="https://github.com/michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten" style="color: #6B6A64;" style-hover="color: #B3261E;">Site History</a><span>© 2026 Micheal Ray Berry</span></span>
       </div>
     </div>
   </footer>
@@ -1339,11 +1338,25 @@ class Component extends DCLogic {
       const openFromUrl = () => {
         if (this.pathRouting()) {
           const p = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
-          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'record'];
+          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
+          // The Recording Assistant is not a public page. It answers only on
+          // /inspection, which is linked from the portal at /mrb and marked
+          // noindex, so it never appears in the nav or in search results.
+          if (p === 'inspection') {
+            this.setState({ page: 'record' });
+            try {
+              let m = document.querySelector('meta[name="robots"]');
+              if (!m) { m = document.createElement('meta'); m.name = 'robots'; document.head.appendChild(m); }
+              m.content = 'noindex,nofollow';
+            } catch (e) {}
+            document.title = 'Recording Assistant — Micheal Ray Berry';
+            return;
+          }
           if (!p) { this.setState({ page: 'home' }); this.applyPageSeo('home'); return; }
         }
-        if ((window.location.hash || '').toLowerCase().indexOf('record') !== -1) { this.setState({ page: 'record' }); this.applyPageSeo('record'); }
+        // The Recording Assistant is reached from the portal at /mrb, never
+        // from the public site; no public route resolves to it.
       };
       openFromUrl();
       window.addEventListener('hashchange', openFromUrl);
@@ -1594,8 +1607,6 @@ class Component extends DCLogic {
     this.applyPageSeo(page);
     try {
       if (this.pathRouting()) window.history.pushState({ page }, '', page === 'home' ? '/' : '/' + page);
-      else if (page === 'record') window.location.hash = 'record';
-      else if ((window.location.hash || '').toLowerCase().indexOf('record') !== -1) window.location.hash = '';
     } catch (e) {}
     try { window.scrollTo(0, 0); } catch (e) {}
   }

@@ -85,7 +85,7 @@
         <span class="ra-ck-w" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
         <span class="ra-ck-p" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
         <span class="ra-ck-v" style="font-family:'IBM Plex Mono',monospace;font-size:12px"></span>
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B6A64">YouTube post: manual check — <a href="https://studio.youtube.com" target="_blank" style="color:#B3261E">open Studio ↗</a></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B6A64">Video: uploads itself to the record — <a href="https://michealrayberry.com/daily/" target="_blank" style="color:#B3261E">open Studio ↗</a></span>
       </div>
       <div class="ra-row">
         <div class="ra-field">
@@ -139,14 +139,14 @@
       <button class="ra-ghost ra-photos ra-hide" style="margin-top:10px">Download 4 Photos</button>
       <button class="ra-ghost ra-xcard ra-hide" style="margin-top:10px">Download X Card</button>
       <div class="ra-field ra-titlebox ra-hide" style="margin-top:10px">
-        <label>YouTube Short title — paste when uploading</label>
+        <label>Video title — recorded with the entry</label>
         <div style="display:flex;gap:8px">
           <input class="ra-yt" readonly>
           <button class="ra-copy ra-ghost" style="max-width:110px">Copy</button>
         </div>
       </div>
       <div class="ra-field ra-descbox ra-hide" style="margin-top:10px">
-        <label>YouTube description — paste when uploading</label>
+        <label>Video description — recorded with the entry</label>
         <textarea class="ra-desc" readonly rows="6" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid #141412;background:#F1F0EA;color:#141412;resize:vertical;border-radius:0"></textarea>
         <button class="ra-copydesc ra-ghost" style="margin-top:8px">Copy description</button>
       </div>
@@ -157,7 +157,7 @@
         <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6B6A64;margin-top:10px;line-height:1.6">A blurry photo can be retaken individually — hold the pose, 6-second countdown. The video is one continuous record: re-recording it means the full sequence.</p>
       </div>
       <p class="ra-note">
-        One button runs the whole session: countdown → guided four-view video (~95s, narrated) → four posed photos. When it finishes, hit Download All, upload the five files to the MRB Daily Photos Drive folder, and post the video to YouTube with the copied title.
+        One button runs the whole session: countdown → guided four-view video (~95s, narrated) → four posed photos. When it finishes, hit Download All — the downloads are backups; the photos, weight, and video have already filed themselves to the record.
       </p>
       <div class="ra-mealbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
         <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Evening meal photograph — separate capture</label>
@@ -385,9 +385,39 @@
           for (const p of photos) phs.push(await sha256Blob(await (await fetch(p.dataUrl)).blob()));
           const ok = await attestPost({ kind: 'daily', code: challenge ? challenge.code : '', weight: parseFloat($('.ra-w').value) || '', video_sha256: vh, photo_sha256s: phs });
           setNote((ok ? 'ATTESTED \u2713 — code and file fingerprints logged with server time. ' : 'ATTESTATION FAILED — fingerprints were not logged; flag it to the AP. ') +
-            'Review the video and photos below (retake any photo), then Download All \u2192 Drive folder \u2192 YouTube.', false);
+            'Review the video and photos below (retake any photo), then file the packet — the video uploads itself to the record.', false);
         } catch (e) {}
       }
+      /* ---- Inspection video: browser → Cloudflare R2, direct ----
+         Apps Script signs a 15-minute PUT URL for one exact object key and
+         the file goes straight from this device to the bucket, so there is
+         no relay and no size ceiling. The sheet is then updated with the
+         public video.michealrayberry.com URL, which is what the day page
+         embeds. Corrective and corner recordings never come through here —
+         they stay in the AP's private Drive archive. */
+      async function uploadVideoToR2(blob, onProgress) {
+        const sign = await (await fetch(ATTEST_ENDPOINT, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'r2sign', key: deviceKey(), date: isoStr, kind: 'daily', mime: blob.type || 'video/mp4' }),
+        })).json();
+        if (!sign || !sign.ok) throw new Error((sign && sign.error) || 'could not sign upload');
+
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', sign.uploadUrl, true);
+          xhr.setRequestHeader('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+          };
+          xhr.onload = () => (xhr.status === 200 || xhr.status === 201
+            ? resolve()
+            : reject(new Error('R2 ' + xhr.status + ' ' + String(xhr.responseText || '').slice(0, 120))));
+          xhr.onerror = () => reject(new Error('network error during upload'));
+          xhr.send(blob);
+        });
+        return sign.publicUrl;
+      }
+
       // ---- One-tap packet filing: photos + weight go straight to the record ----
       async function postPacket(payload) {
         try {
@@ -406,10 +436,23 @@
           });
           okAll = okAll && ok;
         }
+        if (lastVideoBlob) {
+          try {
+            const mb = (lastVideoBlob.size / 1048576).toFixed(0);
+            setNote('Uploading the inspection video (' + mb + ' MB) — 0%. Keep this page open.', false);
+            const publicUrl = await uploadVideoToR2(lastVideoBlob, (pct) => {
+              setNote('Uploading the inspection video (' + mb + ' MB) — ' + pct + '%. Keep this page open.', false);
+            });
+            await postPacket({ video_url: publicUrl });
+          } catch (e) {
+            okAll = false;
+            setNote('VIDEO UPLOAD FAILED (' + e.message + ') — download the video below and give it to the AP.', true);
+          }
+        }
         await postPacket({ finalize: true });
         refreshChecklist();
         setNote(okAll
-          ? 'Photos + weight are ON THE RECORD \u2713 (attested). Remaining: Download Video \u2192 upload to YouTube. The downloads below are backups.'
+          ? 'Photos + weight are ON THE RECORD \u2713 (attested). The video uploads itself to the record. The downloads below are backups.'
           : 'Some photos failed to file automatically — use Download All and upload them to the Drive folder manually.', false);
       }
       // ---- Packet checklist + deadline clock (reads the live tracker) ----
@@ -1036,7 +1079,7 @@
         showReview();
         attestDaily().then(() => filePacket());
         setNote(
-          'Review the video and all four photos below — retake any photo individually if needed. Then Download All → upload the five files to the MRB Daily Photos Drive folder → post the video to YouTube with the copied title.',
+          'Review the video and all four photos below — retake any photo individually if needed. Then Download All — the downloads are backups; everything required has already filed itself to the record.',
           true
         );
       }
