@@ -631,7 +631,12 @@ function weeksIndexPage(entries) {
 
 function dailyIndexPage(entries) {
   const byDate = new Map(entries.map((e) => [e.record.date, e]));
-  const latest = entries.at(-1)?.record.date || START_DATE;
+  /* Run to today, not to the last finalized day. Stopping at the last
+     complete record makes an unfiled day vanish from the index instead of
+     showing as a gap — which is the one thing this page exists to prevent. */
+  const today = new Date().toISOString().slice(0, 10);
+  const lastEntry = entries.at(-1)?.record.date || START_DATE;
+  const latest = today > lastEntry ? today : lastEntry;
   const days = [];
   for (let d = new Date(`${START_DATE}T12:00:00Z`); ; d.setUTCDate(d.getUTCDate() + 1)) {
     const iso = d.toISOString().slice(0, 10);
@@ -837,8 +842,8 @@ function noRecordPage({ date, day, previous, next, reason }) {
   </header>
   <main>
     <div class="card">
-      <p><strong>No complete record was filed for this date.</strong> ${htmlEscape(reason)}</p>
-      <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, due by 10 PM Eastern. This page exists because the day exists: a gap in the record is documented rather than omitted.</p>
+      <p><strong>The Daily Compliance Packet for this date was not completed.</strong> ${htmlEscape(reason)}</p>
+      <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
     </div>
     <nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
@@ -991,11 +996,16 @@ async function main() {
     const date = row ? row.date : dateForDay(d);
     // Say precisely what is absent — a missing video reads differently from
     // a day with nothing filed at all.
-    const reason = !row
-      ? 'No weigh-in, photographs, or inspection video were filed for this Project Day.'
-      : (!row.video
-        ? 'A weight was recorded, but the required inspection video was not filed.'
-        : 'The inspection video was filed, but the four required accountability photographs were not.');
+    const have = [];
+    const missing = [];
+    (row && row.weight ? have : missing).push('the recorded weight');
+    (row && row.video ? have : missing).push('the inspection video');
+    const photoCount = ['front', 'left', 'rear', 'right']
+      .filter((a) => findPhoto(photoFiles, row ? row.date : dateForDay(d), d, a)).length;
+    (photoCount === 4 ? have : missing).push(photoCount ? photoCount + ' of the four accountability photographs' : 'the four accountability photographs');
+    const reason = have.length
+      ? 'The record for this Project Day is incomplete. Filed: ' + have.join(', ') + '. Not filed: ' + missing.join(', ') + '.'
+      : 'None of the required daily documentation was filed for this Project Day.';
     sequence.push({ day: d, date, complete: false, reason });
   }
 
