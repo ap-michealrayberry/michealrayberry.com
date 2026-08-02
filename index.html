@@ -1146,7 +1146,8 @@
     <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap;">
         <button onClick="{{ toolDaily }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tdBg }}; color: {{ tdFg }};">Daily Inspection</button>
-        <button onClick="{{ toolAck }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ taBg }}; color: {{ taFg }};">Violation Acknowledgment</button>
+        <button onClick="{{ toolAck }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ taBg }}; color: {{ taFg }};">Violation Resolution</button>
+        <button onClick="{{ toolCorr }}" style="padding: 16px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; border-right: 1px solid #141412; background: {{ tcBg }}; color: {{ tcFg }};">Corner Time</button>
               </div>
     </section>
     <sc-if value="{{ isToolDaily }}" hint-placeholder-val="{{ true }}">
@@ -1160,6 +1161,13 @@
     <section style="border-bottom: 1px solid #141412; background: #F1F0EA;">
       <div style="max-width: 1160px; margin: 0 auto;">
         <dc-import name="Violation Acknowledgment" hint-size="100%,1000px"></dc-import>
+      </div>
+    </section>
+    </sc-if>
+    <sc-if value="{{ isToolCorr }}" hint-placeholder-val="{{ false }}">
+    <section style="border-bottom: 1px solid #141412; background: #F1F0EA;">
+      <div style="max-width: 1160px; margin: 0 auto;">
+        <dc-import name="Corner Time" hint-size="100%,1000px"></dc-import>
       </div>
     </section>
     </sc-if>
@@ -1211,22 +1219,22 @@ function normalizeDriveUrl(url) {
 class Component extends DCLogic {
   state = { page: 'home', liveWeighIns: null, livePenalties: null, liveUpdates: null, liveJournal: null, liveAmendments: null, expandedDay: null };
 
-  // Official public tracker sheets (AP-administered). Read-only CSV endpoints; no key needed.
-  // All record tabs live in ONE AP-administered spreadsheet. Swapping to a new
-  // spreadsheet (e.g. the ap@ rebuild) is a ONE-LINE change: set SHEET_ID.
-  // Tabs are read BY NAME, so a rebuild's new gids never need chasing.
+  /* ─────────── RECORD SOURCE — the only lines to edit after a rebuild ───────────
+     createRecordSpreadsheet() in Apps Script logs the new SHEET ID and one gid
+     per tab. Paste the ID here and the two public gids below; nothing else in
+     this file needs to change. Read-only CSV; no key involved. */
   SHEET_ID = '1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM';
+  GID_WEIGHINS = '1146060827';
+  GID_VIOLATIONS = '1365599185';
+
   CSV_BASE = 'https://docs.google.com/spreadsheets/d/' + this.SHEET_ID + '/gviz/tq?tqx=out:csv';
-  // Tab reads use the sheet's REAL gids (tab names on the live sheet differ from
-  // the code-created ones — a wrong &sheet= name silently serves the FIRST tab).
-  WEIGHINS_CSV = this.CSV_BASE + '&gid=1146060827';
-  PENALTIES_CSV = this.CSV_BASE + '&gid=1365599185';
-  // Updates (AP-administered). Columns: date · type ('official'|'personal') · title · body · link.
-  UPDATES_CSV = this.CSV_BASE + '&gid=742923954';
-  // Micheal's journal form responses — a Google Form's response tab.
-  JOURNAL_CSV = this.CSV_BASE + '&gid=482638063';
-  // Amendments log — public change history of the SIGNED agreement (§12.1).
-  AMENDMENTS_CSV = this.CSV_BASE + '&gid=413137433';
+  WEIGHINS_CSV = this.CSV_BASE + '&gid=' + this.GID_WEIGHINS;
+  PENALTIES_CSV = this.CSV_BASE + '&gid=' + this.GID_VIOLATIONS;
+  /* Optional tabs. The rebuilt record does not include them; leave blank and
+     their sections stay empty, or paste a gid to switch one back on. */
+  UPDATES_CSV = '';
+  JOURNAL_CSV = '';
+  AMENDMENTS_CSV = '';
 
   parseCSV(text) {
     // Handles quoted fields with commas; returns array of row arrays.
@@ -1348,7 +1356,7 @@ class Component extends DCLogic {
       })
       .catch(() => {});
     if (this.JOURNAL_CSV) {
-      fetch(this.JOURNAL_CSV)
+      fetch(this.JOURNAL_CSV || "data:text/csv,")
         .then((r) => (r.ok ? r.text() : null))
         .then((t) => {
           if (!t) return;
@@ -1372,7 +1380,7 @@ class Component extends DCLogic {
         .catch(() => {});
     }
     if (this.UPDATES_CSV) {
-      fetch(this.UPDATES_CSV)
+      fetch(this.UPDATES_CSV || "data:text/csv,")
         .then((r) => (r.ok ? r.text() : null))
         .then((t) => {
           if (!t) return;
@@ -1391,7 +1399,7 @@ class Component extends DCLogic {
         .catch(() => {});
     }
     if (this.AMENDMENTS_CSV) {
-      fetch(this.AMENDMENTS_CSV)
+      fetch(this.AMENDMENTS_CSV || "data:text/csv,")
         .then((r) => (r.ok ? r.text() : null))
         .then((t) => {
           if (!t) return;

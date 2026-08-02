@@ -83,10 +83,6 @@
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Health sync</span>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; line-height: 1.5;">{{ healthLabel }}</span>
           </div>
-          <div style="border: 1px solid #3A3935; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Dinner</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; line-height: 1.5; color: {{ mealColor }};">{{ mealLabel }}</span>
-          </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
           <sc-for list="{{ photos }}" as="p" hint-placeholder-count="4">
@@ -149,7 +145,6 @@
       </section>
 
       <section style="display: flex; flex-direction: column; gap: 16px;">
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corrective sessions</h2>      <section style="display: flex; flex-direction: column; gap: 16px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Corrective sessions</h2>
         <sc-if value="{{ hasCorrective }}" hint-placeholder-val="{{ false }}">
           <div style="display: flex; flex-direction: column;">
@@ -174,26 +169,6 @@
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6B6A64;">Corrective recordings stay private (§8) — they arrive by direct delivery, never through this portal or the public site. This log records only assignment and completion.</span>
       </section>
 
-      <section style="display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Dinner plan — preapproved</h2>
-          <button onClick="{{ regenMeals }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #FAFAF7; border: 1px solid #57544F; padding: 9px 14px; cursor: pointer;" style-hover="border-color: #FAFAF7;">Re-apply rotation</button>
-        </div>
-        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Auto-assigned every Sunday 5 PM from the Meal Library tab (edit that tab to change the approved set — labels must be foods the recorder's camera check can detect). Override any day below; changes apply to the recorder immediately. Off-plan captures attest as NOT-confirmed — evidence for your ruling (§8), not an automatic violation.</p>
-        <div style="display: flex; flex-direction: column;">
-          <sc-for list="{{ mealDays }}" as="m" hint-placeholder-count="7">
-            <div style="border-top: 1px solid #3A3935; padding: 10px 0; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; min-width: 150px; color: {{ m.color }};">{{ m.label }}</span>
-              <select onChange="{{ m.pick }}" value="{{ m.meal }}" style="flex: 1; min-width: 260px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 9px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
-                <option value="">— unassigned —</option>
-                <sc-for list="{{ mealOptions }}" as="o" hint-placeholder-count="3">
-                  <option value="{{ o.name }}">{{ o.name }}</option>
-                </sc-for>
-              </select>
-            </div>
-          </sc-for>
-        </div>
-      </section>
 
       <section style="display: flex; flex-direction: column; gap: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
@@ -244,7 +219,6 @@
       </section>
 
       <section style="display: flex; flex-direction: column; gap: 16px;">
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Handover runbook (§13)</h2>      <section style="display: flex; flex-direction: column; gap: 16px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; margin: 0; letter-spacing: 0.04em;">Handover runbook (§13)</h2>
         <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983; max-width: 720px;">Everything the AP operates. At handover: take each account, rotate each key, and Micheal keeps only his record key and the camera.</p>
         <div style="display: flex; flex-direction: column;">
@@ -258,9 +232,9 @@
       </section>
 
       <section style="border-top: 1px solid #3A3935; padding-top: 20px; display: flex; gap: 22px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12px;">
-        <a href="https://docs.google.com/spreadsheets/d/1wmyPT0vfuHrZfoTnnkIOsr7lHKNlr7Kro8L8dNxUkNM" target="_blank">Open the record sheet →</a>
+        <a href="https://drive.google.com/drive/recent" target="_blank">Open the record sheet →</a>
         <a href="https://michealrayberry.com" target="_blank">Public site →</a>
-        <a href="https://github.com/michealrayberry/michealrayberry.com" target="_blank">Repository →</a>
+        <a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank">Repository →</a>
       </section>
     </main>
   </sc-if>
@@ -287,13 +261,13 @@ class Component extends DCLogic {
       ok: true, today, day: 10,
       weighin: { weight: 335.6, front: '', left: '', rear: '', right: '' },
       attest: [{ at: '21:14', event: 'capture-attested', kind: 'daily', status: 'code-match' },
-               { at: '19:40', event: 'capture-attested', kind: 'meal-plan-confirmed', status: '' }],
+               { at: '19:40', event: 'capture-attested', kind: 'corrective', status: 'VALID' }],
       health: { steps: 6840, zone: 22, mi: 3.1, cal: 2680, wt: 335.6 },
       violations: [{ row: 2, date: today, violation: 'Daily Compliance Packet late (sample)', status: 'Unresolved' },
                    { row: 3, date: '2026-07-25', violation: 'Missed inspection video (sample)', status: 'Resolved · 2026-07-26' }],
       corrective: [{ row: 2, date: today, assignment: '30-minute corner-time corrective (sample)', due: today, status: 'Assigned' }],
-      mealLibrary: [{ name: 'Grilled chicken breast, steamed vegetables' }, { name: 'Baked fish, roasted vegetables' }, { name: 'Turkey chili' }],
-      mealPlan: Array.from({ length: 7 }, (_, i) => { const dt = new Date(); dt.setDate(dt.getDate() + i); const ds = dt.toISOString().slice(0, 10); return { date: ds, meal: i % 2 ? 'Baked fish, roasted vegetables' : 'Grilled chicken breast, steamed vegetables' }; }),
+
+      corrective: [{ row: 2, date: today, assignment: '30-minute corner-time corrective (sample)', due: today, status: 'Assigned' }],
       missedStreak: 0,
       siteState: { abandoned: '', completed: '', ap_statement: '', ap_links: '[]' },
     };
@@ -404,28 +378,6 @@ class Component extends DCLogic {
       },
       compClear: () => { if (confirm('Reverse the completion declaration?')) this.post({ action: 'apcomplete', op: 'clear' }, 'Reversing…'); },
       compSave: () => this.post({ action: 'apcomplete', op: 'statement', text: s.compStatement !== undefined ? s.compStatement : (st.completion_statement || '') }, 'Saving…'),
-      mealLabel: (() => {
-        const mr = attRows.filter((a) => (a.kind || '').indexOf('meal') === 0);
-        if (!mr.length) return 'no capture yet';
-        if (mr.some((a) => (a.kind || '').indexOf('plan-confirmed') !== -1)) return 'VERIFIED ON-PLAN';
-        if (mr.some((a) => (a.kind || '').indexOf('NOT-confirmed') !== -1)) return 'OFF-PLAN';
-        return 'captured';
-      })(),
-      mealColor: (() => {
-        const mr = attRows.filter((a) => (a.kind || '').indexOf('meal') === 0);
-        if (!mr.length) return '#8A8983';
-        if (mr.some((a) => (a.kind || '').indexOf('plan-confirmed') !== -1)) return '#9CCC9C';
-        if (mr.some((a) => (a.kind || '').indexOf('NOT-confirmed') !== -1)) return '#E8837B';
-        return '#E8C55F';
-      })(),
-      mealOptions: d.mealLibrary || [],
-      mealDays: (d.mealPlan || []).map((m) => ({
-        label: m.date + (m.date === d.today ? ' · TODAY' : ''),
-        color: m.date === d.today ? '#E8C55F' : '#FAFAF7',
-        meal: m.meal,
-        pick: (e) => this.post({ action: 'apmeal', op: 'assign', date: m.date, meal: e.target.value }, 'Assigning…'),
-      })),
-      regenMeals: () => { if (confirm('Re-apply the library rotation to the coming week? Future days are overwritten; today and past are untouched.')) this.post({ action: 'apmeal', op: 'regen' }, 'Regenerating…'); },
       onUpdTitle: set('updTitle'), onUpdBody: set('updBody'),
       postUpdate: () => {
         if (!(s.updTitle || '').trim() || !(s.updBody || '').trim()) { this.setState({ err: 'Title and body are both required.' }); return; }
