@@ -319,7 +319,7 @@
             if (mySay !== _sayGen) return; // a newer line superseded this one while it was fetching
             if (_elAudio) { try { _elAudio.pause(); } catch (e) {} }
             _elAudio = new Audio(_elCache[text]);
-            try { ensureAC(); const src = audioCtx.createMediaElementSource(_elAudio); src.connect(elDest); src.connect(audioCtx.destination); } catch (e) {}
+            try { ensureAC(); const src = audioCtx.createMediaElementSource(_elAudio); src.connect(audioCtx.destination); } catch (e) {}
             await _elAudio.play();
             return;
           } catch (e) { /* fall through to device voice */ }
@@ -1389,7 +1389,7 @@
           micAnalyser = audioCtx.createAnalyser();
           micAnalyser.fftSize = 1024;
           micSrc.connect(micAnalyser);
-          if (elDest) micSrc.connect(elDest); // room audio is part of the recording
+          if (elDest && !micSrc.__wired) { micSrc.connect(elDest); micSrc.__wired = 1; } // room audio — the single voice path
         } catch (e) {}
         setCorrNote('Requesting verification code…');
         const ch = await fetchChallenge('corrective');
@@ -1467,9 +1467,11 @@
         ensureAC();
         try {
           const micTracks = stream ? stream.getAudioTracks() : [];
-          if (micTracks.length && audioCtx && elDest) {
+          // Only wire the microphone if the daily path has not already done so.
+          if (micTracks.length && audioCtx && elDest && !audioCtx.__micWired) {
             const micSrc = audioCtx.createMediaStreamSource(new MediaStream(micTracks));
             micSrc.connect(elDest);
+            audioCtx.__micWired = 1;
           }
         } catch (e) {}
         if (elDest) elDest.stream.getAudioTracks().forEach((t) => canvasStream.addTrack(t));

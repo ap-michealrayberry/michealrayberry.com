@@ -63,6 +63,7 @@
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button onClick="{{ pickCorner }}" style="flex: 1; min-width: 150px; padding: 13px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid {{ cornerBorder }}; background: {{ cornerBg }}; color: #141412;">Corner time</button>
           <button onClick="{{ pickStrokes }}" style="flex: 1; min-width: 150px; padding: 13px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid {{ strokesBorder }}; background: {{ strokesBg }}; color: #141412;">Penalty strokes</button>
+          <button onClick="{{ pickBoth }}" style="flex: 1; min-width: 150px; padding: 13px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer; border: 1px solid {{ bothBorder }}; background: {{ bothBg }}; color: #141412;">Both</button>
         </div>
         <div style="display: flex; gap: 8px;">
           <sc-for list="{{ levels }}" as="lv" hint-placeholder-count="3">
@@ -100,6 +101,10 @@
         <button onClick="{{ startPreview }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">{{ previewLabel }}</button>
       </div>
 
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-top: 1px solid #D8D6CF; padding-top: 12px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ voiceColor }};">Voice: {{ voiceState }}</span>
+        <a href="/mrb" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A64;" style-hover="color: #B3261E;">Change in portal →</a>
+      </div>
       <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ status }}</span>
       <button onClick="{{ rehearse }}" style="padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Rehearse — voice only, nothing recorded</button>
       <button onClick="{{ begin }}" style="padding: 16px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #8E1E18;">{{ beginLabel }}</button>
@@ -219,7 +224,14 @@ class Component extends DCLogic {
      A generation token cancels anything still queued when the session
      moves on, so a slow line cannot talk over the next one. */
   async speak(text) {
+    /* Two guards. `gen` invalidates everything queued when the session ends;
+       `seq` invalidates the previous utterance when a new one starts — without
+       it a slow fetch could resolve after the next line had already begun and
+       both would play at once, which reads as doubled audio on the tape. */
     const gen = this._gen;
+    this._seq = (this._seq || 0) + 1;
+    const seq = this._seq;
+    const stale = () => gen !== this._gen || seq !== this._seq;
     try { if (this._audio) { this._audio.pause(); this._audio = null; } } catch (e) {}
     try { speechSynthesis.cancel(); } catch (e) {}
     // The stroke detector must never hear the voice: numbers spoken aloud are
@@ -244,7 +256,7 @@ class Component extends DCLogic {
           if (!r.ok) throw new Error(r.status);
           this._vc[text] = URL.createObjectURL(await r.blob());
         }
-        if (gen !== this._gen) { release(); return; }
+        if (stale()) { release(); return; }
         this._audio = new Audio(this._vc[text]);
         this._audio.volume = 1;
         this._audio.onended = release;
@@ -253,7 +265,7 @@ class Component extends DCLogic {
         return;
       } catch (e) {}
     }
-    if (gen !== this._gen) { release(); return; }
+    if (stale()) { release(); return; }
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.94; u.pitch = 0.9; u.volume = 1;
@@ -363,7 +375,7 @@ class Component extends DCLogic {
     else {
       const vis = (i) => (lm[i].visibility == null ? 1 : lm[i].visibility);
       if (vis(11) < 0.5 && vis(12) < 0.5) issues.push('OUT OF FRAME');
-      else if (this.state.mode === 'corner') {
+      else if (this.state.mode === 'corner' || this._chained) {
         const sw = Math.max(0.02, Math.abs(lm[11].x - lm[12].x));
         const near = (w, e) => Math.hypot(lm[w].x - lm[e].x, lm[w].y - lm[e].y) < sw * 0.95 && lm[w].y < Math.max(lm[11].y, lm[12].y);
         if (!((near(15, 7) || near(15, 8)) && (near(16, 7) || near(16, 8)))) issues.push('HANDS OFF HEAD');
@@ -408,7 +420,48 @@ class Component extends DCLogic {
 
   /* ── private upload (chunked relay to the AP's archive) ─────── */
   _b64(part) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(part); }); }
+  /* Upload path. R2 first — it is a single signed PUT straight from the phone
+     and is what the daily tool uses successfully; the object key carries a
+     random token and is never linked, indexed, or listed anywhere. If signing
+     or the PUT fails, the chunked relay into the AP's Drive archive is the
+     fallback, so a session is never left with nowhere to go. */
   async fileToArchive(blob, name) {
+    if (await this.uploadToR2(blob, name)) return;
+    return this.fileToDrive(blob, name);
+  }
+
+  async uploadToR2(blob, name) {
+    try {
+      const token = Math.random().toString(36).slice(2, 10);
+      const objectName = name.replace(/(\.[a-z0-9]+)$/i, '-' + token + '$1');
+      const sign = await (await fetch(this.EP, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'r2sign', key: this.state.key, kind: 'corrective', name: objectName, mime: blob.type || 'video/webm' }),
+      })).json();
+      if (!sign || !sign.ok || !sign.url) return false;
+      this.setState({ upStatus: 'DELIVERING TO THE AP ARCHIVE — 0%…' });
+      const ok = await new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', sign.url, true);
+        xhr.setRequestHeader('Content-Type', blob.type || 'video/webm');
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) this.setState({ upStatus: 'DELIVERING TO THE AP ARCHIVE — ' + Math.round((e.loaded / e.total) * 100) + '%…' });
+        };
+        xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
+        xhr.onerror = () => resolve(false);
+        xhr.send(blob);
+      });
+      if (!ok) return false;
+      this._archiveUrl = sign.publicUrl || '';
+      this.setState({ upStatus: 'DELIVERED TO THE AP ARCHIVE ✓ — private, unlisted, and never published. The download below is your backup.' });
+      try {
+        await fetch(this.EP, { method: 'POST', body: JSON.stringify({ action: 'correctivefiled', key: this.state.key, ref: this.vn(), url: sign.publicUrl || '', mode: this.state.mode }) });
+      } catch (e) {}
+      return true;
+    } catch (e) { return false; }
+  }
+
+  async fileToDrive(blob, name) {
     const key = this.state.key;
     const mime = blob.type || 'video/webm';
     this.setState({ upStatus: 'DELIVERING TO THE AP ARCHIVE — 0% · keep this page open…' });
@@ -444,9 +497,12 @@ class Component extends DCLogic {
     const ctx = c.getContext('2d');
     this._canvas = c;
     const ref = this.vn();
-    const label = this.state.mode === 'corner'
-      ? 'CORNER TIME · LEVEL ' + this.state.level + ' · ' + this.mins() + ' MIN'
-      : 'PENALTY STROKES · LEVEL ' + this.state.level + ' · ' + this.strokes();
+    const labelFor = () => {
+      const lv = ' · LEVEL ' + this.state.level;
+      if (this.state.mode === 'corner') return 'CORNER TIME' + lv + ' · ' + this.mins() + ' MIN';
+      if (this.state.mode === 'strokes') return 'PENALTY STROKES' + lv + ' · ' + this.strokes();
+      return (this._chained ? 'CORNER TIME (2 OF 2)' : 'PENALTY STROKES (1 OF 2)') + lv + ' · ' + this.strokes() + ' + ' + this.mins() + ' MIN';
+    };
     const F = Math.max(14, Math.round(vw / 40));
     const draw = () => {
       if (this.state.phase !== 'active') return;
@@ -463,7 +519,7 @@ class Component extends DCLogic {
       if (code) { ctx.fillStyle = '#FAFAF7'; ctx.font = '700 ' + Math.round(F) + 'px "IBM Plex Mono",monospace'; ctx.fillText(code, c.width - ctx.measureText(code).width - F, bandH * 0.42); }
       ctx.fillStyle = 'rgba(15,15,13,0.82)'; ctx.fillRect(0, c.height - bandH, c.width, bandH);
       const el = this.fmt(Math.floor((Date.now() - this._start) / 1000));
-      const main = ref + ' — ' + label + ' · ' + (this._counterText || el);
+      const main = ref + ' — ' + labelFor() + ' · ' + (this._counterText || el);
       ctx.fillStyle = '#FAFAF7'; ctx.font = '600 ' + Math.round(F) + 'px "IBM Plex Mono",monospace';
       ctx.fillText(main, F, c.height - bandH * 0.62);
       ctx.fillStyle = '#B9B8B2'; ctx.font = '400 ' + Math.round(F * 0.72) + 'px "IBM Plex Mono",monospace';
@@ -506,7 +562,7 @@ class Component extends DCLogic {
     this._gen = (this._gen || 0) + 1;
     this._discard = false; this._invalid = ''; this._safety = false;
     this._strikes = 0; this._monIssue = null; this._breachAt = null; this._lastC = null; this._monOn = false;
-    this._code = '';
+    this._code = ''; this._chained = false;
     if (!rehearse) {
       this.setState({ status: 'Opening camera…' });
       try { await this.openCamera(); } catch (e) { this.setState({ status: 'Camera unavailable — the session must be recorded.' }); return; }
@@ -521,7 +577,9 @@ class Component extends DCLogic {
     this._start = Date.now();
     if (!rehearse) this.beginRecording();
     this.beep(880, 160);
-    this.state.mode === 'corner' ? this.runCorner() : this.runStrokes();
+    if (this.state.mode === 'both') this.runBoth();
+    else if (this.state.mode === 'corner') this.runCorner();
+    else this.runStrokes();
   }
 
   say(text, ms) {
@@ -533,12 +591,15 @@ class Component extends DCLogic {
     });
   }
 
-  async runCorner() {
+  async runCorner(chained) {
     const mins = this.mins(), c = this.cur();
-    await this.say('Corrective session. This is corner time at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. You do not speak at any point. The voice speaks for the record.');
-    if (this.state.phase !== 'active') return;
-    await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
-    if (this.state.phase !== 'active') return;
+    this._chained = !!chained;
+    if (!chained) {
+      await this.say('Corrective session. This is corner time at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. You do not speak at any point. The voice speaks for the record.');
+      if (this.state.phase !== 'active') return;
+      await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.');
+      if (this.state.phase !== 'active') return;
+    }
     await this.say('Take position. Face the corner. Hands behind your head, fingers interlocked. Feet shoulder-width apart. Stand upright.');
     if (this.state.phase !== 'active') return;
     await this.say(mins + ' continuous minutes, silent and still, monitored throughout. Three warnings invalidate the session and the full duration restarts from zero. Beginning now.', 5200);
@@ -569,11 +630,23 @@ class Component extends DCLogic {
     this.beep(660, 250);
     await this.say('The corrective period is complete. Turn around and face the camera. Stand at attention.', 6000);
     if (this.state.phase !== 'active') return;
-    await this.say('This session is complete: ' + this.mins() + ' continuous minutes against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 8000);
+    await this.say('This session is complete: ' + (this._chained ? this.strokes() + ' strokes and ' + this.mins() + ' continuous minutes' : this.mins() + ' continuous minutes') + ' against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 9000);
     this.finish('complete');
   }
 
-  async runStrokes() {
+  /* Both parts in one unbroken take. Strokes are administered first and the
+     corner time follows immediately, because the corner period is the part
+     that must be continuous and unbroken to count — putting it last means a
+     single stop can never split it. The recording never pauses between them. */
+  async runBoth() {
+    await this.runStrokes(true);
+    if (this.state.phase !== 'active') return;
+    await this.say('The count is complete. The second part of the assignment follows immediately, in the same recording.', 6000);
+    if (this.state.phase !== 'active') return;
+    this.runCorner(true);
+  }
+
+  async runStrokes(chained) {
     const total = this.strokes(), c = this.cur();
     const auto = this.state.autoCount;
     await this.say('Corrective session. Penalty strokes at level ' + this.state.level + ', assigned against ' + this.vn() + ' — the record for ' + c.date + '. ' + total + ' strokes, self-administered. You do not speak.');
@@ -604,6 +677,7 @@ class Component extends DCLogic {
     this._monOn = false; clearInterval(this._monInt);
     if (this.state.phase !== 'active') return;
     this.beep(660, 250);
+    if (chained) return;
     await this.say('The count is complete. Turn and face the camera. Stand at attention.', 6000);
     if (this.state.phase !== 'active') return;
     await this.say('This session is complete: ' + total + ' strokes against ' + this.vn() + ', one unedited take. It will be submitted to the Accountability Partner. The entry stays open until he verifies it.', 8000);
@@ -697,7 +771,11 @@ class Component extends DCLogic {
     this.setState({ phase: 'done' });
     if (this._rec && this._rec.state !== 'inactive') this._rec.stop();
     this.closeCamera();
-    const mode = this.state.mode === 'corner' ? this.mins() + ' minutes of corner time' : this.strokes() + ' penalty strokes';
+    const mode = this.state.mode === 'corner'
+      ? this.mins() + ' minutes of corner time'
+      : this.state.mode === 'strokes'
+        ? this.strokes() + ' penalty strokes'
+        : this.strokes() + ' penalty strokes followed by ' + this.mins() + ' minutes of corner time';
     const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
     if (this._rehearse) {
       this._rehearse = false;
@@ -720,9 +798,11 @@ class Component extends DCLogic {
     this.setState({
       doneTitle: 'Session Complete',
       summary: 'One continuous take: ' + mode + ' against ' + this.vn() + '. It is delivered to the AP\u2019s private archive (status below) and is not published anywhere. The entry shows as corrected once the submission is logged, and resolved only when the AP verifies it.',
-      verLine: this.vn() + ' · ' + (this.state.mode === 'corner' ? 'CORNER TIME' : 'PENALTY STROKES') + ' LEVEL ' + this.state.level + ' · SUBMITTED ' + stamp + ' · AWAITING AP VERIFICATION',
+      verLine: this.vn() + ' · ' + (this.state.mode === 'corner' ? 'CORNER TIME' : this.state.mode === 'strokes' ? 'PENALTY STROKES' : 'STROKES + CORNER TIME') + ' LEVEL ' + this.state.level + ' · SUBMITTED ' + stamp + ' · AWAITING AP VERIFICATION',
     });
   }
+
+  elActive() { try { return !!localStorage.getItem('mrb_el_key'); } catch (e) { return false; } }
 
   renderVals() {
     const s = this.state;
@@ -750,17 +830,21 @@ class Component extends DCLogic {
 
       pickCorner: () => this.setState({ mode: 'corner' }),
       pickStrokes: () => this.setState({ mode: 'strokes' }),
+      pickBoth: () => this.setState({ mode: 'both' }),
       cornerBorder: on(s.mode === 'corner'), cornerBg: bg(s.mode === 'corner'),
       strokesBorder: on(s.mode === 'strokes'), strokesBg: bg(s.mode === 'strokes'),
+      bothBorder: on(s.mode === 'both'), bothBg: bg(s.mode === 'both'),
       levels: [1, 2, 3].map((n) => ({
-        label: 'Level ' + n + ' · ' + (s.mode === 'corner' ? this.MINUTES[n] + ' min' : this.STROKES[n]),
+        label: 'Level ' + n + ' · ' + (s.mode === 'strokes' ? this.STROKES[n] : s.mode === 'both' ? this.STROKES[n] + ' + ' + this.MINUTES[n] + 'm' : this.MINUTES[n] + ' min'),
         pick: () => this.setState({ level: n }),
         border: on(s.level === n), bg: bg(s.level === n),
       })),
       assignmentLine: s.mode === 'corner'
         ? 'Level ' + s.level + ' — ' + this.mins() + ' continuous minutes facing the corner, hands behind the head, monitored throughout.'
-        : 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, self-administered, in frame throughout.',
-      isStrokes: s.mode === 'strokes',
+        : s.mode === 'strokes'
+          ? 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, self-administered, in frame throughout.'
+          : 'Level ' + s.level + ' — ' + this.strokes() + ' strokes, then ' + this.mins() + ' continuous minutes of corner time, both in one unbroken recording.',
+      isStrokes: s.mode === 'strokes' || s.mode === 'both',
       pickAuto: () => this.setState({ autoCount: true }),
       pickPaced: () => this.setState({ autoCount: false }),
       autoBorder: on(s.autoCount), autoBg: bg(s.autoCount),
@@ -781,15 +865,19 @@ class Component extends DCLogic {
         catch (e) { this.setState({ status: 'Camera unavailable — check permissions.' }); }
       },
 
+      voiceState: this.elActive() ? 'ElevenLabs' : 'Device fallback',
+      voiceColor: this.elActive() ? '#3A6B3A' : '#8A6A1E',
       status: s.status,
       rehearse: () => this.begin(true),
       begin: () => this.begin(false),
       beginLabel: s.mode === 'corner'
         ? 'Begin — ' + this.mins() + ' min corner time'
-        : 'Begin — ' + this.strokes() + ' strokes' + (s.autoCount ? ', counted by sound' : ''),
+        : s.mode === 'strokes'
+          ? 'Begin — ' + this.strokes() + ' strokes' + (s.autoCount ? ', counted by sound' : '')
+          : 'Begin — ' + this.strokes() + ' strokes + ' + this.mins() + ' min corner time',
 
-      activeKicker: (s.mode === 'corner' ? 'Corner time' : 'Penalty strokes') + ' · ' + this.vn() + ' · Level ' + s.level,
-      activeHeading: s.mode === 'corner' ? 'Face the corner · stand still' : 'In frame · follow the count',
+      activeKicker: (s.mode === 'corner' ? 'Corner time' : s.mode === 'strokes' ? 'Penalty strokes' : 'Strokes + corner time') + ' · ' + this.vn() + ' · Level ' + s.level,
+      activeHeading: (s.mode === 'corner' || this._chained) ? 'Face the corner · stand still' : 'In frame · follow the count',
       bigCounter: s.bigCounter, counterSub: s.counterSub, line: s.line,
       monLine: s.monLine, monColor: s.monIssue ? '#B3261E' : '#3A6B3A',
       camRef: (el) => { this._camEl = el; if (el && this._stream) { el.srcObject = this._stream; el.play().catch(() => {}); } },

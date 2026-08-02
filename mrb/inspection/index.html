@@ -40,10 +40,14 @@
   <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ false }}">
     <div style="padding: 26px 20px 8px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
       <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(30px, 6vw, 46px); text-transform: uppercase; line-height: 1; margin: 0;">Daily Inspection</h1>
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; border: 1px solid #D8D6CF; background: #FFFFFF; padding: 10px 14px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ voiceColor }};">Voice: {{ voiceState }}</span>
+        <a href="/mrb" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A64;" style-hover="color: #B3261E;">Change in portal →</a>
+      </div>
       <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">One session records the whole packet: the four-angle inspection video, the four accountability photographs, and today's weight. The voice runs the sequence — you never speak. The verification code is issued by the record moments before recording and is burned into every frame, so the footage cannot be older than it claims. The video files itself to the record when the session ends.</p>
     </div>
     <div style="flex: 1; min-height: 0;">
-      <x-import component-from-global-scope="recording-assistant" from="../../recording-assistant.js" hint-size="100%,600px"></x-import>
+      <x-import component-from-global-scope="recording-assistant" from="./recording-assistant.js" hint-size="100%,600px"></x-import>
     </div>
   </sc-if>
 </div>
@@ -87,6 +91,8 @@ class Component extends DCLogic {
     return Math.max(1, Math.floor((Date.now() - new Date(this.START + 'T00:00:00').getTime()) / 864e5) + 1);
   }
 
+  elActive() { try { return !!localStorage.getItem('mrb_el_key'); } catch (e) { return false; } }
+
   renderVals() {
     const s = this.state;
     return {
@@ -97,6 +103,8 @@ class Component extends DCLogic {
       unlock: () => { const k = (s.keyInput || '').trim(); if (k) this.verify(k); },
       unlockLabel: s.checking ? 'Checking…' : 'Unlock the tools',
       authMsg: s.authMsg,
+      voiceState: this.elActive() ? 'ElevenLabs' : 'Device fallback',
+      voiceColor: this.elActive() ? '#3A6B3A' : '#8A6A1E',
     };
   }
 }

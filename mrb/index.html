@@ -77,6 +77,22 @@
     </a>
   </div>
 
+  <div style="width: 100%; max-width: 760px; border: 1px solid #D8D6CF; background: #FFFFFF; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">AI voice</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: {{ voiceColor }};">{{ voiceState }}</span>
+    </div>
+    <p style="margin: 0; font-size: 12.5px; line-height: 1.6; color: #3A3935;">Every tool is fully AI-voiced — you never speak on camera. With an ElevenLabs key the narration is a clean synthetic voice; without one the tools fall back to the phone's built-in voice, which still works but sounds flatter. The key is stored on this device only and is never sent to the record.</p>
+    <input type="password" value="{{ elKey }}" onChange="{{ onElKey }}" placeholder="ElevenLabs API key (optional)" autoComplete="off" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 11px 12px; border: 1px solid #141412; background: #FAFAF7; color: #141412;">
+    <input type="text" value="{{ elVoice }}" onChange="{{ onElVoice }}" placeholder="Voice ID (optional — defaults to a low male voice)" autoComplete="off" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 11px 12px; border: 1px solid #D8D6CF; background: #FAFAF7; color: #141412;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button onClick="{{ saveVoice }}" style="flex: 1; min-width: 130px; padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #B3261E;">Save</button>
+      <button onClick="{{ testVoice }}" style="flex: 1; min-width: 130px; padding: 11px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: none; color: #141412; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="border-color: #B3261E; color: #B3261E;">Test voice</button>
+      <button onClick="{{ clearVoice }}" style="padding: 11px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: none; color: #6B6A64; border: 1px solid #D8D6CF; cursor: pointer;" style-hover="color: #B3261E; border-color: #B3261E;">Clear</button>
+    </div>
+    <span style="font-size: 12px; color: #B3261E; min-height: 15px; line-height: 1.5;">{{ voiceMsg }}</span>
+  </div>
+
   <sc-if value="{{ hasCorrective }}" hint-placeholder-val="{{ false }}">
   <div style="width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px;">
     <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Assigned to you — private, not published</span>
@@ -148,9 +164,15 @@ class Component extends DCLogic {
   START = '2026-07-20';
   MILESTONES = [300, 275, 250, 225, 200, 175];
 
-  state = { key: '', keyInput: '', authMsg: '', data: null, now: Date.now(), loading: false };
+  state = { key: '', keyInput: '', authMsg: '', data: null, now: Date.now(), loading: false, elKey: '', elVoice: '', voiceMsg: '' };
 
   componentDidMount() {
+    try {
+      this.setState({
+        elKey: localStorage.getItem('mrb_el_key') || '',
+        elVoice: localStorage.getItem('mrb_el_voice') || '',
+      });
+    } catch (e) {}
     let k = '';
     try { k = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
     if (k) { this.setState({ key: k }); this.load(k); }
@@ -194,7 +216,50 @@ class Component extends DCLogic {
     const s = this.state;
     const d = s.data;
     const unlocked = !!d;
+    /* The ElevenLabs credentials live in this device's storage only — every
+       tool reads the same two keys, so setting them here configures the whole
+       toolkit. Nothing about them ever reaches the record or the AP. */
+    const elSet = !!(s.elKey || '').trim();
     const base = {
+      elKey: s.elKey, elVoice: s.elVoice, voiceMsg: s.voiceMsg,
+      voiceState: elSet ? 'ELEVENLABS VOICE' : 'DEVICE VOICE (FALLBACK)',
+      voiceColor: elSet ? '#3A6B3A' : '#8A6A1E',
+      onElKey: (e) => this.setState({ elKey: e.target.value }),
+      onElVoice: (e) => this.setState({ elVoice: e.target.value }),
+      saveVoice: () => {
+        try {
+          const k = (s.elKey || '').trim();
+          const v = (s.elVoice || '').trim();
+          if (k) localStorage.setItem('mrb_el_key', k); else localStorage.removeItem('mrb_el_key');
+          if (v) localStorage.setItem('mrb_el_voice', v); else localStorage.removeItem('mrb_el_voice');
+          this.setState({ voiceMsg: k ? 'Saved. Every tool on this device now uses the ElevenLabs voice.' : 'Cleared. The tools will use the phone\u2019s built-in voice.' });
+        } catch (e) { this.setState({ voiceMsg: 'Could not save to this browser\u2019s storage.' }); }
+      },
+      clearVoice: () => {
+        try { localStorage.removeItem('mrb_el_key'); localStorage.removeItem('mrb_el_voice'); } catch (e) {}
+        this.setState({ elKey: '', elVoice: '', voiceMsg: 'Cleared. The tools will use the phone\u2019s built-in voice.' });
+      },
+      testVoice: async () => {
+        const line = 'This is the voice that will run the session. You do not speak; the voice speaks for the record.';
+        const k = (s.elKey || '').trim();
+        const v = (s.elVoice || '').trim() || 'pNInz6obpgDQGcFmaJgB';
+        if (!k) {
+          try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(line); u.rate = 0.94; u.pitch = 0.9; speechSynthesis.speak(u); this.setState({ voiceMsg: 'Playing the device voice — no key is set.' }); }
+          catch (e) { this.setState({ voiceMsg: 'No voice is available in this browser.' }); }
+          return;
+        }
+        this.setState({ voiceMsg: 'Requesting audio…' });
+        try {
+          const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + v + '?output_format=mp3_44100_64', {
+            method: 'POST', headers: { 'xi-api-key': k, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: line, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.55, similarity_boost: 0.75 } }),
+          });
+          if (!r.ok) { this.setState({ voiceMsg: r.status === 401 ? 'Key rejected by ElevenLabs. Check it and save again.' : 'ElevenLabs returned ' + r.status + '. The tools will fall back to the device voice.' }); return; }
+          const a = new Audio(URL.createObjectURL(await r.blob()));
+          await a.play();
+          this.setState({ voiceMsg: 'Working. Press Save to use this voice in every tool.' });
+        } catch (e) { this.setState({ voiceMsg: 'Could not reach ElevenLabs. The tools will fall back to the device voice.' }); }
+      },
       locked: !unlocked, unlocked,
       keyInput: s.keyInput, authMsg: s.authMsg,
       onKey: (e) => this.setState({ keyInput: e.target.value }),
