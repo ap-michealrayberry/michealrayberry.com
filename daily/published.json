@@ -86,5 +86,13 @@
     "weight_lb": 336,
     "status": "Unresolved",
     "url": "/daily/2026-07-31-day-012/"
+  },
+  {
+    "day": 13,
+    "date": "2026-08-01",
+    "type": "violation",
+    "weight_lb": 338.6,
+    "status": "Unresolved",
+    "url": "/daily/2026-08-01-day-013/"
   }
 ]
