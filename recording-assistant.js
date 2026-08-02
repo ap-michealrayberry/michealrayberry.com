@@ -44,7 +44,8 @@
     .ra-root{background:#FAFAF7;color:#141412;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;width:100%;}
     .ra-root *{box-sizing:border-box;margin:0;padding:0;}
     .ra-stage{display:flex;align-items:center;justify-content:center;padding:24px 10px 8px;position:relative;min-height:0;}
-    .ra-view{max-width:100%;max-height:58vh;aspect-ratio:9/16;border:1px solid #141412;background:#000;}
+    .ra-view{width:100%;max-width:420px;max-height:70vh;aspect-ratio:9/16;object-fit:contain;border:1px solid #141412;background:#000;}
+    @media(max-width:640px){.ra-view{max-width:none;max-height:78vh;}.ra-viewwrap{display:block;}}
     .ra-cam{display:none;}
     .ra-viewwrap{position:relative;display:inline-block;max-width:100%;}
     .ra-hud{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
@@ -196,31 +197,12 @@
           Standardized project-uniform portrait, inspection stance, facing the camera. Factual and fully clothed; stamped with the violation number and date (§8: no consequence details). It is filed privately with the violation entry for the AP’s review — it is not published.
         </p>
       </div>
-      <div class="ra-corrbox" style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
-        <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Corrective session — corner time</label>
-        <div class="ra-row">
-          <div class="ra-field">
-            <label>Level assigned by AP</label>
-            <select class="ra-clevel">
-              <option value="1">Level 1 · 10 min</option>
-              <option value="2">Level 2 · 20 min</option>
-              <option value="3">Level 3 · 30 min</option>
-            </select>
-          </div>
-          <div class="ra-field">
-            <label>Violation date it resolves</label>
-            <input class="ra-cref" type="date">
-          </div>
-        </div>
-        <div class="ra-row">
-          <button class="ra-rec ra-cstart">Begin Corrective Session</button>
-        </div>
-        <div class="ra-row">
-          <button class="ra-stop ra-cstop ra-hide">■ Abort — invalidates the session</button>
-        </div>
-        <a class="ra-dl ra-cdl ra-hide" download></a>
-        <p class="ra-corrnote" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B6A64;text-align:center;margin-top:10px;line-height:1.6">
-          One continuous take, timed to the second — no pause, no early stop. Position and room audio are monitored: leaving the frame, dropping the hands from the head, turning away, excessive movement, or sustained noise or music draws a spoken warning. Three warnings — or any breach held longer than a few seconds — invalidates the session: nothing is saved and the full duration restarts from zero.
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid #D8D6CF">
+        <label style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:8px">Corrective session</label>
+        <p style="margin:0;font-size:13px;line-height:1.6;color:#3A3935">
+          Corrective sessions are recorded with the dedicated tool, which runs the
+          full assigned sequence and monitors position, posture and attire throughout.
+          <a href="/mrb/corrective/" style="color:#B3261E">Open the corrective tool →</a>
         </p>
       </div>
     </div>
@@ -1160,7 +1142,7 @@
       }
 
       // ---- Violation portrait (§8-trimmed): stamped still, filed to the record ----
-      const setVpNote = (m) => { $('.ra-vpnote').textContent = m; };
+      const setVpNote = (m) => { const el = $('.ra-vpnote'); if (el) el.textContent = m; };
       async function captureViolationPortrait(vnum, vdate, code) {
         const shots = [];
         for (let s = 0; s < 3; s++) {
@@ -1189,35 +1171,6 @@
         p.fillText('ACTIVE UNTIL RESOLVED · LIVE CAPTURE' + (code ? ' · CODE ' + code : '') + ' · MICHEALRAYBERRY.COM', Math.round(40 * k), PH - Math.round(40 * k));
         return c;
       }
-      $('.ra-vp').addEventListener('click', async () => {
-        if (recording || countdownLeft > 0) return;
-        if (!stream) { setVpNote('Tap Begin Daily Inspection (or just allow the camera) first, then capture.'); return; }
-        const vnum = parseInt($('.ra-vpnum').value, 10);
-        const vdate = $('.ra-vpdate').value;
-        if (!vnum || !vdate) { setVpNote('Enter the violation number and date first — both are stamped into the portrait.'); return; }
-        setVpNote('Requesting verification code…');
-        const ch = await fetchChallenge('violation-portrait');
-        if (!ch) { setVpNote('Verification code unavailable — a connection is required. The portrait cannot be captured unverified.'); return; }
-        await setVideoRes(3840, 2160);
-        const c = await captureViolationPortrait(vnum, vdate, ch.code);
-        await setVideoRes(1920, 1080);
-        if (!c) { setVpNote('Camera frame unavailable — try again.'); return; }
-        beep(880, 150);
-        const dataUrl = c.toDataURL('image/jpeg', 0.92);
-        const dl = $('.ra-vpdl');
-        dl.href = dataUrl;
-        dl.download = 'micheal-ray-berry-violation-portrait-v' + String(vnum).padStart(3, '0') + '-' + isoStr + '.jpg';
-        dl.textContent = 'Download Portrait (V-' + String(vnum).padStart(3, '0') + ')';
-        dl.classList.remove('ra-hide');
-        setVpNote('Filing to the record…');
-        const blob = await (await fetch(dataUrl)).blob();
-        const hash = await sha256Blob(blob);
-        const filed = await postPacket({ name: 'violation-portrait.jpg', image_b64: String(dataUrl).split(',')[1] });
-        const att = await attestPost({ kind: 'violation-portrait-v' + vnum, code: ch.code, weight: '', video_sha256: '', photo_sha256s: [hash] });
-        setVpNote(filed && att
-          ? 'Filed and attested. It is held privately with the violation entry for the AP.'
-          : 'Captured, but filing failed — download it and send it to the AP directly.');
-      });
 
       // ---- Corrective session (private · §8): continuous timed single take ----
       const CORR_LEVELS = { 1: 10, 2: 20, 3: 30 }; // minutes, per unified consequence structure
@@ -1329,8 +1282,8 @@
         if (micStream) { micStream.getTracks().forEach((t) => t.stop()); micStream = null; micAnalyser = null; }
         if (corrRecorder && corrRecorder.state !== 'inactive') corrRecorder.stop();
         $('.ra-recdot').classList.remove('on');
-        $('.ra-cstop').classList.add('ra-hide');
-        $('.ra-cstart').classList.remove('ra-hide');
+        const cs = $('.ra-cstop'); if (cs) cs.classList.add('ra-hide');
+        const cb = $('.ra-cstart'); if (cb) cb.classList.remove('ra-hide');
       }
       function finishCorrective() {
         const c = corrective;
@@ -1367,92 +1320,6 @@
         if (ext === 'webm' && typeof ysFixWebmDuration === 'function') ysFixWebmDuration(blob, durMs, deliver);
         else deliver(blob);
       }
-      $('.ra-cstart').addEventListener('click', async () => {
-        if (recording || countdownLeft > 0 || corrective || photoPhase) return;
-        const level = parseInt($('.ra-clevel').value, 10);
-        const mins = CORR_LEVELS[level];
-        const ref = $('.ra-cref').value;
-        if (!ref) {
-          setCorrNote('Enter the violation date this session resolves — it is stamped into the recording.');
-          $('.ra-cref').focus();
-          return;
-        }
-        if (!stream) { await startCamera(); if (!stream) return; }
-        await setVideoRes(1920, 1080);
-        setCorrNote('Loading position monitor…');
-        try { await loadPose(); } catch (e) { setCorrNote('Position monitor failed to load — a connection is required. The session cannot run unmonitored.'); return; }
-        try { micStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-        catch (e) { setCorrNote('Microphone required — the session records room audio for verification.'); return; }
-        ensureAC();
-        try {
-          const micSrc = audioCtx.createMediaStreamSource(micStream);
-          micAnalyser = audioCtx.createAnalyser();
-          micAnalyser.fftSize = 1024;
-          micSrc.connect(micAnalyser);
-          if (elDest && !micSrc.__wired) { micSrc.connect(elDest); micSrc.__wired = 1; } // room audio — the single voice path
-        } catch (e) {}
-        setCorrNote('Requesting verification code…');
-        const ch = await fetchChallenge('corrective');
-        if (!ch) { setCorrNote('Verification code unavailable — a connection is required. The session cannot start unverified.'); return; }
-        const startLine = 'Corrective session. This is corner time at level ' + level + ', assigned against ' + ref + '. ' +
-          mins + ' continuous minutes, one unedited take. You do not speak at any point — the voice speaks for the record. ' +
-          'The verification code shown on screen was issued by the record moments ago, so this footage cannot be older than it claims. ' +
-          'Assume the position: standing in the corner, camera on your back, hands behind the head, feet shoulder-width apart. ' +
-          'Position, movement, and room audio are monitored throughout. Three warnings invalidate the session and the full duration restarts from zero. ' +
-          'Ten seconds to take position. The session begins now.';
-        const markLines = [];
-        for (let m = 5; m < mins; m += 5) markLines.push(m + ' minutes elapsed. ' + (mins - m) + ' minutes remaining. The session continues.');
-        setCorrNote('Preparing voice lines…');
-        await prefetchTexts([startLine,
-          'Warning one. Return to the required position and remain still.',
-          'Warning two. Return to the required position and remain still.',
-          'Session invalidated. The full corrective session must restart from the beginning.'].concat(markLines));
-        setCorrNote('Recording. One continuous take — monitored. Do not stop until the voice announces completion.');
-        corrective = { level, mins, ref, code: ch.code, total: mins * 60, start: Date.now(), marks: {}, done: false, strikes: 0, monStart: Date.now() + 10000 };
-        corrChunks = [];
-        const cs = view.captureStream(30);
-        ensureAC();
-        if (elDest) elDest.stream.getAudioTracks().forEach((t) => cs.addTrack(t));
-        const mime =
-          MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4'
-          : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus') ? 'video/webm;codecs=vp8,opus'
-          : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm'
-          : '';
-        // Long take — modest bitrate keeps a 30-min file deliverable (~400 MB max).
-        corrRecorder = new MediaRecorder(cs, mime ? { mimeType: mime, videoBitsPerSecond: 1800000 } : { videoBitsPerSecond: 1800000 });
-        corrRecorder.ondataavailable = (e) => { if (e.data.size) corrChunks.push(e.data); };
-        corrRecorder.onstop = finishCorrective;
-        corrective.start = Date.now();
-        corrRecorder.start(1000);
-        beep(880, 150); beep(880, 150, 0.22);
-        say(startLine);
-        $('.ra-cstart').classList.add('ra-hide');
-        $('.ra-cstop').classList.remove('ra-hide');
-        $('.ra-cdl').classList.add('ra-hide');
-        $('.ra-recdot').classList.add('on');
-        corrInt = setInterval(() => {
-          const el = (Date.now() - corrective.start) / 1000;
-          const timer = $('.ra-timer');
-          timer.textContent = Math.floor(el / 60) + ':' + String(Math.floor(el % 60)).padStart(2, '0');
-          timer.classList.toggle('warn', corrective.total - el <= 60);
-          const elMin = Math.floor(el / 60);
-          if (elMin > 0 && elMin % 5 === 0 && elMin < corrective.mins && !corrective.marks[elMin] && el - elMin * 60 < 0.5) {
-            corrective.marks[elMin] = 1;
-            say(elMin + ' minutes elapsed. ' + (corrective.mins - elMin) + ' minutes remaining. The session continues.');
-            beep(660, 120);
-          }
-          if (el >= corrective.total) {
-            corrective.done = true;
-            beep(880, 150); beep(880, 150, 0.22);
-            stopCorrective();
-          }
-        }, 200);
-        corrMonInt = setInterval(corrMonitorTick, 300);
-      });
-      $('.ra-cstop').addEventListener('click', () => {
-        if (!corrective) return;
-        stopCorrective();
-      });
 
       function beginRecording() {
         chunks = [];
