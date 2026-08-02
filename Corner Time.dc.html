@@ -465,7 +465,6 @@ class Component extends DCLogic {
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', sign.uploadUrl, true);
-        xhr.setRequestHeader('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) this.setState({ upStatus: 'UPLOADING THE DEMONSTRATION — ' + Math.round((e.loaded / e.total) * 100) + '%…' });
         };
@@ -529,7 +528,6 @@ class Component extends DCLogic {
     try {
       const r = await fetch(sign.uploadUrl, {
         method: 'PUT',
-        headers: { 'x-amz-content-sha256': 'UNSIGNED-PAYLOAD' },
         body: new Blob([new Uint8Array([0])], { type: 'video/mp4' }),
       });
       if (r.ok) { this.setState({ status: 'UPLOAD PATH OK ✓ — signing and the bucket both work from ' + location.origin + '.' }); return; }

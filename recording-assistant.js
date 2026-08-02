@@ -405,8 +405,7 @@
         await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open('PUT', sign.uploadUrl, true);
-          xhr.setRequestHeader('x-amz-content-sha256', 'UNSIGNED-PAYLOAD');
-          xhr.upload.onprogress = (e) => {
+            xhr.upload.onprogress = (e) => {
             if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
           };
           xhr.onload = () => (xhr.status === 200 || xhr.status === 201
