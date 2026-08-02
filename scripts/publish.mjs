@@ -252,10 +252,11 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       alternateName: 'Ray Berry',
       url: SITE_ORIGIN + '/',
       image: front,
-      // Only accounts the project actually uses. Declaring a channel that
-      // does not carry the record tells Google the canonical source is
-      // somewhere it is not.
-      sameAs: ['https://x.com/michealrayberry'],
+      // Must match the sameAs on the home page exactly: one entity, one set of
+      // profiles. A day page claiming a narrower set makes the Person node
+      // ambiguous instead of corroborating it. YouTube is absent by design —
+      // the project no longer publishes there.
+      sameAs: ["https://x.com/michealrayberry", "https://www.tiktok.com/@michealrayberry", "https://www.instagram.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry", "https://www.reddit.com/user/MichealRayBerry/", "https://www.flickr.com/photos/michealrayberry/"],
     },
     ...Object.entries(photos).map(([angle, p]) => ({
       '@type': 'ImageObject',
@@ -356,24 +357,31 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <meta name="twitter:description" content="${htmlEscape(description)}">
   <meta name="twitter:image" content="${htmlEscape(front)}">
   <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
+    .sitebar{background:#141412;color:#fafaf7;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 24px;font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+    .sitebar a{color:#fafaf7;text-decoration:none}.sitebar a:hover{color:#ff6b61}
+    .sitebar span{display:flex;gap:16px;flex-wrap:wrap}
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}header a{color:inherit}
-    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
-    h1{font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}.stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px ui-monospace,monospace}
+    .eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}.stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px 'IBM Plex Mono',ui-monospace,monospace}
     .intro{max-width:760px;font-size:1.15rem}.attest{border-left:4px solid var(--accent);padding:10px 14px;background:#f1f0ea}
     .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:36px 0}.gallery figure{margin:0;border:1px solid var(--ink);background:#fff}
-    .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase}
+    .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
     .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
-    .also{font:12px/1.8 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
+    .also{font:12px/1.8 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
     @media(max-width:720px){.gallery{grid-template-columns:1fr}nav{grid-template-columns:1fr;text-align:left!important}nav a:nth-child(2),nav a:last-child{text-align:left}}
   </style>
 </head>
 <body>
+<div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
 <header>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
   <h1>Micheal Ray Berry — Day ${day}</h1>
@@ -398,22 +406,25 @@ function dailyPage({ record, photos, previous, next, attestation }) {
    day is missing while its page sits published. Days between the start and
    the latest record with no page are shown as gaps, which is the point. */
 const PAGE_CSS = `
+    .sitebar{background:#141412;color:#fafaf7;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 24px;font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+    .sitebar a{color:#fafaf7;text-decoration:none}.sitebar a:hover{color:#ff6b61}
+    .sitebar span{display:flex;gap:16px;flex-wrap:wrap}
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}
-    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
-    h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
-    h2{font-size:1.5rem;margin:32px 0 8px}
+    .eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
+    h2{font-family:'IBM Plex Sans Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em;font-size:1.5rem;margin:32px 0 8px}
     .intro{max-width:760px;font-size:1.1rem}
-    .stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px ui-monospace,monospace;margin:.5rem 0}
-    table{width:100%;border-collapse:collapse;margin:20px 0;font:14px ui-monospace,monospace}
+    .stats{display:flex;gap:24px;flex-wrap:wrap;font:600 14px 'IBM Plex Mono',ui-monospace,monospace;margin:.5rem 0}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font:14px 'IBM Plex Mono',ui-monospace,monospace}
     th{text-align:left;background:var(--ink);color:var(--paper);padding:8px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
     td{padding:8px 10px;border-bottom:1px solid var(--rule)}
     .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:24px 0}
     .gallery figure{margin:0;border:1px solid var(--ink);background:#fff}.gallery img{display:block;width:100%;height:auto}
-    .gallery figcaption{padding:8px 10px;font:11px/1.5 ui-monospace,monospace;text-transform:uppercase}
+    .gallery figcaption{padding:8px 10px;font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .pending{border-left:4px solid var(--accent);padding:12px 16px;background:#f1f0ea}
-    nav.crumbs{font:12px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+    nav.crumbs{font:12px 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
 `;
 
@@ -482,9 +493,13 @@ function milestonePage(target, entries) {
   <meta property="og:description" content="${htmlEscape(description)}"><meta property="og:url" content="${canonical}">
   ${reached ? `<meta property="og:image" content="${htmlEscape(reached.photos.front.sourceUrl)}">` : ''}
   <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>${PAGE_CSS}</style>
 </head>
 <body>
+<div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
 <header>
   <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / <a href="/milestones">Milestones</a> / ${target} lb</nav>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
@@ -548,9 +563,13 @@ function weekPage(week, weekEntries, allEntries) {
       { name: `Week ${week}`, url: canonical },
     ]),
   ] })}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>${PAGE_CSS}</style>
 </head>
 <body>
+<div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
 <header>
   <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / <a href="/weeks/">Weeks</a> / Week ${week}</nav>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
@@ -588,9 +607,13 @@ function weeksIndexPage(entries) {
   <meta name="description" content="Week-by-week summary of the Micheal Ray Berry Public Accountability Project: documented days and net weight change for every project week.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="${canonical}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>${PAGE_CSS}</style>
 </head>
 <body>
+<div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
 <header>
   <nav class="crumbs"><a href="/">Micheal Ray Berry</a> / Weeks</nav>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
@@ -663,25 +686,32 @@ function dailyIndexPage(entries) {
       name: `Day ${d.day} — ${longDate(d.date)}`,
     })),
   })}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
+    .sitebar{background:#141412;color:#fafaf7;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 24px;font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+    .sitebar a{color:#fafaf7;text-decoration:none}.sitebar a:hover{color:#ff6b61}
+    .sitebar span{display:flex;gap:16px;flex-wrap:wrap}
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     header,main,footer{max-width:1200px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}
-    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
-    h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
-    .intro{max-width:760px}.count{font:600 14px ui-monospace,monospace;letter-spacing:.08em}
+    .eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
+    .intro{max-width:760px}.count{font:600 14px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em}
     ul{list-style:none;padding:0;margin:28px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
     .card{border:1px solid var(--ink);background:#fff}.card a{display:block;color:inherit;text-decoration:none}
     .card img{display:block;width:100%;height:auto}
-    .card .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 ui-monospace,monospace;text-transform:uppercase}
+    .card .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .card .wt{font-weight:700}.card.gap{border-color:var(--accent)}
     .card .thumb{aspect-ratio:9/16;background:repeating-linear-gradient(45deg,#f1f0ea,#f1f0ea 10px,#e8e6df 10px,#e8e6df 20px);display:flex;align-items:center;justify-content:center}
-    .card .thumb span{font:700 13px ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
+    .card .thumb span{font:700 13px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
     .card .flag{color:var(--accent);font-weight:700}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
   </style>
 </head>
 <body>
+<div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
 <header>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
   <h1>Daily Record</h1>
@@ -779,20 +809,27 @@ function noRecordPage({ date, day, previous, next, reason }) {
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
   <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
+    .sitebar{background:#141412;color:#fafaf7;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 24px;font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+    .sitebar a{color:#fafaf7;text-decoration:none}.sitebar a:hover{color:#ff6b61}
+    .sitebar span{display:flex;gap:16px;flex-wrap:wrap}
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     header,main,footer{max-width:1120px;margin:auto;padding:24px}header{border-bottom:2px solid var(--ink)}header a{color:inherit}
-    .eyebrow{font:600 12px/1.2 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
-    h1{font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}
+    .eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+    h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,6vw,4.5rem);line-height:1;margin:.35rem 0}
     .card{border:1px solid var(--ink);background:#f1f0ea;border-left:6px solid var(--accent);padding:22px 24px;margin:32px 0;max-width:760px}
     .card p{margin:0 0 12px}.card p:last-child{margin:0}
-    nav{display:flex;justify-content:space-between;gap:16px;margin:36px 0 12px;font:600 14px ui-monospace,monospace}
+    nav{display:flex;justify-content:space-between;gap:16px;margin:36px 0 12px;font:600 14px 'IBM Plex Mono',ui-monospace,monospace}
     nav a{color:var(--ink)}footer{border-top:1px solid var(--rule);color:var(--muted);font-size:14px}
     a{color:var(--ink)}a:hover{color:var(--accent)}
   </style>
 </head>
 <body>
+  <div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
   <header>
     <div class="eyebrow"><a href="/">Micheal Ray Berry</a> · Public Accountability Project</div>
     <h1>Day ${day} — No record</h1>

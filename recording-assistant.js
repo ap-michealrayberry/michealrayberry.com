@@ -455,7 +455,7 @@
             await postPacket({ video_url: publicUrl });
           } catch (e) {
             okAll = false;
-            setNote('VIDEO UPLOAD FAILED (' + e.message + ') — download the video below and give it to the AP.', true);
+            setNote('VIDEO UPLOAD FAILED (' + e.message + ') — download the video below and give it to the AP.');
           }
         }
         await postPacket({ finalize: true });
@@ -574,10 +574,10 @@
       // guidance (and vice versa) — both are visible at once.
       const setMealNote = (msg) => { $('.ra-mealnote').textContent = msg; };
 
-      const setNote = (msg, isHTML) => {
-        const n = $('.ra-note');
-        if (isHTML) n.innerHTML = msg; else n.textContent = msg;
-      };
+      // textContent only: nothing written here is markup, and an error string
+      // interpolated into innerHTML is a sink waiting for a message it did not
+      // author (a device name, a filename, a server response).
+      const setNote = (msg) => { $('.ra-note').textContent = msg; };
 
       async function startCamera() {
         if (stream) stream.getTracks().forEach((t) => t.stop());

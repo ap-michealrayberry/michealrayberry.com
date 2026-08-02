@@ -361,8 +361,6 @@ class Component extends DCLogic {
       abStatement: s.abStatement !== undefined ? s.abStatement : (st.ap_statement || ''),
       abLinksText: s.abLinks !== undefined ? s.abLinks : abLinksText,
       onAbStatement: set('abStatement'), onAbLinks: set('abLinks'),
-      'Saving…');
-      },
       abPresume: () => { if (confirm('Set the site to PRESUMED ABANDONED?\n\nReversible. Use for a manual §11 call (e.g. delete/conceal attempt) ahead of the 30-day automatic trigger.')) this.post({ action: 'apabandon', op: 'presume' }, 'Setting…'); },
       abConfirm: () => {
         if (!confirm('CONFIRM ABANDONMENT — §11 TERMINATION.\n\nThe site permanently converts to the abandonment record. This is designed to be one-way.')) return;
