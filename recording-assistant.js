@@ -232,16 +232,9 @@
       const hud = $('.ra-hud');
       const hctx = hud.getContext('2d');
       const HW = 720, HH = 1280;
-      // Tool mode: "daily" (default) = inspection + meal; "corrective" = corrective session only.
-      const MODE = this.getAttribute('mode') || 'daily';
-      if (MODE === 'corrective') {
-        ['.ra-w', '.ra-day'].forEach((s) => { const r = $(s).closest('.ra-row'); if (r) r.classList.add('ra-hide'); });
-        ['.ra-start', '.ra-rehearse', '.ra-note', '.ra-mealbox', '.ra-check'].forEach((s) => $(s).classList.add('ra-hide'));
-        const cb = $('.ra-corrbox');
-        cb.style.borderTop = 'none'; cb.style.marginTop = '0'; cb.style.paddingTop = '0';
-      } else {
-        $('.ra-corrbox').classList.add('ra-hide');
-      }
+      // Daily inspection and the evening meal photo only. Corrective sessions
+      // have their own tool at /mrb/corrective/, which owns the assigned
+      // sequence and the position monitor.
       const W = 1080, H = 1920; // 1080p portrait — lighter to composite+encode in realtime (2.5K caused frame drops); stills stay full-res
       view.width = W; view.height = H; // keep buffer in sync with draw math
 
@@ -1176,7 +1169,7 @@
       const CORR_LEVELS = { 1: 10, 2: 20, 3: 30 }; // minutes, per unified consequence structure
       let corrective = null, corrRecorder = null, corrChunks = [], corrInt = null;
       let poseLM = null, corrMonInt = null, micStream = null, micAnalyser = null;
-      const setCorrNote = (m) => { $('.ra-corrnote').textContent = m; };
+      const setCorrNote = (m) => { const el = $('.ra-corrnote'); if (el) el.textContent = m; };
       // MediaPipe pose landmarker — loaded on demand at session start (CDN).
       async function loadPose() {
         if (poseLM) return;
