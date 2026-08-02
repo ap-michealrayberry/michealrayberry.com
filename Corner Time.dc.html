@@ -495,8 +495,10 @@ class Component extends DCLogic {
     }
   }
 
+  BUILD = '2026-08-02b';
+
   async testUpload() {
-    this.setState({ status: 'Testing the upload path…' });
+    this.setState({ status: 'Testing the upload path… (build ' + this.BUILD + ')' });
     let key = '';
     try { key = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
     if (!key) { this.setState({ status: 'FAIL — no device key in this browser. Open /inspection and enter it once.' }); return; }
@@ -530,11 +532,11 @@ class Component extends DCLogic {
         method: 'PUT',
         body: new Blob([new Uint8Array([0])], { type: 'video/mp4' }),
       });
-      if (r.ok) { this.setState({ status: 'UPLOAD PATH OK ✓ — signing and the bucket both work from ' + location.origin + '.' }); return; }
+      if (r.ok) { this.setState({ status: 'UPLOAD PATH OK ✓ — build ' + this.BUILD + ' · signing and the bucket both work from ' + location.origin + '.' }); return; }
       const body = (await r.text()).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
       this.setState({ status: 'FAIL at the bucket — HTTP ' + r.status + '. ' + body });
     } catch (e) {
-      this.setState({ status: 'FAIL at the bucket — blocked before any response. Origin is ' + location.origin + '; that exact origin must be in the R2 bucket\u2019s CORS AllowedOrigins. (' + e + ')' });
+      this.setState({ status: 'FAIL at the bucket — blocked before any response. Build ' + this.BUILD + ' · origin ' + location.origin + '. If that build is not the one you just pushed, this page is cached — reload in a private tab. Otherwise the origin must be in the bucket\u2019s CORS AllowedOrigins with PUT allowed. (' + e + ')' });
     }
   }
 
