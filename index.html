@@ -1355,6 +1355,23 @@ class Component extends DCLogic {
       window.addEventListener('popstate', () => { openFromUrl(); this.openDayFromUrl(); });
       if ((window.location.search || '').indexOf('day=') !== -1) this.openDayFromUrl();
     } catch (e) {}
+    // The generated record (/daily/published.json, built from the daily
+    // manifests in GitHub) seeds the weigh-in data so the homepage and the
+    // permanent archive can never disagree; the live sheet then overlays it
+    // for rows newer than the last published manifest.
+    fetch('/daily/published.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rec) => {
+        if (!Array.isArray(rec) || !rec.length) return;
+        this.setState({ publishedRecord: rec });
+        if (!this.state.liveWeighIns) {
+          const entries = rec
+            .filter((d) => typeof d.weight_lb === 'number' && isFinite(d.weight_lb))
+            .map((d) => ({ date: d.date, weight: d.weight_lb, note: d.note || '', status: d.status }));
+          if (entries.length) this.setState({ liveWeighIns: entries });
+        }
+      })
+      .catch(() => {});
     fetch(this.WEIGHINS_CSV)
       .then((r) => (r.ok ? r.text() : null))
       .then((t) => {
@@ -1511,10 +1528,18 @@ class Component extends DCLogic {
   }
 
   // ===== THE OFFICIAL WEIGH-IN RECORD =====
-  // Live source: the public "MRB Accountability — Weigh-ins" Google Sheet.
-  // The list below is only the offline fallback shown if the sheet is unreachable.
+  // Base source: /daily/published.json, generated from the committed daily
+  // manifests — the same record GitHub holds. The live sheet overlays it for
+  // freshness. There is no hand-maintained record list here anymore.
   weighIns() {
     if (this.state.liveWeighIns) return this.state.liveWeighIns;
+    const rec = this.state.publishedRecord;
+    if (Array.isArray(rec)) {
+      const entries = rec
+        .filter((d) => typeof d.weight_lb === 'number' && isFinite(d.weight_lb))
+        .map((d) => ({ date: d.date, weight: d.weight_lb, note: d.note || '', status: d.status }));
+      if (entries.length) return entries;
+    }
     return [
       { date: '2026-07-20', weight: 340.0, note: 'Project start' },
     ];

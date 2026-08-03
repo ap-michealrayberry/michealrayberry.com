@@ -1,0 +1,84 @@
+# Scheduled daily-record synchronization. Fetches the public sheet CSVs,
+# ingests any new media (photo downloads, HTTP video verification), rebuilds
+# every generated artifact from the manifests, validates, and — only when the
+# output actually changed — opens a pull request. It never commits to main
+# directly, so a human (or branch protection + review) stays in the loop and
+# a bad sheet edit cannot silently rewrite the record.
+#
+# Loop safety: pull requests opened with the built-in GITHUB_TOKEN do not
+# trigger other workflows, so this workflow cannot cascade. (Consequence: the
+# "Validate record" check does not auto-run on sync PRs — re-run it manually
+# from the Actions tab, or configure a fine-grained PAT as SYNC_TOKEN to
+# restore automatic PR checks.) A second guard skips the run when a sync PR
+# is already open.
+name: Sync daily record
+
+on:
+  schedule:
+    # 22:15 America/New_York is 02:15 UTC during EDT and 03:15 UTC during
+    # EST. Both are scheduled year-round; the changes-only guard makes the
+    # extra firing a no-op.
+    - cron: '15 2 * * *'
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-daily-record
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Skip if a sync PR is already open
+        id: guard
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+        run: |
+          open=$(gh pr list --state open --json headRefName --jq '[.[] | select(.headRefName | startswith("sync/record"))] | length')
+          echo "open=$open" >> "$GITHUB_OUTPUT"
+          if [ "$open" != "0" ]; then
+            echo "A sync/record PR is already open; merging it first keeps the record linear."
+          fi
+
+      - name: Sync, ingest, generate, validate
+        if: steps.guard.outputs.open == '0'
+        run: npm run sync
+
+      - name: Open pull request if the record changed
+        if: steps.guard.outputs.open == '0'
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Record already up to date — no PR."
+            exit 0
+          fi
+          STAMP="$(date -u +%Y%m%d-%H%M%S)"
+          BRANCH="sync/record-$STAMP"
+          git config user.name "mrb-record-sync"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "Sync daily record from spreadsheet snapshot ($STAMP)" \
+                     -m "Source-data timestamp: $(node -p "require('./data/sync-state.json').fetched_at")"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "Daily record sync — $(date -u +%F)" \
+            --body "$(printf 'Automated synchronization of the daily record from the spreadsheet snapshot.\n\n- Source-data timestamp: %s\n- Generated deterministically by `npm run sync`; validation (including remote video checks) passed in this run.\n- Review the diff, then merge to publish. Evidence hash changes would have failed validation and can never arrive silently through this PR.\n' "$(node -p "require('./data/sync-state.json').fetched_at")")"
