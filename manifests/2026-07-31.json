@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "schema": "https://michealrayberry.com/schemas/daily-record-manifest-v2.json",
+  "project": {
+    "name": "Micheal Ray Berry Public Accountability Project",
+    "person": {
+      "name": "Micheal Ray Berry",
+      "id": "https://michealrayberry.com/#micheal-ray-berry"
+    },
+    "start_date": "2026-07-20",
+    "start_weight_lb": 340,
+    "goal_weight_lb": 175,
+    "timezone": "America/New_York"
+  },
+  "date": "2026-07-31",
+  "day": 12,
+  "weight_lb": 336,
+  "note": "scale-synced (Withings via Google Health)",
+  "status": "partial",
+  "status_reason": "Filed: the recorded weight. Not filed: the four accountability photographs, the inspection video.",
+  "canonical_url": "https://michealrayberry.com/daily/2026-07-31-day-012/",
+  "published_at": "2026-08-03T22:30:00Z",
+  "last_verified_at": "2026-08-03T22:30:00Z",
+  "source": {
+    "sheet_id": "1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM",
+    "sheet_row": 13,
+    "source_fetched_at": "2026-08-03T22:30:00Z"
+  },
+  "media": {
+    "photos": {
+      "front": null,
+      "left": null,
+      "rear": null,
+      "right": null
+    },
+    "video": null
+  },
+  "attestation": null,
+  "violation": {
+    "violation": "Missed 10 PM ET deadline — Daily Compliance Packet incomplete (2 items) [auto-declared]",
+    "status": "Unresolved",
+    "logged_for": "2026-07-31"
+  },
+  "history": [
+    {
+      "at": "2026-08-03T22:30:00Z",
+      "status": "partial",
+      "reason": "Initial normalized manifest (v2 migration from the legacy publisher)."
+    }
+  ]
+}

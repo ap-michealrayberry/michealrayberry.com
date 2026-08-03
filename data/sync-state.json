@@ -1,0 +1,8 @@
+{
+  "sheet_id": "1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM",
+  "source": "Google Sheets — MRB Accountability record spreadsheet (public read-only CSV)",
+  "fetched_at": "2026-08-03T22:30:00Z",
+  "as_of": "2026-08-03T22:30:00Z",
+  "method": "manual repair session (Drive read); scheduled sync uses scripts/sync-sheet.mjs over HTTPS",
+  "notes": "as_of drives every timestamp and 'today' decision in generated output so regeneration is deterministic."
+}

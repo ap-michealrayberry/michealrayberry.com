@@ -1,0 +1,141 @@
+{
+  "schema": "https://michealrayberry.com/schemas/daily-record-manifest-v1.json",
+  "person": {
+    "name": "Micheal Ray Berry",
+    "id": "https://michealrayberry.com/#micheal-ray-berry"
+  },
+  "project": {
+    "name": "Micheal Ray Berry Public Accountability Project",
+    "start_date": "2026-07-20",
+    "start_weight_lb": 340,
+    "goal_weight_lb": 175
+  },
+  "record": {
+    "date": "2026-07-20",
+    "day": 1,
+    "weight_lb": 337.8,
+    "note": "",
+    "video_url": "https://drive.google.com/file/d/1gUnOwliQn8Pwncw9XbSQ67WUXf00k6eR/view",
+    "canonical_url": "https://michealrayberry.com/daily/2026-07-20-day-001/",
+    "attestation": null,
+    "violation": null
+  },
+  "photos": {
+    "front": {
+      "url": "https://michealrayberry.com/photos/micheal-ray-berry-day-001-front-2026-07-20.jpg",
+      "width": 2160,
+      "height": 3840,
+      "sha256": "55542f62f534f346911832d8643c18dfe03d940592cd24e0e00e3d59bb829ea2",
+      "responsive": [
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-front-2026-07-20-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 19798,
+          "sha256": "0cab5f88db4c67630a31cda7359db99e76cb33b77c3578d60331248cae428156"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-front-2026-07-20-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 51576,
+          "sha256": "55b2cacda7bec583a48860fb9afdc6cd32e5fcbfb4a5c5d899e527dbb585be9f"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-front-2026-07-20-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 102800,
+          "sha256": "00749451dd07febcaa17743b9829c6ec8f87b57a9ceff3535aeb61355a6eb7ff"
+        }
+      ]
+    },
+    "left": {
+      "url": "https://michealrayberry.com/photos/micheal-ray-berry-day-001-left-2026-07-20.jpg",
+      "width": 2160,
+      "height": 3840,
+      "sha256": "bdefd8b9604578de7b993c2857f312ae9825c4a16eedcb07a224ac8d49d704ab",
+      "responsive": [
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-left-2026-07-20-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 17528,
+          "sha256": "eb11b3db7953f6b58cb7e233fdd34bb1a3f365964b9dba6f20edeb978d645f92"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-left-2026-07-20-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 44636,
+          "sha256": "be12b669e95a61174f5ebf675313770a7b670671c90f633a4f539f9c94ae2c55"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-left-2026-07-20-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 88700,
+          "sha256": "d0488f126bcd644fd933f9a232f9aa2d9988656e02f2c1e39c42677d10a3a999"
+        }
+      ]
+    },
+    "rear": {
+      "url": "https://michealrayberry.com/photos/micheal-ray-berry-day-001-rear-2026-07-20.jpg",
+      "width": 2160,
+      "height": 3840,
+      "sha256": "47d7a9bd106c15a9cb5d45bae24628406d6f6707a5a7a70bec9877440f21455f",
+      "responsive": [
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-rear-2026-07-20-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 20526,
+          "sha256": "c5c2d7e5312238181b7baad7bf14b64b11616b2a2a4b7cc657f515b77c23acaa"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-rear-2026-07-20-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 51138,
+          "sha256": "8c5058d99907b0b575e58998e331581142c21a4400559fdfa5af1cfd90b8ddc2"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-rear-2026-07-20-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 100940,
+          "sha256": "479bf368df7f1ef5ae5219d1b5b24126e07cc379007e482f8b448e7c4fd705da"
+        }
+      ]
+    },
+    "right": {
+      "url": "https://michealrayberry.com/photos/micheal-ray-berry-day-001-right-2026-07-20.jpg",
+      "width": 2160,
+      "height": 3840,
+      "sha256": "2d255f992b8c75b18811eed286dbc66735939d18bdf8a6c21a4c121be4d1f377",
+      "responsive": [
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-right-2026-07-20-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 18090,
+          "sha256": "e143f08ebe484f3fcbb1c6a2c56951c66e2722251dc3cd32be1baed31caf3afb"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-right-2026-07-20-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 46390,
+          "sha256": "34e5d3abd4516e6fe3b69cfde9f263b0cb8102867ad36af036d8ba98b1683d42"
+        },
+        {
+          "url": "https://michealrayberry.com/media/responsive/2026/07/20/micheal-ray-berry-day-001-right-2026-07-20-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 90998,
+          "sha256": "bea2068c2ff2c46a5488724fa43d6ae792900b762961566d7ec4fd095b2bde3a"
+        }
+      ]
+    }
+  }
+}

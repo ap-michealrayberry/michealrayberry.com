@@ -1,8 +1,15 @@
 {
-  "name": "mrb-seo-publisher",
+  "name": "mrb-record-publisher",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "node scripts/publish.mjs && npm run validate-records",
+    "generate": "node scripts/publish.mjs",
+    "sync": "node scripts/sync-sheet.mjs && node scripts/publish.mjs --online && node scripts/validate.mjs --remote",
+    "validate-records": "node scripts/validate.mjs",
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/ingest.mjs && node --check scripts/generate.mjs && node --check scripts/validate.mjs && node --check scripts/sync-sheet.mjs && node --check scripts/submit-indexnow.mjs && node --check scripts/lib/common.mjs && node --check scripts/lib/sheet.mjs && node --check scripts/lib/manifest.mjs"
+  },
   "dependencies": {
-    "sharp": "^0.33.5"
+    "sharp": "0.33.5"
   }
 }
