@@ -1,0 +1,98 @@
+[
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:fillStyle",
+  "rgba(15,15,13,0.82)"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  128
+ ],
+ [
+  "set:fillStyle",
+  "#FAFAF7"
+ ],
+ [
+  "set:font",
+  "700 44px \"IBM Plex Sans Condensed\",\"Arial Narrow\",sans-serif"
+ ],
+ [
+  "fillText",
+  "MICHEAL RAY BERRY",
+  40,
+  50
+ ],
+ [
+  "set:fillStyle",
+  "#FF6B61"
+ ],
+ [
+  "set:font",
+  "600 24px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "PUBLIC ACCOUNTABILITY PROJECT",
+  40,
+  94
+ ],
+ [
+  "set:font",
+  "700 34px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "set:fillStyle",
+  "#FF6B61"
+ ],
+ [
+  "fillText",
+  "VIOLATION V-002",
+  734,
+  62
+ ],
+ [
+  "set:fillStyle",
+  "rgba(15,15,13,0.82)"
+ ],
+ [
+  "fillRect",
+  0,
+  1792,
+  1080,
+  128
+ ],
+ [
+  "set:fillStyle",
+  "#FAFAF7"
+ ],
+ [
+  "set:font",
+  "600 34px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "VIOLATION OF 2026-08-01 · ASSESSED 2026-08-03",
+  40,
+  1838
+ ],
+ [
+  "set:fillStyle",
+  "#B9B8B2"
+ ],
+ [
+  "set:font",
+  "400 24px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "ACTIVE UNTIL RESOLVED · LIVE CAPTURE · CODE 4821 · MICHEALRAYBERRY.COM",
+  40,
+  1880
+ ]
+]

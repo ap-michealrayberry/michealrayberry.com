@@ -1,0 +1,53 @@
+[
+ [
+  "set:fillStyle",
+  "rgba(10,12,14,.55)"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  1920
+ ],
+ [
+  "set:fillStyle",
+  "#FFFFFF"
+ ],
+ [
+  "set:textAlign",
+  "center"
+ ],
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:font",
+  "700 422px 'IBM Plex Sans Condensed', sans-serif"
+ ],
+ [
+  "fillText",
+  "7",
+  540,
+  960
+ ],
+ [
+  "set:font",
+  "600 35px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "set:fillStyle",
+  "#B9BEC4"
+ ],
+ [
+  "fillText",
+  "RECORDING STARTS IN",
+  540,
+  691
+ ],
+ [
+  "set:textAlign",
+  "left"
+ ]
+]
