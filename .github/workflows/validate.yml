@@ -1,0 +1,46 @@
+# Pull-request validation. Read-only: this workflow never pushes to the PR
+# branch — it only proves the branch is internally consistent.
+name: Validate record
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check
+        run: npm run check-syntax
+
+      - name: Regenerate from committed data (must be a no-op)
+        run: |
+          node scripts/publish.mjs
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --porcelain
+            git diff | head -200
+            echo "::error::Generated output does not match committed output. Run 'npm run generate' locally and commit the result."
+            exit 1
+          fi
+
+      - name: Validate records
+        run: npm run validate-records
