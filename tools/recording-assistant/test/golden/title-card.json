@@ -1,0 +1,125 @@
+[
+ [
+  "save"
+ ],
+ [
+  "set:globalAlpha",
+  1
+ ],
+ [
+  "set:fillStyle",
+  "#141412"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  1920
+ ],
+ [
+  "set:fillStyle",
+  "#B3261E"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  12
+ ],
+ [
+  "fillRect",
+  0,
+  1908,
+  1080,
+  12
+ ],
+ [
+  "set:textAlign",
+  "center"
+ ],
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:fillStyle",
+  "#B3261E"
+ ],
+ [
+  "set:font",
+  "600 35px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "fillText",
+  "PUBLIC ACCOUNTABILITY PROJECT",
+  540,
+  576
+ ],
+ [
+  "set:fillStyle",
+  "#FAFAF7"
+ ],
+ [
+  "set:font",
+  "700 202px 'IBM Plex Sans Condensed', sans-serif"
+ ],
+ [
+  "fillText",
+  "DAY 15",
+  540,
+  806.4
+ ],
+ [
+  "set:font",
+  "600 125px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "fillText",
+  "331.4 LB",
+  540,
+  1017.6
+ ],
+ [
+  "set:fillStyle",
+  "#8A8983"
+ ],
+ [
+  "set:font",
+  "600 35px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "fillText",
+  "MICHEAL RAY BERRY · DAILY INSPECTION · 2026-08-03",
+  540,
+  1190.4
+ ],
+ [
+  "set:fillStyle",
+  "#FAFAF7"
+ ],
+ [
+  "fillText",
+  "MICHEALRAYBERRY.COM",
+  540,
+  1344
+ ],
+ [
+  "set:fillStyle",
+  "#B3261E"
+ ],
+ [
+  "fillText",
+  "VERIFICATION CODE 4821",
+  540,
+  1459.2
+ ],
+ [
+  "restore"
+ ],
+ [
+  "set:textAlign",
+  "left"
+ ]
+]

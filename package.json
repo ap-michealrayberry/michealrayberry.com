@@ -7,9 +7,18 @@
     "generate": "node scripts/publish.mjs",
     "sync": "node scripts/sync-sheet.mjs && node scripts/publish.mjs --online && node scripts/validate.mjs --remote",
     "validate-records": "node scripts/validate.mjs",
-    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/ingest.mjs && node --check scripts/generate.mjs && node --check scripts/validate.mjs && node --check scripts/sync-sheet.mjs && node --check scripts/submit-indexnow.mjs && node --check scripts/lib/common.mjs && node --check scripts/lib/sheet.mjs && node --check scripts/lib/manifest.mjs"
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/ingest.mjs && node --check scripts/generate.mjs && node --check scripts/validate.mjs && node --check scripts/sync-sheet.mjs && node --check scripts/submit-indexnow.mjs && node --check scripts/lib/common.mjs && node --check scripts/lib/sheet.mjs && node --check scripts/lib/manifest.mjs",
+    "build:ra": "node tools/recording-assistant/build.mjs",
+    "test": "npm run build:ra && node --test \"tools/recording-assistant/test/*.test.mjs\""
   },
   "dependencies": {
     "sharp": "0.33.5"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.3",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "jsdom": "^30.0.1"
   }
 }

@@ -1,0 +1,37 @@
+# The recording assistant's harness exists because its bug class was
+# mechanically detectable but nothing ran the mechanism. This runs it on every
+# push and PR that could affect the tool or the CSP it must satisfy.
+name: recording-assistant
+on:
+  push:
+    paths:
+      - 'tools/recording-assistant/**'
+      - 'mrb/inspection/recording-assistant.js'
+      - '_headers'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/recording-assistant.yml'
+  pull_request:
+    paths:
+      - 'tools/recording-assistant/**'
+      - 'mrb/inspection/recording-assistant.js'
+      - '_headers'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/recording-assistant.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: IBM Plex fonts (PNG golden snapshots)
+        run: sudo apt-get update -qq && sudo apt-get install -y fonts-ibm-plex
+      - run: npm ci
+      - run: npm test
+      - name: built file matches source
+        run: git diff --exit-code mrb/inspection/recording-assistant.js
