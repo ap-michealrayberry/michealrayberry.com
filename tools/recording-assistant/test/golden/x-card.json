@@ -1,0 +1,124 @@
+[
+ [
+  "set:fillStyle",
+  "#FAFAF7"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  1350
+ ],
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:fillStyle",
+  "#141412"
+ ],
+ [
+  "set:font",
+  "700 54px \"IBM Plex Sans Condensed\",\"Arial Narrow\",sans-serif"
+ ],
+ [
+  "fillText",
+  "MICHEAL RAY BERRY",
+  48,
+  64
+ ],
+ [
+  "set:fillStyle",
+  "#B3261E"
+ ],
+ [
+  "set:font",
+  "600 26px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "PUBLIC ACCOUNTABILITY PROJECT",
+  48,
+  116
+ ],
+ [
+  "set:fillStyle",
+  "#141412"
+ ],
+ [
+  "set:font",
+  "700 44px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "DAY 15",
+  873.6,
+  88
+ ],
+ [
+  "set:fillStyle",
+  "#F1F0EA"
+ ],
+ [
+  "fillRect",
+  48,
+  160,
+  984,
+  1000
+ ],
+ [
+  "drawImage",
+  {
+   "w": 1080,
+   "h": 1920
+  },
+  258.75,
+  160,
+  562.5,
+  1000
+ ],
+ [
+  "set:strokeStyle",
+  "#141412"
+ ],
+ [
+  "set:lineWidth",
+  3
+ ],
+ [
+  "strokeRect",
+  49.5,
+  161.5,
+  981,
+  997
+ ],
+ [
+  "set:fillStyle",
+  "#141412"
+ ],
+ [
+  "set:font",
+  "700 46px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "2026-08-03 · 331.4 LB",
+  48,
+  1222
+ ],
+ [
+  "set:fillStyle",
+  "#B3261E"
+ ],
+ [
+  "set:font",
+  "600 28px \"IBM Plex Mono\",monospace"
+ ],
+ [
+  "fillText",
+  "340 → 175 · MICHEALRAYBERRY.COM",
+  48,
+  1278
+ ]
+]

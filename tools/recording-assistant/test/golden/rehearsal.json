@@ -1,0 +1,39 @@
+[
+ [
+  "set:fillStyle",
+  "#1B1B19"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  1920
+ ],
+ [
+  "set:textAlign",
+  "center"
+ ],
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:fillStyle",
+  "#4A4A45"
+ ],
+ [
+  "set:font",
+  "600 46px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "fillText",
+  "REHEARSAL — NO CAMERA · NOTHING IS RECORDED",
+  540,
+  960
+ ],
+ [
+  "set:textAlign",
+  "left"
+ ]
+]

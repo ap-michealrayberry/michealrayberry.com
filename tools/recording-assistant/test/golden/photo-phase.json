@@ -1,0 +1,53 @@
+[
+ [
+  "set:fillStyle",
+  "rgba(10,12,14,.45)"
+ ],
+ [
+  "fillRect",
+  0,
+  0,
+  1080,
+  1920
+ ],
+ [
+  "set:textAlign",
+  "center"
+ ],
+ [
+  "set:textBaseline",
+  "middle"
+ ],
+ [
+  "set:fillStyle",
+  "#B9BEC4"
+ ],
+ [
+  "set:font",
+  "600 38px 'IBM Plex Mono', monospace"
+ ],
+ [
+  "fillText",
+  "PHOTO · REAR",
+  540,
+  691
+ ],
+ [
+  "set:fillStyle",
+  "#FFFFFF"
+ ],
+ [
+  "set:font",
+  "700 422px 'IBM Plex Sans Condensed', sans-serif"
+ ],
+ [
+  "fillText",
+  "3",
+  540,
+  960
+ ],
+ [
+  "set:textAlign",
+  "left"
+ ]
+]

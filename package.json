@@ -2,7 +2,18 @@
   "name": "mrb-seo-publisher",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build:ra": "node tools/recording-assistant/build.mjs",
+    "test": "npm run build:ra && node --test \"tools/recording-assistant/test/*.test.mjs\""
+  },
   "dependencies": {
     "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.3",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "jsdom": "^30.0.1"
   }
 }
