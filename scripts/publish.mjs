@@ -629,7 +629,18 @@ function weeksIndexPage(entries) {
 </html>`;
 }
 
-function dailyIndexPage(entries) {
+/* True while today's 10 PM Eastern deadline is still ahead. Derived from the
+   date rather than a fixed offset so it holds across the DST change. */
+function deadlinePending(iso) {
+  const now = new Date();
+  const todayEt = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const todayIso = `${todayEt.getFullYear()}-${String(todayEt.getMonth() + 1).padStart(2, '0')}-${String(todayEt.getDate()).padStart(2, '0')}`;
+  if (iso > todayIso) return true;
+  if (iso < todayIso) return false;
+  return todayEt.getHours() < 22;
+}
+
+function dailyIndexPage(entries, gapKinds = new Map()) {
   const byDate = new Map(entries.map((e) => [e.record.date, e]));
   /* Run to today, not to the last finalized day. Stopping at the last
      complete record makes an unfiled day vanish from the index instead of
@@ -645,15 +656,27 @@ function dailyIndexPage(entries) {
   }
   days.reverse();
   const documented = days.filter((d) => d.entry).length;
-  const gaps = days.length - documented;
+  const incomplete = days.filter((d) => !d.entry && gapKinds.get(d.date) === 'incomplete').length;
+  const pending = days.filter((d) => !d.entry && deadlinePending(d.date)).length;
+  const gaps = days.length - documented - incomplete - pending;
   const canonical = `${SITE_ORIGIN}/daily/`;
   const title = 'Daily Record — Micheal Ray Berry Public Accountability Project';
   const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${documented} documented days with four-angle photographs, recorded weight, inspection video, and SHA-256 evidence manifests.`;
   const cards = days.map(({ date, day, entry }) => {
     const href = `/daily/${date}-day-${String(day).padStart(3, '0')}/`;
     if (!entry) {
-      return `<li class="card gap"><div class="thumb"><span>NO RECORD</span></div>
-        <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">No record</span></div></li>`;
+      const partial = gapKinds.get(date) === 'incomplete';
+      // A day still inside its filing window is open, not missed.
+      if (!partial && deadlinePending(date)) {
+        return `<li class="card gap pending"><div class="thumb"><span>DUE TONIGHT</span></div>
+        <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">Due by 10 PM ET</span></div></li>`;
+      }
+      const flag = partial ? 'Incomplete record' : 'No record';
+      const inner = `<div class="thumb"><span>${flag.toUpperCase()}</span></div>
+        <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">${flag}</span></div>`;
+      // An incomplete day links to its page, which states what was filed and
+      // what was not; a day with nothing filed has nothing to open.
+      return partial ? `<li class="card gap"><a href="${href}">${inner}</a></li>` : `<li class="card gap">${inner}</li>`;
     }
     const front = entry.photos.front;
     const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
@@ -712,6 +735,9 @@ function dailyIndexPage(entries) {
     .card .thumb{aspect-ratio:9/16;background:repeating-linear-gradient(45deg,#f1f0ea,#f1f0ea 10px,#e8e6df 10px,#e8e6df 20px);display:flex;align-items:center;justify-content:center}
     .card .thumb span{font:700 13px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
     .card .flag{color:var(--accent);font-weight:700}
+    .card.pending{border-color:var(--rule)}
+    .card.pending .thumb{background:repeating-linear-gradient(45deg,#f6f5f1,#f6f5f1 10px,#eeece6 10px,#eeece6 20px)}
+    .card.pending .thumb span,.card.pending .flag{color:var(--muted)}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
   </style>
 </head>
@@ -723,7 +749,7 @@ function dailyIndexPage(entries) {
 </header>
 <main>
   <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>. The gaps are part of the record.</p>
-  <p class="count"><strong>${documented}</strong> documented days · <strong>${gaps}</strong> days without a record</p>
+  <p class="count"><strong>${documented}</strong> documented days${incomplete ? ` · <strong>${incomplete}</strong> incomplete ${incomplete === 1 ? 'record' : 'records'}` : ''}${gaps ? ` · <strong>${gaps}</strong> ${gaps === 1 ? 'day' : 'days'} without a record` : ''}${pending ? ` · <strong>${pending}</strong> still due` : ''}</p>
   <p><a href="/">Return to michealrayberry.com</a> · <a href="/weeks/">Weekly record</a> · <a href="/milestones">Milestones</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
   <ul>${cards}</ul>
 </main>
@@ -774,10 +800,11 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
    sequence with a hole and no explanation), and the absence is itself part of
    the record — stated neutrally, exactly as the agreement requires. These
    pages carry no photographs, no video, and no consequence detail. */
-function noRecordPage({ date, day, previous, next, reason }) {
+function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
+  const label = kind === 'incomplete' ? 'Incomplete record' : 'No record';
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
-  const title = `Day ${day} — No record — ${longDate(date)} — Micheal Ray Berry`;
-  const description = `Day ${day} of the Micheal Ray Berry Public Accountability Project, ${longDate(date)}: no complete record was filed for this date.`;
+  const title = `Day ${day} — ${label} — ${longDate(date)} — Micheal Ray Berry`;
+  const description = `Day ${day} of the Micheal Ray Berry Public Accountability Project, ${longDate(date)}: ${kind === 'incomplete' ? 'the record filed for this date is incomplete' : 'no record was filed for this date'}.`;
   const graph = [
     {
       '@type': 'WebPage',
@@ -837,12 +864,12 @@ function noRecordPage({ date, day, previous, next, reason }) {
   <div class="sitebar"><a href="/">Micheal Ray Berry</a><span><a href="/daily/">Daily</a><a href="/weeks/">Weeks</a><a href="/milestones">Milestones</a><a href="/penalties">Record</a><a href="/agreement">Agreement</a></span></div>
   <header>
     <div class="eyebrow"><a href="/">Micheal Ray Berry</a> · Public Accountability Project</div>
-    <h1>Day ${day} — No record</h1>
+    <h1>Day ${day} — ${label}</h1>
     <p>${htmlEscape(longDate(date))}</p>
   </header>
   <main>
     <div class="card">
-      <p><strong>The Daily Compliance Packet for this date was not completed.</strong> ${htmlEscape(reason)}</p>
+      <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
       <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
     </div>
     <nav aria-label="Daily record navigation">
@@ -985,7 +1012,12 @@ async function main() {
      with a complete packet and days without. The chain is built over this
      list, so prev/next is continuous and a crawler never sees Day 10 link
      straight to Day 13. */
-  const lastDay = finalized.at(-1)?.record.day || 0;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const lastDay = Math.max(
+    finalized.at(-1)?.record.day || 0,
+    ...records.map((r) => r.day || 0),
+    dayNumber(todayIso),
+  );
   const byDay = new Map(finalized.map((f) => [f.record.day, f]));
   const rowByDay = new Map(records.map((r) => [r.day, r]));
   const sequence = [];
@@ -1006,7 +1038,7 @@ async function main() {
     const reason = have.length
       ? 'The record for this Project Day is incomplete. Filed: ' + have.join(', ') + '. Not filed: ' + missing.join(', ') + '.'
       : 'None of the required daily documentation was filed for this Project Day.';
-    sequence.push({ day: d, date, complete: false, reason });
+    sequence.push({ day: d, date, complete: false, kind: have.length ? 'incomplete' : 'none', reason });
   }
 
   const generated = [];
@@ -1065,17 +1097,19 @@ async function main() {
   for (let i = 0; i < sequence.length; i++) {
     const s = sequence[i];
     if (s.complete) continue;
+    // An in-progress day gets no "no record" page — nothing has been missed yet.
+    if (s.kind !== 'incomplete' && deadlinePending(s.date)) continue;
     const slug = `${s.date}-day-${String(s.day).padStart(3, '0')}`;
     const file = path.join(ROOT, 'daily', slug, 'index.html');
     const page = noRecordPage({
-      date: s.date, day: s.day, reason: s.reason,
+      date: s.date, day: s.day, reason: s.reason, kind: s.kind || 'none',
       previous: i > 0 ? sequence[i - 1] : null,
       next: i < sequence.length - 1 ? sequence[i + 1] : null,
     });
     if (await writeIfChanged(file, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${slug}/`);
   }
 
-  if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated))) {
+  if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated, new Map(sequence.filter((s) => !s.complete).map((s) => [s.date, s.kind || 'none']))))) {
     changedUrls.add(`${SITE_ORIGIN}/daily/`);
   }
 
