@@ -3,7 +3,7 @@ name: bootstrap-recording-assistant
 on:
   push:
     branches:
-      - agent/refactor-recording-assistant
+      - main
     paths:
       - '.github/workflows/bootstrap-recording-assistant.yml'
 
