@@ -34,8 +34,8 @@
         "url": "https://michealrayberry.com/photos/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02.jpg",
         "path": "photos/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02.jpg",
         "content_type": "image/jpeg",
-        "bytes": 874124,
-        "sha256": "ea7dc2dd7a0401a2ddae5a93bcb96f4b0148788c5da80b8bd4a15b778270d56b",
+        "bytes": 706111,
+        "sha256": "7a5525dd37930cedb1171fecbd21fdff4e6e940dc5fdc5491bc64adb54bc4f6a",
         "width": 2160,
         "height": 3840,
         "exif_orientation": null,
@@ -45,24 +45,24 @@
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02-480.webp",
             "width": 480,
             "height": 853,
-            "bytes": 23216,
-            "sha256": "581d993ce87a65d387daca6b88ba65bc986b1ab426f8519bfa7a194f2332b234"
+            "bytes": 20294,
+            "sha256": "b9fff9cdb1bbb44768e96896cce2baf0d64168ad02c767fe1325c2b39d224b28"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02-960.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02-960.webp",
             "width": 960,
             "height": 1707,
-            "bytes": 66214,
-            "sha256": "81f27d7a617efa2de8b406ed89f35c3596f06437e8992a4ad219baaf3e77d256"
+            "bytes": 50442,
+            "sha256": "49154f2ae7bd17549a26f1301063d017866141bbcd7512fcc31b78756fd6adb6"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02-1600.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-front-2026-08-02-1600.webp",
             "width": 1600,
             "height": 2844,
-            "bytes": 137292,
-            "sha256": "732df70789e04bc4f57272839f1f77ad82227c194c6c24aae8b5b5e063b74ddb"
+            "bytes": 99950,
+            "sha256": "a0c2a73a6f943717c676a87faf77898cf42da5e817f7fffcb40cee9028d1aef9"
           }
         ]
       },
@@ -72,8 +72,8 @@
         "url": "https://michealrayberry.com/photos/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02.jpg",
         "path": "photos/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02.jpg",
         "content_type": "image/jpeg",
-        "bytes": 872496,
-        "sha256": "0695bf799d0160fabc0b172ede47bf53769b839162d3ee69395195489708ec59",
+        "bytes": 688007,
+        "sha256": "7db753345593acc53f619a19eda03a17d1b0e323fb463ea112396cb8d2de63d3",
         "width": 2160,
         "height": 3840,
         "exif_orientation": null,
@@ -83,24 +83,24 @@
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02-480.webp",
             "width": 480,
             "height": 853,
-            "bytes": 23370,
-            "sha256": "2e51128c4db20a5562635a768436f778f9d7c558f6edd4ce542d92233bc29a55"
+            "bytes": 18856,
+            "sha256": "c271788f39043f75fe7514e4a4ff8d55d6c791a35d368e7223c3f902a4102766"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02-960.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02-960.webp",
             "width": 960,
             "height": 1707,
-            "bytes": 66730,
-            "sha256": "24416a644e7adad3c4f6625c0dd0f1e3788da3695e159870b5403de7185a6210"
+            "bytes": 46572,
+            "sha256": "8510f72baf8226c101427001841fae059641ef74cbcbc93b2201f7a6149d0933"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02-1600.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-left-2026-08-02-1600.webp",
             "width": 1600,
             "height": 2844,
-            "bytes": 136342,
-            "sha256": "7db68797641053b59da4de338dc7fd3d3a218908f7d5d68a2ee1500b8e35b2c0"
+            "bytes": 91828,
+            "sha256": "6ba2fc71cbb8e9a477549c10d7a4ac8eb844ded5c88c32cfb1527de8bbf01927"
           }
         ]
       },
@@ -110,8 +110,8 @@
         "url": "https://michealrayberry.com/photos/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02.jpg",
         "path": "photos/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02.jpg",
         "content_type": "image/jpeg",
-        "bytes": 878392,
-        "sha256": "f8ac35dd2dcedced2b0c20b9b387bd2e9fcefce2f9f48fd4e540ea4031ef1170",
+        "bytes": 703088,
+        "sha256": "577796ef6cee62ab7e8594ea84ccf88b9e8127b3c1e329aa82e5c2ca8aea8c4f",
         "width": 2160,
         "height": 3840,
         "exif_orientation": null,
@@ -121,24 +121,24 @@
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02-480.webp",
             "width": 480,
             "height": 853,
-            "bytes": 23074,
-            "sha256": "04ebcb49b67ca2e180f3b1470a46cb877afbeed91bf975151d7fead5c4f0e9a3"
+            "bytes": 19760,
+            "sha256": "c0cac88204a4f5f3b45d97fc5722b148e9bd4391bcc25df1f716077a8ad739a2"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02-960.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02-960.webp",
             "width": 960,
             "height": 1707,
-            "bytes": 67206,
-            "sha256": "bf990c85a82ac626a051eec1cc3cd115febb86b010a3e3ac088928ef7058d3b1"
+            "bytes": 49296,
+            "sha256": "75d9a8b2e2f43682c6bc972f411df0b97c5e121d7a8652d6458ea92fea0833ce"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02-1600.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-rear-2026-08-02-1600.webp",
             "width": 1600,
             "height": 2844,
-            "bytes": 139130,
-            "sha256": "f05f575e24ef05fe42f769dfa94ed9778ba032431765746c0f69430e9ec88947"
+            "bytes": 95718,
+            "sha256": "60d99a8a39a4f84d841bfe4d46e8078ad4b966e71472ad730eda869d7c265cd4"
           }
         ]
       },
@@ -148,8 +148,8 @@
         "url": "https://michealrayberry.com/photos/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02.jpg",
         "path": "photos/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02.jpg",
         "content_type": "image/jpeg",
-        "bytes": 888189,
-        "sha256": "fc5ee72c6a00c0e264a417afb2de8e3825907a3aad6608997501705505402ba5",
+        "bytes": 684525,
+        "sha256": "09bd68c1a59d648d5583ec890567d83f3fcf93b3cac2efa7a85acd466ea584a8",
         "width": 2160,
         "height": 3840,
         "exif_orientation": null,
@@ -159,24 +159,24 @@
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02-480.webp",
             "width": 480,
             "height": 853,
-            "bytes": 23886,
-            "sha256": "2833ddc24a99b5d4d1b0df430a80a219f625f2c6f1dfe22376081c2650e009d6"
+            "bytes": 18554,
+            "sha256": "af3e5cb7362b8610b5566b0cfc337060e5e469e7e4ff50877f3cd5a04d35f22f"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02-960.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02-960.webp",
             "width": 960,
             "height": 1707,
-            "bytes": 69292,
-            "sha256": "d92ef501b8b5783b24c30a3f4d40927a4527e31c41bc17f3e7f2f9d4d2272e57"
+            "bytes": 47052,
+            "sha256": "5a141d20cb25aec1934ea6b5dd407ab99440f4db2f00054ecc3dcaf50ef3b681"
           },
           {
             "url": "https://michealrayberry.com/media/responsive/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02-1600.webp",
             "path": "media/responsive/2026/08/02/micheal-ray-berry-day-014-right-2026-08-02-1600.webp",
             "width": 1600,
             "height": 2844,
-            "bytes": 142070,
-            "sha256": "63546505ae73387226cfe424c086f4d95b6c0b416b66a940e5703cebe0fc493f"
+            "bytes": 91404,
+            "sha256": "9f1a0f9e1aaaf65b2056766192aa6ac985ebbccd95bd0ceb906f9d9ac2d406c1"
           }
         ]
       }
@@ -194,17 +194,17 @@
     }
   },
   "attestation": {
-    "logged_at": "2026-08-02T10:08:30-04:00",
-    "code": "4561",
+    "logged_at": "2026-08-02T19:15:08-04:00",
+    "code": "5691",
     "status": "VALID — code issued 2 min before attest",
-    "video_sha256": "185f2fdfda49223970061951094efd2b28a25c433b473865719e5e3ecd2f0f0d",
+    "video_sha256": "aaeea17a2c4f676e4e724592a044c87cd344170adb8bf34c48e39b69d656a02f",
     "photo_sha256s": [
-      "ea7dc2dd7a0401a2ddae5a93bcb96f4b0148788c5da80b8bd4a15b778270d56b",
-      "0695bf799d0160fabc0b172ede47bf53769b839162d3ee69395195489708ec59",
-      "f8ac35dd2dcedced2b0c20b9b387bd2e9fcefce2f9f48fd4e540ea4031ef1170",
-      "fc5ee72c6a00c0e264a417afb2de8e3825907a3aad6608997501705505402ba5"
+      "8ae993c7e932a453d7e06810a0a605cd5395a5e60dc6c095113576f643347024",
+      "7db753345593acc53f619a19eda03a17d1b0e323fb463ea112396cb8d2de63d3",
+      "577796ef6cee62ab7e8594ea84ccf88b9e8127b3c1e329aa82e5c2ca8aea8c4f",
+      "09bd68c1a59d648d5583ec890567d83f3fcf93b3cac2efa7a85acd466ea584a8"
     ],
-    "matches_archived_photos": true,
+    "matches_archived_photos": false,
     "attempts_recorded": 6
   },
   "violation": null,
