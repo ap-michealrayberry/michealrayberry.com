@@ -26,7 +26,6 @@ const STATIC_PAGES = [
   ['penalties', 'daily'],
   ['uniform', 'weekly'],
   ['updates', 'daily'],
-  ['verify', 'monthly'],
   ['daily/', 'daily'],
 ];
 
@@ -80,6 +79,17 @@ function longDate(date) {
 
 function sha256(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+// Project days are defined in America/New_York. Deriving "today" from UTC
+// (toISOString) adds the next project day between 00:00 UTC and midnight ET,
+// producing an incorrect day count and premature pending/failure pages.
+function etToday() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
 }
 
 async function exists(file) {
@@ -645,7 +655,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   /* Run to today, not to the last finalized day. Stopping at the last
      complete record makes an unfiled day vanish from the index instead of
      showing as a gap — which is the one thing this page exists to prevent. */
-  const today = new Date().toISOString().slice(0, 10);
+  const today = etToday();
   const lastEntry = entries.at(-1)?.record.date || START_DATE;
   const latest = today > lastEntry ? today : lastEntry;
   const days = [];
@@ -1012,7 +1022,7 @@ async function main() {
      with a complete packet and days without. The chain is built over this
      list, so prev/next is continuous and a crawler never sees Day 10 link
      straight to Day 13. */
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = etToday();
   const lastDay = Math.max(
     finalized.at(-1)?.record.day || 0,
     ...records.map((r) => r.day || 0),
