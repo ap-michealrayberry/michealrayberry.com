@@ -1,6 +1,6 @@
 // Network-first service worker: the record must never be stale, but the app
 // shell still opens offline / on flaky connections.
-const CACHE = 'mrb-v5';
+const CACHE = 'mrb-v6';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js'])).then(() => self.skipWaiting()));
 });
@@ -19,8 +19,13 @@ self.addEventListener('fetch', (e) => {
   if (u.pathname.indexOf('/verify') === 0) return;
   e.respondWith(
     fetch(e.request).then((r) => {
-      const cp = r.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, cp));
+      // Only cache genuine same-origin successes. Caching redirects, 404s, or
+      // error responses would let a missing evidence page persist offline and
+      // mask itself as available.
+      if (r.ok && !r.redirected && r.type === 'basic') {
+        const cp = r.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, cp));
+      }
       return r;
     }).catch(() => caches.match(e.request).then((m) => m || caches.match('/')))
   );
