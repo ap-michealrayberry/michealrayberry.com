@@ -1143,7 +1143,7 @@
             <p style="margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-wrap;">{{ up.body }}</p>
             <sc-if value="{{ up.hasLink }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: 20px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
-                <a href="{{ up.link }}" target="_blank">{{ up.linkLabel }}</a>
+                <a href="{{ up.link }}" target="_blank" rel="noopener noreferrer">{{ up.linkLabel }}</a>
               </div>
             </sc-if>
           </div>
@@ -1188,7 +1188,7 @@
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">Official record</span>
             <div style="display: flex; gap: 20px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;">
               <a href="https://michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">Website</a>
-              <a href="https://x.com/michealrayberry" target="_blank" style="color: #FAFAF7;" style-hover="color: #B3261E;">X</a>
+              <a href="https://x.com/michealrayberry" target="_blank" rel="noopener noreferrer" style="color: #FAFAF7;" style-hover="color: #B3261E;">X</a>
             </div>
           </div>
                   </div>
@@ -1216,7 +1216,7 @@ function normalizeDriveUrl(url) {
 }
 
 class Component extends DCLogic {
-  state = { page: 'home', liveWeighIns: null, livePenalties: null, liveUpdates: null, liveJournal: null, liveAmendments: null, expandedDay: null };
+  state = { page: 'home', liveWeighIns: null, livePenalties: null, liveUpdates: null, liveJournal: null, liveAmendments: null, expandedDay: null, loadFailed: false };
 
   /* ─────────── RECORD SOURCE — the only line to edit after a rebuild ───────────
      createRecordSpreadsheet() in Apps Script logs the new SHEET ID; paste it
@@ -1370,7 +1370,7 @@ class Component extends DCLogic {
           this.injectSeoJsonLd(entries);
         }
       })
-      .catch(() => {});
+      .catch(() => this.setState({ loadFailed: true }));
     if (this.JOURNAL_CSV) {
       fetch(this.JOURNAL_CSV || "data:text/csv,")
         .then((r) => (r.ok ? r.text() : null))
@@ -1449,9 +1449,9 @@ class Component extends DCLogic {
           .filter((e) => e.date && e.violation);
         this.setState({ livePenalties: entries });
       })
-      .catch(() => {});
+      .catch(() => this.setState({ loadFailed: true }));
     // Site State tab (key/value, AP-administered): abandonment stage (§11), AP statement, AP-placed links.
-    fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Site State')
+    fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Site%20State')
       .then((r) => (r.ok ? r.text() : null))
       .then((t) => {
         if (!t) return;
@@ -1816,7 +1816,9 @@ class Component extends DCLogic {
       color: /^\s*(satisfied|resolved)/i.test(p.status || '') ? '#8A8983' : '#E8837B',
     }));
     const recordStatus = !recordsLoaded
-      ? 'Official Public Record — Loading official record…'
+      ? (this.state.loadFailed
+          ? 'Official Public Record — Temporarily unavailable (could not reach the live record)'
+          : 'Official Public Record — Loading official record…')
       : (inViolation
           ? 'Official Public Record — ACTIVE VIOLATION' + (openList.length > 1 ? ' (' + openList.length + ')' : '')
           : 'Official Public Record — No open entries');
