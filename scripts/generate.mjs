@@ -793,6 +793,10 @@ export async function generate() {
   await write(path.join(ROOT, 'sitemap-videos.xml'), videoSitemap(manifests));
   await write(path.join(ROOT, 'sitemap.xml'), sitemapIndex(latestDate));
 
+  // Local debugging convenience only (git-ignored). It reflects a single
+  // generation run and a deterministic rebuild resets it to [], so production
+  // must NOT depend on it — the SEO workflow derives the authoritative URL list
+  // from the merge diff via scripts/collect-changed-urls.mjs.
   await fs.writeFile(path.join(ROOT, '.indexnow-urls.json'),
     JSON.stringify([...changedUrls].filter((u) => u.startsWith(SITE_ORIGIN)).sort(), null, 2) + '\n');
 
