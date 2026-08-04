@@ -44,3 +44,6 @@ jobs:
 
       - name: Validate records
         run: npm run validate-records
+
+      - name: SEO publication unit tests
+        run: npm run seo:test

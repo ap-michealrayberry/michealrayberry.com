@@ -1,0 +1,137 @@
+# Post-merge SEO publication. Runs AFTER a reviewed change reaches main. It
+# validates the merged record, derives the changed public URLs from the merge
+# diff, waits until Cloudflare Pages is actually serving the merged content, and
+# only then notifies IndexNow. It never generates or pushes a record to main —
+# publication happens because a human already merged.
+name: Publish SEO record
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "manifests/**"
+      - "daily/**"
+      - "weeks/**"
+      - "milestones/**"
+      - "photos/**"
+      - "media/responsive/**"
+      - "feed.xml"
+      - "sitemap*.xml"
+      - "robots.txt"
+      - "llms.txt"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/publish-seo.yml"
+  workflow_dispatch:
+
+# Read-only to the repo; this workflow must never write to main.
+permissions:
+  contents: read
+  actions: write
+
+# Serialize SEO runs but never cancel one that may already be submitting URLs.
+concurrency:
+  group: publish-seo
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate merged record (syntax + build + validation)
+        run: |
+          npm run check-syntax
+          npm run build
+
+      - name: Determine changed public URLs
+        id: collect
+        run: |
+          BASE="${{ github.event.before }}"
+          HEAD="${{ github.sha }}"
+          if [ -z "$BASE" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            BASE="$(git rev-parse "${HEAD}~1")"
+          fi
+          node scripts/collect-changed-urls.mjs --base "$BASE" --head "$HEAD" --output .seo-changed-urls.json
+          COUNT="$(node -p "JSON.parse(require('fs').readFileSync('.seo-changed-urls.json','utf8')).length")"
+          {
+            echo "base=$BASE"
+            echo "head=$HEAD"
+            echo "count=$COUNT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload changed-URL list
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-changed-urls
+          path: .seo-changed-urls.json
+          if-no-files-found: error
+
+      - name: Compute deployment marker (latest canonical URL)
+        id: marker
+        run: |
+          MARKER="$(node -e "import('./scripts/lib/manifest.mjs').then(async (m) => { const a = await m.loadManifests(); a.sort((x, y) => x.day - y.day); process.stdout.write((a.at(-1) || {}).canonical_url || ''); })")"
+          echo "url=$MARKER" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Cloudflare Pages deployment
+        id: deploy
+        if: steps.collect.outputs.count != '0'
+        run: |
+          node scripts/check-deployment.mjs \
+            --marker-url "${{ steps.marker.outputs.url }}" \
+            --sitemap "https://michealrayberry.com/sitemap.xml" \
+            --retries 20 --delay-ms 15000
+
+      - name: Submit changed URLs to IndexNow
+        id: indexnow
+        if: steps.collect.outputs.count != '0'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: node scripts/submit-indexnow.mjs --input .seo-changed-urls.json
+
+      - name: Publication summary
+        if: always()
+        run: |
+          COUNT="${{ steps.collect.outputs.count }}"
+          {
+            echo "## Publish SEO record"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Repository commit | \`${{ steps.collect.outputs.head }}\` |"
+            echo "| Base commit | \`${{ steps.collect.outputs.base }}\` |"
+            echo "| Changed public URLs | ${COUNT:-unknown} |"
+            if [ "${COUNT:-0}" = "0" ]; then
+              echo "| Deployment verified | n/a (no public URLs changed) |"
+              echo "| IndexNow result | skipped (nothing to submit) |"
+            else
+              echo "| Deployment verified | ${{ steps.deploy.outcome }} |"
+              echo "| IndexNow result | ${{ steps.indexnow.outcome }} |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .seo-changed-urls.json ] && [ "${COUNT:-0}" != "0" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Submitted URLs" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Canonical daily pages: $(grep -c '/daily/[0-9]' .seo-changed-urls.json)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Sitemaps: $(grep -c '/sitemap' .seo-changed-urls.json)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Feed: $(grep -c '/feed.xml' .seo-changed-urls.json)" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .seo-changed-urls.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi

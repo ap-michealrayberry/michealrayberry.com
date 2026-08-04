@@ -59,6 +59,37 @@ function archivalPathFor(date, day, angle, contentType) {
     `micheal-ray-berry-day-${pad3(day)}-${angle}-${date}.${ext}`);
 }
 
+/* Evidence continuity is keyed on Project Day + date + position — NOT on file
+   path. Once a manifest records evidence for a (date, position), the bytes at
+   that position are immutable: a hash change requires explicit approval even
+   when the file was renamed or moved to another accepted filename. This closes
+   the loophole where relocating a historical photograph let a different
+   same-day image silently replace the attested one.
+
+   Returns one of:
+     { status: 'new' }        no prior evidence recorded for this position
+     { status: 'unchanged' }  same bytes at the same path
+     { status: 'migrated' }   same bytes, path normalized (allowed, recorded)
+     { status: 'replaced' }   different bytes, but the change is approved
+   Throws (fail) when the bytes differ and no matching approval exists. */
+export function checkEvidenceContinuity({ prior, newHash, newRelPath, approvedChanges = [], label = 'evidence' }) {
+  if (!prior?.sha256) return { status: 'new' };
+  if (prior.sha256 === newHash) {
+    return prior.path === newRelPath
+      ? { status: 'unchanged' }
+      : { status: 'migrated', fromPath: prior.path, toPath: newRelPath, sha256: newHash };
+  }
+  const approved = approvedChanges.some((c) => c.old === prior.sha256 && c.new === newHash &&
+    (c.path == null || c.path === prior.path || c.path === newRelPath));
+  if (!approved) {
+    throw fail(`EVIDENCE HASH CHANGE for ${label}: manifest records ${prior.sha256} (${prior.path}), ` +
+      `resolved file ${newRelPath} is ${newHash}. Historical evidence is never replaced silently — ` +
+      'even under a different filename. If intentional, record it in ' +
+      'data/approved-hash-changes.json ({ path, old, new }) and re-run.');
+  }
+  return { status: 'replaced', fromPath: prior.path, toPath: newRelPath, oldSha256: prior.sha256, newSha256: newHash };
+}
+
 async function downloadRemotePhoto(url, dest) {
   const response = await fetch(url, {
     headers: { 'user-agent': 'MRB-Record-Publisher/2.0 (+https://michealrayberry.com)' },
@@ -142,7 +173,7 @@ async function buildResponsive(sourcePath, buffer, date, day, angle, meta) {
   return { variants, oriented };
 }
 
-async function resolvePhoto({ existing, photoFiles, record, angle, approvedChanges, errors }) {
+async function resolvePhoto({ existing, photoFiles, record, angle, approvedChanges, errors, migrations }) {
   const sourceUrl = record.photos[angle];
   const prior = existing?.media?.photos?.[angle] || null;
 
@@ -185,14 +216,17 @@ async function resolvePhoto({ existing, photoFiles, record, angle, approvedChang
   if (!contentType) throw fail(`file is not a decodable image: ${localPath}`);
   const hash = sha256(buffer);
 
-  // Evidence immutability: bytes under a published path must match the hash
-  // already on record, unless the change has been explicitly approved.
-  if (prior?.sha256 && prior.path === path.relative(ROOT, localPath) && prior.sha256 !== hash) {
-    const approved = approvedChanges.some((c) => c.path === prior.path && c.old === prior.sha256 && c.new === hash);
-    if (!approved) {
-      throw fail(`EVIDENCE HASH CHANGE for ${prior.path}: manifest records ${prior.sha256}, file is now ${hash}. ` +
-        'Historical media is never rewritten silently. If this change is intentional, record it in data/approved-hash-changes.json and re-run.');
-    }
+  // Evidence immutability, keyed on (date, position) rather than path: a hash
+  // change is rejected even when the photo was renamed/moved. A same-bytes move
+  // is an allowed path normalization; both migrations and approved replacements
+  // are recorded in the manifest history by the caller.
+  const newRelPath = path.relative(ROOT, localPath);
+  const continuity = checkEvidenceContinuity({
+    prior, newHash: hash, newRelPath, approvedChanges,
+    label: `Day ${record.day} ${angle} (${record.date})`,
+  });
+  if (migrations && (continuity.status === 'migrated' || continuity.status === 'replaced')) {
+    migrations.push({ angle, ...continuity });
   }
 
   const meta = await sharp(buffer, { failOn: 'none' }).metadata();
@@ -276,12 +310,13 @@ export async function ingest() {
     const prior = existing && existing.schema_version === MANIFEST_SCHEMA_VERSION ? existing : null;
 
     const errors = [];
+    const migrations = [];
     const photos = {};
     for (const angle of ANGLES) {
       photos[angle] = await resolvePhoto({
         existing: prior, photoFiles,
         record: row || { date, day, photos: {} },
-        angle, approvedChanges, errors,
+        angle, approvedChanges, errors, migrations,
       });
     }
 
@@ -351,6 +386,15 @@ export async function ingest() {
       m.history.push({ at: state.as_of, status: m.status, reason: 'Initial normalized manifest (v2 migration from the legacy publisher).' });
     } else if (last.status !== m.status) {
       m.history.push({ at: state.as_of, status: m.status, reason: m.status_reason });
+    }
+
+    // Append-only record of any evidence path normalization or approved
+    // replacement, so a rename or an authorized byte change is never silent.
+    for (const mig of migrations) {
+      const reason = mig.status === 'migrated'
+        ? `Evidence path normalized for ${mig.angle}: ${mig.fromPath} → ${mig.toPath} (identical bytes, sha256 ${mig.sha256.slice(0, 12)}…).`
+        : `Approved evidence replacement for ${mig.angle}: ${mig.oldSha256.slice(0, 12)}… → ${mig.newSha256.slice(0, 12)}… (${mig.fromPath} → ${mig.toPath}).`;
+      m.history.push({ at: state.as_of, status: m.status, reason });
     }
 
     // A position whose only source is a remote URL that could not be

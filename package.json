@@ -7,9 +7,13 @@
     "generate": "node scripts/publish.mjs",
     "sync": "node scripts/sync-sheet.mjs && node scripts/publish.mjs --online && node scripts/validate.mjs --remote",
     "validate-records": "node scripts/validate.mjs",
-    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/ingest.mjs && node --check scripts/generate.mjs && node --check scripts/validate.mjs && node --check scripts/sync-sheet.mjs && node --check scripts/submit-indexnow.mjs && node --check scripts/lib/common.mjs && node --check scripts/lib/sheet.mjs && node --check scripts/lib/manifest.mjs",
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/ingest.mjs && node --check scripts/generate.mjs && node --check scripts/validate.mjs && node --check scripts/sync-sheet.mjs && node --check scripts/submit-indexnow.mjs && node --check scripts/collect-changed-urls.mjs && node --check scripts/check-deployment.mjs && node --check scripts/lib/common.mjs && node --check scripts/lib/sheet.mjs && node --check scripts/lib/manifest.mjs && node --check scripts/lib/url-map.mjs",
+    "seo:collect": "node scripts/collect-changed-urls.mjs",
+    "seo:submit": "node scripts/submit-indexnow.mjs",
+    "seo:verify-deploy": "node scripts/check-deployment.mjs",
+    "seo:test": "node --test \"test/seo/*.test.mjs\"",
     "build:ra": "node tools/recording-assistant/build.mjs",
-    "test": "npm run build:ra && node --test \"tools/recording-assistant/test/*.test.mjs\""
+    "test": "npm run build:ra && node --test \"tools/recording-assistant/test/*.test.mjs\" \"test/seo/*.test.mjs\""
   },
   "dependencies": {
     "sharp": "0.33.5"
