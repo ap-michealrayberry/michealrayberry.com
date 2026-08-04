@@ -42,6 +42,20 @@ that lives outside the repo.
   - To intentionally regenerate goldens after a deliberate overlay change: `RA_UPDATE=1 npm test`,
     then review the image diff.
 
+### AI coding CLIs (installed in this VM)
+
+- Instructions are shared: `AGENTS.md` (this file) is the source of truth; `CLAUDE.md` points
+  Claude Code back here. Cursor and Codex read `AGENTS.md` natively.
+- Both CLIs are installed to a **user-local npm prefix** (root owns the default global prefix `/`),
+  and that prefix's `bin` is added to `PATH` via `~/.bashrc`:
+  - `codex` — OpenAI Codex CLI (`@openai/codex`)
+  - `claude` — Anthropic Claude Code (`@anthropic-ai/claude-code`)
+- If a CLI is ever missing on a fresh machine, reinstall with:
+  `npm i -g --prefix ~/.npm-global @openai/codex @anthropic-ai/claude-code`
+  and ensure `~/.npm-global/bin` is on `PATH`.
+- Each CLI needs its own auth/API key at runtime (e.g. `OPENAI_API_KEY` for Codex, Anthropic
+  login/`ANTHROPIC_API_KEY` for Claude Code); these are not committed.
+
 ### Publisher (build step, not a service)
 
 - `node scripts/publish.mjs` regenerates `daily/*` pages, sitemaps, RSS, and responsive images from
