@@ -14,10 +14,12 @@ import {
 } from './lib/common.mjs';
 import { loadManifests } from './lib/manifest.mjs';
 
+// Only public, indexable surfaces belong here. Private/utility routes that
+// robots.txt disallows (/verify, /mrb, /ap) must never appear in a sitemap.
 const STATIC_PAGES = [
   ['', 'daily'], ['dashboard', 'daily'], ['milestones', 'weekly'], ['about', 'weekly'],
   ['agreement', 'weekly'], ['penalties', 'daily'], ['uniform', 'weekly'],
-  ['updates', 'daily'], ['verify', 'monthly'], ['daily/', 'daily'],
+  ['updates', 'daily'], ['daily/', 'daily'],
 ];
 
 function imageLabel(angle) {
