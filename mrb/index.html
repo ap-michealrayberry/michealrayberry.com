@@ -73,7 +73,7 @@
     </a>
     <a href="/mrb/corrective/" style="border: 1px solid #B3261E; color: #141412; padding: 18px 20px; text-decoration: none; display: flex; flex-direction: column; gap: 5px; background: #FFFFFF;" style-hover="background: #F6DEDC;">
       <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase;">Corrective Session</span>
-      <span style="font-size: 12.5px; line-height: 1.55; color: #3A3935;">Corner time or penalty strokes, whichever the AP assigned. One continuous AI-voiced take, monitored throughout, delivered straight to his private archive. Never published.</span>
+      <span style="font-size: 12.5px; line-height: 1.55; color: #3A3935;">Corner time, a machine penalty sequence, or both — whichever the AP assigned. Level sets the count: 25, 50, or 100, and 15, 20, or 30 minutes. One continuous AI-voiced take, monitored throughout, delivered straight to his private archive. Never published.</span>
     </a>
   </div>
 
@@ -101,6 +101,9 @@
         <div style="display: flex; flex-direction: column; gap: 3px; max-width: 480px;">
           <span style="font-size: 14px; line-height: 1.55; font-weight: 600;">{{ c.assignment }}</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #6B6A64;">{{ c.meta }}</span>
+          <sc-if value="{{ c.hasRemain }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; letter-spacing: 0.04em; color: {{ c.remainColor }};">{{ c.remain }}</span>
+          </sc-if>
         </div>
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: {{ c.color }}; white-space: nowrap;">{{ c.status }}</span>
       </div>
@@ -321,12 +324,40 @@ class Component extends DCLogic {
           : 'Weight entry, four-angle inspection, and tracker update. Multiple misses on the same day count as one violation.'),
 
       hasCorrective: clist.length > 0,
-      correctiveList: clist.map((c) => ({
-        assignment: c.assignment,
-        meta: 'Assigned ' + (c.date || '—') + (c.due ? ' · due ' + c.due : ''),
-        status: (c.status || 'Assigned').toUpperCase(),
-        color: /overdue/i.test(c.status) ? '#B3261E' : '#141412',
-      })),
+      correctiveList: clist.map((c) => {
+        // Deadlines are end-of-day Eastern, so the clock runs to 23:59:59 on
+        // the due date rather than midnight at the start of it.
+        // End of the due day, Eastern. Computed from the date itself rather
+        // than a hardcoded offset, so it stays correct across the DST change.
+        const dueMs = /^\d{4}-\d{2}-\d{2}/.test(String(c.due || ''))
+          ? (function () {
+              const d = String(c.due).slice(0, 10);
+              const noon = new Date(d + 'T12:00:00Z');
+              const et = new Date(noon.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+              const offset = Math.round((noon - et) / 3600000); // 4 in EDT, 5 in EST
+              return new Date(d + 'T23:59:59' + (offset < 10 ? '-0' : '-') + offset + ':00').getTime();
+            })() : null;
+        const left = dueMs === null ? null : dueMs - s.now;
+        const hrs = left === null ? null : left / 3600000;
+        let remain = '';
+        if (left !== null) {
+          const abs = Math.abs(left);
+          const dd = Math.floor(abs / 86400000);
+          const hh = Math.floor((abs % 86400000) / 3600000);
+          const mm = Math.floor((abs % 3600000) / 60000);
+          const span = dd ? dd + 'd ' + String(hh).padStart(2, '0') + 'h' : String(hh).padStart(2, '0') + 'h ' + String(mm).padStart(2, '0') + 'm';
+          remain = left < 0 ? span + ' PAST DUE' : span + ' to submit';
+        }
+        return {
+          assignment: c.assignment,
+          meta: 'Assigned ' + (c.date || '—') + (c.due ? ' · due ' + c.due : ''),
+          status: (c.status || 'Assigned').toUpperCase(),
+          color: /overdue/i.test(c.status) ? '#B3261E' : '#141412',
+          remain,
+          hasRemain: !!remain,
+          remainColor: hrs === null ? '#6B6A64' : (hrs < 0 ? '#B3261E' : hrs < 12 ? '#B3261E' : hrs < 48 ? '#8A6A1E' : '#141412'),
+        };
+      }),
 
       hasViolations: vlist.length > 0,
       noViolations: vlist.length === 0,

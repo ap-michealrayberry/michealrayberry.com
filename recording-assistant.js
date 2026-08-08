@@ -352,6 +352,28 @@
           return j && j.ok && j.code ? j : null;
         } catch (e) { return null; }
       }
+      let chunkChain = null, chunkCount = 0, chainQueue = Promise.resolve();
+      async function sha256Bytes(bytes) {
+        return new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+      }
+      function chainReset(seed) {
+        chunkChain = null; chunkCount = 0;
+        chainQueue = sha256Bytes(new TextEncoder().encode(String(seed || ''))).then((h) => { chunkChain = h; });
+      }
+      function chainPush(blob) {
+        chunkCount++;
+        chainQueue = chainQueue.then(async () => {
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const joined = new Uint8Array((chunkChain ? chunkChain.length : 0) + bytes.length);
+          if (chunkChain) joined.set(chunkChain, 0);
+          joined.set(bytes, chunkChain ? chunkChain.length : 0);
+          chunkChain = await sha256Bytes(joined);
+        }).catch(() => {});
+      }
+      async function chainHex() {
+        await chainQueue;
+        return chunkChain ? Array.from(chunkChain).map((b) => b.toString(16).padStart(2, '0')).join('') : '';
+      }
       async function sha256Blob(blob) {
         const h = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
         return Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -368,7 +390,7 @@
           const vh = lastVideoBlob ? await sha256Blob(lastVideoBlob) : '';
           const phs = [];
           for (const p of photos) phs.push(await sha256Blob(await (await fetch(p.dataUrl)).blob()));
-          const ok = await attestPost({ kind: 'daily', code: challenge ? challenge.code : '', weight: parseFloat($('.ra-w').value) || '', video_sha256: vh, photo_sha256s: phs });
+          const ok = await attestPost({ kind: 'daily', code: challenge ? challenge.code : '', weight: parseFloat($('.ra-w').value) || '', video_sha256: vh, photo_sha256s: phs, chunk_chain: await chainHex(), chunk_count: chunkCount });
           setNote((ok ? 'ATTESTED \u2713 — code and file fingerprints logged with server time. ' : 'ATTESTATION FAILED — fingerprints were not logged; flag it to the AP. ') +
             'Review the video and photos below (retake any photo), then file the packet — the video uploads itself to the record.', false);
         } catch (e) {}
@@ -1347,7 +1369,7 @@
           canvasStream,
           mime ? { mimeType: mime, videoBitsPerSecond: 9000000 } : { videoBitsPerSecond: 9000000 }
         );
-        mediaRecorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size) { chunks.push(e.data); chainPush(e.data); } };
         mediaRecorder.onstop = finishRecording;
         mediaRecorder.start(1000);
         }
@@ -1460,7 +1482,7 @@
            in every recording adds nothing a viewer can use. */
         SEGMENTS[0].speak = 'This is the official Daily Inspection for Micheal Ray Berry, Day ' + dayNum + ' of the Public Accountability Project. Today is ' + spokenDate + '.' +
           (wSpoken ? ' Documented weight this morning: ' + wSpoken + ' pounds.' : '') +
-          ' Stand at attention facing the camera. Feet together, hands behind the head, eyes forward. You do not speak during this recording. The voice speaks for the record.' +
+          ' Stand at attention facing the camera. Feet together, hands behind the head, eyes forward. Project uniform in frame for verification. You do not speak during this recording. The voice speaks for the record.' +
           ' This is one continuous take. Four views are required, and the verification code shown on screen was issued moments ago by the record itself, so this footage cannot be older than it claims. Beginning with the front view. Hold the position.';
       }
 
@@ -1481,6 +1503,7 @@
           setNote('Verification code unavailable — check the connection and try again. The inspection cannot start unverified.');
           return;
         }
+        chainReset(challenge.code);
         buildIntro();
         setNote('Preparing voice lines…', false);
         await prefetchLines();

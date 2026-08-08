@@ -162,7 +162,7 @@
           </div>
         </sc-if>
         <div style="border: 1px solid #3A3935; padding: 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-          <input type="text" onChange="{{ onCAssign }}" placeholder="Assignment (e.g. 30-minute corner-time corrective, recorded)" style="flex: 1; min-width: 280px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
+          <input type="text" onChange="{{ onCAssign }}" placeholder="Assignment — e.g. Level 2: 50-count machine sequence + 20 min corner time" style="flex: 1; min-width: 280px; background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-size: 14px;">
           <input type="date" onChange="{{ onCDue }}" style="background: #1E1D1A; border: 1px solid #57544F; color: #FAFAF7; padding: 10px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
           <button onClick="{{ assignCorrective }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: #FAFAF7; color: #141412; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600;" style-hover="background: #D8D6CF;">Assign</button>
         </div>
@@ -386,7 +386,7 @@ class Component extends DCLogic {
       runbook: [
         { what: 'Google account', detail: 'Owns the record spreadsheet (all tabs), Apps Script (every endpoint + trigger), Drive photo archive, and the health-sync OAuth. The single most important login — 2FA mandatory.' },
         { what: 'Apps Script keys', detail: 'Script properties: SHEET_ID (which spreadsheet is the record), PACKET_KEY (Micheal\u2019s device key), AP_KEY (this portal), NETLIFY_HOOK (deploys); the ElevenLabs key lives only on Micheal\u2019s device. Rotate AP_KEY and PACKET_KEY at handover with setApKey / setDeviceKey.' },
-        { what: 'Triggers', detail: 'importPhotos (10 min), nightlyComplianceCheck (10 PM ET), abandonmentCheck (11 PM, incl. completion-streak alert), apWeeklyReview (Sun 9 AM), fitbitSync (every 6 h, when health is connected). Re-run setup after any script change.' },
+        { what: 'Triggers', detail: 'importPhotos (10 min), hourlyWatch (verdicts, submissions, milestones), morningBrief (7 AM), eveningWarning (8 PM, silent if the packet is complete), nightlyComplianceCheck (10 PM ET), abandonmentCheck (11 PM, incl. completion-streak alert), apWeeklyReview (Sun 9 AM), fitbitSync (every 6 h, when health is connected). Re-run setup after any script change.' },
         { what: 'GitHub repo', detail: 'ap-michealrayberry/michealrayberry.com — the site source, owned by the AP account. Enable branch protection on main; the repo root is the public website, so nothing private is ever committed there.' },
         { what: 'Netlify', detail: 'Serves the site from the repo. Take over the team, keep the build hook, confirm the domain + HTTPS. DNS stays at Wix (registrar): A → 75.2.60.5, www CNAME → the Netlify site; MX/TXT untouched (email).' },
         { what: 'YouTube @michealrayberry', detail: 'Official platform for the daily inspection videos only. AP needs at least manager access. No violation, corrective, or acknowledgment material is ever posted here — it stays in the AP\u2019s private archive.' },

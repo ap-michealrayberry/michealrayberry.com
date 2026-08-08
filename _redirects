@@ -1,3 +1,7 @@
+# ── Netlify → Cloudflare Pages proxy (temporary, until DNS moves) ──
+# Netlify-only: Cloudflare Pages rejects absolute targets and ignores this.
+/*  https://michealrayberry-com.pages.dev/:splat  200
+
 # michaelrayberry.com (the typo domain) is redirected to the canonical site by
 # a zone-level Single Redirect Rule in Cloudflare, not from here: Pages matches
 # PATHS only and rejects absolute-URL sources. See AP Setup and Secrets.

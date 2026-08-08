@@ -152,7 +152,7 @@ class Component extends DCLogic {
   EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
   LOG_CSV = 'https://docs.google.com/spreadsheets/d/1BKNAGZEchYs2P5ZoWql6Ct_4GTyAKJxUqEsXVsJyeDM/gviz/tq?tqx=out:csv&sheet=Violation%20Log';
   START = '2026-07-20';
-  MINUTES = { 1: 10, 2: 20, 3: 30 };
+  MINUTES = { 1: 15, 2: 20, 3: 30 };
   // Machine counts by level. The equipment delivers every stroke; the count is
   // what the level assigns, and the machine's own counter is the evidence.
   STROKES = { 1: 25, 2: 50, 3: 100 };
@@ -627,7 +627,7 @@ class Component extends DCLogic {
       const frac = 1 - remS / (mins * 60);
       if (!this._q1 && frac >= 0.25) {
         this._q1 = true;
-        this.speak('Micheal Ray Berry, remain facing the corner. Another adult has to review this recording because ordinary assurances were no longer sufficient. The requirement was known. The deadline passed. The required evidence was absent or incomplete. You could have avoided this entire session by completing one defined responsibility on time. Instead you are standing in a corner, in the Penalty Uniform, while an automated voice supervises your position. Hands stay in place. Eyes to the corner.');
+        this.speak('Micheal Ray Berry, remain facing the corner. Another adult has to review this recording because ordinary assurances were no longer sufficient. The requirement was known. The deadline passed. The required evidence was absent or incomplete. You could have avoided this entire session by completing one defined responsibility on time. Instead you are standing in a corner, in the project uniform, while an automated voice supervises your position. Hands stay in place. Eyes to the corner.');
       } else if (remS <= mins * 30 && !this._half) {
         this._half = true;
         this.speak('Half of the assigned time is complete. Do not relax your position. Before the deadline you controlled the outcome; after it, the consequence controls your time. You built this structure because private promises could be delayed, minimised, or abandoned. This session exists for the moment your preferred account of yourself stops matching your documented conduct. Regret after the deadline is not compliance, embarrassment does not shorten the timer, and partial performance is not completion. Remain still.');
@@ -716,7 +716,7 @@ class Component extends DCLogic {
     if (this.state.phase !== 'active') return;
     await this.say('An adult now requires a marked floor position, a designated uniform, an automated voice, a counting machine, a continuous recording, and another adult\u2019s verification, because one clearly defined obligation was not completed.', 10000);
     if (this.state.phase !== 'active') return;
-    await this.say('The black Penalty Uniform is confirmed on camera. There is no explanation segment in this session. Excuses do not alter verified facts. The record requires three things only: the missed obligation, the assigned consequence, and evidence of complete performance.', 11000);
+    await this.say('The project uniform is on camera for verification. There is no explanation segment in this session. Excuses do not alter verified facts. The record requires three things only: the missed obligation, the assigned consequence, and evidence of complete performance.', 11000);
     if (this.state.phase !== 'active') return;
     await this.say('This recording goes to the Accountability Partner and to no one else. It exists so completion can be verified. It is not published, and no part of it appears on the public record.', 8500);
   }
@@ -777,7 +777,7 @@ class Component extends DCLogic {
   strokeMark(n, total) {
     const at = (f) => n === Math.max(1, Math.round(total * f));
     if (at(0.2)) return 'Recorded reminders that completing the obligation on time would have prevented this entire sequence.';
-    if (at(0.4)) return 'Micheal Ray Berry remains on camera, in the Penalty Uniform, because an unsupported promise carried less evidentiary weight than a machine counter. The machine does not negotiate. The recording does not forget. The Accountability Partner will see precisely what was required after the deadline passed.';
+    if (at(0.4)) return 'Micheal Ray Berry remains on camera, in the project uniform, because an unsupported promise carried less evidentiary weight than a machine counter. The machine does not negotiate. The recording does not forget. The Accountability Partner will see precisely what was required after the deadline passed.';
     if (at(0.5)) return 'Halfway. The machine feels nothing. The camera records everything. Only Micheal has to stand there and experience the private embarrassment of needing an automated count to mark one avoidable failure. Hold your position.';
     if (at(0.7)) return 'The original obligation was easier than this. Completing it before the deadline would have prevented every part of this record.';
     if (at(0.9)) return 'The last of the count. Keep your body inside the marked area.';
@@ -941,7 +941,7 @@ class Component extends DCLogic {
         border: on(s.level === n), bg: bg(s.level === n),
       })),
       assignmentLine: s.mode === 'corner'
-        ? 'Level ' + s.level + ' — ' + this.mins() + ' continuous minutes facing the corner, hands behind the head, monitored throughout.'
+        ? 'Level ' + s.level + ' — ' + this.mins() + ' continuous minutes facing the corner, standing upright, hands behind the head, substantially still. The timer starts only once the position is set; leaving it invalidates the attempt and the full period restarts.'
         : s.mode === 'strokes'
           ? 'Level ' + s.level + ' — ' + this.strokes() + '-count machine sequence, counter and body in frame throughout.'
           : 'Level ' + s.level + ' — ' + this.strokes() + '-count machine sequence, then ' + this.mins() + ' continuous minutes of corner time, both in one unbroken recording.',
