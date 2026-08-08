@@ -1,113 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="../../support.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FAFAF7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Daily Inspection" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Daily Inspection — Micheal Ray Berry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<x-dc>
-<helmet>
-  <title>Daily Inspection — Recording Assistant</title>
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&amp;family=IBM+Plex+Sans+Condensed:wght@700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
-  <style>
-    body { margin: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
-    a { color: #141412; } a:hover { color: #B3261E; }
-  </style>
-</helmet>
+  <div id="app">
+    <header>
+      <div class="logo">MICHEAL RAY BERRY</div>
+      <div class="subtitle">PUBLIC ACCOUNTABILITY PROJECT · DAILY INSPECTION</div>
+      <div class="status-bar" id="statusBar">READY</div>
+    </header>
 
-<div style="min-height: 100vh; display: flex; flex-direction: column;">
-  <div style="background: #141412; color: #FAFAF7; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; flex-wrap: wrap;">
-    <a href="/mrb" style="color: #FAFAF7; text-decoration: none;" style-hover="color: #FF6B61;">← Portal</a>
-    <span style="color: #8A8983;">Daily Inspection · {{ dayLabel }}</span>
+    <!-- SETUP -->
+    <section id="setupScreen" class="screen active">
+      <div class="deadline" id="deadlineBox">
+        <div class="deadline-label">Time remaining · due 10:00 PM ET</div>
+        <div class="deadline-clock" id="deadlineClock">--:--:--</div>
+        <p class="deadline-note">Weight entry, four-angle inspection, and tracker update. Multiple misses on the same day count as one violation.</p>
+      </div>
+
+      <h2 id="packetHeading">Today's compliance packet — 0 of 6 complete</h2>
+      <div class="packet-grid" id="packetGrid">
+        <div class="packet-item" data-item="weight"><span class="packet-name">Weight</span><span class="packet-state">Due</span></div>
+        <div class="packet-item" data-item="front"><span class="packet-name">Front</span><span class="packet-state">Due</span></div>
+        <div class="packet-item" data-item="left"><span class="packet-name">Left</span><span class="packet-state">Due</span></div>
+        <div class="packet-item" data-item="rear"><span class="packet-name">Rear</span><span class="packet-state">Due</span></div>
+        <div class="packet-item" data-item="right"><span class="packet-name">Right</span><span class="packet-state">Due</span></div>
+        <div class="packet-item" data-item="video"><span class="packet-name">Video</span><span class="packet-state">Due</span></div>
+      </div>
+
+      <h1>Daily Inspection Setup</h1>
+      <p class="note">One continuous four-angle take. Subject does not speak. Voice speaks for the record. Verification code is issued by the record at start. Due with the rest of the Daily Compliance Packet by 10 PM Eastern.</p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project Day</label>
+          <input type="number" id="dayNumber" value="20" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Weight (lb)</label>
+          <input type="number" id="currentWeight" value="337.6" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label>Date (YYYY-MM-DD)</label>
+          <input type="text" id="sessionDate" value="2026-08-08" />
+        </div>
+        <div class="form-group full">
+          <label>Device Key</label>
+          <input type="password" id="deviceKeyInput" value="" placeholder="paste device key from the portal" autocomplete="off" />
+        </div>
+        <div class="form-group full">
+          <label>Key Status</label>
+          <input type="text" id="deviceKeyStatus" value="" readonly />
+        </div>
+      </div>
+
+      <div class="voice-panel">
+        <div class="voice-head">
+          <span class="voice-title">AI voice</span>
+          <span class="voice-state" id="voiceState">Device fallback</span>
+        </div>
+        <p class="note" style="margin-bottom:12px">Every tool is fully AI-voiced — you never speak on camera. With an ElevenLabs key the narration is a clean synthetic voice; without one it falls back to the phone's built-in voice, which still works but sounds flatter. The key is stored on this device only and is never sent to the record.</p>
+        <input type="password" id="elKeyInput" placeholder="ElevenLabs API key (optional)" autocomplete="off" />
+        <div class="button-row" style="margin-top:10px">
+          <button type="button" class="secondary" id="btnSaveVoice">Save voice key</button>
+          <button type="button" class="secondary" id="btnClearVoice">Clear</button>
+        </div>
+        <div class="upload-status" id="voiceMsg"></div>
+      </div>
+
+      <p class="note" id="keyNote">Enter the device key once. It is stored only on this browser (<code>mrb_packet_key</code>). Without it the inspection cannot start or file to the record.</p>
+      <div class="button-row" style="margin-top:8px;margin-bottom:8px">
+        <button type="button" id="btnSaveKey" class="secondary">SAVE KEY</button>
+        <button type="button" id="btnClearKey" class="danger">CLEAR KEY</button>
+      </div>
+
+      <div class="form-group full checkbox-group">
+        <label><input type="checkbox" id="autoRecord" checked /> Auto-start recording with official overlay</label>
+      </div>
+      <!-- retained for compatibility; filing uses the Apps Script / R2 route -->
+      <input type="hidden" id="workerUrl" value="" />
+      <input type="hidden" id="uploadToken" value="" />
+      <input type="hidden" id="verificationCode" value="" />
+
+      <div class="button-row">
+        <button id="btnStart" class="primary">START INSPECTION</button>
+        <button id="btnInstall" class="secondary" hidden>INSTALL ON THIS PHONE</button>
+      </div>
+      <p class="note" id="installNote" hidden>Installed on this device. Open it from your home screen for full-screen use.</p>
+    </section>
+
+    <!-- LIVE -->
+    <section id="sessionScreen" class="screen">
+      <div class="preview-wrap">
+        <canvas id="previewCanvas" width="720" height="1280"></canvas>
+      </div>
+
+      <div class="session-info">
+        <div id="sessionMeta"></div>
+        <div class="step-name" id="stepName">—</div>
+        <div class="timers">
+          <span>Elapsed <strong id="sessionTimer">00:00</strong></span>
+        </div>
+      </div>
+
+      <div class="voice-status" id="voiceStatus">Voice ready</div>
+      <div class="auto-status" id="autoStatus">—</div>
+
+      <div class="control-grid">
+        <button id="btnEmergency" class="control-btn danger">EMERGENCY STOP</button>
+        <button id="btnEndEarly" class="control-btn secondary">END EARLY</button>
+      </div>
+
+      <div class="recording-row">
+        <span id="recordingStatus">Overlay recording off</span>
+      </div>
+    </section>
+
+    <!-- POST -->
+    <section id="postScreen" class="screen">
+      <h1>Inspection Complete</h1>
+      <div class="summary-card" id="sessionSummary"></div>
+
+      <div class="packet-reminder">
+        <h2 id="postPacketHeading">Daily compliance packet — 0 of 6 complete</h2>
+        <div class="packet-grid" id="postPacketGrid">
+          <div class="packet-item" data-item="weight"><span class="packet-name">Weight</span><span class="packet-state">Due</span></div>
+          <div class="packet-item" data-item="front"><span class="packet-name">Front</span><span class="packet-state">Due</span></div>
+          <div class="packet-item" data-item="left"><span class="packet-name">Left</span><span class="packet-state">Due</span></div>
+          <div class="packet-item" data-item="rear"><span class="packet-name">Rear</span><span class="packet-state">Due</span></div>
+          <div class="packet-item" data-item="right"><span class="packet-name">Right</span><span class="packet-state">Due</span></div>
+          <div class="packet-item" data-item="video"><span class="packet-name">Video</span><span class="packet-state">Due</span></div>
+        </div>
+        <p class="small">Nothing is complete until the record accepts all of them. A finished file on the phone after the deadline is a miss.</p>
+      </div>
+
+      <div class="upload-box" id="uploadBox">
+        <button id="btnUpload" class="primary">FILE TO THE RECORD</button>
+        <div id="uploadStatus" class="upload-status"></div>
+      </div>
+
+      <div class="button-row">
+        <button id="btnNew" class="primary">NEW INSPECTION</button>
+      </div>
+    </section>
   </div>
 
-  <sc-if value="{{ locked }}" hint-placeholder-val="{{ true }}">
-    <div style="max-width: 460px; margin: 72px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px;">
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Device not authorised</span>
-      <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 30px; text-transform: uppercase; margin: 0; letter-spacing: 0.03em;">Recording Assistant</h1>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">The capture tools are not public. Enter the device key the Accountability Partner issued for this phone. It is stored on this device only, and the AP can revoke it at any time.</p>
-      <input type="password" value="{{ keyInput }}" onChange="{{ onKey }}" placeholder="Device key" autoComplete="off" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 13px 14px; border: 1px solid #141412; background: #FFFFFF; color: #141412;">
-      <button onClick="{{ unlock }}" style="padding: 15px 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; cursor: pointer;" style-hover="background: #B3261E;">{{ unlockLabel }}</button>
-      <span style="font-size: 12px; color: #B3261E; min-height: 16px; line-height: 1.5;">{{ authMsg }}</span>
-    </div>
-  </sc-if>
-
-  <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ false }}">
-    <div style="padding: 26px 20px 8px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">
-      <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(30px, 6vw, 46px); text-transform: uppercase; line-height: 1; margin: 0;">Daily Inspection</h1>
-      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; border: 1px solid #D8D6CF; background: #FFFFFF; padding: 10px 14px;">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: {{ voiceColor }};">Voice: {{ voiceState }}</span>
-        <a href="/mrb" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A64;" style-hover="color: #B3261E;">Change in portal →</a>
-      </div>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #3A3935;">One session records the whole packet: the four-angle inspection video, the four accountability photographs, and today's weight. The voice runs the sequence — you never speak. The verification code is issued by the record moments before recording and is burned into every frame, so the footage cannot be older than it claims. The video files itself to the record when the session ends.</p>
-    </div>
-    <div style="flex: 1; min-height: 0;">
-      <x-import component-from-global-scope="recording-assistant" from="./recording-assistant.js" hint-size="100%,600px"></x-import>
-    </div>
-  </sc-if>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  EP = 'https://script.google.com/macros/s/AKfycbyJ7PV4NAmK2WcP-pBMLW78orrw_i7KndnKEkWLT_Xd0GtyeRztQpOxd2oSaitEHJM7/exec';
-  START = '2026-07-20';
-
-  state = { key: '', keyInput: '', authMsg: '', checking: false };
-
-  componentDidMount() {
-    // The portal stores the key after validating it, so arriving from /mrb
-    // unlocks without a second prompt. A direct hit still has to authenticate.
-    let k = '';
-    try { k = localStorage.getItem('mrb_packet_key') || ''; } catch (e) {}
-    if (k) this.verify(k);
-  }
-
-  async verify(key) {
-    this.setState({ checking: true, authMsg: '' });
-    try {
-      // Validated with mystate, not a challenge: a challenge would write a
-      // 'challenge-issued' row into the Attestation log on every gate check,
-      // and that log is evidence — it must contain real captures only.
-      const r = await fetch(this.EP + '?action=mystate&key=' + encodeURIComponent(key));
-      const j = await r.json();
-      if (!j || !j.ok) {
-        try { localStorage.removeItem('mrb_packet_key'); } catch (e) {}
-        this.setState({ key: '', checking: false, authMsg: 'Key not accepted. Ask the AP to confirm or reissue it.' });
-        return;
-      }
-      try { localStorage.setItem('mrb_packet_key', key); } catch (e) {}
-      this.setState({ key, checking: false, authMsg: '' });
-    } catch (e) {
-      this.setState({ checking: false, authMsg: 'Could not reach the record. A connection is required — the inspection cannot run unverified.' });
-    }
-  }
-
-  dayNum() {
-    return Math.max(1, Math.floor((Date.now() - new Date(this.START + 'T00:00:00').getTime()) / 864e5) + 1);
-  }
-
-  elActive() { try { return !!localStorage.getItem('mrb_el_key'); } catch (e) { return false; } }
-
-  renderVals() {
-    const s = this.state;
-    return {
-      locked: !s.key, unlocked: !!s.key,
-      dayLabel: 'Day ' + this.dayNum(),
-      keyInput: s.keyInput,
-      onKey: (e) => this.setState({ keyInput: e.target.value }),
-      unlock: () => { const k = (s.keyInput || '').trim(); if (k) this.verify(k); },
-      unlockLabel: s.checking ? 'Checking…' : 'Unlock the tools',
-      authMsg: s.authMsg,
-      voiceState: this.elActive() ? 'ElevenLabs' : 'Device fallback',
-      voiceColor: this.elActive() ? '#3A6B3A' : '#8A6A1E',
-    };
-  }
-}
-</script>
+  <script src="overlay.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
