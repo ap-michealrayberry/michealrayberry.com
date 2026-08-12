@@ -1,0 +1,43 @@
+# Netlify serves the site directly from the repo (Netlify-only stack).
+# michaelrayberry.com (the typo domain) is added as a Netlify domain alias and
+# redirected to the canonical host here — Netlify supports host-based rules.
+https://michaelrayberry.com/*      https://michealrayberry.com/:splat  301!
+https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
+
+/home        /            301
+/dashboard   /index.html  200
+/milestones  /index.html  200
+/about       /index.html  200
+/agreement   /index.html  200
+/penalties   /index.html  200
+/uniform     /index.html  200
+/updates     /index.html  200
+/log         /penalties   301
+/annex/* / 301
+/annex / 301
+/fagspose/* / 301
+/fagspose / 301
+/protocol/* / 301
+/protocol / 301
+
+# The capture instrument is /assistant/ — one tool, five sessions. Every old
+# tool path and the retired portal funnel there.
+/corrective    /assistant/   301
+/weekly        /assistant/   301
+/confirmation  /assistant/   301
+/record        /assistant/   301
+/record/*      /assistant/   301
+/mrb           /assistant/   301
+/ap            /             301
+/ap/*          /             301
+/mrb/*         /assistant/   301
+/inspection    /assistant/   301
+/portal        /assistant/   301
+/resolution    /assistant/   301
+/Corner%20Time.dc.html               /assistant/  301
+/Violation%20Acknowledgment.dc.html  /assistant/  301
+
+# Build-only inputs live in the repo but are not part of the served record.
+# (Netlify builds before publishing, so 404-ing them here does not affect the build.)
+/scripts/*     /404.html   404
+/package.json  /404.html   404

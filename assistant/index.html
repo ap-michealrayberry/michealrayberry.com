@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="screen-orientation" content="portrait" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0F0F0D" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="MRB Recording Assistant — Public Accountability Project capture instrument" />
+  <title>MRB Recording Assistant</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app-root">
+    <!-- Fatal / init error surface -->
+    <div id="view-error" class="view view-error" hidden>
+      <div class="panel error-panel">
+        <h1>Cannot start</h1>
+        <p id="error-message" class="mono"></p>
+        <button type="button" id="btn-error-retry" class="btn btn-primary">Retry</button>
+      </div>
+    </div>
+
+    <!-- Home / chooser -->
+    <div id="view-home" class="view">
+      <header class="site-header">
+        <div class="site-header-left">
+          <div class="name">MICHEAL RAY BERRY</div>
+          <div class="tagline">PUBLIC ACCOUNTABILITY PROJECT</div>
+        </div>
+        <div class="site-header-right mono">RECORD</div>
+      </header>
+
+      <main class="home-main">
+        <section class="status-panel panel" id="status-panel" aria-label="Today status">
+          <div class="status-row">
+            <span class="label">Deadline</span>
+            <span id="deadline-countdown" class="mono value">—</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Packet today</span>
+            <span id="packet-status" class="mono value">Loading…</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Voice</span>
+            <span id="voice-status" class="mono value">—</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Device key</span>
+            <span id="key-status" class="mono value">—</span>
+          </div>
+          <div id="open-entries" class="open-entries" hidden>
+            <div class="section-label">Open entries</div>
+            <ul id="open-entries-list"></ul>
+          </div>
+          <div id="queue-status" class="queue-status" hidden>
+            <div class="section-label">Upload queue</div>
+            <div id="queue-status-body" class="mono small"></div>
+          </div>
+        </section>
+
+        <section class="chooser" aria-label="Sessions">
+          <h2 class="chooser-heading">Sessions</h2>
+          <p class="chooser-intro">One instrument. Five sessions. Shared camera, overlay, monitor, voice, hashing, and upload — only the script and filing destination differ.</p>
+          <p class="chooser-intro" style="color:#8A8983;font-size:12.5px">Visitors: this is the official capture instrument behind the record. Filing requires the device key issued to Micheal, checked server-side on every action — without it the tool runs as a demonstration and nothing reaches the record. The standard it enforces is documented at <a href="/positions/" style="color:inherit">michealrayberry.com/positions</a>.</p>
+
+          <button type="button" class="session-card" data-session="daily" id="card-daily">
+            <div class="session-card-top">
+              <span class="session-name">Daily Inspection</span>
+              <span class="session-when mono">Due 10 PM ET</span>
+            </div>
+            <p class="session-desc">Four-angle video (~90s), four photographs, the weight. Evidence for the public record.</p>
+          </button>
+
+          <button type="button" class="session-card" data-session="corrective" id="card-corrective">
+            <div class="session-card-top">
+              <span class="session-name">Corrective Session</span>
+              <span class="session-when mono">After confirmed violation</span>
+            </div>
+            <p class="session-desc">10 / 20 / 30 min by level, monitored throughout. Posted publicly to @michealrayberry and published beside the entry.</p>
+          </button>
+
+          <button type="button" class="session-card" data-session="confirmation" id="card-confirmation">
+            <div class="session-card-top">
+              <span class="session-name">Consent Confirmation</span>
+              <span class="session-when mono">Once · on each amendment</span>
+            </div>
+            <p class="session-desc">Recorded statement of understanding. Re-recorded when the agreement is amended.</p>
+          </button>
+
+          <button type="button" class="session-card" data-session="announcement" id="card-announcement">
+            <div class="session-card-top">
+              <span class="session-name">Project Announcement</span>
+              <span class="session-when mono">Launch · once</span>
+            </div>
+            <p class="session-desc">The opening statement of the project. Posted publicly to @michealrayberry and set as the site’s introduction.</p>
+          </button>
+
+          <button type="button" class="session-card" data-session="demo" id="card-demo">
+            <div class="session-card-top">
+              <span class="session-name">Demonstration</span>
+              <span class="session-when mono">As needed</span>
+            </div>
+            <p class="session-desc">Explainer of the standard. Marked DEMONSTRATION · NOT A SESSION. Answers no violation.</p>
+          </button>
+        </section>
+
+        <section class="settings-panel panel" id="settings-panel">
+          <button type="button" class="settings-toggle" id="btn-settings-toggle" aria-expanded="false">
+            Device configuration
+          </button>
+          <div id="settings-body" class="settings-body" hidden>
+            <label class="field">
+              <span>Device key</span>
+              <input type="password" id="input-device-key" class="mono" autocomplete="off" placeholder="mrb_packet_key" />
+            </label>
+            <label class="field">
+              <span>Apps Script exec URL</span>
+              <input type="url" id="input-exec-url" class="mono" placeholder="https://script.google.com/…/exec" />
+            </label>
+            <label class="field">
+              <span>Sheet ID (public CSV)</span>
+              <input type="text" id="input-sheet-id" class="mono" placeholder="Spreadsheet ID" />
+            </label>
+            <label class="field">
+              <span>ElevenLabs key (optional)</span>
+              <input type="password" id="input-el-key" class="mono" autocomplete="off" placeholder="mrb_el_key" />
+            </label>
+            <label class="field">
+              <span>ElevenLabs voice</span>
+              <input type="text" id="input-el-voice" class="mono" placeholder="pNInz6obpgDQGcFmaJgB" />
+            </label>
+            <div class="settings-actions">
+              <button type="button" id="btn-save-settings" class="btn btn-primary">Save</button>
+              <button type="button" id="btn-clear-settings" class="btn btn-ghost">Clear keys</button>
+            </div>
+            <p class="settings-note mono small">Keys stay on this device only. The AP key is never used here. Demo mode runs without a server when exec URL is empty.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Preflight -->
+    <div id="view-preflight" class="view" hidden>
+      <header class="site-header compact">
+        <div class="site-header-left">
+          <div class="name" id="preflight-title">Pre-flight</div>
+          <div class="tagline" id="preflight-subtitle">Verify before capture</div>
+        </div>
+        <button type="button" id="btn-preflight-back" class="btn btn-ghost btn-sm">Back</button>
+      </header>
+      <main class="preflight-main">
+        <ul id="preflight-list" class="preflight-list"></ul>
+        <div class="preflight-frame-wrap">
+          <video id="preflight-video" class="preflight-video" playsinline muted autoplay></video>
+          <canvas id="preflight-guide" class="preflight-guide" width="720" height="1280"></canvas>
+          <div class="frame-guides" aria-hidden="true">
+            <div class="guide-line guide-head"></div>
+            <div class="guide-line guide-foot"></div>
+          </div>
+        </div>
+        <div class="preflight-fields" id="preflight-fields"></div>
+        <div class="preflight-actions">
+          <button type="button" id="btn-flip-camera" class="btn btn-ghost">Flip camera</button>
+          <button type="button" id="btn-preflight-start" class="btn btn-primary" disabled>Begin session</button>
+        </div>
+        <p id="preflight-status" class="status-line mono" role="status"></p>
+      </main>
+    </div>
+
+    <!-- Active session -->
+    <div id="view-session" class="view view-session" hidden>
+      <div class="session-stage">
+        <video id="capture-video" class="capture-video" playsinline muted></video>
+        <canvas id="compose-canvas" class="compose-canvas" width="720" height="1280"></canvas>
+        <canvas id="preview-canvas" class="preview-canvas" width="720" height="1280"></canvas>
+      </div>
+      <div class="session-chrome">
+        <p id="session-status" class="status-line mono" role="status">Ready</p>
+        <div class="session-meta mono" id="session-meta"></div>
+        <div id="setup-controls" class="setup-controls" hidden>
+          <p id="setup-countdown" class="setup-countdown mono">SETUP</p>
+          <button type="button" id="btn-setup-ready" class="btn btn-primary" disabled>Ready — start recording</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photos (daily) -->
+    <div id="view-photos" class="view" hidden>
+      <header class="site-header compact">
+        <div class="site-header-left">
+          <div class="name">Accountability photographs</div>
+          <div class="tagline" id="photo-step-label">Front</div>
+        </div>
+      </header>
+      <main class="photos-main">
+        <div class="photo-stage">
+          <canvas id="photo-canvas" class="photo-canvas" width="720" height="1280"></canvas>
+        </div>
+        <p id="photo-prompt" class="photo-prompt"></p>
+        <p id="photo-status" class="status-line mono" role="status"></p>
+        <button type="button" id="btn-photo-shutter" class="btn btn-primary" disabled hidden>Auto capture</button>
+      </main>
+    </div>
+
+    <!-- Filing / result -->
+    <div id="view-result" class="view" hidden>
+      <header class="site-header compact">
+        <div class="site-header-left">
+          <div class="name" id="result-title">Session complete</div>
+          <div class="tagline" id="result-subtitle">Filing to the record</div>
+        </div>
+      </header>
+      <main class="result-main">
+        <div class="panel">
+          <pre id="result-body" class="result-body mono"></pre>
+        </div>
+        <div id="result-downloads" class="result-downloads" hidden></div>
+        <div class="result-actions">
+          <button type="button" id="btn-result-home" class="btn btn-primary">Return home</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Parked media elements must stay in the document for decode (not display:none) -->
+  <video id="parked-video" class="parked" playsinline muted></video>
+  <audio id="narration-audio" class="parked"></audio>
+
+  <!-- Single classic script (built from js/*.js) — also load modular sources in order if bundle missing -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+(function (MRB) {
+  "use strict";
+
+  var stream = null;
+  var facing = "environment"; // rear default
+  var videoEl = null;
+
+
+  /** Force all capture canvases to fixed portrait 720×1280. No landscape geometry. */
+  function sizePortraitCanvases() {
+    var w = (MRB.config && MRB.config.CANVAS_W) || 720;
+    var h = (MRB.config && MRB.config.CANVAS_H) || 1280;
+    if (w >= h) {
+      // Guard: config must never be landscape
+      w = 720;
+      h = 1280;
+    }
+    ["compose-canvas", "preview-canvas", "photo-canvas", "preflight-guide"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.width !== w) el.width = w;
+      if (el.height !== h) el.height = h;
+    });
+    return { w: w, h: h };
+  }
+
+  function getFacing() {
+    return facing;
+  }
+
+  function setFacing(mode) {
+    facing = mode === "user" ? "user" : "environment";
+  }
+
+  function toggleFacing() {
+    facing = facing === "environment" ? "user" : "environment";
+    return facing;
+  }
+
+  /**
+   * Natural stream only — do NOT request width/height/aspectRatio ideals.
+   * Cropped sensor modes push feet out of frame.
+   */
+  function videoConstraints() {
+    return {
+      facingMode: { ideal: facing },
+    };
+  }
+
+  async function start(targetVideo) {
+    stop();
+    sizePortraitCanvases();
+    videoEl = targetVideo || document.getElementById("capture-video") || document.getElementById("parked-video");
+    if (!videoEl) throw new Error("No video element for camera");
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("getUserMedia unavailable on this device");
+    }
+
+    var constraints = {
+      video: videoConstraints(),
+      audio: MRB.audio.micConstraints(),
+    };
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (e) {
+      // Retry video-only if audio denied
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints() });
+      } catch (e2) {
+        throw new Error("Camera permission failed: " + (e2.message || e.message || e));
+      }
+    }
+
+    videoEl.srcObject = stream;
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    // Must be in document; wait for loadeddata before drawing
+    await videoEl.play().catch(function () {
+      /* autoplay policies — play may need gesture; preflight has one */
+    });
+    await waitLoadedData(videoEl);
+    return stream;
+  }
+
+  function waitLoadedData(video) {
+    if (video.readyState >= 2 && video.videoWidth > 0) {
+      return Promise.resolve();
+    }
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(function () {
+        cleanup();
+        // Resolve anyway if we have some dimensions
+        if (video.videoWidth > 0) resolve();
+        else reject(new Error("Camera loadeddata timeout — dimensions not ready"));
+      }, 8000);
+      function onData() {
+        cleanup();
+        resolve();
+      }
+      function cleanup() {
+        clearTimeout(t);
+        video.removeEventListener("loadeddata", onData);
+      }
+      video.addEventListener("loadeddata", onData);
+    });
+  }
+
+  function stop() {
+    if (stream) {
+      stream.getTracks().forEach(function (t) {
+        try {
+          t.stop();
+        } catch (e) {
+          /* ignore */
+        }
+      });
+      stream = null;
+    }
+    if (videoEl) {
+      try {
+        videoEl.srcObject = null;
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }
+
+  function getStream() {
+    return stream;
+  }
+
+  function getVideoEl() {
+    return videoEl;
+  }
+
+  function getAudioTracks() {
+    if (!stream) return [];
+    return stream.getAudioTracks();
+  }
+
+  function getVideoTracks() {
+    if (!stream) return [];
+    return stream.getVideoTracks();
+  }
+
+  async function flip(targetVideo) {
+    toggleFacing();
+    return start(targetVideo || videoEl);
+  }
+
+  MRB.camera = {
+    start: start,
+    stop: stop,
+    flip: flip,
+    sizePortraitCanvases: sizePortraitCanvases,
+    getStream: getStream,
+    getVideoEl: getVideoEl,
+    getAudioTracks: getAudioTracks,
+    getVideoTracks: getVideoTracks,
+    getFacing: getFacing,
+    setFacing: setFacing,
+    toggleFacing: toggleFacing,
+    videoConstraints: videoConstraints,
+    waitLoadedData: waitLoadedData,
+  };
+})(window.MRB);

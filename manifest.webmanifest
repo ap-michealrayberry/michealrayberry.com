@@ -1,0 +1,17 @@
+{
+  "name": "MRB Public Accountability Record",
+  "short_name": "MRB Record",
+  "start_url": "/record",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#141412",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "800x800",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
