@@ -1749,6 +1749,7 @@ class Component extends DCLogic {
       const [y, m, d] = iso.split('-').map(Number);
       return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
+    const START_DATE = new Date('2026-08-13T00:00:00');
     const dayOf = (iso) => {
       const [y, m, d] = iso.split('-').map(Number);
       return Math.floor((new Date(y, m - 1, d) - START_DATE) / 86400000) + 1;
