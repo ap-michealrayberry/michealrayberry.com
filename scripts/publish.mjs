@@ -2006,6 +2006,133 @@ function sitemapIndex(latestDate) {
 `;
 }
 
+/* About and Agreement are authored once, inside index.html (the DC shell), and
+   mirrored here as standalone, indexable static pages so crawlers and social
+   cards get real content and per-page metadata. Same source, no drift: the DC
+   template syntax is stripped and the inline-styled body wrapped in the site
+   shell. The Agreement's dynamic amendment log (live on the SPA page) is
+   dropped from the static copy. */
+const SYN_CSS = `
+    :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
+    a{color:var(--ink);text-underline-offset:3px}
+    .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
+    .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
+    .wordmark b{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:24px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+    .wordmark span{font:11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+    .sitenav{display:flex;flex-direction:column;align-items:flex-end;gap:0}
+    .nav-primary,.nav-secondary{display:flex;gap:2px;row-gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .sitenav a{font:600 12.5px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:8px 9px}
+    .nav-secondary a{font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);padding:5px 9px}
+    .sitenav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+    main{max-width:1160px;margin:auto;padding:0}
+    .sitefoot{background:var(--ink);color:var(--paper);padding:56px 32px 40px}
+    .sitefoot-in{max-width:1160px;margin:auto;display:flex;flex-direction:column;gap:40px}
+    .sitefoot-top{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap}
+    .sitefoot-bottom{border-top:1px solid #3A3935;padding-top:24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:13px 'IBM Plex Mono',ui-monospace,monospace;color:#8A8983}
+    .sitefoot-bottom a{color:var(--paper);text-decoration:none}.sitefoot-bottom a:hover{color:#FF6B61}
+    .sitefoot-bottom .pair{display:flex;gap:6px 20px;flex-wrap:wrap}.sitefoot-bottom .pair span{white-space:nowrap}
+    .sitefoot b{display:block;font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+    .sitefoot .sub{font:11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:#8A8983;margin-top:6px;display:block}
+    .sitefoot .col{display:flex;flex-direction:column;gap:10px}
+    .sitefoot .colhead{font:10px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+    .sitefoot .links{display:flex;gap:20px;flex-wrap:wrap;font:12px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em}
+    .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}.rec:hover{color:#FF6B61}
+    .rec-lamp{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}`;
+const SYN_HEADER = `<div class="sitehead"><div class="sitehead-in">
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <nav class="sitenav">
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+  </nav>
+</div></div>`;
+const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
+    <div class="sitefoot-top">
+      <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
+      <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
+    </div>
+    <div class="sitefoot-bottom">
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener">Site History</a></span>
+    </div>
+  </div></div>`;
+function synExtract(full, startTag, endMarker) {
+  const s = full.indexOf(startTag);
+  const e = full.indexOf(endMarker, s);
+  if (s === -1 || e === -1) throw new Error('synthetic-page markers not found: ' + startTag);
+  return full.slice(s + startTag.length, e).replace(/\s*<\/div>\s*<\/sc-if>\s*$/, '');
+}
+function synClean(html) {
+  return html
+    .replace(/<sc-if value="\{\{ hasAmendments \}\}"[\s\S]*$/, '')
+    .replace(/\s+onClick="\{\{[^}]*\}\}"/g, '')
+    .replace(/\s+aria-current="\{\{[^}]*\}\}"/g, '')
+    .replace(/\s+style-hover="[^"]*"/g, '')
+    .replace(/\s+style-active="[^"]*"/g, '')
+    .replace(/ data-photo-src=/g, ' src=')
+    .replace(/\{\{[^}]*\}\}/g, '');
+}
+function synPage({ title, desc, canonical, body }) {
+  const schema = JSON.stringify({ '@context': 'https://schema.org', '@graph': [
+    { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description: desc, about: { '@id': `${SITE_ORIGIN}/#micheal-ray-berry` }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
+    { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
+      { '@type': 'ListItem', position: 2, name: title.split(' \u2014 ')[0], item: canonical } ] } ] });
+  return `<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${htmlEscape(title)}</title>
+  <meta name="description" content="${htmlEscape(desc)}">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <link rel="canonical" href="${canonical}">
+  <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry \u2014 Daily Record" href="${SITE_ORIGIN}/feed.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Micheal Ray Berry \u2014 Public Accountability Project">
+  <meta property="og:title" content="${htmlEscape(title)}">
+  <meta property="og:description" content="${htmlEscape(desc)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="${SITE_ORIGIN}/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${htmlEscape(title)}">
+  <meta name="twitter:description" content="${htmlEscape(desc)}">
+  <meta name="twitter:image" content="${SITE_ORIGIN}/og-image.png">
+  <script type="application/ld+json">${schema}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
+  <style>${SYN_CSS}</style>
+</head>
+<body>
+${SYN_HEADER}
+<main>
+${body}
+</main>
+${SYN_FOOTER}
+</body>
+</html>`;
+}
+async function buildSyntheticPages() {
+  const full = await fs.readFile(path.join(ROOT, 'index.html'), 'utf8');
+  return [
+    ['about', synPage({
+      title: 'About the Project \u2014 Micheal Ray Berry',
+      desc: 'Why this public accountability project exists, how it is administered by an independent Accountability Partner, and the documentation standard behind the record.',
+      canonical: `${SITE_ORIGIN}/about`,
+      body: synClean(synExtract(full, '<div data-screen-label="About">', '<!-- ==================== AGREEMENT')),
+    })],
+    ['agreement', synPage({
+      title: 'The Signed Accountability Agreement \u2014 Micheal Ray Berry',
+      desc: 'The full public text of the signed Public Accountability Agreement: daily requirements, documentation standard, weigh-ins, violations, corrective sessions, and record permanence.',
+      canonical: `${SITE_ORIGIN}/agreement`,
+      body: synClean(synExtract(full, '<div data-screen-label="Agreement">', '<!-- ==================== PENALTIES')),
+    })],
+  ];
+}
+
 async function main() {
   const [csv, attestCsv, violationCsv, siteStateCsv] = await Promise.all([
     fetchText(SHEET_CSV, true),
@@ -2237,6 +2364,12 @@ async function main() {
 
   if (await writeIfChanged(path.join(ROOT, 'consent', 'index.html'), consentPage())) {
     changedUrls.add(`${SITE_ORIGIN}/consent/`);
+  }
+
+  // Standalone, indexable About and Agreement pages, mirrored from index.html.
+  for (const [slug, html] of await buildSyntheticPages()) {
+    if (await writeIfChanged(path.join(ROOT, slug, 'index.html'), html)) changedUrls.add(`${SITE_ORIGIN}/${slug}`);
+    extraUrls.push(`${SITE_ORIGIN}/${slug}`);
   }
   extraUrls.push(`${SITE_ORIGIN}/weeks/`);
 
