@@ -14,6 +14,8 @@ const ATTEST_CSV = process.env.ATTESTATION_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Attestation';
 const SITE_STATE_CSV = process.env.SITE_STATE_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Site%20State';
+const HEALTH_CSV = process.env.HEALTH_CSV ||
+  'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Health';
 const START_DATE = '2026-08-13';
 const START_WEIGHT = 340;
 const GOAL_WEIGHT = 175;
@@ -231,7 +233,7 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
-function dailyPage({ record, photos, previous, next, attestation }) {
+function dailyPage({ record, photos, previous, next, attestation, health }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Micheal Ray Berry Day ${day} — ${weight.toFixed(1)} lb | ${longDate(date)}`;
@@ -379,6 +381,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     .nav-secondary a{font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);padding:5px 9px}
     .sitenav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
     .sitenav a[aria-current]{color:var(--accent)}
+    .sitenav .ap{color:var(--accent);border:1px solid var(--accent);padding:7px 10px}.sitenav .ap:hover{background:var(--accent);color:#fff;text-decoration:none}
     .sitefoot-bottom .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}
     .sitefoot-bottom .rec:hover{color:#FF6B61}
     .sitenav .rec{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);padding:5px 9px 5px 8px}
@@ -426,8 +429,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -439,6 +442,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
+  ${health ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px">Device-synced activity: <strong>${Number(health.steps).toLocaleString('en-US')} steps</strong>${health.zone ? ` · ${Math.round(health.zone)} active-zone minutes` : ''}${health.mi ? ` · ${health.mi.toFixed(1)} mi` : ''}${health.cal ? ` · ${Math.round(health.cal).toLocaleString('en-US')} calories out` : ''} — synced automatically from the connected device, not self-reported.</p>` : ''}
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
   <p><a href="/manifests/${date}.json">View the machine-readable manifest and SHA-256 evidence hashes</a></p>
@@ -478,6 +482,7 @@ const PAGE_CSS = `
     .nav-secondary a{font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);padding:5px 9px}
     .sitenav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
     .sitenav a[aria-current]{color:var(--accent)}
+    .sitenav .ap{color:var(--accent);border:1px solid var(--accent);padding:7px 10px}.sitenav .ap:hover{background:var(--accent);color:#fff;text-decoration:none}
     .sitefoot-bottom .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}
     .sitefoot-bottom .rec:hover{color:#FF6B61}
     .sitenav .rec{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);padding:5px 9px 5px 8px}
@@ -598,8 +603,8 @@ function milestonePage(target, entries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -636,8 +641,13 @@ function milestonePage(target, entries) {
    Project weeks run Day 1–7, 8–14, and so on. Each page carries that
    week's weights, the net change, and every documented day, giving the
    archive a second navigable axis and a lot more indexable surface. */
-function weekPage(week, weekEntries, allEntries) {
+function weekPage(week, weekEntries, allEntries, healthMap) {
   const firstDay = (week - 1) * 7 + 1;
+  const wkHealth = [...(healthMap || new Map()).entries()]
+    .filter(([d]) => { const n = dayNumber(d); return n >= firstDay && n <= firstDay + 6; })
+    .map(([, a]) => a);
+  const avgSteps = wkHealth.length ? Math.round(wkHealth.reduce((t, a) => t + a.steps, 0) / wkHealth.length) : 0;
+  const zoneTotal = Math.round(wkHealth.reduce((t, a) => t + a.zone, 0));
   const canonical = `${SITE_ORIGIN}/weeks/week-${String(week).padStart(2, '0')}/`;
   const weights = weekEntries.map((e) => e.record.weight);
   const net = weights.length > 1 ? weights[weights.length - 1] - weights[0] : 0;
@@ -687,8 +697,8 @@ function weekPage(week, weekEntries, allEntries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -699,6 +709,7 @@ function weekPage(week, weekEntries, allEntries) {
 </header>
 <main>
   <p class="intro">${htmlEscape(description)}</p>
+  ${wkHealth.length ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px;display:inline-block">Device-synced activity, ${wkHealth.length} synced ${wkHealth.length === 1 ? 'day' : 'days'}: avg ${avgSteps.toLocaleString('en-US')} steps/day${zoneTotal ? ` · ${zoneTotal} active-zone minutes total` : ''}.</p>` : ''}
   ${rows ? `<table><thead><tr><th>Day</th><th>Date</th><th>Weight</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No documented days in this week.</div>'}
   <p>${nav}</p>
   <p><a href="/daily/">Full daily record</a> · <a href="/dashboard">Weigh-in log</a></p>
@@ -750,8 +761,8 @@ function weeksIndexPage(entries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -883,6 +894,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
     .nav-secondary a{font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);padding:5px 9px}
     .sitenav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
     .sitenav a[aria-current]{color:var(--accent)}
+    .sitenav .ap{color:var(--accent);border:1px solid var(--accent);padding:7px 10px}.sitenav .ap:hover{background:var(--accent);color:#fff;text-decoration:none}
     .sitefoot-bottom .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}
     .sitefoot-bottom .rec:hover{color:#FF6B61}
     .sitenav .rec{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);padding:5px 9px 5px 8px}
@@ -934,8 +946,8 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1065,6 +1077,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
     .nav-secondary a{font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);padding:5px 9px}
     .sitenav a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
     .sitenav a[aria-current]{color:var(--accent)}
+    .sitenav .ap{color:var(--accent);border:1px solid var(--accent);padding:7px 10px}.sitenav .ap:hover{background:var(--accent);color:#fff;text-decoration:none}
     .sitefoot-bottom .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}
     .sitefoot-bottom .rec:hover{color:#FF6B61}
     .sitenav .rec{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);padding:5px 9px 5px 8px}
@@ -1108,8 +1121,8 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1222,8 +1235,8 @@ function consentPage() {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1391,8 +1404,8 @@ function violationPage(v, prev, next) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1513,8 +1526,8 @@ function specimenPage(demoUrl) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1669,8 +1682,8 @@ function positionsPage(entries) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1847,8 +1860,8 @@ function cornerTimePage(entries, violations, demoUrl) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -2043,8 +2056,8 @@ const SYN_CSS = `
 const SYN_HEADER = `<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/agreement">Agreement</a><a href="/about">About</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -2134,11 +2147,12 @@ async function buildSyntheticPages() {
 }
 
 async function main() {
-  const [csv, attestCsv, violationCsv, siteStateCsv] = await Promise.all([
+  const [csv, attestCsv, violationCsv, siteStateCsv, healthCsv] = await Promise.all([
     fetchText(SHEET_CSV, true),
     fetchText(ATTEST_CSV, true),
     fetchText(VIOLATION_CSV, true),
     fetchText(SITE_STATE_CSV, true),
+    fetchText(HEALTH_CSV, true),
   ]);
   if (!csv) {
     // Sheet unreachable (not shared, or Google hiccuping). Publishing new
@@ -2178,6 +2192,23 @@ async function main() {
   const demoUrl = /^https?:/.test(siteState.demo_video_url || '')
     ? siteState.demo_video_url
     : 'https://pub-944fe11d344847f68307fb252477ba11.r2.dev/corner%20time/PXL_20251116_175931189~3%20(1).mp4';
+
+  /* Health tab: device-synced daily activity. gviz falls back to the FIRST
+     sheet when the named tab is missing, so only parse when the header really
+     is the Health tab's. */
+  const healthMap = new Map();
+  if (healthCsv) {
+    const hrows = parseCSV(healthCsv);
+    const hhead = (hrows[0] || []).map((v) => String(v).toLowerCase());
+    if (hhead[1] === 'steps' && String(hhead[2] || '').startsWith('zone')) {
+      for (const r of hrows.slice(1)) {
+        const d = normalizeDate(r[0]);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) continue;
+        const a = { steps: parseFloat(r[1]) || 0, zone: parseFloat(r[2]) || 0, mi: parseFloat(r[5]) || 0, cal: parseFloat(r[6]) || 0 };
+        if (a.steps || a.zone || a.mi || a.cal) healthMap.set(d, a);
+      }
+    }
+  }
 
   const rows = parseCSV(csv);
   const records = rows.slice(1).map((r) => ({
@@ -2268,7 +2299,7 @@ async function main() {
     const next = pos >= 0 && pos < sequence.length - 1 ? sequence[pos + 1] : null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
-    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '' });
+    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '', health: healthMap.get(record.date) || null });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
 
     const manifest = {
@@ -2288,6 +2319,7 @@ async function main() {
         video_url: record.video,
         canonical_url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
         attestation: attestMap.get(record.date) || null,
+        activity: healthMap.get(record.date) || null,
       },
       photos: Object.fromEntries(Object.entries(photos).map(([angle, p]) => [angle, {
         url: p.sourceUrl,
@@ -2336,7 +2368,7 @@ async function main() {
   for (let w = 1; w <= maxWeek; w++) {
     const inWeek = generated.filter(({ record }) => Math.ceil(record.day / 7) === w);
     const file = path.join(ROOT, 'weeks', `week-${String(w).padStart(2, '0')}`, 'index.html');
-    if (await writeIfChanged(file, weekPage(w, inWeek, generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
+    if (await writeIfChanged(file, weekPage(w, inWeek, generated, healthMap))) changedUrls.add(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
     extraUrls.push(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
   }
   if (await writeIfChanged(path.join(ROOT, 'weeks', 'index.html'), weeksIndexPage(generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/`);

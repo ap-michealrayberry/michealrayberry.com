@@ -24,9 +24,9 @@
 
     var bottomPrimary = "";
     if (session.inSetup) {
-      bottomPrimary = "SETUP — HANDS BEHIND HEAD · CODE " + session.code;
+      bottomPrimary = "SETUP — WAIT POSITION · CODE " + session.code;
     } else if (session.type === "daily") {
-      bottomPrimary = MRB.overlay.buildDailyBottom(session.day, session.code);
+      bottomPrimary = MRB.overlay.buildDailyBottom(session.day, session.code, session.weight);
     } else if (session.type === "corrective") {
       bottomPrimary = MRB.overlay.buildCornerBottom(
         session.vNum || session.level,
@@ -47,17 +47,68 @@
       projectLine: "PUBLIC ACCOUNTABILITY PROJECT",
       bottomPrimary: bottomPrimary,
       bottomSecondary: MRB.overlay.buildSecondary(session.date),
-      monitorText: null,
-      monitorTone: "ok",
+      // Burned-in pose line: tracks the CURRENT scripted position. Gray —
+      // instructional, not computer-confirmed (pose monitor disabled).
+      monitorText: session.poseText || null,
+      monitorTone: session.poseTone || "ok",
       videoEl: session.videoEl,
       showGuides: !!session.inSetup,
     };
   }
 
+  function titleCardStateFrom(session) {
+    var title =
+      session.type === "demo"
+        ? MRB.overlay.demoTag()
+        : MRB.config.SESSION_TAGS[session.type] || session.type.toUpperCase();
+    var dateStr = MRB.dates.formatOverlayDate(session.date);
+    var line1 = dateStr;
+    var stat = "";
+    if (session.type === "daily") {
+      line1 = "DAY " + MRB.dates.padDay(session.day) + " \u00B7 " + dateStr;
+      stat = session.weight ? session.weight + " LB" : "";
+    } else if (session.type === "corrective") {
+      line1 = "V-" + String(session.vNum || session.level).padStart(3, "0") + " \u00B7 LEVEL " + session.level + " \u00B7 " + dateStr;
+    } else if (session.type === "weekly") {
+      line1 = "WEEK " + (session.week || "") + " \u00B7 " + dateStr;
+    } else if (session.type === "confirmation") {
+      line1 = "VERSION " + (session.version || "1") + " \u00B7 " + dateStr;
+    }
+    return {
+      name: "MICHEAL RAY BERRY",
+      projectLine: "PUBLIC ACCOUNTABILITY PROJECT",
+      title: title,
+      stat: stat,
+      line1: line1,
+      line2: "MICHEALRAYBERRY.COM",
+    };
+  }
+
+  function thumbStateFrom(session) {
+    // The exported PNG is the exact composed frame (stamp burned in), so the
+    // same frame is pickable as the thumbnail inside the YouTube video.
+    return { frame: session.thumbFrame };
+  }
+
   function makeDraw(session, compose, preview) {
     return function () {
-      var state = overlayStateFrom(session);
-      MRB.overlay.drawOverlay(compose.getContext("2d"), state);
+      var ctx = compose.getContext("2d");
+      if (session.titleCardUntil && performance.now() < session.titleCardUntil) {
+        MRB.overlay.drawTitleCard(ctx, titleCardStateFrom(session));
+      } else {
+        var st = overlayStateFrom(session);
+        MRB.overlay.drawOverlay(ctx, st);
+        // Thumbnail body frame: captured once, ~2.5s after the title card —
+        // the opening posture (facing camera, hands behind head), so every
+        // day's thumbnail has the same camera position and stance.
+        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 2500 && st.videoEl && st.videoEl.videoWidth) {
+          var f = document.createElement("canvas");
+          f.width = MRB.overlay.W;
+          f.height = MRB.overlay.H;
+          f.getContext("2d").drawImage(compose, 0, 0);
+          session.thumbFrame = f;
+        }
+      }
       var pctx = preview.getContext("2d");
       pctx.drawImage(compose, 0, 0);
     };
@@ -113,7 +164,8 @@
     loop.start();
 
     MRB.ui.setStatus("session", "SETUP — get into position");
-    setMeta("Not recording yet · hands behind head");
+    session.poseText = "WAIT POSITION";
+    setMeta("Not recording yet · wait position");
 
     await speakAndHold(
       session,
@@ -146,10 +198,10 @@
         countdownEl.textContent =
           "SETUP " +
           Math.ceil(remaining) +
-          "s · hands behind head" +
+          "s · wait position" +
           (canReady ? " · ready available" : " · hold " + Math.ceil(SETUP_MIN_SEC - elapsed) + "s");
       }
-      setMeta("Setup " + Math.floor(elapsed) + "s · hands behind head");
+      setMeta("Setup " + Math.floor(elapsed) + "s · wait position");
 
       if (canReady && userReady) {
         resolved = true;
@@ -252,10 +304,13 @@
       challengeCode: session.code,
     });
 
+    // First ~1.6s of every recording is the burned-in title card — it is the
+    // pick-a-frame thumbnail on Shorts and self-identifies any repost.
+    session.titleCardUntil = performance.now() + 1600;
     var draw = makeDraw(session, compose, preview);
     await rec.start(draw);
     MRB.ui.setStatus("session", "Recording");
-    setMeta(session.type + " · code " + session.code + " · hands behind head");
+    setMeta(session.type + " · code " + session.code);
 
     try {
       if (session.type === "daily") {
@@ -305,7 +360,7 @@
 
     session.machine.go("filing");
     var filedOk = await fileResult(session, result, {});
-    var links = autoDownload(session, result);
+    var links = await autoDownload(session, result);
     active = null;
     await cleanup(session, false);
     return {
@@ -317,11 +372,18 @@
     };
   }
 
-  function autoDownload(session, result) {
+  async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
+    var thumbBlob = null;
+    try {
+      thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
+    } catch (e) {
+      /* thumbnail is a bonus artifact — never block the downloads */
+    }
     return MRB.download.saveArtifacts({
       videoBlob: result.blob,
       photos: session.photos,
+      thumbBlob: thumbBlob,
       meta: {
         kind: session.type,
         day: session.day,
@@ -356,6 +418,7 @@
         session.machine.setCurrentView(viewId);
       }
       MRB.ui.setStatus("session", segments[i].label);
+      if (segments[i].pose) session.poseText = segments[i].pose;
       await speakAndHold(session, segments[i].text, segments[i].sec);
       if (viewId) session.machine.markViewDone(viewId);
     }
@@ -379,6 +442,7 @@
       var seg = segments[i];
       if (seg.id) session.machine.setCurrentView(seg.id);
       MRB.ui.setStatus("session", seg.label);
+      if (seg.pose) session.poseText = seg.pose;
       setMeta(
         "Level " +
           session.level +
@@ -427,11 +491,13 @@
 
     session.remainingSec = 0;
     MRB.ui.setStatus("session", "Timer complete");
+    session.poseText = "RETURN TO WAIT";
     await speakAndHold(session, MRB.scripts.cornerTimerComplete(), 10);
     if (session.aborted) return;
 
     session.machine.setCurrentView("wait_close");
     MRB.ui.setStatus("session", "Closing — Wait");
+    session.poseText = "WAIT POSITION";
     await speakAndHold(session, MRB.scripts.cornerClosing(session), 14);
     session.machine.markViewDone("wait_close");
   }
@@ -442,6 +508,7 @@
     var fig = session.figures || { lines: [], assessment: "", endW: null, documented: 0 };
 
     MRB.ui.setStatus("session", "Opening");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.weeklyOpening(session), 12);
     if (session.aborted) return;
 
@@ -451,6 +518,7 @@
     }
 
     MRB.ui.setStatus("session", "To the corner");
+    session.poseText = "CORNER POSITION · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.weeklyToCorner(), 14);
     if (session.aborted) return;
 
@@ -476,6 +544,7 @@
     }
 
     MRB.ui.setStatus("session", "Closing");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(
       session,
       MRB.scripts.weeklyClosing({
@@ -488,16 +557,19 @@
 
   async function runConfirmation(session) {
     MRB.ui.setStatus("session", "Confirmation");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.confirmationScript(session), 30);
   }
 
   async function runDemo(session) {
     MRB.ui.setStatus("session", "Demonstration");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.demoScript(), 25);
   }
 
   async function runAnnouncement(session) {
     MRB.ui.setStatus("session", "Announcement");
+    session.poseText = "WAIT POSITION";
     await speakAndHold(session, MRB.scripts.announcementScript(), 60);
   }
 
@@ -542,6 +614,7 @@
       MRB.ui.byId("photo-step-label").textContent = p.label + " (" + (i + 1) + "/4)";
       MRB.ui.byId("photo-prompt").textContent = p.text;
       MRB.ui.setStatus("photo", "Preparing…");
+      session.poseText = p.pose || "HANDS BEHIND HEAD";
 
       var live = true;
       var liveTimer = setInterval(function () {
@@ -563,7 +636,7 @@
         if (session.aborted) break;
         MRB.ui.setStatus(
           "photo",
-          "Auto capture in " + c + " · hold position · hands behind head"
+          "Auto capture in " + c + " · hold position"
         );
         await sleep(1000, session);
       }

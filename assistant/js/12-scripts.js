@@ -25,6 +25,7 @@
         id: "wait_open",
         label: "Opening — Wait",
         sec: 12,
+        pose: "WAIT POSITION",
         text:
           "This is the official Daily Inspection for Micheal Ray Berry, Day " +
           n +
@@ -39,6 +40,7 @@
         id: "inspection",
         label: "Front — Inspection",
         sec: 8,
+        pose: "INSPECTION · HANDS BEHIND HEAD",
         text:
           "Assume Inspection position. Feet shoulder-width apart. Hands behind the head. Eyes forward. Hold.",
       },
@@ -46,30 +48,35 @@
         id: "left",
         label: "Left",
         sec: 5,
+        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
         text: "Turn left. Hold. Left profile.",
       },
       {
         id: "rear",
         label: "Rear",
         sec: 5,
+        pose: "REAR · HANDS BEHIND HEAD",
         text: "Turn to the rear. Hold. Rear view.",
       },
       {
         id: "right",
         label: "Right",
         sec: 5,
+        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
         text: "Turn right. Hold. Right profile.",
       },
       {
         id: "front_close",
         label: "Front — Closing View",
         sec: 6,
+        pose: "FRONT · HANDS BEHIND HEAD",
         text: "Return to the front. Hold. Four required views complete.",
       },
       {
         id: "wait_close",
         label: "Return to Wait — Completion",
         sec: 10,
+        pose: "WAIT POSITION",
         text:
           "Return to Wait position. Hold. The remaining Daily Compliance Packet requirements " +
           "are due by ten PM Eastern. Up, down, or flat, it gets posted. Daily Inspection complete.",
@@ -83,21 +90,25 @@
         id: "front",
         label: "Front",
         text: "Front photograph. Inspection position. Feet shoulder-width apart. Hands behind the head. Hold.",
+        pose: "FRONT · HANDS BEHIND HEAD",
       },
       {
         id: "left",
         label: "Left",
         text: "Left profile photograph. Turn left. Hands behind the head. Hold.",
+        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
       },
       {
         id: "rear",
         label: "Rear",
         text: "Rear photograph. Turn to the rear. Hands behind the head. Hold.",
+        pose: "REAR · HANDS BEHIND HEAD",
       },
       {
         id: "right",
         label: "Right",
         text: "Right profile photograph. Turn right. Hands behind the head. Hold.",
+        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
       },
     ];
   }
@@ -117,6 +128,7 @@
         id: "wait_open",
         label: "Opening — Wait",
         sec: 16,
+        pose: "WAIT POSITION",
         text:
           "This is a Corrective Session for Micheal Ray Berry under the Public Accountability Project. " +
           "The entry being corrected is " +
@@ -134,6 +146,7 @@
         id: "to_corner",
         label: "Assume Corner Position",
         sec: 18,
+        pose: "CORNER POSITION · HANDS BEHIND HEAD",
         text:
           "Turn around and face the corner. Feet shoulder-width apart. Hands behind the head. " +
           "Do not lean against either wall. Eyes toward the corner. Hold the position. " +

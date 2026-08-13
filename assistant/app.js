@@ -796,8 +796,11 @@
       ctx.fillRect(0, 0, W, H);
       return;
     }
-    // Contain (letterbox), never crop
-    var scale = Math.min(W / vw, H / vh);
+    // Fill the vertical frame (cover): scale up and center-crop the excess
+    // instead of letterboxing — no black bars. The live monitor shows this
+    // exact canvas, so framing is WYSIWYG; the preflight guides keep the
+    // full body in frame.
+    var scale = Math.max(W / vw, H / vh);
     var dw = vw * scale;
     var dh = vh * scale;
     var dx = (W - dw) / 2;
@@ -807,67 +810,242 @@
     ctx.drawImage(video, dx, dy, dw, dh);
   }
 
-  function drawBands(ctx, state) {
-    // Top band
-    ctx.fillStyle = "rgba(15,15,13,0.82)";
-    ctx.fillRect(0, 0, W, TOP);
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
 
-    // Name — IBM Plex Sans Condensed 29px bold
-    ctx.fillStyle = "#FAFAF7";
-    ctx.font = "700 29px 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif";
-    ctx.textBaseline = "top";
-    ctx.textAlign = "left";
-    ctx.fillText(state.name || "MICHEAL RAY BERRY", 16, 14);
+  // Shorts / TikTok reserve the extreme top and bottom edges and the right
+  // action rail for their own UI. The overlay floats inside that safe zone as
+  // two inset cards so name / date / code / weight are never covered.
+  var SIDE = 18;
+  var SAFE_TOP = 118; // top card clears the app's top bar
+  var SAFE_BOT = 300; // bottom card clears the handle/description + progress bar
+  var RAIL = 200; // right-side action rail (Like / Share / Remix)
 
-    // Project line — mono 16px accent
-    ctx.fillStyle = "#FF6B61";
-    ctx.font = "500 16px 'IBM Plex Mono', monospace";
-    ctx.fillText(state.projectLine || "PUBLIC ACCOUNTABILITY PROJECT", 16, 48);
-
-    // Session tag — right, 23px bold mono
-    ctx.fillStyle = "#FAFAF7";
-    ctx.font = "700 18px 'IBM Plex Mono', monospace";
-    ctx.textAlign = "right";
-    var tag = state.sessionTag || "";
-    // Wrap long tags
-    if (tag.length > 16) {
-      ctx.font = "700 15px 'IBM Plex Mono', monospace";
+  // Shrink the font until the text fits maxW (keeps long lines inside cards).
+  function fitFont(ctx, text, basePx, maxW, pre, post) {
+    var px = basePx;
+    ctx.font = pre + px + post;
+    while (px > 11 && ctx.measureText(text).width > maxW) {
+      px -= 1;
+      ctx.font = pre + px + post;
     }
-    ctx.fillText(tag, W - 16, 28);
+  }
+
+  function drawBands(ctx, state) {
+    // Lower-third evidence stamp: dark card with a red accent bar, a small
+    // muted identity line (name · code · date) over a large bold record line
+    // (day · weight). Sits in the bottom safe zone, clear of the action rail.
+    var primary = state.bottomPrimary || "";
+    var code = "";
+    var m = primary.match(/\s*\u00b7\s*CODE\s+(\S+)/);
+    if (m) { code = m[1]; primary = primary.replace(m[0], ""); }
+    var date = state.bottomSecondary || "";
+    date = date === "MICHEALRAYBERRY.COM" ? "" : date.replace(" \u00b7 MICHEALRAYBERRY.COM", "");
+    var isDemo = state.sessionTag && state.sessionTag.indexOf("NOT A SESSION") !== -1;
+    var big = primary;
+    var smallParts = [];
+    if (isDemo) { big = state.sessionTag; if (primary) smallParts.push(primary); }
+    if (state.name) smallParts.push(state.name);
+    if (code) smallParts.push("VERIFY " + code);
+    if (date) smallParts.push(date);
+    var small = smallParts.join(" \u00b7 ");
+    if (!big && !small) return;
+    var cx = W / 2; // centered in the frame, like the filed Shorts
+    var maxW = W - 150 - 58; // side margins + accent bar/padding
+    var MONO = "'IBM Plex Mono', monospace";
+    var COND = "'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif";
+    function fitPx(text, basePx, weight, family) {
+      var px = basePx;
+      ctx.font = weight + " " + px + "px " + family;
+      while (px > 11 && ctx.measureText(text).width > maxW) {
+        px -= 1;
+        ctx.font = weight + " " + px + "px " + family;
+      }
+      return px;
+    }
+    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0;
+    if (small) {
+      smallPx = fitPx(small, 20, "600", COND);
+      smallW = ctx.measureText(small).width;
+    }
+    if (big) {
+      bigPx = fitPx(big, 42, "700", COND);
+      bigW = ctx.measureText(big).width;
+    }
+    var chipW = Math.max(smallW, bigW) + 58;
+    var chipH = 12 + (small ? smallPx + 9 : 0) + (big ? bigPx + 5 : 0) + 12;
+    var x = cx - chipW / 2;
+    var y = H - SAFE_BOT - chipH;
+    state._stampTop = y; // drawMonitorChip stacks above this
+    state._stampCx = cx;
+    ctx.fillStyle = "rgba(10,10,9,0.88)";
+    roundRect(ctx, x, y, chipW, chipH, 6);
+    ctx.fill();
+    ctx.fillStyle = "#B3261E";
+    ctx.fillRect(x, y + 3, 5, chipH - 6);
+    var tx = x + 5 + (chipW - 5) / 2;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    var ty = y + 12;
+    if (small) {
+      ctx.font = "600 " + smallPx + "px " + COND; // same face as the title card name
+      ctx.fillStyle = "#B9B7B0";
+      ty += smallPx;
+      ctx.fillText(small, tx, ty);
+      ty += 9;
+    }
+    if (big) {
+      ctx.font = "700 " + bigPx + "px " + COND; // same face as the title card title
+      ctx.fillStyle = "#FFFFFF";
+      ty += bigPx;
+      ctx.fillText(big, tx, ty);
+    }
     ctx.textAlign = "left";
-
-    // Bottom band
-    ctx.fillStyle = "rgba(15,15,13,0.82)";
-    ctx.fillRect(0, H - BOTTOM, W, BOTTOM);
-
-    ctx.fillStyle = "#FAFAF7";
-    ctx.font = "500 20px 'IBM Plex Mono', monospace";
-    ctx.textBaseline = "top";
-    ctx.fillText(state.bottomPrimary || "", 16, H - BOTTOM + 14);
-
-    ctx.fillStyle = "#B9B8B2";
-    ctx.font = "400 15px 'IBM Plex Mono', monospace";
-    ctx.fillText(state.bottomSecondary || "", 16, H - BOTTOM + 44);
   }
 
   function drawMonitorChip(ctx, state) {
     if (!state.monitorText) return;
     var text = state.monitorText;
     var tone = state.monitorTone || "ok";
-    var bg = tone === "warn" ? "rgba(138,106,30,0.92)" : tone === "fail" ? "rgba(179,38,30,0.92)" : "rgba(58,107,58,0.92)";
+    // Neutral gray by default — green is reserved for computer-confirmed
+    // posture compliance (pose monitor), which is currently disabled.
+    var bg = tone === "warn" ? "rgba(138,106,30,0.92)" : tone === "fail" ? "rgba(179,38,30,0.92)" : tone === "confirmed" ? "rgba(58,107,58,0.92)" : "rgba(62,62,58,0.92)";
     ctx.font = "600 16px 'IBM Plex Mono', monospace";
     var tw = ctx.measureText(text).width;
     var padX = 14;
     var chipW = tw + padX * 2;
     var chipH = 32;
-    var x = (W - chipW) / 2;
-    var y = H - BOTTOM - chipH - 12;
+    var cx = state._stampCx || W / 2; // same center as the stamp
+    var x = cx - chipW / 2;
+    var y = (state._stampTop || H - SAFE_BOT - 34) - chipH - 10; // stacked above the stamp
     ctx.fillStyle = bg;
-    ctx.fillRect(x, y, chipW, chipH);
+    roundRect(ctx, x, y, chipW, chipH, 8);
+    ctx.fill();
     ctx.fillStyle = "#FAFAF7";
     ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.fillText(text, cx, y + chipH / 2);
     ctx.textAlign = "left";
-    ctx.fillText(text, x + padX, y + chipH / 2);
+  }
+
+  /**
+   * Full-frame title card. Burned in as the first frames of every recording
+   * (it doubles as the pick-a-frame thumbnail on Shorts) and rendered alone
+   * for the exported thumbnail PNG. Pure function of (ctx, state).
+   * state: { name, projectLine, title, line1, line2 }
+   */
+  function drawTitleCard(ctx, state) {
+    state = state || {};
+    ctx.fillStyle = "#0F0F0D";
+    ctx.fillRect(0, 0, W, H);
+    var cx = W / 2;
+    var cy = H / 2;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#FF6B61";
+    ctx.fillRect(cx - 32, cy - 214, 64, 4);
+    ctx.fillStyle = "#FAFAF7";
+    ctx.font = "700 58px 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif";
+    ctx.fillText(state.name || "MICHEAL RAY BERRY", cx, cy - 144);
+    ctx.fillStyle = "#FF6B61";
+    ctx.font = "500 21px 'IBM Plex Mono', monospace";
+    ctx.fillText(state.projectLine || "PUBLIC ACCOUNTABILITY PROJECT", cx, cy - 88);
+    ctx.strokeStyle = "rgba(250,250,247,0.16)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - 200, cy - 30);
+    ctx.lineTo(cx + 200, cy - 30);
+    ctx.stroke();
+    ctx.fillStyle = "#FAFAF7";
+    fitFont(ctx, state.title || "", 44, W - 70, "700 ", "px 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif");
+    ctx.fillText(state.title || "", cx, cy + 34);
+    var yNext = cy + 106;
+    if (state.stat) {
+      ctx.fillStyle = "#FAFAF7";
+      ctx.font = "700 48px 'IBM Plex Mono', monospace";
+      ctx.fillText(state.stat, cx, yNext);
+      yNext += 66;
+    }
+    ctx.fillStyle = "#B9B8B2";
+    fitFont(ctx, state.line1 || "", 26, W - 70, "500 ", "px 'IBM Plex Mono', monospace");
+    ctx.fillText(state.line1 || "", cx, yNext);
+    ctx.fillStyle = "#78776F";
+    ctx.font = "400 19px 'IBM Plex Mono', monospace";
+    ctx.fillText(state.line2 || "MICHEALRAYBERRY.COM", cx, yNext + 50);
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+  }
+
+  /**
+   * Exported thumbnail (720x1280): a captured body frame with a LARGE
+   * lower-third — small identity line (name · date) over a big record line
+   * (day · weight) — matching the filed Shorts. state: { frame, big, small }
+   */
+  function drawThumbCard(ctx, state) {
+    state = state || {};
+    if (state.frame) {
+      ctx.drawImage(state.frame, 0, 0, W, H);
+    } else {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, W, H);
+    }
+    var big = state.big || "";
+    var small = state.small || "";
+    if (!big && !small) return;
+    var cx = W / 2;
+    var maxW = W - 132;
+    function fitPx(text, basePx, weight) {
+      var px = basePx;
+      ctx.font = weight + " " + px + "px 'IBM Plex Mono', monospace";
+      while (px > 14 && ctx.measureText(text).width > maxW) {
+        px -= 1;
+        ctx.font = weight + " " + px + "px 'IBM Plex Mono', monospace";
+      }
+      return px;
+    }
+    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0;
+    if (small) {
+      smallPx = fitPx(small, 26, "600");
+      smallW = ctx.measureText(small).width;
+    }
+    if (big) {
+      bigPx = fitPx(big, 58, "700");
+      bigW = ctx.measureText(big).width;
+    }
+    var chipW = Math.max(smallW, bigW) + 84;
+    var chipH = 22 + (small ? smallPx + 14 : 0) + (big ? bigPx + 8 : 0) + 22;
+    var x = cx - chipW / 2;
+    var y = H - 84 - chipH;
+    ctx.fillStyle = "rgba(10,10,9,0.88)";
+    roundRect(ctx, x, y, chipW, chipH, 8);
+    ctx.fill();
+    ctx.fillStyle = "#B3261E";
+    ctx.fillRect(x, y + 5, 8, chipH - 10);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    var tx = x + 8 + (chipW - 8) / 2;
+    var ty = y + 22;
+    if (small) {
+      ctx.font = "600 " + smallPx + "px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = "#C6C4BD";
+      ty += smallPx;
+      ctx.fillText(small, tx, ty);
+      ty += 14;
+    }
+    if (big) {
+      ctx.font = "700 " + bigPx + "px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = "#FFFFFF";
+      ty += bigPx;
+      ctx.fillText(big, tx, ty);
+    }
+    ctx.textAlign = "left";
   }
 
   /**
@@ -904,8 +1082,10 @@
     }
   }
 
-  function buildDailyBottom(day, code) {
-    return "DAY " + MRB.dates.padDay(day) + " · CODE " + code;
+  function buildDailyBottom(day, code, weight) {
+    var base = "DAY " + MRB.dates.padDay(day);
+    if (weight) base += " · " + weight + " LB";
+    return base + " · CODE " + code;
   }
 
   function buildCornerBottom(vNum, level, remainingMmSs) {
@@ -926,6 +1106,8 @@
     TOP: TOP,
     BOTTOM: BOTTOM,
     drawOverlay: drawOverlay,
+    drawTitleCard: drawTitleCard,
+    drawThumbCard: drawThumbCard,
     drawLetterboxedVideo: drawLetterboxedVideo,
     buildDailyBottom: buildDailyBottom,
     buildCornerBottom: buildCornerBottom,
@@ -1736,6 +1918,7 @@
         id: "wait_open",
         label: "Opening — Wait",
         sec: 12,
+        pose: "WAIT POSITION",
         text:
           "This is the official Daily Inspection for Micheal Ray Berry, Day " +
           n +
@@ -1750,6 +1933,7 @@
         id: "inspection",
         label: "Front — Inspection",
         sec: 8,
+        pose: "INSPECTION · HANDS BEHIND HEAD",
         text:
           "Assume Inspection position. Feet shoulder-width apart. Hands behind the head. Eyes forward. Hold.",
       },
@@ -1757,30 +1941,35 @@
         id: "left",
         label: "Left",
         sec: 5,
+        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
         text: "Turn left. Hold. Left profile.",
       },
       {
         id: "rear",
         label: "Rear",
         sec: 5,
+        pose: "REAR · HANDS BEHIND HEAD",
         text: "Turn to the rear. Hold. Rear view.",
       },
       {
         id: "right",
         label: "Right",
         sec: 5,
+        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
         text: "Turn right. Hold. Right profile.",
       },
       {
         id: "front_close",
         label: "Front — Closing View",
         sec: 6,
+        pose: "FRONT · HANDS BEHIND HEAD",
         text: "Return to the front. Hold. Four required views complete.",
       },
       {
         id: "wait_close",
         label: "Return to Wait — Completion",
         sec: 10,
+        pose: "WAIT POSITION",
         text:
           "Return to Wait position. Hold. The remaining Daily Compliance Packet requirements " +
           "are due by ten PM Eastern. Up, down, or flat, it gets posted. Daily Inspection complete.",
@@ -1794,21 +1983,25 @@
         id: "front",
         label: "Front",
         text: "Front photograph. Inspection position. Feet shoulder-width apart. Hands behind the head. Hold.",
+        pose: "FRONT · HANDS BEHIND HEAD",
       },
       {
         id: "left",
         label: "Left",
         text: "Left profile photograph. Turn left. Hands behind the head. Hold.",
+        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
       },
       {
         id: "rear",
         label: "Rear",
         text: "Rear photograph. Turn to the rear. Hands behind the head. Hold.",
+        pose: "REAR · HANDS BEHIND HEAD",
       },
       {
         id: "right",
         label: "Right",
         text: "Right profile photograph. Turn right. Hands behind the head. Hold.",
+        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
       },
     ];
   }
@@ -1828,6 +2021,7 @@
         id: "wait_open",
         label: "Opening — Wait",
         sec: 16,
+        pose: "WAIT POSITION",
         text:
           "This is a Corrective Session for Micheal Ray Berry under the Public Accountability Project. " +
           "The entry being corrected is " +
@@ -1845,6 +2039,7 @@
         id: "to_corner",
         label: "Assume Corner Position",
         sec: 18,
+        pose: "CORNER POSITION · HANDS BEHIND HEAD",
         text:
           "Turn around and face the corner. Feet shoulder-width apart. Hands behind the head. " +
           "Do not lean against either wall. Eyes toward the corner. Hold the position. " +
@@ -3109,9 +3304,9 @@
 
     var bottomPrimary = "";
     if (session.inSetup) {
-      bottomPrimary = "SETUP — HANDS BEHIND HEAD · CODE " + session.code;
+      bottomPrimary = "SETUP — WAIT POSITION · CODE " + session.code;
     } else if (session.type === "daily") {
-      bottomPrimary = MRB.overlay.buildDailyBottom(session.day, session.code);
+      bottomPrimary = MRB.overlay.buildDailyBottom(session.day, session.code, session.weight);
     } else if (session.type === "corrective") {
       bottomPrimary = MRB.overlay.buildCornerBottom(
         session.vNum || session.level,
@@ -3132,17 +3327,68 @@
       projectLine: "PUBLIC ACCOUNTABILITY PROJECT",
       bottomPrimary: bottomPrimary,
       bottomSecondary: MRB.overlay.buildSecondary(session.date),
-      monitorText: null,
-      monitorTone: "ok",
+      // Burned-in pose line: tracks the CURRENT scripted position. Gray —
+      // instructional, not computer-confirmed (pose monitor disabled).
+      monitorText: session.poseText || null,
+      monitorTone: session.poseTone || "ok",
       videoEl: session.videoEl,
       showGuides: !!session.inSetup,
     };
   }
 
+  function titleCardStateFrom(session) {
+    var title =
+      session.type === "demo"
+        ? MRB.overlay.demoTag()
+        : MRB.config.SESSION_TAGS[session.type] || session.type.toUpperCase();
+    var dateStr = MRB.dates.formatOverlayDate(session.date);
+    var line1 = dateStr;
+    var stat = "";
+    if (session.type === "daily") {
+      line1 = "DAY " + MRB.dates.padDay(session.day) + " \u00B7 " + dateStr;
+      stat = session.weight ? session.weight + " LB" : "";
+    } else if (session.type === "corrective") {
+      line1 = "V-" + String(session.vNum || session.level).padStart(3, "0") + " \u00B7 LEVEL " + session.level + " \u00B7 " + dateStr;
+    } else if (session.type === "weekly") {
+      line1 = "WEEK " + (session.week || "") + " \u00B7 " + dateStr;
+    } else if (session.type === "confirmation") {
+      line1 = "VERSION " + (session.version || "1") + " \u00B7 " + dateStr;
+    }
+    return {
+      name: "MICHEAL RAY BERRY",
+      projectLine: "PUBLIC ACCOUNTABILITY PROJECT",
+      title: title,
+      stat: stat,
+      line1: line1,
+      line2: "MICHEALRAYBERRY.COM",
+    };
+  }
+
+  function thumbStateFrom(session) {
+    // The exported PNG is the exact composed frame (stamp burned in), so the
+    // same frame is pickable as the thumbnail inside the YouTube video.
+    return { frame: session.thumbFrame };
+  }
+
   function makeDraw(session, compose, preview) {
     return function () {
-      var state = overlayStateFrom(session);
-      MRB.overlay.drawOverlay(compose.getContext("2d"), state);
+      var ctx = compose.getContext("2d");
+      if (session.titleCardUntil && performance.now() < session.titleCardUntil) {
+        MRB.overlay.drawTitleCard(ctx, titleCardStateFrom(session));
+      } else {
+        var st = overlayStateFrom(session);
+        MRB.overlay.drawOverlay(ctx, st);
+        // Thumbnail body frame: captured once, ~2.5s after the title card —
+        // the opening posture (facing camera, hands behind head), so every
+        // day's thumbnail has the same camera position and stance.
+        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 2500 && st.videoEl && st.videoEl.videoWidth) {
+          var f = document.createElement("canvas");
+          f.width = MRB.overlay.W;
+          f.height = MRB.overlay.H;
+          f.getContext("2d").drawImage(compose, 0, 0);
+          session.thumbFrame = f;
+        }
+      }
       var pctx = preview.getContext("2d");
       pctx.drawImage(compose, 0, 0);
     };
@@ -3198,7 +3444,8 @@
     loop.start();
 
     MRB.ui.setStatus("session", "SETUP — get into position");
-    setMeta("Not recording yet · hands behind head");
+    session.poseText = "WAIT POSITION";
+    setMeta("Not recording yet · wait position");
 
     await speakAndHold(
       session,
@@ -3231,10 +3478,10 @@
         countdownEl.textContent =
           "SETUP " +
           Math.ceil(remaining) +
-          "s · hands behind head" +
+          "s · wait position" +
           (canReady ? " · ready available" : " · hold " + Math.ceil(SETUP_MIN_SEC - elapsed) + "s");
       }
-      setMeta("Setup " + Math.floor(elapsed) + "s · hands behind head");
+      setMeta("Setup " + Math.floor(elapsed) + "s · wait position");
 
       if (canReady && userReady) {
         resolved = true;
@@ -3337,10 +3584,13 @@
       challengeCode: session.code,
     });
 
+    // First ~1.6s of every recording is the burned-in title card — it is the
+    // pick-a-frame thumbnail on Shorts and self-identifies any repost.
+    session.titleCardUntil = performance.now() + 1600;
     var draw = makeDraw(session, compose, preview);
     await rec.start(draw);
     MRB.ui.setStatus("session", "Recording");
-    setMeta(session.type + " · code " + session.code + " · hands behind head");
+    setMeta(session.type + " · code " + session.code);
 
     try {
       if (session.type === "daily") {
@@ -3390,7 +3640,7 @@
 
     session.machine.go("filing");
     var filedOk = await fileResult(session, result, {});
-    var links = autoDownload(session, result);
+    var links = await autoDownload(session, result);
     active = null;
     await cleanup(session, false);
     return {
@@ -3402,11 +3652,18 @@
     };
   }
 
-  function autoDownload(session, result) {
+  async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
+    var thumbBlob = null;
+    try {
+      thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
+    } catch (e) {
+      /* thumbnail is a bonus artifact — never block the downloads */
+    }
     return MRB.download.saveArtifacts({
       videoBlob: result.blob,
       photos: session.photos,
+      thumbBlob: thumbBlob,
       meta: {
         kind: session.type,
         day: session.day,
@@ -3441,6 +3698,7 @@
         session.machine.setCurrentView(viewId);
       }
       MRB.ui.setStatus("session", segments[i].label);
+      if (segments[i].pose) session.poseText = segments[i].pose;
       await speakAndHold(session, segments[i].text, segments[i].sec);
       if (viewId) session.machine.markViewDone(viewId);
     }
@@ -3464,6 +3722,7 @@
       var seg = segments[i];
       if (seg.id) session.machine.setCurrentView(seg.id);
       MRB.ui.setStatus("session", seg.label);
+      if (seg.pose) session.poseText = seg.pose;
       setMeta(
         "Level " +
           session.level +
@@ -3512,11 +3771,13 @@
 
     session.remainingSec = 0;
     MRB.ui.setStatus("session", "Timer complete");
+    session.poseText = "RETURN TO WAIT";
     await speakAndHold(session, MRB.scripts.cornerTimerComplete(), 10);
     if (session.aborted) return;
 
     session.machine.setCurrentView("wait_close");
     MRB.ui.setStatus("session", "Closing — Wait");
+    session.poseText = "WAIT POSITION";
     await speakAndHold(session, MRB.scripts.cornerClosing(session), 14);
     session.machine.markViewDone("wait_close");
   }
@@ -3527,6 +3788,7 @@
     var fig = session.figures || { lines: [], assessment: "", endW: null, documented: 0 };
 
     MRB.ui.setStatus("session", "Opening");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.weeklyOpening(session), 12);
     if (session.aborted) return;
 
@@ -3536,6 +3798,7 @@
     }
 
     MRB.ui.setStatus("session", "To the corner");
+    session.poseText = "CORNER POSITION · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.weeklyToCorner(), 14);
     if (session.aborted) return;
 
@@ -3561,6 +3824,7 @@
     }
 
     MRB.ui.setStatus("session", "Closing");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(
       session,
       MRB.scripts.weeklyClosing({
@@ -3573,16 +3837,19 @@
 
   async function runConfirmation(session) {
     MRB.ui.setStatus("session", "Confirmation");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.confirmationScript(session), 30);
   }
 
   async function runDemo(session) {
     MRB.ui.setStatus("session", "Demonstration");
+    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.demoScript(), 25);
   }
 
   async function runAnnouncement(session) {
     MRB.ui.setStatus("session", "Announcement");
+    session.poseText = "WAIT POSITION";
     await speakAndHold(session, MRB.scripts.announcementScript(), 60);
   }
 
@@ -3627,6 +3894,7 @@
       MRB.ui.byId("photo-step-label").textContent = p.label + " (" + (i + 1) + "/4)";
       MRB.ui.byId("photo-prompt").textContent = p.text;
       MRB.ui.setStatus("photo", "Preparing…");
+      session.poseText = p.pose || "HANDS BEHIND HEAD";
 
       var live = true;
       var liveTimer = setInterval(function () {
@@ -3648,7 +3916,7 @@
         if (session.aborted) break;
         MRB.ui.setStatus(
           "photo",
-          "Auto capture in " + c + " · hold position · hands behind head"
+          "Auto capture in " + c + " · hold position"
         );
         await sleep(1000, session);
       }
@@ -4603,6 +4871,31 @@
     return "micheal-ray-berry-" + day + "-" + stem + "-" + date + code + "." + ext;
   }
 
+  function buildThumbName(meta) {
+    meta = meta || {};
+    var STEMS = { daily: "inspection", corrective: "corrective", weekly: "weekly-review", confirmation: "confirmation", demo: "demo" };
+    var kind = meta.kind || meta.type || "session";
+    var stem = STEMS[kind] || kind;
+    var day = "day-" + String(meta.day != null ? meta.day : 0).padStart(3, "0");
+    var date = meta.date || new Date().toISOString().slice(0, 10);
+    return "micheal-ray-berry-" + day + "-" + stem + "-thumbnail-" + date + ".png";
+  }
+
+  /** Render the session title card to a vertical PNG (720\u00D71280). */
+  function renderThumbnail(state) {
+    return new Promise(function (resolve, reject) {
+      var c = document.createElement("canvas");
+      c.width = MRB.overlay.W;
+      c.height = MRB.overlay.H;
+      if (state && state.frame) MRB.overlay.drawThumbCard(c.getContext("2d"), state);
+      else MRB.overlay.drawTitleCard(c.getContext("2d"), state);
+      c.toBlob(function (blob) {
+        if (blob) resolve(blob);
+        else reject(new Error("Thumbnail render failed"));
+      }, "image/png");
+    });
+  }
+
   /**
    * Auto-download video + photos; return link descriptors for the result UI.
    */
@@ -4622,6 +4915,18 @@
         url: vUrl,
         size: payload.videoBlob.size,
         blob: payload.videoBlob,
+      });
+    }
+
+    if (payload.thumbBlob) {
+      var tName = buildThumbName(meta);
+      var tUrl = triggerDownload(payload.thumbBlob, tName);
+      links.push({
+        kind: "thumbnail",
+        name: tName,
+        url: tUrl,
+        size: payload.thumbBlob.size,
+        blob: payload.thumbBlob,
       });
     }
 
@@ -4677,6 +4982,8 @@
     saveArtifacts: saveArtifacts,
     renderLinks: renderLinks,
     buildVideoName: buildVideoName,
+    buildThumbName: buildThumbName,
+    renderThumbnail: renderThumbnail,
     extensionForMime: extensionForMime,
   };
 })(window.MRB);

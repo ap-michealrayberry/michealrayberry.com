@@ -8,6 +8,8 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /dashboard   /index.html  200
 /milestones  /index.html  200
 /penalties   /index.html  200
+/partner     /index.html  200
+/accountability-partner  /partner  301
 /uniform     /index.html  200
 /updates     /index.html  200
 /log         /penalties   301

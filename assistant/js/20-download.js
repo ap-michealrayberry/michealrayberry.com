@@ -49,6 +49,31 @@
     return "micheal-ray-berry-" + day + "-" + stem + "-" + date + code + "." + ext;
   }
 
+  function buildThumbName(meta) {
+    meta = meta || {};
+    var STEMS = { daily: "inspection", corrective: "corrective", weekly: "weekly-review", confirmation: "confirmation", demo: "demo" };
+    var kind = meta.kind || meta.type || "session";
+    var stem = STEMS[kind] || kind;
+    var day = "day-" + String(meta.day != null ? meta.day : 0).padStart(3, "0");
+    var date = meta.date || new Date().toISOString().slice(0, 10);
+    return "micheal-ray-berry-" + day + "-" + stem + "-thumbnail-" + date + ".png";
+  }
+
+  /** Render the session title card to a vertical PNG (720\u00D71280). */
+  function renderThumbnail(state) {
+    return new Promise(function (resolve, reject) {
+      var c = document.createElement("canvas");
+      c.width = MRB.overlay.W;
+      c.height = MRB.overlay.H;
+      if (state && state.frame) MRB.overlay.drawThumbCard(c.getContext("2d"), state);
+      else MRB.overlay.drawTitleCard(c.getContext("2d"), state);
+      c.toBlob(function (blob) {
+        if (blob) resolve(blob);
+        else reject(new Error("Thumbnail render failed"));
+      }, "image/png");
+    });
+  }
+
   /**
    * Auto-download video + photos; return link descriptors for the result UI.
    */
@@ -68,6 +93,18 @@
         url: vUrl,
         size: payload.videoBlob.size,
         blob: payload.videoBlob,
+      });
+    }
+
+    if (payload.thumbBlob) {
+      var tName = buildThumbName(meta);
+      var tUrl = triggerDownload(payload.thumbBlob, tName);
+      links.push({
+        kind: "thumbnail",
+        name: tName,
+        url: tUrl,
+        size: payload.thumbBlob.size,
+        blob: payload.thumbBlob,
       });
     }
 
@@ -123,6 +160,8 @@
     saveArtifacts: saveArtifacts,
     renderLinks: renderLinks,
     buildVideoName: buildVideoName,
+    buildThumbName: buildThumbName,
+    renderThumbnail: renderThumbnail,
     extensionForMime: extensionForMime,
   };
 })(window.MRB);

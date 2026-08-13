@@ -16,6 +16,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#141412">
   <script src="./boot.js"></script>
+  <link rel="icon" type="image/svg+xml" href="https://michealrayberry.com/favicon.svg">
   <link rel="icon" type="image/png" href="https://michealrayberry.com/favicon.png">
   <link rel="apple-touch-icon" href="https://michealrayberry.com/favicon.png">
   <meta name="robots" content="index, follow">
@@ -167,11 +168,14 @@
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
           <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
+          <a href="/partner" onClick="{{ goPartner }}" aria-current="{{ isPartnerNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 11px; cursor: pointer; color: #B3261E; text-decoration: none; display: inline-block; border: 1px solid #B3261E;" style-hover="background: #B3261E; color: #FFFFFF;">Local AP</a>
         </div>
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection Standard</a>
+          <a href="/uniform" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
           <a href="/agreement" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
           <a href="/about" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
+          <a href="/updates" onClick="{{ goUpdates }}" aria-current="{{ isUpdatesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Updates</a>
         </div>
       </nav>
     </div>
@@ -739,6 +743,65 @@
   </div>
   </sc-if>
 
+  <!-- ==================== LOCAL AP ==================== -->
+  <sc-if value="{{ isPartner }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Local AP">
+    <section style="border-bottom: 1px solid #141412; padding: 72px 32px 56px;">
+      <div style="max-width: 1160px; margin: 0 auto;">
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§12.2 — Accountability Partner</p>
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 24px;">Local Accountability Partner Wanted</h1>
+        <div style="max-width: 700px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
+          <p style="margin: 0;">This project is administered by a remote Accountability Partner. It now needs a second Partner who can be present in person, locally, to carry the parts of the role that cannot be done over a screen.</p>
+          <p style="margin: 0;">This is a real enforcement role, not a symbolic one. It carries genuine authority: within the written rules, the Partner's judgment on the record is final, and it is not negotiable in the moment. Any appointment is formalized by a signed amendment to the agreement. Before you consider it, understand exactly what it involves.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="What the role is">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8837B;">The role</span>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">What you would do</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7; color: #D8D6CF;">
+          <p style="margin: 0;">You would enforce the signed agreement in person, with real authority over how it is carried out. That includes directing and supervising corrective corner time — standing in a corner for 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role is conducted strictly under the agreement: safe-for-work under §10.4, with your identity kept private under §12.2.</p>
+          <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <li>Verify weigh-ins in person.</li>
+            <li>Supervise corrective corner-time sessions.</li>
+            <li>Confirm or reject violations against the written rules.</li>
+            <li>Help administer the website and the official record.</li>
+            <li>Hold the signed agreement and the record keys.</li>
+            <li>Set additional daily structure and requirements in support of the goal, enforced on the same terms (§3.1).</li>
+            <li>Conduct the weekly review.</li>
+            <li>Appear on camera as needed, with your face and identity kept private (§12.2).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px;">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The requirement</span>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">You can hold the line</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7;">
+          <p style="margin: 0;">There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when Micheal asks you not to.</p>
+          <p style="margin: 0; font-weight: 600;">The project only works if the person running it does not soften it in the moment. If that is not you, this is not the role for you.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 56px 32px 72px; background: #FAFAF7;">
+      <div style="max-width: 1160px; margin: 0 auto; border: 1px solid #141412; padding: 40px 36px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">To apply</span>
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(30px, 4vw, 48px); text-transform: uppercase; margin: 0; line-height: 1;">Write to the Accountability Partner</h2>
+        <a href="mailto:ap@michealrayberry.com" style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(18px, 3vw, 26px); font-weight: 600; color: #141412; text-decoration: none; border-bottom: 2px solid #B3261E; align-self: flex-start; padding-bottom: 2px;" style-hover="color: #B3261E;">ap@michealrayberry.com</a>
+      </div>
+    </section>
+  </div>
+  </sc-if>
+
   <!-- ==================== ABOUT ==================== -->
   <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="About">
@@ -895,7 +958,7 @@
           <div style="border: 1px solid #141412; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px; max-width: 560px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Covered by the agreement</span>
             <ul style="margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.7; display: flex; flex-direction: column; gap: 6px;">
-              <li>Daily Compliance Packet — weight entry, Daily Inspection video published to the official record, four-angle daily photos, and tracker update by 10:00 PM ET</li>
+              <li>Daily Compliance Packet — weight entry, Daily Inspection video published to the official record, four-angle daily photos, tracker update, and device-synced activity data by 10:00 PM ET</li>
               <li>Standardized uniform, pose, and four-angle documentation format</li>
               <li>Consequences (§8): corner time, 10 / 20 / 30 minutes by level, recorded and published. The permanent entry records the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result</li>
               <li>Milestone resets at 300 / 275 / 250 / 225 / 200 / 175 lbs</li>
@@ -954,7 +1017,8 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">2. Definitions</h3>
           <p style="margin: 0;"><strong>Project Day</strong> — each calendar day in the America/New_York time zone, beginning Day 1. <strong>Official Platforms</strong> — the website michealrayberry.com, the official YouTube channel @michealrayberry, and the AP-administered media archive, together with any Project account the AP designates for republication; only records on Official Platforms count toward compliance. The daily inspection video is both published to the official record and posted publicly to the official YouTube channel by the deadline; a verified outage of either platform is handled under §9. <strong>Official Record System</strong> — the AP-administered submission database, weigh-in log, Violation Log, Consequence Log, photo and video archives, Updates log, integrity manifests, and automatically generated website records, without regard to the particular vendor or storage technology used. <strong>Recording Assistant</strong> — the required capture and submission interface at michealrayberry.com/#record, or its AP-designated successor URL, that controls the official sequence, overlays, timestamps, media capture, validation, and transmission of required records. <strong>Daily Compliance Packet</strong> — the four items listed in §3, due every Project Day. <strong>Violation Event</strong> — a documentation failure as defined in §7; weight values are never Violation Events. <strong>Accumulated Violation Count</strong> — the number of Violation Events since Day 1 or the most recent documented milestone reset under §6.2. <strong>Consequence Level</strong> — Level One, Level Two, or Level Three, determined under §8.1. <strong>Corrective Session</strong> — the standardized, continuous, recorded session described in §8.2, published on the permanent record beside the Violation Event that caused it. <strong>Active Violation Period</strong> — the period beginning when the AP publishes a confirmed Violation Event and ending only when the AP verifies that every consequence assigned to that event has been completed and marks the event Resolved. <strong>Public Notice</strong> — the factual site notice described in §8.5, displayed while an entry is unresolved. <strong>Consequence Record</strong> — the permanent public entry described in §8.4: date, missed requirement, status, and resolution date.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">3. The Daily Compliance Packet</h3>
-          <p style="margin: 0;">Every Project Day, by 10:00 PM Eastern Time, Micheal Ray Berry shall use the official Recording Assistant to complete and transmit all four items: (1) <strong>Daily Inspection Video</strong> — one standardized inspection video captured through the Recording Assistant, published to the official record at michealrayberry.com, and posted publicly to the official YouTube channel @michealrayberry, where each day page embeds it; a missed or late YouTube posting is itself a Violation Event; (2) <strong>Daily Accountability Photos</strong> — the standardized four-angle photos (front, left side, rear, right side) captured in the same Recording Assistant session and transmitted to the Official Record System; (3) <strong>Weight Entry</strong> — that day’s weight entered and submitted through the Recording Assistant; and (4) <strong>Daily Record Fields</strong> — every other field presented or assigned through the Recording Assistant completed and submitted. Multiple missed items on the same Project Day constitute one Violation Event. A packet counts as timely only when the Recording Assistant records a successful server-side submission by the deadline. Local capture, an unfinished form, a file remaining on Micheal Ray Berry’s device, or an attempted transmission without a success confirmation does not constitute completion. The Official Record System’s server timestamps, validation results, event history, and integrity records are authoritative evidence. A delay or failure in an automated downstream publication process does not constitute a Violation Event if the Recording Assistant successfully received a complete and timely packet; in that event the AP or automated recovery process shall restore publication without penalty to Micheal Ray Berry.</p>
+          <p style="margin: 0;">Every Project Day, by 10:00 PM Eastern Time, Micheal Ray Berry shall use the official Recording Assistant to complete and transmit all five items: (1) <strong>Daily Inspection Video</strong> — one standardized inspection video captured through the Recording Assistant, published to the official record at michealrayberry.com, and posted publicly to the official YouTube channel @michealrayberry, where each day page embeds it; a missed or late YouTube posting is itself a Violation Event; (2) <strong>Daily Accountability Photos</strong> — the standardized four-angle photos (front, left side, rear, right side) captured in the same Recording Assistant session and transmitted to the Official Record System; (3) <strong>Weight Entry</strong> — that day’s weight entered and submitted through the Recording Assistant; (4) <strong>Daily Record Fields</strong> — every other field presented or assigned through the Recording Assistant completed and submitted; and (5) <strong>Activity Sync</strong> — that day’s device-recorded activity data (steps, active-zone minutes, distance, and calories), delivered to the Official Record System by automatic sync from the connected device platform while a device connection is active. Activity figures are read from the device platform, never self-reported. A failure of the device platform or the sync service itself, evidenced by the Official Record System’s sync log, is a downstream failure and not a Violation Event. Multiple missed items on the same Project Day constitute one Violation Event. A packet counts as timely only when the Recording Assistant records a successful server-side submission by the deadline. Local capture, an unfinished form, a file remaining on Micheal Ray Berry’s device, or an attempted transmission without a success confirmation does not constitute completion. The Official Record System’s server timestamps, validation results, event history, and integrity records are authoritative evidence. A delay or failure in an automated downstream publication process does not constitute a Violation Event if the Recording Assistant successfully received a complete and timely packet; in that event the AP or automated recovery process shall restore publication without penalty to Micheal Ray Berry.</p>
+          <p style="margin: 0;"><strong>3.1 Additional structure and requirements.</strong> In addition to the Daily Compliance Packet, the Accountability Partner may establish further daily structure, routines, check-ins, and requirements in support of the Project's purpose. Such requirements (a) must serve the Project's health and accountability purpose and be reasonable in light of it; (b) remain at all times subject to §6.4 and §9 — documented medical advice and a physician's guidance supersede them, and any requirement a licensed physician advises against is void; (c) must be safe, lawful, and strictly non-sexual and safe-for-work under §10.4; (d) take effect only when adopted by a written amendment signed under §12.1 and then noted in the public Updates log by title and date; and (e) once in effect, are enforced under §§7–8 on the same automatic, non-discretionary basis as every other requirement. Micheal Ray Berry may contest a new requirement within 48 hours only on the ground that it fails (a), (b), or (c); otherwise it takes effect and stands. This authority exists only for the Project's duration and ends on completion (§6.3) or termination (§11).</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">4. Documentation Standard</h3>
           <p style="margin: 0;"><strong>4.1 Uniform.</strong> All official documentation is recorded in the project uniform: solid black unitard and plain black shoes. It is a visible symbol of the commitment entered into at the start of the Project, appearing in every inspection and standardized photograph from beginning to completion. Identity is established by Micheal Ray Berry’s visible face and the Official Platforms. <strong>4.2 Wait position.</strong> Every inspection recording opens and closes in the Wait position: standing upright and squared to the camera, feet apart at the established width, hands behind the back, head level, eyes forward. The opening Wait is held while the Project Day, date, recorded weight, and verification code are established on the record; the closing Wait is held while the session is closed. Wait files no progress photograph. <strong>4.3 Pose and angles.</strong> Standing upright, hands behind the head, body and face visible. Each Daily Inspection documents front, left side, rear, and right side views in sequence, closing on a front view before returning to Wait. A normal Daily Inspection runs approximately 20–60 seconds; no specific length is required if identity, attire, pose, angles, and visibility are clear. <strong>4.4 No concealment.</strong> No cropping, filters, props, lighting, editing, clothing alteration, camera angle, timing, or platform setting intended to conceal body size, identity, attire, weight status, or compliance. The same standards apply to the daily photos. <strong>4.5 Mandatory capture and submission instrument.</strong> The Recording Assistant is the exclusive ordinary method for creating and submitting the Daily Compliance Packet. It shall guide the standardized sequence, require the official poses and angles, apply the date and Project Day overlay, associate the submitted weight and required fields, capture server time, validate completeness, transmit the packet to the Official Record System, and issue an unambiguous success or failure result. Separately recorded or manually uploaded media do not count unless the Recording Assistant was verifiably unavailable and the AP expressly authorizes a replacement method under §9. Preference, convenience, travel, browser choice, unfamiliarity, or avoidable device problems do not authorize bypassing the Recording Assistant.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">5. Official Weigh-Ins and Reviews</h3>
@@ -983,9 +1047,9 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">11. Termination Without Completion</h3>
           <p style="margin: 0;">Thirty consecutive Project Days without required documentation, or any attempt by Micheal Ray Berry to delete, conceal, disable, or shut down the public record, creates a presumption that the Project has ended without completion. Before recording termination, the AP provides written notice and a seven-calendar-day opportunity to resume documentation, establish a documented exception (§9), or execute a mutual termination (§12.4). If the Project ends without completion, the website retains a neutral permanent archival entry stating that the Project ended without verified completion on the stated date and the last verified weight, and may include an accurate summary of documented compliance history. The entry may not use insulting, degrading, speculative, or punitive language. Consequences already assessed under §8 remain in effect.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">12. General Terms</h3>
-          <p style="margin: 0;"><strong>12.1 Amendments</strong> only by written instrument signed by both parties; each amendment is noted in the public Updates log by title and date. <strong>12.2 AP privacy.</strong> The AP is not publicly named. Public contact routes to ap@michealrayberry.com. <strong>12.3 Good faith.</strong> Both parties shall act in good faith toward the Project’s purpose: a truthful, complete, permanent public record. If any provision is found unenforceable, the remainder stands. <strong>12.4 Voluntary participation.</strong> Micheal Ray Berry may be released from this Agreement only by completion (§6.3), by signed mutual termination noted in the public record, or by termination without completion (§11) with its stated permanent effects.</p>
+          <p style="margin: 0;"><strong>12.1 Amendments</strong> only by written instrument signed by both parties; each amendment is noted in the public Updates log by title and date. <strong>12.2 AP privacy.</strong> The AP is not publicly named. Public contact routes to ap@michealrayberry.com. <strong>12.3 Good faith.</strong> Both parties shall act in good faith toward the Project’s purpose: a truthful, complete, permanent public record. If any provision is found unenforceable, the remainder stands. <strong>12.4 Voluntary participation.</strong> Micheal Ray Berry may be released from this Agreement only by completion (§6.3), by signed mutual termination noted in the public record, or by termination without completion (§11) with its stated permanent effects. <strong>12.5 Additional or successor Accountability Partner.</strong> A person becomes an additional or successor Accountability Partner, and gains any authority under this Agreement, only through a written amendment signed under §12.1 that identifies them to the parties (their identity may remain private to the public under §12.2) and states the scope of their authority. Until such an amendment takes effect, no person other than the current Accountability Partner holds any authority under this Agreement, and no additional structure or requirement under §3.1 is effective.</p>
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">13. Acknowledgment and Execution</h3>
-          <p style="margin: 0;">I, Micheal Ray Berry, have read every section of this Agreement and I understand exactly what I am signing. I understand that every confirmed Violation Event produces a Level One, Level Two, or Level Three corrective requirement — corner time of 10, 20, or 30 minutes by level — completed in the project uniform, recorded in one unbroken take, and verified by the Accountability Partner, together with a factual public log entry — date, requirement missed, status, submission and resolution timestamps, and verification result — that becomes part of the permanent public record. I understand that the corrective recording is published on the permanent record beside the entry that caused it, that completing the requirement closes the obligation without removing the recording, and that resolution of the entry does not remove it either. I understand that violations are declared automatically from objective evidence and that the Accountability Partner cannot excuse, soften, or downgrade one — only confirm or reject it against the written rules — and that I have a fixed 48 hours to contest with evidence before the determination stands. I understand that I must complete each corrective session within 72 hours of the notice, and that missing that deadline is itself a new violation at the next level. I understand that submitting the corrective recording resolves the entry, that the Accountability Partner may overrule and reopen it only on the written verification standard with a stated reason, and that resolution never erases the entry. I understand that my Project content is public and that I grant the Accountability Partner a license to repost, share, mirror, and archive it anywhere for the Project's accountability and documentation purpose, but not to sell, monetize, materially alter, or sublicense it for unrelated purposes (§10.2a). I understand and accept that, as a practical matter, public content may be copied and reused by third parties beyond either party's control (§10.2b). I understand that I may not edit, soften, suppress, or remove the record because of embarrassment, regret, dissatisfaction, or loss of motivation; content may be removed, relocated, redacted, or replaced only under the limited circumstances expressly permitted by §10.3 and the safety-and-privacy process in §8.6. I understand that there are only three ways out: I finish, both parties release me in writing, or the Project ends without verified completion and is recorded that way, factually. I am not signing this in a moment of motivation; I am signing it so that the version of me who loses motivation has no exit. No one has pressured me. This is my own decision, made with a clear mind, and I accept every consequence of it.</p>
+          <p style="margin: 0;">I, Micheal Ray Berry, have read every section of this Agreement and I understand exactly what I am signing. I understand that every confirmed Violation Event produces a Level One, Level Two, or Level Three corrective requirement — corner time of 10, 20, or 30 minutes by level — completed in the project uniform, recorded in one unbroken take, and verified by the Accountability Partner, together with a factual public log entry — date, requirement missed, status, submission and resolution timestamps, and verification result — that becomes part of the permanent public record. I understand that the corrective recording is published on the permanent record beside the entry that caused it, that completing the requirement closes the obligation without removing the recording, and that resolution of the entry does not remove it either. I understand that violations are declared automatically from objective evidence and that the Accountability Partner cannot excuse, soften, or downgrade one — only confirm or reject it against the written rules — and that I have a fixed 48 hours to contest with evidence before the determination stands. I understand that I must complete each corrective session within 72 hours of the notice, and that missing that deadline is itself a new violation at the next level. I understand that the Accountability Partner may set additional daily structure and requirements in support of the goal, that these are enforced on the same automatic terms as every other requirement, and that they are bound by the medical, safety, lawful, and non-sexual limits stated in §3.1. I understand that submitting the corrective recording resolves the entry, that the Accountability Partner may overrule and reopen it only on the written verification standard with a stated reason, and that resolution never erases the entry. I understand that my Project content is public and that I grant the Accountability Partner a license to repost, share, mirror, and archive it anywhere for the Project's accountability and documentation purpose, but not to sell, monetize, materially alter, or sublicense it for unrelated purposes (§10.2a). I understand and accept that, as a practical matter, public content may be copied and reused by third parties beyond either party's control (§10.2b). I understand that I may not edit, soften, suppress, or remove the record because of embarrassment, regret, dissatisfaction, or loss of motivation; content may be removed, relocated, redacted, or replaced only under the limited circumstances expressly permitted by §10.3 and the safety-and-privacy process in §8.6. I understand that there are only three ways out: I finish, both parties release me in writing, or the Project ends without verified completion and is recorded that way, factually. I am not signing this in a moment of motivation; I am signing it so that the version of me who loses motivation has no exit. No one has pressured me. This is my own decision, made with a clear mind, and I accept every consequence of it.</p>
           <p style="margin: 0;">The Accountability Partner has read this Agreement in full, accepts the duties of administering the public record fairly and without exception, and agrees to hold the line even — especially — when asked not to.</p>
           <p style="margin: 12px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Signed and executed August 13, 2026 by both parties, and amended by agreement since. Signatures and the amendment record are held by the Accountability Partner. Day 1: August 13, 2026 · Starting weight: 340.0 lb · Goal: 175.0 lb.</p>
         </div>
@@ -1419,7 +1483,7 @@ class Component extends DCLogic {
              indexed and linked from the archive, they are just no longer top-level
              navigation. Milestones render within the dashboard, the uniform within
              about. */
-          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
+          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
           // The Recording Assistant is not part of the public site at all. It
           // is public at /assistant/; the device key gates filing, not viewing.
@@ -1433,22 +1497,24 @@ class Component extends DCLogic {
       window.addEventListener('popstate', () => { openFromUrl(); this.openDayFromUrl(); });
       if ((window.location.search || '').indexOf('day=') !== -1) this.openDayFromUrl();
     } catch (e) {}
-    fetch(this.WEIGHINS_CSV)
+    const loadWeighIns = (retry) => fetch(this.WEIGHINS_CSV)
       .then((r) => (r.ok ? r.text() : null))
       .then((t) => {
-        if (!t) return;
+        if (!t) { if (retry) return loadWeighIns(false); this.setState({ liveWeighIns: [] }); return; }
         const rows = this.parseCSV(t).slice(1); // drop header
         const entries = rows
           // Sheets may hand back a real date (7/22/2026) instead of an ISO
           // string, so every date is normalized before it is validated.
           .map((r) => ({ date: this.normDate(r[0]), weight: parseFloat(r[1]), note: (r[2] || '').trim(), photo: (r[3] || '').trim(), left: (r[4] || '').trim(), rear: (r[5] || '').trim(), right: (r[6] || '').trim(), video: (r[7] || '').trim() }))
           .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && !isNaN(e.weight));
-        if (entries.length) {
-          this.setState({ liveWeighIns: entries });
-          this.injectSeoJsonLd(entries);
-        }
+        // Always resolve the load gate — an empty record renders "—", never an endless spinner.
+        this.setState({ liveWeighIns: entries });
+        if (entries.length) this.injectSeoJsonLd(entries);
       })
-      .catch(() => {});
+      .catch(() => { if (retry) return loadWeighIns(false); this.setState({ liveWeighIns: [] }); });
+    // Safety net: never let the record hang on "Loading" if a CSV endpoint is slow or flaky.
+    setTimeout(() => this.setState((s) => ({ liveWeighIns: s.liveWeighIns == null ? [] : s.liveWeighIns, livePenalties: s.livePenalties == null ? [] : s.livePenalties })), 9000);
+    loadWeighIns(true);
     if (this.JOURNAL_CSV) {
       fetch(this.JOURNAL_CSV || "data:text/csv,")
         .then((r) => (r.ok ? r.text() : null))
@@ -1505,10 +1571,10 @@ class Component extends DCLogic {
         })
         .catch(() => {});
     }
-    fetch(this.PENALTIES_CSV)
+    const loadPenalties = (retry) => fetch(this.PENALTIES_CSV)
       .then((r) => (r.ok ? r.text() : null))
       .then((t) => {
-        if (!t) return;
+        if (!t) { if (retry) return loadPenalties(false); this.setState({ livePenalties: [] }); return; }
         const rows = this.parseCSV(t).slice(1);
         // Public format (§8): date · violation · status. Legacy 7-column level rows still parse.
         const entries = rows
@@ -1527,7 +1593,8 @@ class Component extends DCLogic {
           .filter((e) => e.date && e.violation);
         this.setState({ livePenalties: entries });
       })
-      .catch(() => {});
+      .catch(() => { if (retry) return loadPenalties(false); this.setState({ livePenalties: [] }); });
+    loadPenalties(true);
     // Site State tab (key/value, AP-administered): abandonment stage (§11), AP statement, AP-placed links.
     fetch(this.WEIGHINS_CSV.split('?')[0] + '?tqx=out:csv&sheet=Site State')
       .then((r) => (r.ok ? r.text() : null))
@@ -1573,7 +1640,7 @@ class Component extends DCLogic {
         // gviz falls back to the FIRST sheet when the named tab doesn't exist —
         // only parse if this is really the Health tab.
         const head = (rows[0] || []).map((h) => String(h).toLowerCase());
-        if (head[1] !== 'steps' || head[2] !== 'zone_minutes') return;
+        if (head[1] !== 'steps' || !String(head[2] || '').startsWith('zone')) return;
         const norm = (s) => {
           const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
           return m ? m[3] + '-' + String(m[1]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0') : String(s).trim();
@@ -1623,6 +1690,7 @@ class Component extends DCLogic {
         updates: ['Updates & Milestones \u2014 Micheal Ray Berry', 'Updates from the record: milestones, weekly reviews, and project events.', 'updates'],
         record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
         milestones: ['Milestone Ladder \u2014 300 to 175 | Micheal Ray Berry', 'The six official milestones between 340 and 175 pounds, each verified by an on-camera weigh-in and milestone video, with live status from the record.', 'milestones'],
+        partner: ['Local Accountability Partner Wanted \u2014 Micheal Ray Berry', 'The Public Accountability Project is seeking a local, in-person Accountability Partner to work alongside the remote Partner: verify weigh-ins, supervise corrective corner time, and confirm violations against the written rules. Apply at ap@michealrayberry.com.', 'partner'],
       };
       const m = M[page] || M.home;
       const canon = base + m[2];
@@ -2148,9 +2216,13 @@ class Component extends DCLogic {
       isDashboardNav: page === 'dashboard' ? 'page' : undefined,
       isAgreementNav: page === 'agreement' ? 'page' : undefined,
       isAboutNav: page === 'about' ? 'page' : undefined,
+      isUniformNav: page === 'uniform' ? 'page' : undefined,
+      isUpdatesNav: page === 'updates' ? 'page' : undefined,
+      isPartnerNav: page === 'partner' ? 'page' : undefined,
       isMilestonesNav: page === 'milestones' ? 'page' : undefined,
       isDashboard: page === 'dashboard',
       isAbout: page === 'about',
+      isPartner: page === 'partner',
       isAgreement: page === 'agreement',
       amendments,
       hasAmendments: amendments.length > 0,
@@ -2199,6 +2271,7 @@ class Component extends DCLogic {
       goHome: this.navTo('home'),
       goDashboard: this.navTo('dashboard'),
       goAbout: this.navTo('about'),
+      goPartner: this.navTo('partner'),
       goAgreement: this.navTo('agreement'),
       goPenalties: this.navTo('penalties'),
       goUniform: this.navTo('uniform'),
