@@ -3661,16 +3661,11 @@
 
   async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
-    var thumbBlob = null;
-    try {
-      thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
-    } catch (e) {
-      /* thumbnail is a bonus artifact — never block the downloads */
-    }
+    // Video + the four angle stills only. Inspection/announcement thumbnails
+    // were landing in the daily Drive folder and stealing the front slot.
     return MRB.download.saveArtifacts({
       videoBlob: result.blob,
       photos: session.photos,
-      thumbBlob: thumbBlob,
       meta: {
         kind: session.type,
         day: session.day,
