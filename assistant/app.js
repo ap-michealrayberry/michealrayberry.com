@@ -649,6 +649,7 @@
       mime: mime, // NOT contentType
     };
     var data = await postJson(body);
+    if (data && data.skipped) return data; // R2 retired — caller files photos / YouTube only
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "r2sign failed");
     }
@@ -2523,12 +2524,25 @@
     }
     if (!blob) throw new Error("No blob in queue item");
 
-    // Every take ships to the AP's bucket as a BACKUP copy — for corrective
-    // sessions the public YouTube posting remains the evidence and the thing
-    // that resolves the entry; this copy is disaster recovery only.
-    var sign = await MRB.api.r2sign(item.kind, item.date, item.mime || blob.type || "video/mp4");
-    var uploadUrl = MRB.api.readUploadUrl(sign); // must be uploadUrl
-    await resumablePut(uploadUrl, blob, null, item.uploadOffset || 0);
+    // Video backup used to go to Cloudflare R2. That path is retired.
+    // If the server still signs an upload, we send a disaster-recovery copy;
+    // otherwise we skip straight to attestation + Drive photos + YouTube.
+    var sign = null;
+    var publicUrl = "";
+    try {
+      sign = await MRB.api.r2sign(item.kind, item.date, item.mime || blob.type || "video/mp4");
+    } catch (e) {
+      var msg = (e && e.message) || String(e);
+      if (!/R2 not configured|r2sign failed|missing uploadUrl/i.test(msg)) throw e;
+      sign = { skipped: true };
+    }
+    if (sign && !sign.skipped && sign.uploadUrl && String(sign.uploadUrl).indexOf("example.invalid") < 0) {
+      var uploadUrl = MRB.api.readUploadUrl(sign);
+      await resumablePut(uploadUrl, blob, null, item.uploadOffset || 0);
+      publicUrl = sign.publicUrl || "";
+    } else if (statusWriter) {
+      statusWriter("No video bucket — filing photos to Drive. Post the take to YouTube after.");
+    }
 
     var attestBody = {
       date: item.date,
@@ -2545,7 +2559,7 @@
     var seal = await MRB.api.attest(attestBody);
     item.seal = seal.seal;
     item.sealed_at = seal.sealed_at;
-    item.publicUrl = sign.publicUrl;
+    item.publicUrl = publicUrl;
 
     if (item.kind === "daily" && item.photos) {
       for (var p = 0; p < item.photos.length; p++) {
@@ -2561,7 +2575,7 @@
       await MRB.api.packet({
         date: item.date,
         weight: item.weight,
-        video_url: sign.publicUrl,
+        video_url: publicUrl || undefined,
         finalize: true,
       });
     } else if (item.kind === "weekly") {

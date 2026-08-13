@@ -123,6 +123,7 @@
       mime: mime, // NOT contentType
     };
     var data = await postJson(body);
+    if (data && data.skipped) return data; // R2 retired — caller files photos / YouTube only
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "r2sign failed");
     }
