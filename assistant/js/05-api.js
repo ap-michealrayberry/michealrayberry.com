@@ -93,14 +93,7 @@
         demo: true,
       };
     }
-    var url =
-      c.execUrl +
-      (c.execUrl.indexOf("?") >= 0 ? "&" : "?") +
-      "action=challenge&kind=" +
-      encodeURIComponent(k) +
-      "&key=" +
-      encodeURIComponent(key);
-    var data = await getJson(url);
+    var data = await postJson({ action: "challenge", key: key, kind: k });
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "Challenge request failed");
     }

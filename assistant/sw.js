@@ -1,6 +1,6 @@
-/* MRB Recording Assistant — minimal offline shell for PWA install */
-var CACHE = "mrb-record-v1";
-var ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest"];
+/* MRB Recording Assistant — network-first so a deploy reaches installed phones. */
+var CACHE = "mrb-record-v3";
+var ASSETS = ["./index.html", "styles.css", "app.js", "manifest.webmanifest"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
@@ -31,16 +31,21 @@ self.addEventListener("activate", function (event) {
 self.addEventListener("fetch", function (event) {
   var req = event.request;
   if (req.method !== "GET") return;
+  var url = new URL(req.url);
+  if (url.origin !== location.origin) return;
   event.respondWith(
-    caches.match(req).then(function (cached) {
-      return (
-        cached ||
-        fetch(req).then(function (res) {
-          return res;
-        }).catch(function () {
-          return caches.match("index.html");
-        })
-      );
+    fetch(req).then(function (res) {
+      if (res && res.ok) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (cache) {
+          cache.put(req, copy);
+        });
+      }
+      return res;
+    }).catch(function () {
+      return caches.match(req).then(function (cached) {
+        return cached || caches.match("./index.html");
+      });
     })
   );
 });

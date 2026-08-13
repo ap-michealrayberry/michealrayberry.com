@@ -1,7 +1,7 @@
 {
   "name": "MRB Public Accountability Record",
   "short_name": "MRB Record",
-  "start_url": "/record",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FAFAF7",

@@ -5,14 +5,8 @@ https://michaelrayberry.com/*      https://michealrayberry.com/:splat  301!
 https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 
 /home        /            301
-/dashboard   /index.html  200
-/milestones  /index.html  200
-/penalties   /index.html  200
-/partner     /index.html  200
-/accountability-partner  /partner  301
-/uniform     /index.html  200
-/updates     /index.html  200
 /log         /penalties   301
+/accountability-partner  /partner  301
 /annex/* / 301
 /annex / 301
 /fagspose/* / 301
@@ -37,7 +31,10 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /Corner%20Time.dc.html               /assistant/  301
 /Violation%20Acknowledgment.dc.html  /assistant/  301
 
-# Build-only inputs live in the repo but are not part of the served record.
-# (Netlify builds before publishing, so 404-ing them here does not affect the build.)
-/scripts/*     /404.html   404
-/package.json  /404.html   404
+# Build-only inputs are in the repo but are not part of the served record.
+# The trailing ! is required: without it Netlify serves the real file.
+/scripts/*     /404.html   404!
+/package.json  /404.html   404!
+/package-lock.json /404.html 404!
+/netlify.toml  /404.html   404!
+/node_modules/* /404.html  404!

@@ -2,6 +2,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
+import { writeArchivePages } from './archive-pages.mjs';
 
 // Netlify sets no workspace var; the build runs from the repo root.
 const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
@@ -35,7 +36,7 @@ const STATIC_PAGES = [
   ['consent', 'monthly'],
   ['uniform', 'weekly'],
   ['updates', 'daily'],
-  ['verify', 'monthly'],
+  ['partner', 'weekly'],
   ['daily/', 'daily'],
 ];
 
@@ -2218,7 +2219,7 @@ async function main() {
     video: String(r[7] || '').trim(),
   })).filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isFinite(r.weight))
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
-    .filter((r) => r.day >= 0)
+    .filter((r) => r.day >= 1)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const attestMap = new Map();
@@ -2286,6 +2287,7 @@ async function main() {
   }
 
   const generated = [];
+  const publishedDaily = [];
   const changedUrls = new Set();
   for (let i = 0; i < finalized.length; i++) {
     const { record, photoPaths } = finalized[i];
@@ -2301,6 +2303,7 @@ async function main() {
     const pageFile = path.join(pageDir, 'index.html');
     const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '', health: healthMap.get(record.date) || null });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
+    publishedDaily.push({ date: record.date, day: record.day });
 
     const manifest = {
       schema: 'https://michealrayberry.com/schemas/daily-record-manifest-v1.json',
@@ -2352,6 +2355,7 @@ async function main() {
       next: i < sequence.length - 1 ? sequence[i + 1] : null,
     });
     if (await writeIfChanged(file, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${slug}/`);
+    publishedDaily.push({ date: s.date, day: s.day });
   }
 
   if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated, new Map(sequence.filter((s) => !s.complete).map((s) => [s.date, s.kind || 'none']))))) {
@@ -2405,6 +2409,16 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/weeks/`);
 
+  const archiveChanged = await writeArchivePages(ROOT, {
+    records,
+    violations,
+    entries: generated,
+  });
+  archiveChanged.forEach((u) => {
+    changedUrls.add(u);
+    extraUrls.push(u);
+  });
+
   if (await writeIfChanged(path.join(ROOT, 'feed.xml'), rssFeed(generated))) {
     changedUrls.add(`${SITE_ORIGIN}/feed.xml`);
   }
@@ -2413,7 +2427,7 @@ async function main() {
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
     ['sitemap-violations.xml', violationSitemap(violations)],
-    ['sitemap-daily.xml', dailySitemap(sequence.map((s) => ({ date: s.date, day: s.day })))],
+    ['sitemap-daily.xml', dailySitemap(publishedDaily)],
     ['sitemap-pages.xml', extraSitemap(extraUrls, latestDate)],
     ['sitemap-images.xml', imageSitemap(generated)],
     ['sitemap-videos.xml', videoSitemap(generated)],

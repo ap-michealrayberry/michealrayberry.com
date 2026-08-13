@@ -1,6 +1,6 @@
 // Network-first service worker: the record must never be stale, but the app
 // shell still opens offline / on flaky connections.
-const CACHE = 'mrb-v5';
+const CACHE = 'mrb-v7';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js'])).then(() => self.skipWaiting()));
 });
@@ -17,8 +17,10 @@ self.addEventListener('fetch', (e) => {
   if (u.pathname.indexOf('/verify') === 0) return;
   e.respondWith(
     fetch(e.request).then((r) => {
-      const cp = r.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, cp));
+      if (r && r.ok) {
+        const cp = r.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, cp));
+      }
       return r;
     }).catch(() => caches.match(e.request).then((m) => m || caches.match('/')))
   );

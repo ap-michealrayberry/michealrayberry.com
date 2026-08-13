@@ -11,7 +11,6 @@
   <title>Micheal Ray Berry — Public Accountability Project, 340 to 175 lbs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="The official public record: 340 to 175 pounds, documented daily since August 13, 2026 with inspection videos, weigh-ins, and a public violation log.">
-  <meta name="keywords" content="Micheal Ray Berry, public accountability project, weight loss accountability, daily weigh-in, accountability partner, weight loss journey, public weight loss record, accountability agreement, weight loss transformation, before and after weight loss, extreme weight loss journey, 340 pounds to 175 pounds, daily inspection video, weight loss documentation, public weigh-in log, body transformation record, daily accountability photos, weight loss contract">
   <link rel="canonical" href="https://michealrayberry.com/">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#141412">
@@ -1506,7 +1505,7 @@ class Component extends DCLogic {
           // Sheets may hand back a real date (7/22/2026) instead of an ISO
           // string, so every date is normalized before it is validated.
           .map((r) => ({ date: this.normDate(r[0]), weight: parseFloat(r[1]), note: (r[2] || '').trim(), photo: (r[3] || '').trim(), left: (r[4] || '').trim(), rear: (r[5] || '').trim(), right: (r[6] || '').trim(), video: (r[7] || '').trim() }))
-          .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && !isNaN(e.weight));
+          .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && !isNaN(e.weight) && e.date >= '2026-08-13');
         // Always resolve the load gate — an empty record renders "—", never an endless spinner.
         this.setState({ liveWeighIns: entries });
         if (entries.length) this.injectSeoJsonLd(entries);
