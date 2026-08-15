@@ -1,0 +1,25 @@
+# Dependencies and local secrets
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Publisher output — Netlify generates these on every build.
+# Do not commit a laptop run of `npm run generate`.
+.indexnow-urls.json
+daily/
+weeks/
+manifests/
+media/responsive/
+sitemap.xml
+sitemap-*.xml
+feed.xml
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.swp
+*~

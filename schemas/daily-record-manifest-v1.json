@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://michealrayberry.com/schemas/daily-record-manifest-v1.json",
+  "title": "MRB daily record manifest",
+  "description": "Machine-readable evidence pack for one Project Day of the Micheal Ray Berry Public Accountability Project. One file per finalized day at /manifests/YYYY-MM-DD.json.",
+  "type": "object",
+  "required": ["schema", "person", "project", "record", "photos"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "type": "string", "const": "https://michealrayberry.com/schemas/daily-record-manifest-v1.json" },
+    "person": {
+      "type": "object",
+      "required": ["name", "id"],
+      "properties": {
+        "name": { "type": "string" },
+        "id": { "type": "string", "format": "uri" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "start_date", "start_weight_lb", "goal_weight_lb"],
+      "properties": {
+        "name": { "type": "string" },
+        "start_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "start_weight_lb": { "type": "number" },
+        "goal_weight_lb": { "type": "number" }
+      }
+    },
+    "record": {
+      "type": "object",
+      "required": ["date", "day", "weight_lb", "canonical_url"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "day": { "type": "integer", "minimum": 1 },
+        "weight_lb": { "type": "number" },
+        "note": { "type": "string" },
+        "video_url": { "type": ["string", "null"] },
+        "canonical_url": { "type": "string", "format": "uri" },
+        "attestation": { "type": ["string", "null"] },
+        "activity": { "type": ["object", "null"] }
+      }
+    },
+    "photos": {
+      "type": "object",
+      "required": ["front", "left", "rear", "right"],
+      "properties": {
+        "front": { "$ref": "#/$defs/photo" },
+        "left": { "$ref": "#/$defs/photo" },
+        "rear": { "$ref": "#/$defs/photo" },
+        "right": { "$ref": "#/$defs/photo" }
+      }
+    }
+  },
+  "$defs": {
+    "photo": {
+      "type": "object",
+      "required": ["url", "width", "height", "sha256"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "responsive": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "width", "height", "bytes", "sha256"],
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "width": { "type": "integer" },
+              "height": { "type": "integer" },
+              "bytes": { "type": "integer" },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

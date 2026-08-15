@@ -38,3 +38,5 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /package-lock.json /404.html 404!
 /netlify.toml  /404.html   404!
 /node_modules/* /404.html  404!
+/.github/*     /404.html   404!
+/.gitignore    /404.html   404!

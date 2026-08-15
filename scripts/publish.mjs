@@ -82,6 +82,58 @@ function dayNumber(date) {
   return Math.round((current - start) / 86400000) + 1;
 }
 
+/** Eastern calendar date (YYYY-MM-DD) and hour (0–23) for a moment. */
+function etNow(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now);
+  const get = (type) => parts.find((p) => p.type === type)?.value || '';
+  return {
+    iso: `${get('year')}-${get('month')}-${get('day')}`,
+    hour: parseInt(get('hour'), 10) || 0,
+  };
+}
+
+function todayEtIso(now = new Date()) {
+  return etNow(now).iso;
+}
+
+/* 10 PM Eastern on an ISO date, with the offset that date actually used. */
+function etDeadlineStamp(iso) {
+  const utc = new Date(`${iso}T22:00:00Z`);
+  const etHour = etNow(utc).hour;
+  let delta = etHour - 22;
+  if (delta > 12) delta -= 24;
+  if (delta < -12) delta += 24;
+  const sign = delta >= 0 ? '+' : '-';
+  return `${iso}T22:00:00${sign}${String(Math.abs(delta)).padStart(2, '0')}:00`;
+}
+
+function normalizeVideoUrl(url = '') {
+  return String(url).replace(/([?&])is=/g, '$1si=');
+}
+
+function csvHeader(rows) {
+  return (rows[0] || []).map((v) => String(v).toLowerCase().trim());
+}
+
+function isWeighInsHeader(head) {
+  return head.includes('weight_lb') || head[1] === 'weight';
+}
+
+/* gviz returns the first sheet when the named tab is missing. Weigh-ins
+   looks nothing like a violation log — refuse to parse that fallback. */
+function isViolationLogHeader(head) {
+  if (!head.length) return false;
+  if (isWeighInsHeader(head) || head.includes('photo_front')) return false;
+  return /date/.test(head[0] || '');
+}
+
 function longDate(date) {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC', month: 'long', day: 'numeric', year: 'numeric',
@@ -241,6 +293,7 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
   const description = `Day ${day} of Micheal Ray Berry’s public weight-loss accountability record: ${weight.toFixed(1)} pounds on ${longDate(date)}, with four-angle photographs and the daily inspection video.`;
   const front = photos.front.sourceUrl;
   const embed = videoEmbed(video);
+  const portrait = /youtube\.com\/shorts\//i.test(video) || isSelfHosted(video);
   const graph = [
     {
       '@type': 'WebPage',
@@ -285,8 +338,8 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
       headline: title,
       description,
       articleSection: 'Daily Record',
-      datePublished: `${date}T22:00:00-04:00`,
-      dateModified: `${date}T22:00:00-04:00`,
+      datePublished: `${etDeadlineStamp(date)}`,
+      dateModified: `${etDeadlineStamp(date)}`,
       author: { '@id': PERSON_ID },
       publisher: { '@id': `${SITE_ORIGIN}/#website` },
       mainEntityOfPage: { '@id': canonical },
@@ -331,12 +384,12 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
     </figure>`;
   }).join('\n');
   const videoHtml = isSelfHosted(video)
-    ? `<div class="video"><video controls preload="none" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}">
+    ? `<div class="video portrait"><video controls preload="none" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}">
         <source src="${htmlEscape(video)}" type="video/mp4">
         <a href="${htmlEscape(video)}">Download the Day ${day} inspection video</a>
       </video></div>`
     : (embed
-      ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+      ? `<div class="video${portrait ? ' portrait' : ''}"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
       : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`);
   const week = Math.ceil(day / 7);
   const nav = `<nav aria-label="Daily record navigation">
@@ -361,7 +414,7 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="${htmlEscape(front)}">
-  <meta property="article:published_time" content="${date}T22:00:00-04:00">
+  <meta property="article:published_time" content="${etDeadlineStamp(date)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${htmlEscape(title)}">
   <meta name="twitter:description" content="${htmlEscape(description)}">
@@ -420,6 +473,7 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
     .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
     .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video.portrait{max-width:420px;margin-left:auto;margin-right:auto}.video.portrait:has(iframe){padding-top:177.78%}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
     .also{font:12px/1.8 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
@@ -797,13 +851,11 @@ function weeksIndexPage(entries) {
 
 /* True while today's 10 PM Eastern deadline is still ahead. Derived from the
    date rather than a fixed offset so it holds across the DST change. */
-function deadlinePending(iso) {
-  const now = new Date();
-  const todayEt = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const todayIso = `${todayEt.getFullYear()}-${String(todayEt.getMonth() + 1).padStart(2, '0')}-${String(todayEt.getDate()).padStart(2, '0')}`;
+function deadlinePending(iso, now = new Date()) {
+  const { iso: todayIso, hour } = etNow(now);
   if (iso > todayIso) return true;
   if (iso < todayIso) return false;
-  return todayEt.getHours() < 22;
+  return hour < 22;
 }
 
 function dailyIndexPage(entries, gapKinds = new Map()) {
@@ -811,7 +863,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   /* Run to today, not to the last finalized day. Stopping at the last
      complete record makes an unfiled day vanish from the index instead of
      showing as a gap — which is the one thing this page exists to prevent. */
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayEtIso();
   const lastEntry = entries.at(-1)?.record.date || START_DATE;
   const latest = today > lastEntry ? today : lastEntry;
   const days = [];
@@ -840,9 +892,8 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       const flag = partial ? 'Incomplete record' : 'No record';
       const inner = `<div class="thumb"><span>${flag.toUpperCase()}</span></div>
         <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">${flag}</span></div>`;
-      // An incomplete day links to its page, which states what was filed and
-      // what was not; a day with nothing filed has nothing to open.
-      return partial ? `<li class="card gap"><a href="${href}">${inner}</a></li>` : `<li class="card gap">${inner}</li>`;
+      // After the deadline a gap page exists and is in the sitemap — link it.
+      return `<li class="card gap"><a href="${href}">${inner}</a></li>`;
     }
     const front = entry.photos.front;
     const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
@@ -989,7 +1040,7 @@ function rssFeed(entries) {
       <title>${xmlEscape(`Day ${record.day} — ${record.weight.toFixed(1)} lb — ${longDate(record.date)}`)}</title>
       <link>${url}</link>
       <guid isPermaLink="true">${url}</guid>
-      <pubDate>${new Date(`${record.date}T22:00:00-04:00`).toUTCString()}</pubDate>
+      <pubDate>${new Date(etDeadlineStamp(record.date)).toUTCString()}</pubDate>
       <description>${xmlEscape(`Day ${record.day} of the Micheal Ray Berry Public Accountability Project. Recorded weight ${record.weight.toFixed(1)} pounds on ${longDate(record.date)}, with four-angle documentation photographs and the daily inspection video.`)}</description>
       <enclosure url="${xmlEscape(photos.front.sourceUrl)}" type="image/jpeg" length="0"/>
     </item>`;
@@ -1991,7 +2042,7 @@ ${entries.map(({ record, photos }) => {
       ${isSelfHosted(record.video) || !embed
         ? `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`
         : `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>`}
-      <video:publication_date>${record.date}T22:00:00-04:00</video:publication_date>
+      <video:publication_date>${etDeadlineStamp(record.date)}</video:publication_date>
     </video:video>
   </url>`;
 }).join('\n')}
@@ -2162,7 +2213,21 @@ async function main() {
     console.warn('Fix: Share > General access > Anyone with the link > Viewer.');
     return;
   }
-  const violations = (violationCsv ? parseCSV(violationCsv).slice(1) : [])
+  const weighRows = parseCSV(csv);
+  const weighHead = csvHeader(weighRows);
+  if (!isWeighInsHeader(weighHead)) {
+    console.warn('Weigh-ins header unexpected — skipping page generation this build.');
+    console.warn('Got:', (weighRows[0] || []).join(', '));
+    return;
+  }
+
+  const violationRows = violationCsv ? parseCSV(violationCsv) : [];
+  const violationHead = csvHeader(violationRows);
+  if (violationCsv && !isViolationLogHeader(violationHead)) {
+    console.warn('Violation Log tab missing or gviz fell back to Weigh-ins — not publishing violation pages from that CSV.');
+    console.warn('Got:', (violationRows[0] || []).join(', '));
+  }
+  const violations = (isViolationLogHeader(violationHead) ? violationRows.slice(1) : [])
     .map((r, i) => {
       const date = normalizeDate(r[0]);
       const num = String(i + 1).padStart(3, '0');
@@ -2211,12 +2276,11 @@ async function main() {
     }
   }
 
-  const rows = parseCSV(csv);
-  const records = rows.slice(1).map((r) => ({
+  const records = weighRows.slice(1).map((r) => ({
     date: normalizeDate(r[0]),
     weight: Number.parseFloat(r[1]),
     note: String(r[2] || '').trim(),
-    video: String(r[7] || '').trim(),
+    video: normalizeVideoUrl(String(r[7] || '').trim()),
   })).filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isFinite(r.weight))
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
     .filter((r) => r.day >= 1)
@@ -2257,7 +2321,7 @@ async function main() {
      with a complete packet and days without. The chain is built over this
      list, so prev/next is continuous and a crawler never sees Day 10 link
      straight to Day 13. */
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = todayEtIso();
   const lastDay = Math.max(
     finalized.at(-1)?.record.day || 0,
     ...records.map((r) => r.day || 0),
