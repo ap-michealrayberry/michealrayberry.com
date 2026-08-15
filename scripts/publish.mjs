@@ -286,7 +286,7 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
-function dailyPage({ record, photos, previous, next, attestation, health }) {
+function dailyPage({ record, photos, previous, next, attestation, health, violation = null }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Micheal Ray Berry Day ${day} — ${weight.toFixed(1)} lb | ${longDate(date)}`;
@@ -497,6 +497,7 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
+  ${violation ? `<p>Also on this date: <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
   ${health ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px">Device-synced activity: <strong>${Number(health.steps).toLocaleString('en-US')} steps</strong>${health.zone ? ` · ${Math.round(health.zone)} active-zone minutes` : ''}${health.mi ? ` · ${health.mi.toFixed(1)} mi` : ''}${health.cal ? ` · ${Math.round(health.cal).toLocaleString('en-US')} calories out` : ''} — synced automatically from the connected device, not self-reported.</p>` : ''}
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
@@ -1073,7 +1074,9 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
    sequence with a hole and no explanation), and the absence is itself part of
    the record — stated neutrally, exactly as the agreement requires. These
    pages carry no photographs, no video, and no consequence detail. */
-function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
+function noRecordPage({ date, day, previous, next, reason, kind = 'none', violation = null }) {
+  const fromLog = violation && /incomplete/i.test(violation.what || '');
+  if (fromLog) kind = 'incomplete';
   const label = kind === 'incomplete' ? 'Incomplete record' : 'No record';
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Day ${day} — ${label} — ${longDate(date)} — Micheal Ray Berry`;
@@ -1185,6 +1188,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <main>
     <div class="card">
       <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
+      ${violation ? `<p>Entered as <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
       <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
     </div>
     <nav aria-label="Daily record navigation">
@@ -2386,6 +2390,15 @@ async function main() {
   }
 
   declareGapViolations(violations, sequence);
+  const violationByDate = new Map(violations.map((v) => [v.date, v]));
+  for (const s of sequence) {
+    if (s.complete) continue;
+    const v = violationByDate.get(s.date);
+    if (v && /incomplete/i.test(v.what || '') && s.kind === 'none') {
+      s.kind = 'incomplete';
+      s.reason = v.what;
+    }
+  }
 
   const generated = [];
   const publishedDaily = [];
@@ -2402,7 +2415,12 @@ async function main() {
     const next = pos >= 0 && pos < sequence.length - 1 ? sequence[pos + 1] : null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
-    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '', health: healthMap.get(record.date) || null });
+    const page = dailyPage({
+      record, photos, previous, next,
+      attestation: attestMap.get(record.date) || '',
+      health: healthMap.get(record.date) || null,
+      violation: violationByDate.get(record.date) || null,
+    });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
     publishedDaily.push({ date: record.date, day: record.day });
 
@@ -2454,6 +2472,7 @@ async function main() {
       date: s.date, day: s.day, reason: s.reason, kind: s.kind || 'none',
       previous: i > 0 ? sequence[i - 1] : null,
       next: i < sequence.length - 1 ? sequence[i + 1] : null,
+      violation: violationByDate.get(s.date) || null,
     });
     if (await writeIfChanged(file, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${slug}/`);
     publishedDaily.push({ date: s.date, day: s.day });
