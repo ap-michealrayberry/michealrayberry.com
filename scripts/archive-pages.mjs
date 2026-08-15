@@ -420,7 +420,7 @@ export function personalPage() {
 
 export function partnerPage() {
   const body = `
-  <p class="intro">This project is administered by a remote Accountability Partner. It now needs a second Partner who can be present in person, locally, to carry the parts of the role that cannot be done over a screen.</p>
+  <p class="intro">This project is administered by a remote Accountability Partner. The local search is for a Master or Mistress: someone present in person who will hold the parts of the role that cannot be done over a screen. On this record the title stays Local Accountability Partner until a signed amendment names them.</p>
   <p>This is a real enforcement role, not a symbolic one. It carries genuine authority: within the written rules, the Partner's judgment on the record is final, and it is not negotiable in the moment. Any appointment is formalized by a signed amendment to the agreement.</p>
   <h2>What you would do</h2>
   <p>You would enforce the signed agreement in person, with real authority over how it is carried out. That includes directing and supervising corrective corner time — 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role is conducted strictly under the agreement: safe-for-work under §10.4, with your identity kept private under §12.2.</p>
@@ -433,7 +433,10 @@ export function partnerPage() {
     <li>Set additional daily structure and requirements in support of the goal, enforced on the same terms (§3.1).</li>
     <li>Conduct the weekly review.</li>
     <li>Appear on camera as needed, with your face and identity kept private (§12.2).</li>
+    <li>Hold Google Family Link as the parent user — device supervision. He is not the parent user and cannot revoke it without you.</li>
+    <li>Hold Greenlight as the parent user — spend monitoring. He is not the parent user and cannot revoke it without you.</li>
   </ul>
+  <p>Family Link and Greenlight are given only by signed amendment if you accept. Until someone is appointed, nobody holds them. If no local Master or Mistress is in place, the remote Accountability Partner may hold either or both.</p>
   <h2>You can hold the line</h2>
   <p>There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when Micheal asks you not to.</p>
   <p class="pending">The project only works if the person running it does not soften it in the moment. If that is not you, this is not the role for you.</p>
@@ -442,7 +445,7 @@ export function partnerPage() {
   <p><a href="/agreement">Read the signed agreement</a> · <a href="/about">About the project</a></p>`;
   return shell({
     title: 'Local Accountability Partner Wanted — Micheal Ray Berry',
-    desc: 'The Public Accountability Project is seeking a local, in-person Accountability Partner to verify weigh-ins, supervise corrective corner time, and confirm violations against the written rules.',
+    desc: 'In-person Partner wanted: verify weigh-ins, supervise corrective sessions, and if accepted hold Family Link and Greenlight. The local search is for a Master or Mistress. Apply at ap@michealrayberry.com.',
     canonical: `${SITE_ORIGIN}/partner`,
     current: 'partner',
     eyebrow: '§12.2 — Accountability Partner',
