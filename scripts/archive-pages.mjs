@@ -173,8 +173,7 @@ ${body}
 <div class="sitefoot"><div class="sitefoot-in">
   <div class="sitefoot-top">
     <div><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
-    <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a></span></div>
-    <div><span class="colhead">Personal</span><span class="links"><a href="/personal/">21+</a></span></div>
+    <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span></div>
   </div>
   <div class="sitefoot-bottom">
     <span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span>
@@ -462,7 +461,6 @@ export async function writeArchivePages(root, { records = [], violations = [], e
     ['uniform', uniformPage()],
     ['updates', updatesPage()],
     ['partner', partnerPage()],
-    ['personal', personalPage()],
   ];
   const changed = [];
   for (const [slug, html] of pages) {

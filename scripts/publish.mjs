@@ -512,11 +512,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -689,11 +685,7 @@ function milestonePage(target, entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -789,11 +781,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -856,11 +844,7 @@ function weeksIndexPage(entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1044,11 +1028,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1220,7 +1200,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
     <div class="card">
       <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
       ${violation ? `<p>Entered as <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
-      <p>He is required to file, by 10 PM Eastern, the inspection video, four photographs, the day's weight, and the tracker update, in the project uniform. From 15 August 2026 the collar is part of that uniform. A missing collar is a violation, same class as a missed packet. A packet counts only when every element is filed on time.</p>
+      <p>He is required to file, by 10 PM Eastern, the inspection video, four photographs, the day's weight, and the tracker update, in the project uniform. A packet counts only when every element is filed on time.</p>
     </div>
     <nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
@@ -1234,11 +1214,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1378,11 +1354,7 @@ function consentPage() {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1587,11 +1559,7 @@ function violationPage(v, prev, next) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1773,7 +1741,7 @@ function positionsPage(entries) {
     ['Wait posture', 'Separate from the four photographic positions. Feet apart at the established width, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to shoes. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and from 15 August 2026 the Talena titanium 6 mm lockable neck collar, which he owns. A missing collar is a violation, same class as a missed packet. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1892,11 +1860,7 @@ function positionsPage(entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2067,11 +2031,7 @@ function cornerTimePage(entries, violations, demoUrl) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
-      </div>
-      <div class="col">
-        <span class="colhead">Personal</span>
-        <span class="links"><a href="/personal/">21+</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2214,8 +2174,7 @@ function synHeader() {
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
-      <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
-      <div class="col"><span class="colhead">Personal</span><span class="links"><a href="/personal/">21+</a></span></div>
+      <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span></div>
     </div>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>

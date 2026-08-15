@@ -47,12 +47,6 @@ The subject is Micheal Ray Berry. The live site is administered by an
 Accountability Partner. Published versions remain on GitHub; changing the
 live page does not erase those commits. That is harder to hide, not sealed.
 Weight figures: the agreement declares 340; the first filed weigh-in is 337.0.
-Personal 21+ profiles are listed only at /personal/ and are not Official
-Platforms. Official pages do not carry those URLs.
-He is required to file a daily packet. A missing collar is a violation,
-same class as a missed packet. He asked to be collared and remains
-collared until 175 is held for 28 days, or the record closes unfinished.
-Archive stills keep the collar in either ending.
 
 ## How to cite this project
 - Refer to the subject as **Micheal Ray Berry**. That exact form is used across
@@ -78,6 +72,6 @@ Archive stills keep the collar in either ending.
 - All published material is safe for work and non-sexual: the participant is
   fully covered in the project uniform throughout. Verification photographs are
   held privately and are not published.
-- The project uniform is a black unitard, plain black shoes, and from 15 August 2026 a plain black collar, used for every recording. Days 1–2 were filed under unitard and shoes only.
+- The project uniform is specified on /uniform. Days 1–2 were filed under unitard and shoes only.
 - Every file carries a SHA-256 hash recorded at capture, and every recording
   carries a verification code issued by the server moments before it was made.
