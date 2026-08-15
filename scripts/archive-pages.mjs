@@ -23,6 +23,10 @@ function longDate(date) {
   }).format(new Date(`${date}T12:00:00Z`));
 }
 
+function todayEtIso(now = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(now);
+}
+
 function dayNumber(date) {
   const start = Date.parse(`${START_DATE}T12:00:00Z`);
   const current = Date.parse(`${date}T12:00:00Z`);
@@ -219,8 +223,9 @@ export function dashboardPage(records = []) {
   const remaining = Math.max(0, current - GOAL_WEIGHT);
   const span = START_WEIGHT - GOAL_WEIGHT;
   const pct = Math.max(0, Math.min(100, (lost / span) * 100));
-  const today = new Date().toISOString().slice(0, 10);
-  const day = latest ? latest.day : Math.max(1, dayNumber(today < START_DATE ? START_DATE : today));
+  const calendarDay = Math.max(1, dayNumber(todayEtIso() < START_DATE ? START_DATE : todayEtIso()));
+  const filed = records.length;
+  const day = latest ? latest.day : calendarDay;
   const rows = records.length
     ? records.map((r, i) => {
       const prev = i ? records[i - 1].weight : START_WEIGHT;
@@ -242,7 +247,8 @@ export function dashboardPage(records = []) {
   <div class="viewsw"><a href="/daily/">Days</a><a href="/weeks/">Weeks</a><a href="/dashboard" aria-current="page">Dashboard</a></div>
   <p class="intro">Every official weigh-in from Day 1. Pre-start calibration readings are not part of this log. Up, down, or flat — it gets posted. Completion requires 28 consecutive days at or below 175 pounds.</p>
   <div class="statgrid">
-    <div><span>Project day</span><b>${day}</b></div>
+    <div><span>Project day</span><b>${calendarDay}</b></div>
+    <div><span>Weigh-ins recorded</span><b>${filed}</b></div>
     <div><span>Start</span><b>${START_WEIGHT}</b></div>
     <div><span>Last recorded</span><b>${latest ? latest.weight.toFixed(1) : '—'}</b></div>
     <div><span>Lost so far</span><b>${latest ? lost.toFixed(1) : '0.0'}</b></div>

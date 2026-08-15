@@ -74,7 +74,6 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
   <style>
     html, body { margin: 0; padding: 0; background: #FAFAF7; }
     body { font-family: 'IBM Plex Sans', sans-serif; color: #141412; -webkit-font-smoothing: antialiased; }
@@ -1483,6 +1482,11 @@ class Component extends DCLogic {
              navigation. Milestones render within the dashboard, the uniform within
              about. */
           const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
+          if (pages.indexOf(p) !== -1 && p !== 'home') {
+            // Those paths are real HTML. Leave this shell; do not paint a second UI.
+            window.location.replace('/' + p);
+            return;
+          }
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
           // The Recording Assistant is not part of the public site at all. It
           // is public at /assistant/; the device key gates filing, not viewing.
@@ -1703,8 +1707,7 @@ class Component extends DCLogic {
       set('meta[property="og:url"]', 'content', canon);
     } catch (e) {}
   }
-  // Keep title/canonical/description in sync with the open day so each ?day=N
-  // URL presents itself to crawlers as a distinct document.
+  // Day pages live at /daily/YYYY-MM-DD-day-00N/. ?day=N is retired.
   applyDaySeo(dateStr) {
     try {
       const canon = document.querySelector('link[rel="canonical"]');
@@ -1714,18 +1717,22 @@ class Component extends DCLogic {
         return;
       }
       const n = this.dayNumOf(dateStr);
+      const pad = String(n).padStart(3, '0');
       const w = this.weighIns().find((x) => x.date === dateStr);
       const wStr = w && !isNaN(w.weight) ? w.weight.toFixed(1) + ' lb' : '';
       this._seoTitle = 'Day ' + n + (wStr ? ' — ' + wStr : '') + ' — ' + dateStr + ' — Micheal Ray Berry Public Accountability Record';
       document.title = this._seoTitle;
-      if (canon) canon.href = 'https://michealrayberry.com/?day=' + n;
+      if (canon) canon.href = 'https://michealrayberry.com/daily/' + dateStr + '-day-' + pad + '/';
       if (desc) desc.setAttribute('content', 'Day ' + n + ' of Micheal Ray Berry\u2019s public weight-loss accountability record' + (wStr ? ': ' + wStr : '') + ' on ' + dateStr + '. Daily photos from all four angles and the inspection video. 340 to 175 pounds, documented in public.');
     } catch (e) {}
   }
   setDayUrl(dateStr) {
     try {
-      const url = dateStr ? '?day=' + this.dayNumOf(dateStr) : window.location.pathname;
-      window.history.pushState({ day: dateStr || null }, '', url);
+      if (dateStr) {
+        const n = this.dayNumOf(dateStr);
+        window.location.assign('/daily/' + dateStr + '-day-' + String(n).padStart(3, '0') + '/');
+        return;
+      }
     } catch (e) {}
     this.applyDaySeo(dateStr);
   }
@@ -1733,9 +1740,11 @@ class Component extends DCLogic {
     try {
       const m = (window.location.search || '').match(/[?&]day=(\d+)/);
       if (!m) { this.setState({ expandedDay: null }); this.applyDaySeo(null); return; }
-      const dateStr = this.dateOfDayNum(parseInt(m[1], 10));
-      this.setState({ expandedDay: dateStr, page: 'dashboard' });
-      this.applyDaySeo(dateStr);
+      const n = parseInt(m[1], 10);
+      const dateStr = this.dateOfDayNum(n);
+      if (dateStr) {
+        window.location.replace('/daily/' + dateStr + '-day-' + String(n).padStart(3, '0') + '/');
+      }
     } catch (e) {}
   }
 
@@ -1743,8 +1752,12 @@ class Component extends DCLogic {
   // the page is served as a .html file (preview, local open).
   pathRouting() { try { return !/\.html/i.test(window.location.pathname); } catch (e) { return false; } }
   navTo(page) {
+    const STATIC = ['dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
     return (e) => {
-      if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return; // let the browser open a tab/window
+      if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
+      // Archive routes are generated HTML. A left click must load that page,
+      // not keep the visitor inside this shell at the same URL.
+      if (STATIC.indexOf(page) !== -1) return;
       if (e && e.preventDefault) e.preventDefault();
       this.go(page);
     };
@@ -1791,7 +1804,7 @@ class Component extends DCLogic {
     const pct = totalToLose > 0 ? Math.min(100, Math.max(0, (lost / totalToLose) * 100)) : 0;
 
     // ----- Weekly review strip (weeks run Mon-Sun from Day 1) -----
-    const daysSince = Math.floor((Date.now() - new Date('2026-08-13T00:00:00')) / 864e5);
+    const daysSince = Math.max(0, dayNumber - 1);
     const closedWeek = Math.floor(daysSince / 7);
     let wrClosed = 'Week 1 closes with Day 7.';
     if (closedWeek >= 1) {
@@ -2089,13 +2102,8 @@ class Component extends DCLogic {
         date: w.date,
         weight: isNaN(w.weight) ? '' : w.weight.toFixed(1) + ' LB',
         photo: normalizeDriveUrl(w.photo),
-        href: '?day=' + this.dayNumOf(w.date),
-        select: (e) => {
-          try { e.preventDefault(); } catch (err) {}
-          const next = this.state.expandedDay === w.date ? null : w.date;
-          this.setState({ expandedDay: next });
-          this.setDayUrl(next);
-        },
+        href: '/daily/' + w.date + '-day-' + String(this.dayNumOf(w.date)).padStart(3, '0') + '/',
+        select: () => {},
         borderColor: this.state.expandedDay === w.date ? '#B3261E' : '#141412',
       }));
     /* Days without a photograph, in the same three states the archive uses:
@@ -2263,10 +2271,8 @@ class Component extends DCLogic {
       expandedDate: expDay ? expDay.date : '',
       expandedWeight: expDay && !isNaN(expDay.weight) ? expDay.weight.toFixed(1) + ' LB' : '',
       closeExpanded: () => { this.setState({ expandedDay: null }); this.setDayUrl(null); },
-      /* Nav handlers: every nav item is a real <a href> so right-click,
-         open-in-new-tab, share, and JS-off crawls all work; a plain left click
-         still does the SPA takeover. Modified clicks pass through to the
-         browser. */
+      /* Nav handlers: every nav item is a real <a href>. Archive routes
+         (dashboard, penalties, …) load the generated HTML. Home stays here. */
       goHome: this.navTo('home'),
       goDashboard: this.navTo('dashboard'),
       goAbout: this.navTo('about'),

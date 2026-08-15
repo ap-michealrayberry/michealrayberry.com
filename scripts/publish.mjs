@@ -1368,6 +1368,41 @@ function violationText(raw) {
   return s;
 }
 
+/* A gap page without a matching log row is a hole in the record. After the
+   10 PM ET deadline, declare it here so /penalties and /violations/v-NNN
+   stay in sync with /daily even if Apps Script did not write the sheet. */
+function declareGapViolations(violations, sequence) {
+  const have = new Set(violations.map((v) => v.date));
+  let n = violations.length;
+  for (const s of sequence) {
+    if (s.complete) continue;
+    if (deadlinePending(s.date)) continue;
+    if (have.has(s.date)) continue;
+    n += 1;
+    const num = String(n).padStart(3, '0');
+    const what = s.kind === 'incomplete'
+      ? 'Incomplete record — the Daily Compliance Packet was not complete'
+      : 'No record — none of the required daily documentation was filed';
+    violations.push({
+      n,
+      id: 'V-' + num,
+      slug: 'v-' + num,
+      date: s.date,
+      day: s.day,
+      what,
+      state: 'open',
+      submitted: '',
+      resolved: '',
+      verification: '',
+      corrections: [],
+      recording: '',
+    });
+    have.add(s.date);
+    console.log('Declared gap violation ' + ('V-' + num) + ' for ' + s.date);
+  }
+  return violations;
+}
+
 function violationPage(v, prev, next) {
   const canonical = `${SITE_ORIGIN}/violations/${v.slug}/`;
   const title = `${v.id} — ${longDate(v.date)} — Micheal Ray Berry Public Accountability Project`;
@@ -2349,6 +2384,8 @@ async function main() {
       : 'None of the required daily documentation was filed for this Project Day.';
     sequence.push({ day: d, date, complete: false, kind: have.length ? 'incomplete' : 'none', reason });
   }
+
+  declareGapViolations(violations, sequence);
 
   const generated = [];
   const publishedDaily = [];
