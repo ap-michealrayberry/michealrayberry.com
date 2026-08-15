@@ -487,7 +487,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -664,7 +664,7 @@ function milestonePage(target, entries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -759,7 +759,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -824,7 +824,7 @@ function weeksIndexPage(entries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1008,7 +1008,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1187,7 +1187,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1303,7 +1303,7 @@ function consentPage() {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1508,7 +1508,7 @@ function violationPage(v, prev, next) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1631,7 +1631,7 @@ function specimenPage(demoUrl) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1788,7 +1788,7 @@ function positionsPage(entries) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -1967,7 +1967,7 @@ function cornerTimePage(entries, violations, demoUrl) {
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
@@ -2166,7 +2166,7 @@ function synHeader() {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Subject · official record</span></a>
   <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Owner</a></span>
+    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
