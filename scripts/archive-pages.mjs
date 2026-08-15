@@ -37,7 +37,7 @@ const PAGE_CSS = `
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     a{color:var(--ink);text-underline-offset:3px}
-    .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
+    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
     .wordmark b{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:24px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
@@ -153,6 +153,7 @@ function shell({ title, desc, canonical, current, eyebrow, h1, crumbs, body }) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -245,16 +246,16 @@ export function dashboardPage(records = []) {
 
   const body = `
   <div class="viewsw"><a href="/daily/">Days</a><a href="/weeks/">Weeks</a><a href="/dashboard" aria-current="page">Dashboard</a></div>
-  <p class="intro">Every official weigh-in from Day 1. Pre-start calibration readings are not part of this log. Up, down, or flat — it gets posted. Completion requires 28 consecutive days at or below 175 pounds.</p>
+  <p class="intro">Every official weigh-in from Day 1. The agreement declares a start of 340 lb; the first filed weigh-in is 337.0 lb. Pre-start calibration readings are not part of this log. Up, down, or flat — it gets posted.</p>
   <div class="statgrid">
     <div><span>Project day</span><b>${calendarDay}</b></div>
     <div><span>Weigh-ins recorded</span><b>${filed}</b></div>
-    <div><span>Start</span><b>${START_WEIGHT}</b></div>
+    <div><span>Declared start</span><b>${START_WEIGHT}</b></div>
+    <div><span>First filed</span><b>${records[0] ? records[0].weight.toFixed(1) : '—'}</b></div>
     <div><span>Last recorded</span><b>${latest ? latest.weight.toFixed(1) : '—'}</b></div>
-    <div><span>Lost so far</span><b>${latest ? lost.toFixed(1) : '0.0'}</b></div>
     <div><span>To goal</span><b>${remaining.toFixed(1)}</b></div>
   </div>
-  <p class="stats"><span>340 lbs</span><span>${pct.toFixed(0)}% of 165 lbs eliminated</span><span>175 lbs</span></p>
+  <p class="stats"><span>declared 340</span><span>${pct.toFixed(0)}% of 165 lbs vs declared start</span><span>175 lbs</span></p>
   <div class="bar" aria-hidden="true"><i style="width:${pct.toFixed(1)}%"></i></div>
   ${chartSvg(records)}
   <h2>Weigh-in log</h2>
@@ -265,7 +266,7 @@ export function dashboardPage(records = []) {
 
   return shell({
     title: 'Dashboard — Weigh-in log — Micheal Ray Berry',
-    desc: `Official weigh-in log for the Micheal Ray Berry Public Accountability Project: ${records.length} recorded ${records.length === 1 ? 'day' : 'days'} from 340 pounds toward 175.`,
+    desc: `Weigh-in log: declared start 340 lb, first filed ${records[0] ? records[0].weight.toFixed(1) : '—'} lb, ${records.length} recorded ${records.length === 1 ? 'day' : 'days'} toward 175.`,
     canonical: `${SITE_ORIGIN}/dashboard`,
     current: 'dashboard',
     eyebrow: 'Tracked data — updated with every weigh-in',
@@ -375,13 +376,15 @@ export function uniformPage() {
   <p>Creates a consistent visual baseline. Prevents ordinary clothing from hiding or changing the appearance of the body over time. Its purpose is not fashion. Its purpose is documentation.</p>
   <h2>Requirement 2 — Plain black shoes</h2>
   <p>Required for all official full-body documentation. They complete the project uniform and ensure each inspection presents the same full-body visual standard from head to toe.</p>
+  <h2>Requirement 3 — Plain black collar · from 15 August 2026</h2>
+  <p>Worn closed for every official photograph and inspection from this date. Visible in the front, left, and right frames. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 were filed under that original uniform. This item is an amendment, not a silent rewrite of the signed text.</p>
   <h2>Required pose and angles</h2>
   <p>Standing upright, hands behind head, body visible, face visible, no concealment of body shape. Every inspection documents four angles: front, left side, right side, and rear. A normal Daily Inspection runs roughly a minute. The same attire, pose, angle, and no-concealment standards apply to the four required daily photos.</p>
   <p class="pending">No anonymous content. No casual documentation. No hidden identity. No inconsistent visual record.</p>
   <p><a href="/positions/">Inspection standard</a> · <a href="/agreement">Agreement</a></p>`;
   return shell({
     title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
-    desc: 'Required project uniform for the Micheal Ray Berry Public Accountability Project: black full-body unitard, plain black shoes, four-angle documentation.',
+    desc: 'Required project uniform: black full-body unitard, plain black shoes, and from 15 August 2026 a plain black collar. Four-angle documentation.',
     canonical: `${SITE_ORIGIN}/uniform`,
     current: 'home',
     eyebrow: 'Required standard — all official content',

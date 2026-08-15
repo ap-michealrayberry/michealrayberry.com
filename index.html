@@ -10,7 +10,7 @@
 <helmet>
   <title>Micheal Ray Berry — Public Accountability Project, 340 to 175 lbs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The official public record: 340 to 175 pounds, documented daily since August 13, 2026 with inspection videos, weigh-ins, and a public violation log.">
+  <meta name="description" content="Public record: declared start 340 lb, first filed weigh-in 337.0 lb on Day 1 (13 August 2026), toward 175. Daily archive at /daily/. Violation log at /penalties. Homepage reads the live sheet and can lag.">
   <link rel="canonical" href="https://michealrayberry.com/">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#141412">
@@ -22,7 +22,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
   <meta property="og:title" content="Micheal Ray Berry — Public Accountability Project">
-  <meta property="og:description" content="340 → 175 lbs, documented daily in public. Daily inspection videos, weigh-in log, public violation record. There is no unrecorded ending to this project.">
+  <meta property="og:description" content="Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. Toward 175. The archive is /daily/ and /penalties — this homepage can lag.">
   <meta property="og:url" content="https://michealrayberry.com/">
   <meta property="og:image" content="https://michealrayberry.com/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -114,7 +114,7 @@
   <noscript>
     <div style="max-width: 760px; margin: 0 auto; padding: 48px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.7; color: #141412;">
       <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 30px; text-transform: uppercase; margin: 0 0 6px;">Micheal Ray Berry — Public Accountability Project</h1>
-      <p style="margin: 0 0 18px; color: #6B6A64;">The official public record: 340 to 175 pounds, documented every day since August 13, 2026.</p>
+      <p style="margin: 0 0 18px; color: #6B6A64;">Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1 (13 August 2026). The archive is <a href="/daily/">/daily/</a> and <a href="/penalties">/penalties</a>.</p>
       <p style="margin: 0 0 18px;">Every project day by 10:00 PM Eastern: a standardized four-angle inspection video, four daily photos, a weight entry, and a tracker update, all published to this record. A missed requirement is entered permanently in the public violation log with its date, the requirement missed, the status, and the resolution date.</p>
       <p style="margin: 0 0 8px;">The complete record is published as static pages:</p>
       <ul style="margin: 0 0 18px; padding-left: 20px;">
@@ -139,13 +139,11 @@
 
   <!-- ============ STATUS STRIP ============ -->
   <div class="mrb-edge" style="background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; padding: 8px 32px; gap: 16px; flex-wrap: wrap;">
-    <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
+    <div style="display: flex; align-items: center; gap: 10px 28px; flex-wrap: wrap;">
       <span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block;"></span>
-      <span>{{ recordStatus }}</span>
-    </div>
-    <div style="display: flex; gap: 28px; flex-wrap: wrap;">
-      <span style="white-space: nowrap;">{{ dayStatus }}</span>
-      <span style="white-space: nowrap;">Savannah, Georgia</span>
+      <span>Record held by the Accountability Partner</span>
+      <span>Subject Micheal Ray Berry</span>
+      <span>{{ dayStatus }}</span>
     </div>
   </div>
 
@@ -154,7 +152,7 @@
     <div style="max-width: 1160px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 22px 0;">
       <a href="/" onClick="{{ goHome }}" style="display: flex; flex-direction: column; gap: 2px; cursor: pointer; text-decoration: none; color: #141412;">
         <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1;">Micheal Ray Berry</span>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6B6A64;">Public Accountability Project</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6B6A64;">Subject · official record</span>
       </a>
       <nav style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
@@ -330,19 +328,19 @@
           <span style="font-size: clamp(24px, 3vw, 36px); color: #6B6A64;">→</span>
           <span style="font-size: clamp(40px, 6vw, 72px); font-weight: 600; color: #B3261E;">175</span>
           <span style="font-size: clamp(18px, 2vw, 26px); font-weight: 600; color: #B3261E;">LB</span>
-          <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A64;">· Completion requires 28 consecutive days at goal</span>
+          <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A64;">· Declared start · first filed 337.0</span>
         </div>
         <div style="max-width: 640px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.6;">
-          <p style="margin: 0;">My name is Micheal Ray Berry. On August 13, 2026, this project begins at a starting weight of 340 pounds.</p>
-          <p style="margin: 0;">This is a structured, daily commitment. Not a challenge, not a phase, and not something I start and stop.</p>
-          <p style="margin: 0;">Every day by 10:00 PM Eastern, I record a standardized inspection video, capture the four-angle daily photos, record my weight, and update the public tracker.</p>
+          <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb on Day 1 (13 August 2026). Day 2 did not complete the packet (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. This homepage reads the live sheet and can lag.</p>
+          <p style="margin: 0;">This is the Accountability Partner’s official record of Micheal Ray Berry. He is the subject. He does not hold this site.</p>
+          <p style="margin: 0;">Every day by 10:00 PM Eastern he files a standardized inspection video, the four-angle photos, the weight, and the tracker update — in the project uniform, including the required collar.</p>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
           <img data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg" alt="Day 1 front photo — recorded August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 001 — 340 LB. Where this record begins.</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 001 — 337.0 LB filed. Declared start 340.</span>
       </div>
       </div>
     </section>
@@ -656,7 +654,7 @@
             <div style="width: 220px; aspect-ratio: 9 / 16; border: 2px solid #B3261E;">
               <img data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg" alt="Day 1 baseline photo — August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
             </div>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">DAY 001 — 340 LB · THE STARTING POINT</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">DAY 001 — 337.0 LB FILED</span>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64;">Every square that follows is measured against this frame.</span>
           </div>
         </div>
@@ -807,10 +805,12 @@
       <div style="max-width: 1160px; margin: 0 auto;">
         <div class="mrb-hero" style="display: grid; grid-template-columns: 1fr minmax(200px, 280px); gap: 48px; align-items: start;">
         <div>
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">Section 01 — Purpose</p>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">His statement · the record is held above</p>
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 32px;">About This Project</h1>
         <div style="max-width: 680px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
-          <p style="margin: 0;">My name is Micheal Ray Berry. This website documents my public weight loss and accountability project: 340 pounds to 175 pounds.</p>
+          <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb on Day 1 (13 August 2026). Day 2 did not complete the packet (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. The homepage reads the live sheet and can lag.</p>
+          <p style="margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; color: #6B6A64;">What follows is Micheal Ray Berry in the first person. It is his account. It is not the holder of the record.</p>
+          <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a public weight-loss project whose agreement starts at 340 pounds and whose first filed weigh-in is 337.0. The goal is 175 pounds, held 28 days.</p>
           <p style="margin: 0;">I did not need more information, another private plan, or another promise to myself. I needed a structure that made my actions visible, measurable, and difficult to quietly abandon. In private, I could delay, renegotiate, restart, or stop recording when the results became uncomfortable. This project exists to remove those escape routes.</p>
           <p style="margin: 0;">I respond to external structure, immediate verification, fixed deadlines, and consequences that cannot be casually negotiated in the moment. The project takes the decision away from the tired, discouraged, impulsive version of me and places it in rules established by the clear-minded version of me.</p>
           <p style="margin: 0;">Every day produces a public record — successful or not — so progress is based on documented action rather than intention.</p>
@@ -891,7 +891,7 @@
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">A record I could delete later is not a record — it is a draft. If an exit existed, every hard day would point toward it: quit, clean up, pretend it never happened. Permanence closes that door. Quitting no longer erases anything, so the only version of the future where these photos end well is the one where the later photos show 175.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">That is why the record is deliberately built to operate without my cooperation. It is administered by the Accountability Partner, not by me. It is mirrored across independent archives — this website, the public tracker, the YouTube channel, and a public photo archive — each with its own copy. It is indexed by search engines under my real name, on purpose, so it can be found by anyone who looks. I cannot soften it, edit it, or take it down, and any attempt to would itself become part of the record.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">Maximum exposure is not a side effect. It is the mechanism. The more findable this record is, the more it costs to abandon — and the more the only way out is through.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The archive cannot be edited. The next photo can.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">Published versions stay on GitHub. The next photo can still change the story.</p>
           </div>
         </div>
       </div>
@@ -915,7 +915,7 @@
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Can he delete this site or quietly quit?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">No. The website, domain, trackers, and violation log are owned and administered by the Accountability Partner for the project's duration. Thirty days of silence or any attempt to take the record down converts the site to a permanent public abandonment record.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Not unilaterally. The Accountability Partner administers the live site, the domain, and the sheet. Published versions remain in the public GitHub history — changing the live page does not erase those commits. That is harder to hide, not sealed. Thirty days of silence or an attempt to take the record down is supposed to convert the site to an abandonment record, under the agreement.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is the weight loss medically supervised?</span>
@@ -1049,7 +1049,7 @@
           <h3 style="font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; margin: 12px 0 0; border-bottom: 1px solid #D8D6CF; padding-bottom: 4px;">13. Acknowledgment and Execution</h3>
           <p style="margin: 0;">I, Micheal Ray Berry, have read every section of this Agreement and I understand exactly what I am signing. I understand that every confirmed Violation Event produces a Level One, Level Two, or Level Three corrective requirement — corner time of 10, 20, or 30 minutes by level — completed in the project uniform, recorded in one unbroken take, and verified by the Accountability Partner, together with a factual public log entry — date, requirement missed, status, submission and resolution timestamps, and verification result — that becomes part of the permanent public record. I understand that the corrective recording is published on the permanent record beside the entry that caused it, that completing the requirement closes the obligation without removing the recording, and that resolution of the entry does not remove it either. I understand that violations are declared automatically from objective evidence and that the Accountability Partner cannot excuse, soften, or downgrade one — only confirm or reject it against the written rules — and that I have a fixed 48 hours to contest with evidence before the determination stands. I understand that I must complete each corrective session within 72 hours of the notice, and that missing that deadline is itself a new violation at the next level. I understand that the Accountability Partner may set additional daily structure and requirements in support of the goal, that these are enforced on the same automatic terms as every other requirement, and that they are bound by the medical, safety, lawful, and non-sexual limits stated in §3.1. I understand that submitting the corrective recording resolves the entry, that the Accountability Partner may overrule and reopen it only on the written verification standard with a stated reason, and that resolution never erases the entry. I understand that my Project content is public and that I grant the Accountability Partner a license to repost, share, mirror, and archive it anywhere for the Project's accountability and documentation purpose, but not to sell, monetize, materially alter, or sublicense it for unrelated purposes (§10.2a). I understand and accept that, as a practical matter, public content may be copied and reused by third parties beyond either party's control (§10.2b). I understand that I may not edit, soften, suppress, or remove the record because of embarrassment, regret, dissatisfaction, or loss of motivation; content may be removed, relocated, redacted, or replaced only under the limited circumstances expressly permitted by §10.3 and the safety-and-privacy process in §8.6. I understand that there are only three ways out: I finish, both parties release me in writing, or the Project ends without verified completion and is recorded that way, factually. I am not signing this in a moment of motivation; I am signing it so that the version of me who loses motivation has no exit. No one has pressured me. This is my own decision, made with a clear mind, and I accept every consequence of it.</p>
           <p style="margin: 0;">The Accountability Partner has read this Agreement in full, accepts the duties of administering the public record fairly and without exception, and agrees to hold the line even — especially — when asked not to.</p>
-          <p style="margin: 12px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Signed and executed August 13, 2026 by both parties, and amended by agreement since. Signatures and the amendment record are held by the Accountability Partner. Day 1: August 13, 2026 · Starting weight: 340.0 lb · Goal: 175.0 lb.</p>
+          <p style="margin: 12px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Signed and executed August 13, 2026 by both parties, and amended by agreement since. Signatures and the amendment record are held by the Accountability Partner. Day 1: August 13, 2026 · Declared starting weight: 340.0 lb · First filed weigh-in: 337.0 lb · Goal: 175.0 lb.</p>
         </div>
       </div>
     </section>
@@ -1199,10 +1199,15 @@
               <span style="font-size: 20px; font-weight: 600;">Black full-body unitard</span>
               <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Creates a consistent visual baseline. Prevents ordinary clothing from hiding or changing the appearance of the body over time. Its purpose is not fashion. Its purpose is documentation.</p>
             </div>
-            <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirement 2</span>
               <span style="font-size: 20px; font-weight: 600;">Plain black shoes</span>
               <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Required for all official full-body documentation. They complete the project uniform and ensure each inspection presents the same full-body visual standard from head to toe.</p>
+            </div>
+            <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirement 3 · from 15 August 2026</span>
+              <span style="font-size: 20px; font-weight: 600;">Plain black collar</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Worn closed for every official photograph and inspection from this date. Visible in the front, left, and right frames. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 were filed under that original uniform. This item is an amendment, not a silent rewrite of the signed text.</p>
             </div>
           </div>
 
@@ -1311,7 +1316,7 @@
       </div>
       <div style="border-top: 1px solid #3A3935; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">
         <span style="display: flex; gap: 6px 20px; flex-wrap: wrap;"><span style="white-space: nowrap;">Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">ap@michealrayberry.com</a></span><span style="white-space: nowrap;">Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">contact@michealrayberry.com</a></span></span>
-        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten" style="color: #6B6A64;" style-hover="color: #B3261E;">Site History</a><span>© 2026 Micheal Ray Berry</span></span>
+        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits" style="color: #6B6A64;" style-hover="color: #B3261E;">Site History</a><span>© 2026 Micheal Ray Berry</span></span>
       </div>
     </div>
   </footer>
@@ -1663,9 +1668,7 @@ class Component extends DCLogic {
   // The list below is only the offline fallback shown if the sheet is unreachable.
   weighIns() {
     if (this.state.liveWeighIns) return this.state.liveWeighIns;
-    return [
-      { date: '2026-08-13', weight: 340.0, note: 'Project start' },
-    ];
+    return [];
   }
 
   // ----- Per-day URLs (?day=N): each recorded day is its own indexable URL -----
@@ -1684,7 +1687,7 @@ class Component extends DCLogic {
     try {
       const base = 'https://michealrayberry.com/';
       const M = {
-        home: ['Micheal Ray Berry \u2014 Public Accountability Project, 340 to 175 lbs', 'The official public record: 340 to 175 pounds, documented daily since August 13, 2026 with inspection videos, weigh-ins, and a public violation log.', ''],
+        home: ['Micheal Ray Berry \u2014 Public Accountability Project, 340 to 175 lbs', 'Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. The archive is /daily/ and /penalties. This homepage reads the live sheet and can lag.', ''],
         dashboard: ['Weigh-In Dashboard & Daily Record \u2014 Micheal Ray Berry', 'Every daily weigh-in, four-angle photo set, and inspection video from the Public Accountability Project, updated daily by 10 PM ET.', 'dashboard'],
         about: ['About the Project \u2014 Micheal Ray Berry', 'Why this project exists, how the accountability structure works, and its three possible outcomes: completion, enforcement, or a permanent abandonment record.', 'about'],
         agreement: ['The Signed Accountability Agreement \u2014 Micheal Ray Berry', 'The signed Public Accountability Agreement in full: daily requirements, documentation standard, weigh-ins, violations, and the Partner\u2019s role.', 'agreement'],
@@ -2058,8 +2061,12 @@ class Component extends DCLogic {
     // ----- Updates (official entries by the AP; personal notes by Micheal, permanent once posted) -----
     const fallbackUpdates = [{
       date: 'August 13, 2026', type: 'official', title: 'Entry 001 — Project Commencement',
-      body: 'The project begins. Starting weight recorded at 340 pounds. The accountability agreement is signed and published. Daily Inspection videos publish to the official record here; weights post to the public tracker on this record.',
+      body: 'The project begins. The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb. The accountability agreement is signed and published.',
       link: '/daily/',
+    }, {
+      date: 'August 15, 2026', type: 'official', title: 'Uniform amendment — collar required',
+      body: 'From 15 August 2026 the project uniform includes a plain black collar, worn closed for every official photograph and inspection. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 stay as filed. This is an amendment, not a rewrite of the signed text.',
+      link: '/uniform',
     }];
     const officials = (this.state.liveUpdates && this.state.liveUpdates.length ? this.state.liveUpdates : fallbackUpdates).slice();
     const journal = (this.state.liveJournal || []).slice();
