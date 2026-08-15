@@ -1,0 +1,26 @@
+# After 10 PM Eastern the publisher must run even if nobody pushed.
+# 03:10 UTC is 10:10 PM EST / 11:10 PM EDT — always past the deadline.
+# Set repo secret NETLIFY_BUILD_HOOK to the Netlify build-hook URL.
+name: nightly-rebuild
+
+on:
+  schedule:
+    - cron: '10 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    name: ping-netlify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build
+        env:
+          HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: |
+          set -eu
+          if [ -z "${HOOK:-}" ]; then
+            echo "NETLIFY_BUILD_HOOK is not set — skip. Add it under Settings → Secrets."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"
+          echo "Netlify rebuild requested."
