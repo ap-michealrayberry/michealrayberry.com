@@ -164,7 +164,7 @@
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
           <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
-          <a href="/partner" onClick="{{ goPartner }}" aria-current="{{ isPartnerNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 11px; cursor: pointer; color: #B3261E; text-decoration: none; display: inline-block; border: 1px solid #B3261E;" style-hover="background: #B3261E; color: #FFFFFF;">Local AP</a>
+          <a href="/partner" onClick="{{ goPartner }}" aria-current="{{ isPartnerNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 11px; cursor: pointer; color: #B3261E; text-decoration: none; display: inline-block; border: 1px solid #B3261E;" style-hover="background: #B3261E; color: #FFFFFF;">Owner</a>
         </div>
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection Standard</a>
@@ -749,14 +749,14 @@
 
   <!-- ==================== LOCAL AP ==================== -->
   <sc-if value="{{ isPartner }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Local AP">
+  <div data-screen-label="Owner">
     <section style="border-bottom: 1px solid #141412; padding: 72px 32px 56px;">
       <div style="max-width: 1160px; margin: 0 auto;">
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§12.2 — Accountability Partner</p>
-        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 24px;">Local Accountability Partner Wanted</h1>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">Local search</p>
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 24px;">Owner wanted</h1>
         <div style="max-width: 700px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
-          <p style="margin: 0;">This project is administered by a remote Accountability Partner. The local search is for a Master or Mistress: someone present in person who will hold the parts of the role that cannot be done over a screen. On this record the title stays Local Accountability Partner until a signed amendment names them.</p>
-          <p style="margin: 0;">This is a real enforcement role, not a symbolic one. It carries genuine authority: within the written rules, the Partner's judgment on the record is final, and it is not negotiable in the moment. Any appointment is formalized by a signed amendment to the agreement. Before you consider it, understand exactly what it involves.</p>
+          <p style="margin: 0;">He is looking for an owner. A Master or Mistress, in person. The remote Accountability Partner still holds this public record. On the file, appointment is still as Local Accountability Partner, by signed amendment. That is the legal name. This page is the search.</p>
+          <p style="margin: 0;">This is not a symbolic title. An owner holds the line when he asks them not to. Their judgment on the written rules is final in the moment. Nothing takes effect until a signed amendment names them.</p>
         </div>
       </div>
     </section>
@@ -764,11 +764,11 @@
     <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="What the role is">
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8837B;">The role</span>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">What you would do</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8837B;">The search</span>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">What you would hold</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7; color: #D8D6CF;">
-          <p style="margin: 0;">You would enforce the signed agreement in person, with real authority over how it is carried out. That includes directing and supervising corrective corner time — standing in a corner for 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role is conducted strictly under the agreement: safe-for-work under §10.4, with your identity kept private under §12.2.</p>
+          <p style="margin: 0;">You would enforce the signed agreement in person. That includes directing and supervising corrective corner time — standing in a corner for 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role stays under the agreement: safe-for-work under §10.4, identity private under §12.2.</p>
           <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px;">
             <li>Verify weigh-ins in person.</li>
             <li>Supervise corrective corner-time sessions.</li>
@@ -781,7 +781,7 @@
             <li>Hold Google Family Link as the parent user — device supervision. He is not the parent user and cannot revoke it without you.</li>
             <li>Hold Greenlight as the parent user — spend monitoring. He is not the parent user and cannot revoke it without you.</li>
           </ul>
-          <p style="margin: 0;">Family Link and Greenlight are given only by signed amendment if you accept. Until someone is appointed, nobody holds them. If no local Master or Mistress is in place, the remote Accountability Partner may hold either or both.</p>
+          <p style="margin: 0;">Family Link and Greenlight are given only by signed amendment if you accept. Until someone is appointed, nobody holds them. If no local owner is in place, the remote Accountability Partner may hold either or both.</p>
         </div>
       </div>
     </section>
@@ -790,11 +790,11 @@
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The requirement</span>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">You can hold the line</h2>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">If you cannot hold it</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7;">
-          <p style="margin: 0;">There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when Micheal asks you not to.</p>
-          <p style="margin: 0; font-weight: 600;">The project only works if the person running it does not soften it in the moment. If that is not you, this is not the role for you.</p>
+          <p style="margin: 0;">There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when he asks you not to.</p>
+          <p style="margin: 0; font-weight: 600;">If that is not you, this is not the search for you.</p>
         </div>
       </div>
     </section>
@@ -1739,7 +1739,7 @@ class Component extends DCLogic {
         updates: ['Updates & Milestones \u2014 Micheal Ray Berry', 'Updates from the record: milestones, weekly reviews, and project events.', 'updates'],
         record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
         milestones: ['Milestone Ladder \u2014 300 to 175 | Micheal Ray Berry', 'The six official milestones between 340 and 175 pounds, each verified by an on-camera weigh-in and milestone video, with live status from the record.', 'milestones'],
-        partner: ['Local Accountability Partner Wanted \u2014 Micheal Ray Berry', 'In-person Partner wanted: verify weigh-ins, supervise corrective sessions, and if accepted hold Family Link and Greenlight. The local search is for a Master or Mistress. Apply at ap@michealrayberry.com.', 'partner'],
+        partner: ['Owner wanted \u2014 Micheal Ray Berry', 'He is looking for an owner \u2014 a Master or Mistress in person. Weigh-ins, the written rules, and if accepted Family Link and Greenlight. Apply at ap@michealrayberry.com.', 'partner'],
       };
       const m = M[page] || M.home;
       const canon = base + m[2];
@@ -2121,7 +2121,7 @@ class Component extends DCLogic {
       link: '/daily/',
     }, {
       date: 'August 15, 2026', type: 'official', title: 'Uniform amendment — collar required',
-      body: 'From 15 August 2026 the project uniform includes a plain black collar, worn closed for every official photograph and inspection. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 stay as filed. This is an amendment, not a rewrite of the signed text.',
+      body: 'From 15 August 2026 the project uniform includes the AXSmar Talena titanium 6 mm lockable collar, worn closed for every official photograph and inspection. The original signed §4.1 named unitard and shoes only. Days 1–2 stay as filed. This is an amendment, not a rewrite of the signed text.',
       link: '/uniform',
     }];
     const officials = (this.state.liveUpdates && this.state.liveUpdates.length ? this.state.liveUpdates : fallbackUpdates).slice();

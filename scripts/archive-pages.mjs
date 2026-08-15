@@ -108,7 +108,7 @@ function navMark(current) {
     ['/dashboard', 'Dashboard', 'dashboard'],
     ['/penalties', 'Violations', 'penalties'],
     ['/milestones', 'Milestones', 'milestones'],
-    ['/partner', 'Local AP', 'partner'],
+    ['/partner', 'Owner', 'partner'],
   ];
   return items.map(([href, label, key]) =>
     `<a href="${href}"${key === current ? ' aria-current="page"' : ''}>${label}</a>`).join('');
@@ -420,10 +420,10 @@ export function personalPage() {
 
 export function partnerPage() {
   const body = `
-  <p class="intro">This project is administered by a remote Accountability Partner. The local search is for a Master or Mistress: someone present in person who will hold the parts of the role that cannot be done over a screen. On this record the title stays Local Accountability Partner until a signed amendment names them.</p>
-  <p>This is a real enforcement role, not a symbolic one. It carries genuine authority: within the written rules, the Partner's judgment on the record is final, and it is not negotiable in the moment. Any appointment is formalized by a signed amendment to the agreement.</p>
-  <h2>What you would do</h2>
-  <p>You would enforce the signed agreement in person, with real authority over how it is carried out. That includes directing and supervising corrective corner time — 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role is conducted strictly under the agreement: safe-for-work under §10.4, with your identity kept private under §12.2.</p>
+  <p class="intro">He is looking for an owner. A Master or Mistress, in person. The remote Accountability Partner still holds this public record. On the file, appointment is still as Local Accountability Partner, by signed amendment. That is the legal name. This page is the search.</p>
+  <p>This is not a symbolic title. An owner holds the line when he asks them not to. Their judgment on the written rules is final in the moment. Nothing takes effect until a signed amendment names them.</p>
+  <h2>What you would hold</h2>
+  <p>You would enforce the signed agreement in person. That includes directing and supervising corrective corner time — 10, 20, or 30 minutes by level, in the project uniform, recorded in a single unbroken take. The role stays under the agreement: safe-for-work under §10.4, identity private under §12.2.</p>
   <ul>
     <li>Verify weigh-ins in person.</li>
     <li>Supervise corrective corner-time sessions.</li>
@@ -436,21 +436,21 @@ export function partnerPage() {
     <li>Hold Google Family Link as the parent user — device supervision. He is not the parent user and cannot revoke it without you.</li>
     <li>Hold Greenlight as the parent user — spend monitoring. He is not the parent user and cannot revoke it without you.</li>
   </ul>
-  <p>Family Link and Greenlight are given only by signed amendment if you accept. Until someone is appointed, nobody holds them. If no local Master or Mistress is in place, the remote Accountability Partner may hold either or both.</p>
-  <h2>You can hold the line</h2>
-  <p>There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when Micheal asks you not to.</p>
-  <p class="pending">The project only works if the person running it does not soften it in the moment. If that is not you, this is not the role for you.</p>
+  <p>Family Link and Greenlight are given only by signed amendment if you accept. Until someone is appointed, nobody holds them. If no local owner is in place, the remote Accountability Partner may hold either or both.</p>
+  <h2>If you cannot hold it</h2>
+  <p>There is one requirement, and it is the whole role: you must be able to enforce the agreement exactly as written — including, and especially, when he asks you not to.</p>
+  <p class="pending">If that is not you, this is not the search for you.</p>
   <h2>To apply</h2>
   <p>Write to the Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></p>
   <p><a href="/agreement">Read the signed agreement</a> · <a href="/about">About the project</a></p>`;
   return shell({
-    title: 'Local Accountability Partner Wanted — Micheal Ray Berry',
-    desc: 'In-person Partner wanted: verify weigh-ins, supervise corrective sessions, and if accepted hold Family Link and Greenlight. The local search is for a Master or Mistress. Apply at ap@michealrayberry.com.',
+    title: 'Owner wanted — Micheal Ray Berry',
+    desc: 'He is looking for an owner — a Master or Mistress in person. Weigh-ins, the written rules, and if accepted Family Link and Greenlight. Apply at ap@michealrayberry.com.',
     canonical: `${SITE_ORIGIN}/partner`,
     current: 'partner',
-    eyebrow: '§12.2 — Accountability Partner',
-    h1: 'Local Accountability Partner Wanted',
-    crumbs: '<a href="/">Micheal Ray Berry</a> / Local AP',
+    eyebrow: 'Local search',
+    h1: 'Owner wanted',
+    crumbs: '<a href="/">Micheal Ray Berry</a> / Owner',
     body,
   });
 }
