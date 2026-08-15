@@ -114,7 +114,7 @@ function navMark(current) {
     `<a href="${href}"${key === current ? ' aria-current="page"' : ''}>${label}</a>`).join('');
 }
 
-function shell({ title, desc, canonical, current, eyebrow, h1, crumbs, body }) {
+function shell({ title, desc, canonical, current, eyebrow, h1, crumbs, body, robots = 'index,follow,max-image-preview:large' }) {
   const schema = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
@@ -133,7 +133,7 @@ function shell({ title, desc, canonical, current, eyebrow, h1, crumbs, body }) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${htmlEscape(title)}</title>
   <meta name="description" content="${htmlEscape(desc)}">
-  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="robots" content="${htmlEscape(robots)}">
   <link rel="canonical" href="${canonical}">
   <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
   <link rel="icon" type="image/png" href="${SITE_ORIGIN}/favicon.png">
@@ -174,7 +174,7 @@ ${body}
   <div class="sitefoot-top">
     <div><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
     <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a></span></div>
-    <div><span class="colhead">Personal</span><span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span></div>
+    <div><span class="colhead">Personal</span><span class="links"><a href="/personal/">21+</a></span></div>
   </div>
   <div class="sitefoot-bottom">
     <span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span>
@@ -378,16 +378,16 @@ export function uniformPage() {
   <p>Creates a consistent visual baseline. Prevents ordinary clothing from hiding or changing the appearance of the body over time. Its purpose is not fashion. Its purpose is documentation.</p>
   <h2>Requirement 2 — Plain black shoes</h2>
   <p>Required for all official full-body documentation. They complete the project uniform and ensure each inspection presents the same full-body visual standard from head to toe.</p>
-  <h2>Requirement 3 — Plain black collar · from 15 August 2026</h2>
-  <p>Specified item, which he owns: Talena titanium neck collar, 6 mm, anatomically formed, bead-blasted matte, lockable, made to measure (<a href="https://www.axsmar.eu/Titanium/Talena/Talena-Titanium-neck-collar-6mm::62.html" rel="nofollow noopener" target="_blank">AXSmar product page</a>). Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet.</p>
-  <p>He asked to be collared and remains collared until 175 is held for 28 days, or the record closes unfinished. Archive stills keep the collar. Days 1–2 were filed under unitard and shoes only.</p>
+  <h2>Requirement 3 — Titanium collar · from 15 August 2026</h2>
+  <p>AXSmar Talena titanium neck collar, 6 mm, anatomically formed, bead-blasted matte, lockable, made to measure. He owns it. Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet.</p>
+  <p>Days 1–2 were filed under unitard and shoes only. Signed §4.1 is not silently rewritten; this is an amendment.</p>
   <h2>Required pose and angles</h2>
   <p>Standing upright, hands behind head, body visible, face visible, no concealment of body shape. Every inspection documents four angles: front, left side, right side, and rear. A normal Daily Inspection runs roughly a minute. The same attire, pose, angle, and no-concealment standards apply to the four required daily photos.</p>
   <p class="pending">No anonymous content. No casual documentation. No hidden identity. No inconsistent visual record.</p>
   <p><a href="/positions/">Inspection standard</a> · <a href="/agreement">Agreement</a></p>`;
   return shell({
     title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
-    desc: 'Required project uniform: black full-body unitard, plain black shoes, and from 15 August 2026 a plain black collar. Four-angle documentation.',
+    desc: 'Required project uniform: black full-body unitard, plain black shoes, and from 15 August 2026 an AXSmar Talena 6 mm titanium collar. Four-angle documentation.',
     canonical: `${SITE_ORIGIN}/uniform`,
     current: 'home',
     eyebrow: 'Required standard — all official content',
@@ -397,6 +397,27 @@ export function uniformPage() {
   });
 }
 
+
+export function personalPage() {
+  const body = `
+  <p class="intro">21+. Personal. Not the official record. None of these are Official Platforms under the agreement. This page is not scored.</p>
+  <p>These are his personal adult profiles.</p>
+  <p><a href="https://fetlife.com/MichealRayBerry" rel="nofollow noopener" target="_blank">FetLife</a></p>
+  <p><a href="https://xhamster.com/users/michealrayberry" rel="nofollow noopener" target="_blank">xHamster</a></p>
+  <p><a href="https://www.spankingtube.com/user/michealrayberry" rel="nofollow noopener" target="_blank">SpankingTube</a></p>
+  <p class="pending">If you wanted the weigh-in file, go back to <a href="/">the record</a>.</p>`;
+  return shell({
+    title: '21+ — Micheal Ray Berry',
+    desc: 'Personal adult profiles. Not part of the official accountability record.',
+    canonical: `${SITE_ORIGIN}/personal/`,
+    current: 'home',
+    eyebrow: 'Personal · 21+',
+    h1: '21+',
+    crumbs: '<a href="/">Micheal Ray Berry</a> / 21+',
+    body,
+    robots: 'noindex,nofollow',
+  });
+}
 
 export function partnerPage() {
   const body = `
@@ -441,6 +462,7 @@ export async function writeArchivePages(root, { records = [], violations = [], e
     ['uniform', uniformPage()],
     ['updates', updatesPage()],
     ['partner', partnerPage()],
+    ['personal', personalPage()],
   ];
   const changed = [];
   for (const [slug, html] of pages) {

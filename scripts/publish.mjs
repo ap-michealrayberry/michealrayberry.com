@@ -516,7 +516,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -693,7 +693,7 @@ function milestonePage(target, entries) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -793,7 +793,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -860,7 +860,7 @@ function weeksIndexPage(entries) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1048,7 +1048,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1238,7 +1238,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1382,7 +1382,7 @@ function consentPage() {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1591,7 +1591,7 @@ function violationPage(v, prev, next) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1896,7 +1896,7 @@ function positionsPage(entries) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2071,7 +2071,7 @@ function cornerTimePage(entries, violations, demoUrl) {
       </div>
       <div class="col">
         <span class="colhead">Personal</span>
-        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
+        <span class="links"><a href="/personal/">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2215,7 +2215,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
-      <div class="col"><span class="colhead">Personal</span><span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span></div>
+      <div class="col"><span class="colhead">Personal</span><span class="links"><a href="/personal/">21+</a></span></div>
     </div>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
