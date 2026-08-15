@@ -173,7 +173,7 @@ ${body}
 <div class="sitefoot"><div class="sitefoot-in">
   <div class="sitefoot-top">
     <div><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
-    <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span></div>
+    <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a></span></div>
   </div>
   <div class="sitefoot-bottom">
     <span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span>
@@ -266,7 +266,7 @@ export function dashboardPage(records = []) {
   <p><a href="/daily/">Daily record</a> · <a href="/milestones">Milestones</a> · <a href="/weeks/">Weekly summaries</a></p>`;
 
   return shell({
-    title: 'Dashboard — Weigh-in log — Micheal Ray Berry',
+    title: 'Weigh-in dashboard — Micheal Ray Berry official record',
     desc: `Weigh-in log: declared start 340 lb, first filed ${records[0] ? records[0].weight.toFixed(1) : '—'} lb, ${records.length} recorded ${records.length === 1 ? 'day' : 'days'} toward 175.`,
     canonical: `${SITE_ORIGIN}/dashboard`,
     current: 'dashboard',
@@ -309,8 +309,8 @@ export function penaltiesIndexPage(violations = []) {
   <p><a href="/agreement">The signed agreement</a> · <a href="/daily/">Daily record</a></p>`;
 
   return shell({
-    title: 'Violation Log — Micheal Ray Berry Public Accountability Project',
-    desc: 'Permanent public violation log for the Micheal Ray Berry Public Accountability Project. Documentation failures only — weight fluctuation is never a violation.',
+    title: 'Violation log — Micheal Ray Berry official record',
+    desc: 'Permanent public violation log. Documentation failures only — weight fluctuation is never a violation.',
     canonical: `${SITE_ORIGIN}/penalties`,
     current: 'penalties',
     eyebrow: 'Permanent archival record',
@@ -378,7 +378,7 @@ export function uniformPage() {
   <h2>Requirement 2 — Plain black shoes</h2>
   <p>Required for all official full-body documentation. They complete the project uniform and ensure each inspection presents the same full-body visual standard from head to toe.</p>
   <h2>Requirement 3 — Titanium collar · from 15 August 2026</h2>
-  <p>AXSmar Talena titanium neck collar, 6 mm, anatomically formed, bead-blasted matte, lockable, made to measure. He owns it. Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet.</p>
+  <p>A standardized part of the project uniform, and a visible sign of Micheal's commitment to finishing. Worn closed in every official photograph and inspection so each entry matches the same standard. AXSmar Talena, 6 mm titanium, lockable, made to measure. He owns it. Required as of 15 August 2026 (amendment). Days 1–2 stay as filed. A missing collar is a violation, same class as a missed packet.</p>
   <p>Days 1–2 were filed under unitard and shoes only. Signed §4.1 is not silently rewritten; this is an amendment.</p>
   <h2>Required pose and angles</h2>
   <p>Standing upright, hands behind head, body visible, face visible, no concealment of body shape. Every inspection documents four angles: front, left side, right side, and rear. A normal Daily Inspection runs roughly a minute. The same attire, pose, angle, and no-concealment standards apply to the four required daily photos.</p>
@@ -401,7 +401,6 @@ export function personalPage() {
   const body = `
   <p class="intro">21+. Personal. Not the official record. None of these are Official Platforms under the agreement. This page is not scored.</p>
   <p>These are his personal adult profiles.</p>
-  <p><a href="https://fetlife.com/MichealRayBerry" rel="nofollow noopener" target="_blank">FetLife</a></p>
   <p><a href="https://xhamster.com/users/michealrayberry" rel="nofollow noopener" target="_blank">xHamster</a></p>
   <p><a href="https://www.spankingtube.com/user/michealrayberry" rel="nofollow noopener" target="_blank">SpankingTube</a></p>
   <p class="pending">If you wanted the weigh-in file, go back to <a href="/">the record</a>.</p>`;
@@ -420,8 +419,8 @@ export function personalPage() {
 
 export function partnerPage() {
   const body = `
-  <p class="intro">This project is administered by a remote Accountability Partner. It needs a second Partner who can be present in person. He also wants that person to be an owner — a Master or Mistress. The signed file can only appoint them as Local Accountability Partner. That is the role this page is hiring for.</p>
-  <p>This is a real enforcement role, not a symbolic one. Within the written rules, the Partner's judgment on the record is final. Any appointment is a signed amendment. Wanting an owner does not create one.</p>
+  <p class="intro">This project is administered by a remote Accountability Partner. It needs a second Partner who can be present in person.</p>
+  <p>This is a real enforcement role, not a symbolic one. Within the written rules, the Partner's judgment on the record is final. Any appointment is a signed amendment.</p>
   <h2>What you would do</h2>
   <p>You would enforce the signed agreement in person. That includes directing corrective corner time — 10, 20, or 30 minutes by level, in the project uniform, recorded in one unbroken take. The role stays under the agreement: safe-for-work under §10.4, identity private under §12.2.</p>
   <ul>

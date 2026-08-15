@@ -8,9 +8,9 @@
 <body>
 <x-dc>
 <helmet>
-  <title>Micheal Ray Berry — Public Accountability Project, 340 to 175 lbs</title>
+  <title>Micheal Ray Berry — official public weigh-in record, 340 to 175</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Public record: declared start 340 lb, first filed weigh-in 337.0 lb on Day 1 (13 August 2026), toward 175. Daily archive at /daily/. Violation log at /penalties. Homepage reads the live sheet and can lag.">
+  <meta name="description" content="Official public weigh-in record. Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1 (13 August 2026). Toward 175. Archive: /daily/. Violations: /penalties. This homepage reads the live sheet and can lag.">
   <link rel="canonical" href="https://michealrayberry.com/">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#141412">
@@ -18,19 +18,19 @@
   <link rel="icon" type="image/svg+xml" href="https://michealrayberry.com/favicon.svg">
   <link rel="icon" type="image/png" href="https://michealrayberry.com/favicon.png">
   <link rel="apple-touch-icon" href="https://michealrayberry.com/favicon.png">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
-  <meta property="og:title" content="Micheal Ray Berry — Public Accountability Project">
-  <meta property="og:description" content="Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. Toward 175. The archive is /daily/ and /penalties — this homepage can lag.">
+  <meta property="og:title" content="Micheal Ray Berry — official public weigh-in record, 340 to 175">
+  <meta property="og:description" content="Declared start 340 lb. First filed 337.0 lb on Day 1. Toward 175. The archive is /daily/ and /penalties — this homepage can lag.">
   <meta property="og:url" content="https://michealrayberry.com/">
   <meta property="og:image" content="https://michealrayberry.com/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://michealrayberry.com/og-image.png">
-  <meta name="twitter:title" content="Micheal Ray Berry — Public Accountability Project">
-  <meta name="twitter:description" content="Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. The archive is /daily/ and /penalties.">
+  <meta name="twitter:title" content="Micheal Ray Berry — official public weigh-in record, 340 to 175">
+  <meta name="twitter:description" content="Declared start 340 lb. First filed 337.0 lb on Day 1. Archive: /daily/ and /penalties.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -42,7 +42,7 @@
         "url": "https://michealrayberry.com/",
         "publisher": { "@id": "https://michealrayberry.com/#micheal-ray-berry" },
         "about": { "@id": "https://michealrayberry.com/#micheal-ray-berry" },
-        "description": "The official public record of Micheal Ray Berry's weight loss accountability project: 340 to 175 pounds, documented daily.",
+        "description": "The official public weigh-in record of Micheal Ray Berry: declared start 340 pounds, first filed 337.0, toward 175, documented daily.",
         "inLanguage": "en-US"
       },
       {
@@ -59,7 +59,7 @@
         "@type": "Dataset",
         "name": "Micheal Ray Berry public weigh-in record",
         "description": "Daily public weigh-in data from the Micheal Ray Berry Public Accountability Project: date, weight, notes, four-angle daily accountability photos, and inspection videos, documenting a journey from 340 pounds to 175 pounds.",
-        "url": "https://michealrayberry.com/",
+        "url": "https://michealrayberry.com/dashboard",
         "creator": { "@type": "Person", "name": "Micheal Ray Berry" },
         "isAccessibleForFree": true,
         "license": "https://michealrayberry.com/",
@@ -177,138 +177,7 @@
     </div>
   </header>
 
-  <sc-if value="{{ completedShown }}" hint-placeholder-val="{{ false }}">
-    <div style="position: fixed; inset: 0; z-index: 1000; overflow: auto; background: #FAFAF7; color: #141412;" data-screen-label="Completion record">
-      <div style="border-bottom: 4px solid #1B6E3C; padding: 16px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">
-        <span>Official public record — michealrayberry.com</span>
-        <span style="color: #1B6E3C;">§6.3 Completion — verified</span>
-      </div>
-      <div style="max-width: 880px; margin: 0 auto; padding: 72px 32px 80px; display: flex; flex-direction: column; gap: 44px;">
-        <div style="display: flex; flex-direction: column; gap: 18px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #1B6E3C;">Completed {{ completedDate }}</span>
-          <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 8vw, 84px); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.01em;">Micheal Ray Berry completed this project.</h1>
-          <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 640px; color: #3A3935;">340 pounds to 175 pounds, held for 28 consecutive days and verified by official weigh-in. Every day of the road here is documented below — the weigh-ins, the photos, the inspections, and every violation along the way. He said there would be no unrecorded ending. This is the recorded one.</p>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: #D8D6CF; border: 1px solid #D8D6CF;">
-          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Started at</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">340 lbs</span>
-          </div>
-          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Finished at</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #1B6E3C;">175 lbs</span>
-          </div>
-          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Eliminated</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">165 lbs</span>
-          </div>
-          <div style="background: #FAFAF7; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Completed on day</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #1B6E3C;">{{ completedDay }}</span>
-          </div>
-        </div>
-        <sc-if value="{{ completionStatement }}" hint-placeholder-val="{{ false }}">
-          <div style="border-left: 3px solid #1B6E3C; padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 10px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Statement of the Accountability Partner</span>
-            <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #3A3935; white-space: pre-line;">{{ completionStatement }}</p>
-          </div>
-        </sc-if>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button onClick="{{ enterArchive }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; padding: 14px 22px; cursor: pointer; font-weight: 600;" style-hover="background: #3A3935;">View the complete record →</button>
-        </div>
-        <p style="margin: 0; border-top: 1px solid #D8D6CF; padding-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; color: #6B6A64;">Per §6.3 of the signed agreement, this website is now a permanent completion archive. The full record — every weigh-in, photo, video, and violation — remains published as it was built: in public, under his real name.</p>
-      </div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ abandonedConfirmed }}" hint-placeholder-val="{{ false }}">
-    <div style="position: fixed; inset: 0; z-index: 999; overflow: auto; background: #0B0B0A; color: #FAFAF7;" data-screen-label="Abandonment record">
-      <div style="border-bottom: 4px solid #B3261E; padding: 16px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">
-        <span>Official public record — michealrayberry.com</span>
-        <span style="color: #E8837B;">§11 Termination without completion</span>
-      </div>
-      <div style="max-width: 880px; margin: 0 auto; padding: 72px 32px 80px; display: flex; flex-direction: column; gap: 44px;">
-        <div style="display: flex; flex-direction: column; gap: 18px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E;">Terminated {{ abandonDate }}</span>
-          <h1 style="margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 8vw, 84px); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.01em;">Micheal Ray Berry abandoned this project.</h1>
-          <p style="margin: 0; font-size: 17px; line-height: 1.7; max-width: 640px; color: #D8D6CF;">He built this site, signed the agreement, and asked strangers to hold him accountable. Then he stopped answering. Per §11 of the agreement he signed, this website is now his permanent abandonment record. He cannot remove it.</p>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: #3A3935; border: 1px solid #3A3935;">
-          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Started at</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600;">340 lbs</span>
-          </div>
-          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Goal — never reached</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #8A8983;">175 lbs</span>
-          </div>
-          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Quit on day</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #E8837B;">{{ abandonDay }}</span>
-          </div>
-          <div style="background: #0B0B0A; padding: 22px; display: flex; flex-direction: column; gap: 6px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A8983;">Violations on record</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600; color: #E8837B;">{{ abandonViolationCount }}</span>
-          </div>
-        </div>
-        <sc-if value="{{ abandonStatement }}" hint-placeholder-val="{{ false }}">
-          <div style="border-left: 3px solid #B3261E; padding: 4px 0 4px 22px; display: flex; flex-direction: column; gap: 10px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Statement of the Accountability Partner</span>
-            <p style="margin: 0; font-size: 16px; line-height: 1.75; color: #D8D6CF; white-space: pre-line;">{{ abandonStatement }}</p>
-          </div>
-        </sc-if>
-        <sc-if value="{{ hasApLinks }}" hint-placeholder-val="{{ false }}">
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Placed by the Accountability Partner</span>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <sc-for list="{{ apLinks }}" as="l" hint-placeholder-count="1">
-                <a href="{{ l.url }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; border: 1px solid #3A3935; padding: 14px 18px; text-decoration: none; color: #FAFAF7;" style-hover="border-color: #B3261E;">
-                  <span style="font-size: 15px; font-weight: 600; flex: 1;">{{ l.label }}</span>
-                  
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">→</span>
-                </a>
-              </sc-for>
-            </div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ abandonHasViolations }}" hint-placeholder-val="{{ false }}">
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">The violation log — frozen as he left it</span>
-            <div style="display: flex; flex-direction: column;">
-              <sc-for list="{{ abandonPenalties }}" as="p" hint-placeholder-count="2">
-                <div style="border-top: 1px solid #3A3935; padding: 12px 0; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace;">
-                  <span style="font-size: 12px; font-weight: 600; min-width: 92px;">{{ p.date }}</span>
-                  <span style="font-size: 13px; flex: 1; min-width: 220px; color: #D8D6CF;">{{ p.violation }}</span>
-                  <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ p.color }};">{{ p.status }}</span>
-                </div>
-              </sc-for>
-            </div>
-          </div>
-        </sc-if>
-        <p style="margin: 0; border-top: 1px solid #3A3935; padding-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.8; color: #8A8983;">Thirty consecutive days without required documentation, or an attempt to delete or conceal this record, constitutes abandonment under §11 of the signed Public Accountability Agreement. The record, including every violation and this notice, remains published. Project ended without verified completion.</p>
-      </div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ abandonedPresumed }}" hint-placeholder-val="{{ false }}">
-    <div style="background: #141412; color: #FAFAF7; border-bottom: 4px solid #B3261E; padding: 22px 32px; display: flex; flex-direction: column; gap: 8px;" data-screen-label="Presumed abandoned notice">
-      <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; letter-spacing: 0.04em; color: #E8837B;">Presumed abandoned</span>
-      <p style="margin: 0; font-size: 14px; line-height: 1.65; max-width: 720px; color: #D8D6CF;">The record has gone 30+ consecutive days without required documentation. Under §11 this terminates the project as abandoned unless a documented medical exception (§9) applies. Pending the Accountability Partner's determination, after which this site converts permanently to the abandonment record.</p>
-    </div>
-  </sc-if>
-  <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-    <div style="background: #FBEAE8; border-bottom: 1px solid #B3261E; border-left: 8px solid #B3261E;">
-      <div style="max-width: 1160px; margin: 0 auto; padding: 22px 32px; display: flex; align-items: flex-start; gap: 26px; flex-wrap: wrap;">
-        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 280px;">
-          <span style="align-self: flex-start; background: #B3261E; color: #FFFFFF; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; padding: 6px 11px;">Active Violation</span>
-          <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(22px, 3.4vw, 30px); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05; color: #B3261E;">Public Violation — Active</span>
-          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #141412; max-width: 760px; text-wrap: pretty;">{{ noticeBody }}</p>
-        </div>
-        <a href="/penalties" onClick="{{ goPenalties }}" style="align-self: center; background: #B3261E; color: #FFFFFF; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 20px; white-space: nowrap;" style-hover="background: #8E1E18;">View violation record →</a>
-      </div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ showOverdue }}" hint-placeholder-val="{{ false }}">
-    <div style="background: #B3261E; color: #FFFFFF; padding: 14px 32px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">{{ overdueMsg }}</div>
-  </sc-if>
+  <div id="mrb-state-slot" ref="{{ stateSlot }}"></div>
 
   <main style="flex: 1;">
 
@@ -348,7 +217,7 @@
       </div>
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-          <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Day 1 front photo — recorded August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+          <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Micheal Ray Berry, Day 1 front, 13 August 2026, 337.0 lb. Declared start 340." style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 001 — 337.0 lb filed. Declared start 340.</span>
       </div>
@@ -755,8 +624,8 @@
         <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§12.2 — Accountability Partner</p>
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 24px;">Local Accountability Partner Wanted</h1>
         <div style="max-width: 700px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
-          <p style="margin: 0;">This project is administered by a remote Accountability Partner. It needs a second Partner who can be present in person. He also wants that person to be an owner — a Master or Mistress. The signed file can only appoint them as Local Accountability Partner. That is the role this page is hiring for.</p>
-          <p style="margin: 0;">This is a real enforcement role, not a symbolic one. Within the written rules, the Partner's judgment on the record is final. Any appointment is a signed amendment. Wanting an owner does not create one.</p>
+          <p style="margin: 0;">This project is administered by a remote Accountability Partner. It needs a second Partner who can be present in person.</p>
+          <p style="margin: 0;">This is a real enforcement role, not a symbolic one. Within the written rules, the Partner's judgment on the record is final. Any appointment is a signed amendment.</p>
         </div>
       </div>
     </section>
@@ -817,7 +686,7 @@
           <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb on Day 1 (13 August 2026). Day 2 did not complete the packet (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. The homepage reads the live sheet and can lag.</p>
           <p style="margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; color: #6B6A64;">What follows is Micheal Ray Berry in the first person. It is his account. It is not the holder of the record.</p>
           <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a public weight-loss project whose agreement starts at 340 pounds and whose first filed weigh-in is 337.0. The goal is 175 pounds, held 28 days.</p>
-          <p style="margin: 0;">I am submissive. I want structure in real life that I do not get to pick up and put down. This project is built from that. It is D/s-inspired: someone else holds the rules, the record, and the consequences. I asked for that because private promises kept failing.</p>
+          <p style="margin: 0;">I want structure in real life that I do not get to pick up and put down. Someone else holds the rules, the record, and the consequences. I asked for that because private promises kept failing. I also want a Partner, if they accept, to hold device and spend monitoring — Family Link and Greenlight — so I cannot revoke those on a bad day.</p>
           <p style="margin: 0;">I am required to file the packet every day by 10:00 PM Eastern: inspection video, four photographs, weight, tracker update, in the uniform.</p>
           <p style="margin: 0;">What you see here is still documentation. Weight, packet, uniform, misses. Not sexual content. The structure is the point. The photographs are the evidence.</p>
           <p style="margin: 0;">I did not need more information, another private plan, or another promise to myself. I needed a structure that made my actions visible, measurable, and difficult to quietly abandon. In private, I could delay, renegotiate, restart, or stop recording when the results became uncomfortable. This project exists to remove those escape routes.</p>
@@ -843,7 +712,7 @@
           <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">The Structure Behind This Record</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.7;">
-          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. I am submissive to the structure. The Accountability Partner holds the official record. I do not.</p>
+          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. The Accountability Partner holds the official record. I do not.</p>
           <p style="margin: 0; color: #D8D6CF;">I built this project and this website, and then I handed control of the official record to someone else. That was the point. Previous attempts had the same weakness: I set the rules, which meant I could also move them. Under this project, the daily inspections, uniform, documentation standards, corrective requirements, and public record of failure operate under an agreement that I do not get to renegotiate on a bad day.</p>
           <p style="margin: 0; color: #D8D6CF;">What I gave up is discretion over whether the results are documented and how compliance is judged.</p>
           <p style="margin: 0; color: #D8D6CF;">The Accountability Partner administers the requirements, reviews the record, and determines whether a documented requirement has been satisfied. When a violation occurs, it remains part of the record. Every entry on this site is me presenting the required evidence for review by someone who is not me, because a record that I alone could revise whenever it became uncomfortable would defeat the purpose.</p>
@@ -935,8 +804,8 @@
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">One way: 175 pounds, held for 28 consecutive days under the verification standard. Then the site converts to a permanent completion record. There is no other ending that isn't public.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
-            <span style="font-size: 17px; font-weight: 600;">Is this a fetish site?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">The structure is D/s-inspired. He is submissive to it in real life; that is why someone else holds the record. What is published is still SFW documentation of weight, packet, uniform, and misses — full coverage, no sexual content. The photographs are evidence. They are not the point of arousal. If you came for that, this is the wrong record.</p>
+            <span style="font-size: 17px; font-weight: 600;">Is the published record safe for work?</span>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Weight, packet, uniform, misses. Full coverage. No sexual content. The photographs are evidence.</p>
           </div>
           <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
@@ -1220,7 +1089,7 @@
             <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirement 3 · from 15 August 2026</span>
               <span style="font-size: 20px; font-weight: 600;">Titanium collar</span>
-              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">AXSmar Talena titanium neck collar, 6 mm, anatomically formed, bead-blasted matte, lockable, made to measure. He owns it. Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet.</p>
+              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">A standardized part of the project uniform, and a visible sign of Micheal's commitment to finishing. Worn closed in every official photograph and inspection so each entry matches the same standard. AXSmar Talena, 6 mm titanium, lockable, made to measure. He owns it. Required as of 15 August 2026 (amendment). Days 1–2 stay as filed. A missing collar is a violation, same class as a missed packet.</p>
               <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #6B6A64;">Days 1–2 were filed under unitard and shoes only. Signed §4.1 is not silently rewritten; this is an amendment.</p>
             </div>
           </div>
@@ -1324,7 +1193,6 @@
               <a href="https://www.youtube.com/@michealrayberry" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">YouTube</a>
               <a href="https://x.com/michealrayberry" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">X</a>
               <a href="https://bsky.app/profile/michealrayberry.bsky.social" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">Bluesky</a>
-              <a href="https://fetlife.com/MichealRayBerry" target="_blank" rel="me nofollow noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">FetLife</a>
             </div>
           </div>
         </div>
@@ -1725,7 +1593,7 @@ class Component extends DCLogic {
     try {
       const base = 'https://michealrayberry.com/';
       const M = {
-        home: ['Micheal Ray Berry \u2014 Public Accountability Project, 340 to 175 lbs', 'Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. The archive is /daily/ and /penalties. This homepage reads the live sheet and can lag.', ''],
+        home: ['Micheal Ray Berry \u2014 official public weigh-in record, 340 to 175', 'Official public weigh-in record. Declared start 340 lb. First filed 337.0 lb on Day 1. Toward 175. Archive: /daily/. Violations: /penalties. This homepage reads the live sheet and can lag.', ''],
         dashboard: ['Weigh-In Dashboard & Daily Record \u2014 Micheal Ray Berry', 'Every daily weigh-in, four-angle photo set, and inspection video from the Public Accountability Project, updated daily by 10 PM ET.', 'dashboard'],
         about: ['About the Project \u2014 Micheal Ray Berry', 'Why this project exists, how the accountability structure works, and its three possible outcomes: completion, enforcement, or a permanent abandonment record.', 'about'],
         agreement: ['The Signed Accountability Agreement \u2014 Micheal Ray Berry', 'The signed Public Accountability Agreement in full: daily requirements, documentation standard, weigh-ins, violations, and the Partner\u2019s role.', 'agreement'],
@@ -2315,6 +2183,35 @@ class Component extends DCLogic {
         if (latestVideoUrl && el.src !== latestVideoUrl) el.src = latestVideoUrl;
       },
       abandonedConfirmed, abandonedPresumed, abandonDate, abandonDay,
+      abandonViolationCount: penalties.length,
+      abandonStatement: sst.ap_statement || '',
+      apLinks, hasApLinks: apLinks.length > 0,
+      abandonPenalties, abandonHasViolations: penalties.length > 0,
+      stateSlot: (el) => {
+        if (typeof window.__mrbApplyStates === 'function') {
+          window.__mrbApplyStates(el, {
+            completedShown: sst.completed === 'confirmed' && !this.state.completedDismissed,
+            completedDate: sst.completed_date || '',
+            completedDay: (() => {
+              const cd = new Date((sst.completed_date || '') + 'T00:00:00');
+              return isNaN(cd) ? '—' : Math.max(1, Math.floor((cd - new Date('2026-08-13T00:00:00')) / 864e5) + 1);
+            })(),
+            completionStatement: sst.completion_statement || '',
+            abandonedConfirmed,
+            abandonedPresumed,
+            abandonDate,
+            abandonDay,
+            abandonViolationCount: penalties.length,
+            abandonStatement: sst.ap_statement || '',
+            inViolation,
+            noticeBody,
+            showOverdue,
+            overdueMsg,
+            enterArchive: () => this.setState({ completedDismissed: true }),
+            goPenalties: this.navTo('penalties'),
+          });
+        }
+      },
       abandonViolationCount: penalties.length,
       abandonStatement: sst.ap_statement || '',
       apLinks, hasApLinks: apLinks.length > 0,

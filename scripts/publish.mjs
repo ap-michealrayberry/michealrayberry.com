@@ -512,7 +512,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -685,7 +685,7 @@ function milestonePage(target, entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -781,7 +781,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -844,7 +844,7 @@ function weeksIndexPage(entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -886,8 +886,8 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   const pending = days.filter((d) => !d.entry && deadlinePending(d.date)).length;
   const gaps = days.length - documented - incomplete - pending;
   const canonical = `${SITE_ORIGIN}/daily/`;
-  const title = 'Daily Record — Micheal Ray Berry Public Accountability Project';
-  const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${documented} documented days with four-angle photographs, recorded weight, inspection video, and SHA-256 evidence manifests.`;
+  const title = 'Daily record — Micheal Ray Berry official weigh-in archive';
+  const description = `Every published day of Micheal Ray Berry's official weigh-in record. Declared start 340 lb, first filed 337.0 lb. ${documented} documented days, plus gaps. Photographs, weight, inspection video, SHA-256 manifests.`;
   const cards = days.map(({ date, day, entry }) => {
     const href = `/daily/${date}-day-${String(day).padStart(3, '0')}/`;
     if (!entry) {
@@ -907,7 +907,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
     const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
     return `<li class="card"><a href="${href}">
       <picture><source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width:720px) 50vw, 25vw">
-      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front view, Day ${day}, ${longDate(date)}`)}" loading="lazy" decoding="async"></picture>
+      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front, Day ${day}, ${longDate(date)}, ${entry.record.weight.toFixed(1)} lb`)}" loading="lazy" decoding="async"></picture>
       <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="wt">${entry.record.weight.toFixed(1)} lb</span></div>
     </a></li>`;
   }).join('\n');
@@ -1028,7 +1028,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1088,8 +1088,9 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   if (fromLog) kind = 'incomplete';
   const label = kind === 'incomplete' ? 'Incomplete record' : 'No record';
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
-  const title = `Day ${day} — ${label} — ${longDate(date)} — Micheal Ray Berry`;
-  const description = `Day ${day} of the Micheal Ray Berry Public Accountability Project, ${longDate(date)}: ${kind === 'incomplete' ? 'the record filed for this date is incomplete' : 'no record was filed for this date'}.`;
+  const title = `Micheal Ray Berry Day ${day} — ${label} | ${longDate(date)}`;
+  const citation = violation ? ` See ${violation.id || violation.slug}.` : '';
+  const description = `Day ${day} of the Micheal Ray Berry public weigh-in record, ${longDate(date)}: ${kind === 'incomplete' ? 'the record filed for this date is incomplete' : 'no record was filed for this date'}.${citation}`;
   const graph = [
     {
       '@type': 'WebPage',
@@ -1214,7 +1215,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1354,7 +1355,7 @@ function consentPage() {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1559,7 +1560,7 @@ function violationPage(v, prev, next) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1860,7 +1861,7 @@ function positionsPage(entries) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2031,7 +2032,7 @@ function cornerTimePage(entries, violations, demoUrl) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col">
         <span class="colhead">Official record</span>
-        <span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span>
+        <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2174,7 +2175,7 @@ function synHeader() {
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
-      <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a> <a href="https://fetlife.com/MichealRayBerry" rel="me nofollow noopener" target="_blank">FetLife</a></span></div>
+      <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
     </div>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
@@ -2564,7 +2565,12 @@ async function main() {
     changedUrls.add(`${SITE_ORIGIN}/feed.xml`);
   }
 
-  const latestDate = generated.at(-1)?.record.date || START_DATE;
+  const latestDate = [
+    ...generated.map((g) => g.record.date),
+    ...publishedDaily.map((r) => r.date),
+    ...violations.map((v) => v.resolved || v.submitted || v.date),
+    todayEtIso(),
+  ].filter(Boolean).map(String).sort().at(-1) || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
     ['sitemap-violations.xml', violationSitemap(violations)],
