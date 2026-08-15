@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://michealrayberry.com/og-image.png">
   <meta name="twitter:title" content="Micheal Ray Berry — Public Accountability Project">
-  <meta name="twitter:description" content="340 → 175 lbs, documented daily in public. Up, down, or flat — it gets posted.">
+  <meta name="twitter:description" content="Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. The archive is /daily/ and /penalties.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -135,7 +135,7 @@
   </svg>
 </template>
 
-<div style="min-height: 100vh; background: #FAFAF7; display: flex; flex-direction: column;">
+<div style="min-height: 100vh; background: #FAFAF7; display: flex; flex-direction: column; overflow-x: hidden;">
 
   <!-- ============ STATUS STRIP ============ -->
   <div class="mrb-edge" style="background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; padding: 8px 32px; gap: 16px; flex-wrap: wrap;">
@@ -143,7 +143,7 @@
       <span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block;"></span>
       <span>Record held by the Accountability Partner</span>
       <span>Subject Micheal Ray Berry</span>
-      <span>{{ dayStatus }}</span>
+      <span>{{ agreementStatus }}</span>
     </div>
   </div>
 
@@ -316,31 +316,43 @@
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div data-screen-label="Home">
 
-    <!-- Hero -->
-    <section style="border-bottom: 1px solid #141412; padding: 88px 32px 72px;">
+    <!-- File header -->
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px 48px;">
       <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 1fr minmax(220px, 300px); gap: 56px; align-items: start;">
       <div>
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 28px;">Project activated: August 13, 2026</p>
-        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(48px, 8vw, 104px); line-height: 0.98; letter-spacing: -0.01em; text-transform: uppercase; margin: 0 0 40px; max-width: 900px;">Public Accountability Project</h1>
-        <div style="display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; margin-bottom: 44px;">
-          <span style="font-size: clamp(40px, 6vw, 72px); font-weight: 600;">340</span>
-          <span style="font-size: clamp(18px, 2vw, 26px); font-weight: 600; color: #6B6A64;">LB</span>
-          <span style="font-size: clamp(24px, 3vw, 36px); color: #6B6A64;">→</span>
-          <span style="font-size: clamp(40px, 6vw, 72px); font-weight: 600; color: #B3261E;">175</span>
-          <span style="font-size: clamp(18px, 2vw, 26px); font-weight: 600; color: #B3261E;">LB</span>
-          <span style="font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A64;">· Declared start · first filed 337.0</span>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">Official record · held by the Accountability Partner</p>
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(48px, 8vw, 104px); line-height: 0.92; letter-spacing: -0.01em; text-transform: uppercase; margin: 0 0 12px; max-width: 900px;">Micheal Ray Berry</h1>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64; margin: 0 0 12px;">Subject of this file · not its author</p>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #141412; margin: 0 0 36px;">He has named himself a submissive</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; border: 1px solid #141412; margin-bottom: 36px; max-width: 720px;">
+          <div style="padding: 18px 16px; border-right: 1px solid #D8D6CF;">
+            <span style="display:block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Day</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 600;">{{ dayNumber }}</span>
+          </div>
+          <div style="padding: 18px 16px; border-right: 1px solid #D8D6CF;">
+            <span style="display:block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Last filed</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 600;">{{ currentLabel }}</span>
+          </div>
+          <div style="padding: 18px 16px; border-right: 1px solid #D8D6CF;">
+            <span style="display:block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64;">Collar</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; line-height: 1.2;">{{ collarStatus }}</span>
+          </div>
+          <div style="padding: 18px 16px;">
+            <span style="display:block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B3261E;">Open</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 600; color: #B3261E;">{{ openCountLabel }}</span>
+          </div>
         </div>
         <div style="max-width: 640px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.6;">
-          <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb on Day 1 (13 August 2026). Day 2 did not complete the packet (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. This homepage reads the live sheet and can lag.</p>
-          <p style="margin: 0;">This is the Accountability Partner’s official record of Micheal Ray Berry. He is the subject. He does not hold this site.</p>
-          <p style="margin: 0;">Every day by 10:00 PM Eastern he files a standardized inspection video, the four-angle photos, the weight, and the tracker update — in the project uniform, including the required collar.</p>
+          <p style="margin: 0;">He is required to file a packet every day by 10:00 PM Eastern: inspection video, four-angle photographs, weight, tracker update, in the project uniform. A missing collar is a violation, same class as a missed packet.</p>
+          <p style="margin: 0;">He asked to be collared. He remains collared until 175 lb is held for 28 consecutive days, or the record closes unfinished. Both endings keep the collar on the archive stills.</p>
+          <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> Declared start 340 lb. First filed weigh-in 337.0 lb, Day 1. Day 2 incomplete (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). Archive: <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a>. This page reads the live sheet and can lag.</p>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-          <img data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg" alt="Day 1 front photo — recorded August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+          <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Day 1 front photo — recorded August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 001 — 337.0 LB filed. Declared start 340.</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 001 — 337.0 lb filed. Declared start 340. Collar required from Day 3.</span>
       </div>
       </div>
     </section>
@@ -353,7 +365,7 @@
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ dayNumber }}</span>
         </div>
         <div style="padding: 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Starting weight</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Declared start</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 52px; font-weight: 600; line-height: 1;">{{ startLabel }}</span>
         </div>
         <div style="padding: 36px 24px; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid #3A3935;">
@@ -600,18 +612,16 @@
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Weight Record</h2>
-        <svg viewBox="0 0 1000 340" style="width: 100%; height: auto; display: block;">
+        <svg id="mrb-weight-chart" viewBox="0 0 1000 340" style="width: 100%; height: auto; display: block;">
           <line x1="60" y1="20" x2="60" y2="300" stroke="#141412" stroke-width="1"></line>
           <line x1="60" y1="300" x2="990" y2="300" stroke="#141412" stroke-width="1"></line>
-          <line x1="60" y1="{{ goalY }}" x2="990" y2="{{ goalY }}" stroke="#B3261E" stroke-width="1" stroke-dasharray="6 5"></line>
-          <text x="66" y="{{ goalLabelY }}" fill="#B3261E" font-family="IBM Plex Mono, monospace" font-size="14">GOAL 175</text>
+          <line data-goal-line x1="60" y1="280" x2="990" y2="280" stroke="#B3261E" stroke-width="1" stroke-dasharray="6 5"></line>
+          <text data-goal-label x="66" y="274" fill="#B3261E" font-family="IBM Plex Mono, monospace" font-size="14">GOAL 175</text>
           <text x="10" y="28" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">340</text>
           <text x="10" y="164" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">255</text>
           <text x="10" y="298" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">170</text>
-          <polyline points="{{ chartPoints }}" fill="none" stroke="#141412" stroke-width="2.5"></polyline>
-          <sc-for list="{{ chartDots }}" as="dot" hint-placeholder-count="1">
-            <circle cx="{{ dot.x }}" cy="{{ dot.y }}" r="5" fill="#141412"></circle>
-          </sc-for>
+          <polyline data-series points="" fill="none" stroke="#141412" stroke-width="2.5"></polyline>
+          <g data-dots></g>
         </svg>
         <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64; margin: 0;">Every recorded weigh-in is plotted. Gaps in the record are visible by design.</p>
       </div>
@@ -621,8 +631,8 @@
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px 80px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Weigh-In Log</h2>
-        <div style="border: 1px solid #141412;">
-          <div style="display: grid; grid-template-columns: 90px 1fr 1fr 1fr 2fr; background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; padding: 12px 20px; gap: 16px;">
+        <div style="border: 1px solid #141412; overflow-x: auto;">
+          <div style="display: grid; grid-template-columns: 90px 1fr 1fr 1fr 2fr; min-width: 640px; background: #141412; color: #FAFAF7; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; padding: 12px 20px; gap: 16px;">
             <span>Day</span>
             <span>Date</span>
             <span>Weight</span>
@@ -652,7 +662,7 @@
         <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start;">
           <div style="display: flex; flex-direction: column; gap: 8px; width: 220px;">
             <div style="width: 220px; aspect-ratio: 9 / 16; border: 2px solid #B3261E;">
-              <img data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg" alt="Day 1 baseline photo — August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Day 1 baseline photo — August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
             </div>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">DAY 001 — 337.0 LB FILED</span>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64;">Every square that follows is measured against this frame.</span>
@@ -811,6 +821,11 @@
           <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. The first filed weigh-in is 337.0 lb on Day 1 (13 August 2026). Day 2 did not complete the packet (<a href="/violations/v-002/" style="color: #141412; font-weight: 600;">V-002</a>). The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. The homepage reads the live sheet and can lag.</p>
           <p style="margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; color: #6B6A64;">What follows is Micheal Ray Berry in the first person. It is his account. It is not the holder of the record.</p>
           <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a public weight-loss project whose agreement starts at 340 pounds and whose first filed weigh-in is 337.0. The goal is 175 pounds, held 28 days.</p>
+          <p style="margin: 0;">I am submissive. I want structure in real life that I do not get to pick up and put down. This project is built from that. It is D/s-inspired: someone else holds the rules, the record, and the consequences. I asked for that because private promises kept failing.</p>
+          <p style="margin: 0;">I asked to be collared. I own the specified Talena titanium collar and I remain collared until 175 pounds is held for 28 consecutive days, or the record closes unfinished. Both endings keep the collar on the archive stills. On this record that collar is required for official photographs and inspections from 15 August 2026. A missing collar is a violation, same class as a missed packet.</p>
+          <p style="margin: 0;">I am required to file the packet every day by 10:00 PM Eastern: inspection video, four photographs, weight, tracker update, in the uniform, including the collar.</p>
+          <p id="personal" style="margin: 0;">Personal, 21+, not this record: <a href="https://fetlife.com/MichealRayBerry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">FetLife</a> · <a href="https://xhamster.com/users/michealrayberry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">xHamster</a> · <a href="https://www.spankingtube.com/user/michealrayberry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">SpankingTube</a>. Adult sites. None are Official Platforms under the agreement.</p>
+          <p style="margin: 0;">What you see here is still documentation. Weight, packet, uniform, misses. Not sexual content. The structure is the point. The photographs are the evidence.</p>
           <p style="margin: 0;">I did not need more information, another private plan, or another promise to myself. I needed a structure that made my actions visible, measurable, and difficult to quietly abandon. In private, I could delay, renegotiate, restart, or stop recording when the results became uncomfortable. This project exists to remove those escape routes.</p>
           <p style="margin: 0;">I respond to external structure, immediate verification, fixed deadlines, and consequences that cannot be casually negotiated in the moment. The project takes the decision away from the tired, discouraged, impulsive version of me and places it in rules established by the clear-minded version of me.</p>
           <p style="margin: 0;">Every day produces a public record — successful or not — so progress is based on documented action rather than intention.</p>
@@ -819,9 +834,9 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-            <img src="https://michealrayberry.com/images/signed-agreement-2026-08-13.jpg" alt="Micheal Ray Berry holding the signed accountability agreement, August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" data-comment-anchor="about-portrait">
+            <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Micheal Ray Berry, Day 1 front photograph, August 13, 2026. The signed-agreement photograph is not in the repository." style="width: 100%; height: 100%; object-fit: cover; object-position: top;" data-comment-anchor="about-portrait">
           </div>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Micheal Ray Berry. This record uses my real name and my real face.</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Day 1 front photograph. The signed-agreement image is not in the repository.</span>
         </div>
         </div>
       </div>
@@ -834,7 +849,7 @@
           <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">The Structure Behind This Record</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.7;">
-          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. The Accountability Partner administers the official record, and I do not have unilateral authority to alter what that record says.</p>
+          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. I am submissive to the structure. The Accountability Partner holds the official record. I do not.</p>
           <p style="margin: 0; color: #D8D6CF;">I built this project and this website, and then I handed control of the official record to someone else. That was the point. Previous attempts had the same weakness: I set the rules, which meant I could also move them. Under this project, the daily inspections, uniform, documentation standards, corrective requirements, and public record of failure operate under an agreement that I do not get to renegotiate on a bad day.</p>
           <p style="margin: 0; color: #D8D6CF;">What I gave up is discretion over whether the results are documented and how compliance is judged.</p>
           <p style="margin: 0; color: #D8D6CF;">The Accountability Partner administers the requirements, reviews the record, and determines whether a documented requirement has been satisfied. When a violation occurs, it remains part of the record. Every entry on this site is me presenting the required evidence for review by someone who is not me, because a record that I alone could revise whenever it became uncomfortable would defeat the purpose.</p>
@@ -907,7 +922,7 @@
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this voluntary?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Entirely. I designed this system, asked for it in writing, and signed it — precisely because voluntary private promises kept failing. The Accountability Partner administers the structure; he did not impose it.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Entirely. I designed this system, asked for it in writing, and signed it — precisely because voluntary private promises kept failing. I asked to be collared and remain collared until 175 is held for 28 days, or the record closes unfinished. The Accountability Partner administers the structure; he did not impose it.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">What happens if he misses a requirement?</span>
@@ -924,6 +939,10 @@
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">When does it end?</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">One way: 175 pounds, held for 28 consecutive days under the verification standard. Then the site converts to a permanent completion record. There is no other ending that isn't public.</p>
+          </div>
+          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 17px; font-weight: 600;">Is this a fetish site?</span>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">The structure is D/s-inspired. He is submissive to it in real life; that is why someone else holds the record. What is published is still SFW documentation of weight, packet, uniform, and misses — full coverage, no sexual content. The photographs are evidence. They are not the point of arousal. If you came for that, this is the wrong record. Personal profiles: <a href="https://fetlife.com/MichealRayBerry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">FetLife</a> · <a href="https://xhamster.com/users/michealrayberry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">xHamster</a> · <a href="https://www.spankingtube.com/user/michealrayberry" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">SpankingTube</a> — not part of the official record.</p>
           </div>
           <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
@@ -967,7 +986,7 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-            <img data-photo-src="https://michealrayberry.com/images/signed-agreement-2026-08-13.jpg" alt="Micheal Ray Berry holding the signed agreement, August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            <img src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" data-photo-src="https://michealrayberry.com/photos/2026/08/13/micheal-ray-berry-day-001-front-2026-08-13.jpg?v=2" alt="Micheal Ray Berry, Day 1, August 13, 2026" style="width: 100%; height: 100%; object-fit: cover; display: block;">
           </div>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Fig. 1 — Holding the executed agreement, August 13, 2026.</span>
         </div>
@@ -1207,7 +1226,8 @@
             <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirement 3 · from 15 August 2026</span>
               <span style="font-size: 20px; font-weight: 600;">Plain black collar</span>
-              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Worn closed for every official photograph and inspection from this date. Visible in the front, left, and right frames. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 were filed under that original uniform. This item is an amendment, not a silent rewrite of the signed text.</p>
+              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Specified item, which he owns: <a href="https://www.axsmar.eu/Titanium/Talena/Talena-Titanium-neck-collar-6mm::62.html" rel="nofollow noopener" target="_blank" style="color: #141412; font-weight: 600;" style-hover="color: #B3261E;">Talena titanium neck collar, 6 mm</a>, anatomically formed, bead-blasted matte, lockable, made to measure. Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet. He asked to be collared and remains collared until 175 is held for 28 days, or the record closes unfinished. Archive stills keep the collar in either ending.</p>
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #6B6A64;">Days 1–2 were filed under unitard and shoes only. Signed §4.1 is not silently rewritten; this is an amendment.</p>
             </div>
           </div>
 
@@ -1310,6 +1330,13 @@
               <a href="https://www.youtube.com/@michealrayberry" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">YouTube</a>
               <a href="https://x.com/michealrayberry" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">X</a>
               <a href="https://bsky.app/profile/michealrayberry.bsky.social" target="_blank" rel="me noopener" style="color: #FAFAF7;" style-hover="color: #B3261E;">Bluesky</a>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Personal</span>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;">
+              <span style="color: #8A8983;">Named submissive</span>
+              <a href="/about#personal" style="color: #8A8983;" style-hover="color: #B3261E;">21+</a>
             </div>
           </div>
         </div>
@@ -1422,8 +1449,30 @@ class Component extends DCLogic {
     });
   }
 
+  drawWeightChart() {
+    const svg = document.getElementById('mrb-weight-chart');
+    const c = this._chart;
+    if (!svg || !c) return;
+    const line = svg.querySelector('[data-goal-line]');
+    if (line) {
+      line.setAttribute('y1', c.goalY);
+      line.setAttribute('y2', c.goalY);
+    }
+    const lab = svg.querySelector('[data-goal-label]');
+    if (lab) lab.setAttribute('y', c.goalLabelY);
+    const series = svg.querySelector('[data-series]');
+    if (series) series.setAttribute('points', c.chartPoints || '');
+    const g = svg.querySelector('[data-dots]');
+    if (g) {
+      g.innerHTML = (c.chartDots || []).map((d) =>
+        '<circle cx="' + d.x + '" cy="' + d.y + '" r="5" fill="#141412"></circle>'
+      ).join('');
+    }
+  }
+
   componentDidUpdate() {
     this.syncPhotoImgs();
+    this.drawWeightChart();
     // Helmet's static <title> re-asserts on every render — re-apply the page/day title after it.
     try { if (this._seoTitle && document.title !== this._seoTitle) document.title = this._seoTitle; } catch (e) {}
   }
@@ -1478,6 +1527,7 @@ class Component extends DCLogic {
 
   componentDidMount() {
     this.syncPhotoImgs();
+    this.drawWeightChart();
     try {
       const openFromUrl = () => {
         if (this.pathRouting()) {
@@ -1847,6 +1897,12 @@ class Component extends DCLogic {
 
     const chartDots = data.map((e) => ({ x: xOf(dayOf(e.date)).toFixed(1), y: yOf(e.weight).toFixed(1) }));
     const chartPoints = chartDots.map((d) => d.x + ',' + d.y).join(' ');
+    this._chart = {
+      goalY: yOf(175).toFixed(1),
+      goalLabelY: (yOf(175) - 10).toFixed(1),
+      chartPoints,
+      chartDots,
+    };
 
     // ----- Log rows, newest first -----
     const logRows = data.slice().reverse().map((e, i, arr) => {
@@ -1892,6 +1948,9 @@ class Component extends DCLogic {
       return !(s && Date.now() >= s.ends);
     });
     const inViolation = openList.length > 0;
+    const agreementStatus = 'under agreement · ' + openList.length + ' open';
+    const openCountLabel = String(openList.length);
+    const collarStatus = dayNumber >= 3 ? 'Required on the packet' : 'Not yet required';
     const openViolations = openList.map((p) => {
       const vnum = 'V-' + String(penalties.indexOf(p) + 1).padStart(3, '0');
       let openFor = '';
@@ -1963,8 +2022,12 @@ class Component extends DCLogic {
       const others = openList.length > 1
         ? ' ' + (openList.length - 1) + ' further ' + (openList.length === 2 ? 'entry remains' : 'entries remain') + ' open on the record.'
         : '';
-      return 'Micheal Ray Berry failed to complete the required Daily Compliance Packet by the ' + longDate(p.date) +
-        ' deadline. ' + missing + ' ' + status + others;
+      const vMatch = String(p.url || p.vnum || '').match(/v-?\d+/i);
+      const label = vMatch ? vMatch[0].toUpperCase().replace('V', 'V-').replace('V--', 'V-') : p.date;
+      if (/attestation/i.test(raw)) {
+        return label + ' — ' + longDate(p.date) + '. Weight, photographs, and video for that day are on the record. The required capture attestation was not logged. ' + status + others;
+      }
+      return label + ' — ' + longDate(p.date) + '. ' + missing + ' ' + status + others;
     })();
     /* YouTube (@michealrayberry) is the official player — the sheet holds the
        posted YouTube URL and the players embed it; a self-hosted or Drive URL
@@ -2250,6 +2313,7 @@ class Component extends DCLogic {
       hasAttested: attestedDays > 0, attestedDays, attestedLabel,
       hasHealth: healthRows.length > 0, healthRows,
       inViolation, openViolations, violationCountLabel, recordStatus, openSummary, noticeBody,
+      agreementStatus, openCountLabel, collarStatus,
       introVideoUrl: introVideoUrl && !ytEmbedOf(introVideoUrl) ? introVideoUrl : '', introVideoEmbed: ytEmbedOf(introVideoUrl), noIntroVideo: !introVideoUrl, introPoster,
       latestVideoUrl: latestVideoUrl && !ytEmbedOf(latestVideoUrl) ? latestVideoUrl : '', latestVideoEmbed: ytEmbedOf(latestVideoUrl), noLatestVideo: !latestVideoUrl, latestVideoLabel,
       // src/poster are set here, never as attribute holes — see the players above.

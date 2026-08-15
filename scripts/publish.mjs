@@ -19,6 +19,7 @@ const HEALTH_CSV = process.env.HEALTH_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Health';
 const START_DATE = '2026-08-13';
 const START_WEIGHT = 340;
+let OPEN_COUNT = 0;
 const GOAL_WEIGHT = 175;
 const PERSON_ID = `${SITE_ORIGIN}/#micheal-ray-berry`;
 const INDEXNOW_OUTPUT = path.join(ROOT, '.indexnow-urls.json');
@@ -482,7 +483,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
   </style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -512,6 +513,10 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -659,7 +664,7 @@ function milestonePage(target, entries) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -685,6 +690,10 @@ function milestonePage(target, entries) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -754,7 +763,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -781,6 +790,10 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -819,7 +832,7 @@ function weeksIndexPage(entries) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -844,6 +857,10 @@ function weeksIndexPage(entries) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1003,7 +1020,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   </style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1028,6 +1045,10 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1182,7 +1203,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1199,7 +1220,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
     <div class="card">
       <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
       ${violation ? `<p>Entered as <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
-      <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
+      <p>He is required to file, by 10 PM Eastern, the inspection video, four photographs, the day's weight, and the tracker update, in the project uniform. From 15 August 2026 the collar is part of that uniform. A missing collar is a violation, same class as a missed packet. A packet counts only when every element is filed on time.</p>
     </div>
     <nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
@@ -1214,6 +1235,10 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1298,7 +1323,7 @@ function consentPage() {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1354,6 +1379,10 @@ function consentPage() {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1503,7 +1532,7 @@ function violationPage(v, prev, next) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1559,6 +1588,10 @@ function violationPage(v, prev, next) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1626,7 +1659,7 @@ function specimenPage(demoUrl) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1740,7 +1773,7 @@ function positionsPage(entries) {
     ['Wait posture', 'Separate from the four photographic positions. Feet apart at the established width, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to shoes. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and from 15 August 2026 a plain black collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and from 15 August 2026 the Talena titanium 6 mm lockable neck collar, which he owns. A missing collar is a violation, same class as a missed packet. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1783,7 +1816,7 @@ function positionsPage(entries) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1860,6 +1893,10 @@ function positionsPage(entries) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -1962,7 +1999,7 @@ function cornerTimePage(entries, violations, demoUrl) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
   <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -2031,6 +2068,10 @@ function cornerTimePage(entries, violations, demoUrl) {
       <div class="col">
         <span class="colhead">Official record</span>
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
+      </div>
+      <div class="col">
+        <span class="colhead">Personal</span>
+        <span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span>
       </div>
     </div>
     <div class="sitefoot-bottom">
@@ -2160,7 +2201,8 @@ const SYN_CSS = `
     .sitefoot .links{display:flex;gap:20px;flex-wrap:wrap;font:12px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em}
     .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}.rec:hover{color:#FF6B61}
     .rec-lamp{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}`;
-const SYN_HEADER = `<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+function synHeader() {
+  return `<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Subject · official record</span></a>
   <nav class="sitenav">
@@ -2168,10 +2210,12 @@ const SYN_HEADER = `<div class="authority"><span>Record held by the Accountabili
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
+}
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
+      <div class="col"><span class="colhead">Personal</span><span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span></div>
     </div>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
@@ -2228,7 +2272,7 @@ function synPage({ title, desc, canonical, body }) {
   <style>${SYN_CSS}</style>
 </head>
 <body>
-${SYN_HEADER}
+${synHeader()}
 <main>
 ${body}
 </main>
@@ -2407,6 +2451,7 @@ async function main() {
   }
 
   declareGapViolations(violations, sequence);
+  OPEN_COUNT = violations.filter((v) => (v.state || '') === 'open').length;
   const violationByDate = new Map(violations.map((v) => [v.date, v]));
   for (const s of sequence) {
     if (s.complete) continue;

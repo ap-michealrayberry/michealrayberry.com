@@ -7,6 +7,16 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /home        /            301
 /log         /penalties   301
 /accountability-partner  /partner  301
+/local-ap    /partner/    301
+/local-ap/   /partner/    301
+/inspection-standard  /positions/  301
+/inspection-standard/ /positions/  301
+/the-record  /daily/      301
+/the-record/ /daily/      301
+/violations  /penalties   301
+/violations/ /penalties   301
+/months      /weeks/      301
+/months/     /weeks/      301
 /annex/* / 301
 /annex / 301
 /fagspose/* / 301

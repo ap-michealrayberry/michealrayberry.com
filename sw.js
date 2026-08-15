@@ -1,8 +1,8 @@
 // Network-first service worker: the record must never be stale, but the app
 // shell still opens offline / on flaky connections.
-const CACHE = 'mrb-v7';
+const CACHE = 'mrb-v8';
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js'])).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/support.js', '/404.html'])).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
@@ -22,6 +22,11 @@ self.addEventListener('fetch', (e) => {
         caches.open(CACHE).then((c) => c.put(e.request, cp));
       }
       return r;
-    }).catch(() => caches.match(e.request).then((m) => m || caches.match('/')))
+    }).catch(() => caches.match(e.request).then((m) => {
+      if (m) return m;
+      if (u.pathname === '/' || u.pathname === '/index.html') return caches.match('/');
+      return caches.match('/404.html');
+    }))
   );
 });
+

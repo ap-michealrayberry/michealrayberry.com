@@ -7,6 +7,7 @@ const START_WEIGHT = 340;
 const GOAL_WEIGHT = 175;
 const MILESTONES = [300, 275, 250, 225, 200, 175];
 const PERSON_ID = `${SITE_ORIGIN}/#micheal-ray-berry`;
+let OPEN_COUNT = 0;
 
 function htmlEscape(value = '') {
   return String(value)
@@ -153,7 +154,7 @@ function shell({ title, desc, canonical, current, eyebrow, h1, crumbs, body }) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>Collar required from 15 Aug 2026</span></div>
+<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -173,6 +174,7 @@ ${body}
   <div class="sitefoot-top">
     <div><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
     <div><span class="colhead">Official record</span><span class="links"><a href="${SITE_ORIGIN}">Website</a></span></div>
+    <div><span class="colhead">Personal</span><span class="links"><span>Named submissive</span> <a href="/about#personal">21+</a></span></div>
   </div>
   <div class="sitefoot-bottom">
     <span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span>
@@ -377,7 +379,8 @@ export function uniformPage() {
   <h2>Requirement 2 — Plain black shoes</h2>
   <p>Required for all official full-body documentation. They complete the project uniform and ensure each inspection presents the same full-body visual standard from head to toe.</p>
   <h2>Requirement 3 — Plain black collar · from 15 August 2026</h2>
-  <p>Worn closed for every official photograph and inspection from this date. Visible in the front, left, and right frames. It marks that he does not hold this record. The original signed §4.1 named unitard and shoes only. Days 1–2 were filed under that original uniform. This item is an amendment, not a silent rewrite of the signed text.</p>
+  <p>Specified item, which he owns: Talena titanium neck collar, 6 mm, anatomically formed, bead-blasted matte, lockable, made to measure (<a href="https://www.axsmar.eu/Titanium/Talena/Talena-Titanium-neck-collar-6mm::62.html" rel="nofollow noopener" target="_blank">AXSmar product page</a>). Worn closed for every official photograph and inspection from 15 August 2026. Visible in the front, left, and right frames. A missing collar is a violation, same class as a missed packet.</p>
+  <p>He asked to be collared and remains collared until 175 is held for 28 days, or the record closes unfinished. Archive stills keep the collar. Days 1–2 were filed under unitard and shoes only.</p>
   <h2>Required pose and angles</h2>
   <p>Standing upright, hands behind head, body visible, face visible, no concealment of body shape. Every inspection documents four angles: front, left side, right side, and rear. A normal Daily Inspection runs roughly a minute. The same attire, pose, angle, and no-concealment standards apply to the four required daily photos.</p>
   <p class="pending">No anonymous content. No casual documentation. No hidden identity. No inconsistent visual record.</p>
@@ -430,6 +433,7 @@ export function partnerPage() {
 }
 
 export async function writeArchivePages(root, { records = [], violations = [], entries = [] } = {}) {
+  OPEN_COUNT = (violations || []).filter((v) => String(v.state || v.status || '').toLowerCase() === 'open').length;
   const pages = [
     ['dashboard', dashboardPage(records)],
     ['penalties', penaltiesIndexPage(violations)],
