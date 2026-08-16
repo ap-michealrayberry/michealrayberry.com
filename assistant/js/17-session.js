@@ -98,10 +98,11 @@
       } else {
         var st = overlayStateFrom(session);
         MRB.overlay.drawOverlay(ctx, st);
-        // Thumbnail body frame: captured once, ~2.5s after the title card —
-        // the opening posture (facing camera, hands behind head), so every
-        // day's thumbnail has the same camera position and stance.
-        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 2500 && st.videoEl && st.videoEl.videoWidth) {
+        // Thumbnail still: one dedicated stamped capture from the opening
+        // Wait hold (feet together, hands behind back), taken ~4.5s after the
+        // title card so he is settled — every day's thumbnail shows the same
+        // pose, camera position, and burned-in stamp.
+        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 4500 && String(session.poseText || "").indexOf("WAIT") === 0 && st.videoEl && st.videoEl.videoWidth) {
           var f = document.createElement("canvas");
           f.width = MRB.overlay.W;
           f.height = MRB.overlay.H;
@@ -374,11 +375,16 @@
 
   async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
-    // Video + the four angle stills only. Inspection/announcement thumbnails
-    // were landing in the daily Drive folder and stealing the front slot.
+    var thumbBlob = null;
+    try {
+      thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
+    } catch (e) {
+      /* thumbnail is a bonus artifact — never block the downloads */
+    }
     return MRB.download.saveArtifacts({
       videoBlob: result.blob,
       photos: session.photos,
+      thumbBlob: thumbBlob,
       meta: {
         kind: session.type,
         day: session.day,

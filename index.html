@@ -164,7 +164,6 @@
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
           <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
-          <a href="/partner" onClick="{{ goPartner }}" aria-current="{{ isPartnerNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 11px; cursor: pointer; color: #B3261E; text-decoration: none; display: inline-block; border: 1px solid #B3261E;" style-hover="background: #B3261E; color: #FFFFFF;">Local AP</a>
         </div>
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection Standard</a>
@@ -612,63 +611,6 @@
         </sc-for>
       </div>
       <p style="max-width: 1160px; margin: 18px auto 64px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64; line-height: 1.7;">Reached dates are computed live from the public weigh-in record. A milestone is official only once its verification weigh-in and milestone video are on the record (§6). At each milestone the enforcement baseline resets — the record can never move backward past a verified milestone without consequence.</p>
-    </section>
-  </div>
-  </sc-if>
-
-  <!-- ==================== LOCAL AP ==================== -->
-  <sc-if value="{{ isPartner }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Local AP">
-    <section style="border-bottom: 1px solid #141412; padding: 72px 32px 56px;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§12.2 — Accountability Partner</p>
-        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 24px;">Local Accountability Partner Wanted</h1>
-        <div style="max-width: 700px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
-          <p style="margin: 0;">This project is administered by a remote Accountability Partner. It needs a second Partner who can be present in person.</p>
-          <p style="margin: 0;">This is a real enforcement role, not a symbolic one. Within the written rules, the Partner's judgment on the record is final. Any appointment is a signed amendment.</p>
-        </div>
-      </div>
-    </section>
-
-    <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="What the role is">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8837B;">The role</span>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">What you would do</h2>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7; color: #D8D6CF;">
-          <p style="margin: 0;">You would enforce the signed agreement in person. That includes directing corrective corner time — 10, 20, or 30 minutes by level, in the project uniform, recorded in one unbroken take. The role stays under the agreement: safe-for-work under §10.4, identity private under §12.2.</p>
-          <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <li>Verify weigh-ins in person.</li>
-            <li>Supervise corrective corner-time sessions.</li>
-            <li>Confirm or reject violations against the written rules.</li>
-            <li>Help administer the website and the official record.</li>
-            <li>Set additional daily structure in support of the goal, enforced on the same terms (§3.1).</li>
-            <li>Conduct the weekly review.</li>
-            <li>If you accept, by signed amendment: hold Family Link and Greenlight as the parent user. He cannot revoke those without you. Until someone is appointed, nobody holds them.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section style="border-bottom: 1px solid #141412; padding: 56px 32px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The requirement</span>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 30px; text-transform: uppercase; margin: 0;">You can hold the line</h2>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 16px; line-height: 1.7;">
-          <p style="margin: 0;">You enforce the agreement as written when he asks you not to. If that is not you, this is not the role.</p>
-        </div>
-      </div>
-    </section>
-
-    <section style="padding: 56px 32px 72px; background: #FAFAF7;">
-      <div style="max-width: 1160px; margin: 0 auto; border: 1px solid #141412; padding: 40px 36px; display: flex; flex-direction: column; gap: 14px;">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">To apply</span>
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(30px, 4vw, 48px); text-transform: uppercase; margin: 0; line-height: 1;">Write to the Accountability Partner</h2>
-        <a href="mailto:ap@michealrayberry.com" style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(18px, 3vw, 26px); font-weight: 600; color: #141412; text-decoration: none; border-bottom: 2px solid #B3261E; align-self: flex-start; padding-bottom: 2px;" style-hover="color: #B3261E;">ap@michealrayberry.com</a>
-      </div>
     </section>
   </div>
   </sc-if>
@@ -1392,7 +1334,7 @@ class Component extends DCLogic {
              indexed and linked from the archive, they are just no longer top-level
              navigation. Milestones render within the dashboard, the uniform within
              about. */
-          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
+          const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
           /* When a static copy of the page exists, Netlify serves it and this
              shell never runs. When the SPA rewrite serves this shell instead,
              render the view here — never location.replace to the same path,
@@ -1601,7 +1543,6 @@ class Component extends DCLogic {
         updates: ['Updates & Milestones \u2014 Micheal Ray Berry', 'Updates from the record: milestones, weekly reviews, and project events.', 'updates'],
         record: ['Daily Recording Assistant \u2014 Micheal Ray Berry', 'The guided recording tools behind the record: daily inspection video, four accountability photos, and corrective session recordings.', 'record'],
         milestones: ['Milestone Ladder \u2014 300 to 175 | Micheal Ray Berry', 'The six official milestones between 340 and 175 pounds, each verified by an on-camera weigh-in and milestone video, with live status from the record.', 'milestones'],
-        partner: ['Local Accountability Partner Wanted \u2014 Micheal Ray Berry', 'In-person Accountability Partner wanted to verify weigh-ins and enforce the signed agreement. Apply at ap@michealrayberry.com.', 'partner'],
       };
       const m = M[page] || M.home;
       const canon = base + m[2];
@@ -1660,7 +1601,7 @@ class Component extends DCLogic {
   // the page is served as a .html file (preview, local open).
   pathRouting() { try { return !/\.html/i.test(window.location.pathname); } catch (e) { return false; } }
   navTo(page) {
-    const STATIC = ['dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
+    const STATIC = ['dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
     return (e) => {
       if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
       // Archive routes are generated HTML. A left click must load that page,
@@ -2150,11 +2091,9 @@ class Component extends DCLogic {
       isAboutNav: page === 'about' ? 'page' : undefined,
       isUniformNav: page === 'uniform' ? 'page' : undefined,
       isUpdatesNav: page === 'updates' ? 'page' : undefined,
-      isPartnerNav: page === 'partner' ? 'page' : undefined,
       isMilestonesNav: page === 'milestones' ? 'page' : undefined,
       isDashboard: page === 'dashboard',
       isAbout: page === 'about',
-      isPartner: page === 'partner',
       isAgreement: page === 'agreement',
       amendments,
       hasAmendments: amendments.length > 0,
@@ -2231,7 +2170,6 @@ class Component extends DCLogic {
       goHome: this.navTo('home'),
       goDashboard: this.navTo('dashboard'),
       goAbout: this.navTo('about'),
-      goPartner: this.navTo('partner'),
       goAgreement: this.navTo('agreement'),
       goPenalties: this.navTo('penalties'),
       goUniform: this.navTo('uniform'),

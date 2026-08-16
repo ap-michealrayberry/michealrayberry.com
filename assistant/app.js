@@ -619,7 +619,14 @@
         demo: true,
       };
     }
-    var data = await postJson({ action: "challenge", key: key, kind: k });
+    var url =
+      c.execUrl +
+      (c.execUrl.indexOf("?") >= 0 ? "&" : "?") +
+      "action=challenge&kind=" +
+      encodeURIComponent(k) +
+      "&key=" +
+      encodeURIComponent(key);
+    var data = await getJson(url);
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "Challenge request failed");
     }
@@ -649,7 +656,6 @@
       mime: mime, // NOT contentType
     };
     var data = await postJson(body);
-    if (data && data.skipped) return data; // R2 retired — caller files photos / YouTube only
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "r2sign failed");
     }
@@ -2524,25 +2530,12 @@
     }
     if (!blob) throw new Error("No blob in queue item");
 
-    // Video backup used to go to Cloudflare R2. That path is retired.
-    // If the server still signs an upload, we send a disaster-recovery copy;
-    // otherwise we skip straight to attestation + Drive photos + YouTube.
-    var sign = null;
-    var publicUrl = "";
-    try {
-      sign = await MRB.api.r2sign(item.kind, item.date, item.mime || blob.type || "video/mp4");
-    } catch (e) {
-      var msg = (e && e.message) || String(e);
-      if (!/R2 not configured|r2sign failed|missing uploadUrl/i.test(msg)) throw e;
-      sign = { skipped: true };
-    }
-    if (sign && !sign.skipped && sign.uploadUrl && String(sign.uploadUrl).indexOf("example.invalid") < 0) {
-      var uploadUrl = MRB.api.readUploadUrl(sign);
-      await resumablePut(uploadUrl, blob, null, item.uploadOffset || 0);
-      publicUrl = sign.publicUrl || "";
-    } else if (statusWriter) {
-      statusWriter("No video bucket — filing photos to Drive. Post the take to YouTube after.");
-    }
+    // Every take ships to the AP's bucket as a BACKUP copy — for corrective
+    // sessions the public YouTube posting remains the evidence and the thing
+    // that resolves the entry; this copy is disaster recovery only.
+    var sign = await MRB.api.r2sign(item.kind, item.date, item.mime || blob.type || "video/mp4");
+    var uploadUrl = MRB.api.readUploadUrl(sign); // must be uploadUrl
+    await resumablePut(uploadUrl, blob, null, item.uploadOffset || 0);
 
     var attestBody = {
       date: item.date,
@@ -2559,7 +2552,7 @@
     var seal = await MRB.api.attest(attestBody);
     item.seal = seal.seal;
     item.sealed_at = seal.sealed_at;
-    item.publicUrl = publicUrl;
+    item.publicUrl = sign.publicUrl;
 
     if (item.kind === "daily" && item.photos) {
       for (var p = 0; p < item.photos.length; p++) {
@@ -2575,7 +2568,7 @@
       await MRB.api.packet({
         date: item.date,
         weight: item.weight,
-        video_url: publicUrl || undefined,
+        video_url: sign.publicUrl,
         finalize: true,
       });
     } else if (item.kind === "weekly") {
@@ -3385,10 +3378,11 @@
       } else {
         var st = overlayStateFrom(session);
         MRB.overlay.drawOverlay(ctx, st);
-        // Thumbnail body frame: captured once, ~2.5s after the title card —
-        // the opening posture (facing camera, hands behind head), so every
-        // day's thumbnail has the same camera position and stance.
-        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 2500 && st.videoEl && st.videoEl.videoWidth) {
+        // Thumbnail still: one dedicated stamped capture from the opening
+        // Wait hold (feet together, hands behind back), taken ~4.5s after the
+        // title card so he is settled — every day's thumbnail shows the same
+        // pose, camera position, and burned-in stamp.
+        if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 4500 && String(session.poseText || "").indexOf("WAIT") === 0 && st.videoEl && st.videoEl.videoWidth) {
           var f = document.createElement("canvas");
           f.width = MRB.overlay.W;
           f.height = MRB.overlay.H;
@@ -3661,11 +3655,16 @@
 
   async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
-    // Video + the four angle stills only. Inspection/announcement thumbnails
-    // were landing in the daily Drive folder and stealing the front slot.
+    var thumbBlob = null;
+    try {
+      thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
+    } catch (e) {
+      /* thumbnail is a bonus artifact — never block the downloads */
+    }
     return MRB.download.saveArtifacts({
       videoBlob: result.blob,
       photos: session.photos,
+      thumbBlob: thumbBlob,
       meta: {
         kind: session.type,
         day: session.day,
