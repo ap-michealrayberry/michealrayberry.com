@@ -1393,11 +1393,10 @@ class Component extends DCLogic {
              navigation. Milestones render within the dashboard, the uniform within
              about. */
           const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates', 'partner'];
-          if (pages.indexOf(p) !== -1 && p !== 'home') {
-            // Those paths are real HTML. Leave this shell; do not paint a second UI.
-            window.location.replace('/' + p);
-            return;
-          }
+          /* When a static copy of the page exists, Netlify serves it and this
+             shell never runs. When the SPA rewrite serves this shell instead,
+             render the view here — never location.replace to the same path,
+             which reloads this shell in an infinite loop. */
           if (pages.indexOf(p) !== -1) { this.setState({ page: p }); this.applyPageSeo(p); return; }
           // The Recording Assistant is not part of the public site at all. It
           // is public at /assistant/; the device key gates filing, not viewing.
