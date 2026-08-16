@@ -6,14 +6,14 @@
   var videoEl = null;
 
 
-  /** Force all capture canvases to fixed portrait 720×1280. No landscape geometry. */
+  /** Force all capture canvases to fixed portrait 1080×1920. No landscape geometry. */
   function sizePortraitCanvases() {
-    var w = (MRB.config && MRB.config.CANVAS_W) || 720;
-    var h = (MRB.config && MRB.config.CANVAS_H) || 1280;
+    var w = (MRB.config && MRB.config.CANVAS_W) || 1080;
+    var h = (MRB.config && MRB.config.CANVAS_H) || 1920;
     if (w >= h) {
       // Guard: config must never be landscape
-      w = 720;
-      h = 1280;
+      w = 1080;
+      h = 1920;
     }
     ["compose-canvas", "preview-canvas", "photo-canvas", "preflight-guide"].forEach(function (id) {
       var el = document.getElementById(id);
@@ -38,12 +38,16 @@
   }
 
   /**
-   * Natural stream only — do NOT request width/height/aspectRatio ideals.
-   * Cropped sensor modes push feet out of frame.
+   * Soft HD request: "ideal" never hard-fails and never forces a cropped
+   * sensor mode (the old feet-out-of-frame bug came from exact/aspectRatio
+   * constraints, which stay banned). Preflight's framing preview remains the
+   * check that the full body is in frame.
    */
   function videoConstraints() {
     return {
       facingMode: { ideal: facing },
+      width: { ideal: 1080 },
+      height: { ideal: 1920 },
     };
   }
 

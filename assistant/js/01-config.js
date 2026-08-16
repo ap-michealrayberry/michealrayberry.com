@@ -13,8 +13,8 @@
 
   /** Fixed capture geometry — portrait phone only. No landscape mode. */
   var ORIENTATION = "portrait";
-  var CANVAS_W = 720;
-  var CANVAS_H = 1280;
+  var CANVAS_W = 1080;
+  var CANVAS_H = 1920;
   var TOP_BAND = 85;
   var BOTTOM_BAND = 85;
 

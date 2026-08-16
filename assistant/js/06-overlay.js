@@ -15,6 +15,13 @@
   var TOP = 85;
   var BOTTOM = 85;
 
+  // Canvases may be any multiple of the 720×1280 design space (1080×1920 for
+  // HD capture) — scale the context so every hardcoded coordinate still lands.
+  function applyScale(ctx) {
+    var s = ctx && ctx.canvas && ctx.canvas.width ? ctx.canvas.width / W : 1;
+    ctx.setTransform(s, 0, 0, s, 0, 0);
+  }
+
   function drawLetterboxedVideo(ctx, video) {
     if (!video) return;
     var vw = video.videoWidth || 0;
@@ -113,7 +120,8 @@
     var y = H - SAFE_BOT - chipH;
     state._stampTop = y; // drawMonitorChip stacks above this
     state._stampCx = cx;
-    ctx.fillStyle = "rgba(10,10,9,0.88)";
+    // 0.72 alpha: the record stays visible through its own stamp (§4.4).
+    ctx.fillStyle = "rgba(10,10,9,0.72)";
     roundRect(ctx, x, y, chipW, chipH, 6);
     ctx.fill();
     ctx.fillStyle = "#B3261E";
@@ -171,6 +179,7 @@
    */
   function drawTitleCard(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     ctx.fillStyle = "#0F0F0D";
     ctx.fillRect(0, 0, W, H);
     var cx = W / 2;
@@ -218,6 +227,7 @@
    */
   function drawThumbCard(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     if (state.frame) {
       ctx.drawImage(state.frame, 0, 0, W, H);
     } else {
@@ -281,6 +291,7 @@
    */
   function drawOverlay(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     // Frame
     if (state.imageBitmap) {
       ctx.drawImage(state.imageBitmap, 0, 0, W, H);

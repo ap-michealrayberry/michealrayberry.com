@@ -63,8 +63,8 @@
   function renderThumbnail(state) {
     return new Promise(function (resolve, reject) {
       var c = document.createElement("canvas");
-      c.width = MRB.overlay.W;
-      c.height = MRB.overlay.H;
+      c.width = (state && state.frame && state.frame.width) || 1080;
+      c.height = (state && state.frame && state.frame.height) || 1920;
       if (state && state.frame) MRB.overlay.drawThumbCard(c.getContext("2d"), state);
       else MRB.overlay.drawTitleCard(c.getContext("2d"), state);
       c.toBlob(function (blob) {

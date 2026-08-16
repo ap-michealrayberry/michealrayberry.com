@@ -104,8 +104,8 @@
         // pose, camera position, and burned-in stamp.
         if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 4500 && String(session.poseText || "").indexOf("WAIT") === 0 && st.videoEl && st.videoEl.videoWidth) {
           var f = document.createElement("canvas");
-          f.width = MRB.overlay.W;
-          f.height = MRB.overlay.H;
+          f.width = compose.width;
+          f.height = compose.height;
           f.getContext("2d").drawImage(compose, 0, 0);
           session.thumbFrame = f;
         }

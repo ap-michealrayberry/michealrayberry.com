@@ -10,7 +10,7 @@
     var challengeCode = options.challengeCode;
     // Output is always vertical phone geometry
     if (canvas && canvas.width >= canvas.height) {
-      throw new Error("Capture canvas must be portrait (720×1280). Landscape recording is not available.");
+      throw new Error("Capture canvas must be portrait. Landscape recording is not available.");
     }
     var mimePrefer = options.mimePrefer || [
       "video/webm;codecs=vp9,opus",
@@ -72,7 +72,7 @@
       var track = captureStream.getVideoTracks()[0] || null;
       mixAudioTracks(captureStream);
 
-      var recOpts = mime ? { mimeType: mime, videoBitsPerSecond: 2_500_000 } : { videoBitsPerSecond: 2_500_000 };
+      var recOpts = mime ? { mimeType: mime, videoBitsPerSecond: 8_000_000 } : { videoBitsPerSecond: 8_000_000 };
       try {
         recorder = new MediaRecorder(mixedStream, recOpts);
       } catch (e) {

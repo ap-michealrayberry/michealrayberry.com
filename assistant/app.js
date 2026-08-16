@@ -32,8 +32,8 @@
 
   /** Fixed capture geometry — portrait phone only. No landscape mode. */
   var ORIENTATION = "portrait";
-  var CANVAS_W = 720;
-  var CANVAS_H = 1280;
+  var CANVAS_W = 1080;
+  var CANVAS_H = 1920;
   var TOP_BAND = 85;
   var BOTTOM_BAND = 85;
 
@@ -787,6 +787,13 @@
   var TOP = 85;
   var BOTTOM = 85;
 
+  // Canvases may be any multiple of the 720×1280 design space (1080×1920 for
+  // HD capture) — scale the context so every hardcoded coordinate still lands.
+  function applyScale(ctx) {
+    var s = ctx && ctx.canvas && ctx.canvas.width ? ctx.canvas.width / W : 1;
+    ctx.setTransform(s, 0, 0, s, 0, 0);
+  }
+
   function drawLetterboxedVideo(ctx, video) {
     if (!video) return;
     var vw = video.videoWidth || 0;
@@ -885,7 +892,8 @@
     var y = H - SAFE_BOT - chipH;
     state._stampTop = y; // drawMonitorChip stacks above this
     state._stampCx = cx;
-    ctx.fillStyle = "rgba(10,10,9,0.88)";
+    // 0.72 alpha: the record stays visible through its own stamp (§4.4).
+    ctx.fillStyle = "rgba(10,10,9,0.72)";
     roundRect(ctx, x, y, chipW, chipH, 6);
     ctx.fill();
     ctx.fillStyle = "#B3261E";
@@ -943,6 +951,7 @@
    */
   function drawTitleCard(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     ctx.fillStyle = "#0F0F0D";
     ctx.fillRect(0, 0, W, H);
     var cx = W / 2;
@@ -990,6 +999,7 @@
    */
   function drawThumbCard(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     if (state.frame) {
       ctx.drawImage(state.frame, 0, 0, W, H);
     } else {
@@ -1053,6 +1063,7 @@
    */
   function drawOverlay(ctx, state) {
     state = state || {};
+    applyScale(ctx);
     // Frame
     if (state.imageBitmap) {
       ctx.drawImage(state.imageBitmap, 0, 0, W, H);
@@ -1334,14 +1345,14 @@
   var videoEl = null;
 
 
-  /** Force all capture canvases to fixed portrait 720×1280. No landscape geometry. */
+  /** Force all capture canvases to fixed portrait 1080×1920. No landscape geometry. */
   function sizePortraitCanvases() {
-    var w = (MRB.config && MRB.config.CANVAS_W) || 720;
-    var h = (MRB.config && MRB.config.CANVAS_H) || 1280;
+    var w = (MRB.config && MRB.config.CANVAS_W) || 1080;
+    var h = (MRB.config && MRB.config.CANVAS_H) || 1920;
     if (w >= h) {
       // Guard: config must never be landscape
-      w = 720;
-      h = 1280;
+      w = 1080;
+      h = 1920;
     }
     ["compose-canvas", "preview-canvas", "photo-canvas", "preflight-guide"].forEach(function (id) {
       var el = document.getElementById(id);
@@ -1366,12 +1377,16 @@
   }
 
   /**
-   * Natural stream only — do NOT request width/height/aspectRatio ideals.
-   * Cropped sensor modes push feet out of frame.
+   * Soft HD request: "ideal" never hard-fails and never forces a cropped
+   * sensor mode (the old feet-out-of-frame bug came from exact/aspectRatio
+   * constraints, which stay banned). Preflight's framing preview remains the
+   * check that the full body is in frame.
    */
   function videoConstraints() {
     return {
       facingMode: { ideal: facing },
+      width: { ideal: 1080 },
+      height: { ideal: 1920 },
     };
   }
 
@@ -1690,7 +1705,7 @@
     var challengeCode = options.challengeCode;
     // Output is always vertical phone geometry
     if (canvas && canvas.width >= canvas.height) {
-      throw new Error("Capture canvas must be portrait (720×1280). Landscape recording is not available.");
+      throw new Error("Capture canvas must be portrait. Landscape recording is not available.");
     }
     var mimePrefer = options.mimePrefer || [
       "video/webm;codecs=vp9,opus",
@@ -1752,7 +1767,7 @@
       var track = captureStream.getVideoTracks()[0] || null;
       mixAudioTracks(captureStream);
 
-      var recOpts = mime ? { mimeType: mime, videoBitsPerSecond: 2_500_000 } : { videoBitsPerSecond: 2_500_000 };
+      var recOpts = mime ? { mimeType: mime, videoBitsPerSecond: 8_000_000 } : { videoBitsPerSecond: 8_000_000 };
       try {
         recorder = new MediaRecorder(mixedStream, recOpts);
       } catch (e) {
@@ -2765,7 +2780,7 @@
       label: "Portrait orientation",
       level: "ok",
       blocking: true,
-      detail: "Vertical (720×1280) — locked",
+      detail: "Vertical (1080×1920) — locked",
     };
   }
 
@@ -3384,8 +3399,8 @@
         // pose, camera position, and burned-in stamp.
         if (!session.thumbFrame && session.titleCardUntil && performance.now() > session.titleCardUntil + 4500 && String(session.poseText || "").indexOf("WAIT") === 0 && st.videoEl && st.videoEl.videoWidth) {
           var f = document.createElement("canvas");
-          f.width = MRB.overlay.W;
-          f.height = MRB.overlay.H;
+          f.width = compose.width;
+          f.height = compose.height;
           f.getContext("2d").drawImage(compose, 0, 0);
           session.thumbFrame = f;
         }
@@ -4924,8 +4939,8 @@
   function renderThumbnail(state) {
     return new Promise(function (resolve, reject) {
       var c = document.createElement("canvas");
-      c.width = MRB.overlay.W;
-      c.height = MRB.overlay.H;
+      c.width = (state && state.frame && state.frame.width) || 1080;
+      c.height = (state && state.frame && state.frame.height) || 1920;
       if (state && state.frame) MRB.overlay.drawThumbCard(c.getContext("2d"), state);
       else MRB.overlay.drawTitleCard(c.getContext("2d"), state);
       c.toBlob(function (blob) {

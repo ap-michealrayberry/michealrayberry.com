@@ -114,7 +114,7 @@
       label: "Portrait orientation",
       level: "ok",
       blocking: true,
-      detail: "Vertical (720×1280) — locked",
+      detail: "Vertical (1080×1920) — locked",
     };
   }
 
