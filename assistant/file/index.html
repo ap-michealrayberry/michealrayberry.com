@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F0F0D" />
+  <meta name="description" content="Filing addition to the MRB Recording Assistant — YouTube title, description, and link." />
+  <title>File — MRB Recording Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="file.css" />
+</head>
+<body>
+  <div id="app-root">
+    <header class="site-header">
+      <div class="site-header-left">
+        <div class="name">MICHEAL RAY BERRY</div>
+        <div class="tagline">PUBLIC ACCOUNTABILITY PROJECT</div>
+      </div>
+      <div class="site-header-right mono">FILE</div>
+    </header>
+
+    <main class="result-main">
+      <p class="mono small" style="letter-spacing:.18em;text-transform:uppercase;color:#B3261E;margin:0">
+        Addition to the Recording Assistant
+      </p>
+      <p class="chooser-intro">
+        Record in the <a href="../">Recording Assistant</a>. File the YouTube title, description, and link here.
+        Daily filing is today only, before 10:00 PM ET. A second take on the same day replaces the first.
+      </p>
+
+      <section class="panel" id="status-panel">
+        <div class="status-row">
+          <span class="label">Deadline</span>
+          <span id="deadline-countdown" class="mono value">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Filing day</span>
+          <span id="filing-day" class="mono value">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Take on file</span>
+          <span id="take-status" class="mono value">None</span>
+        </div>
+      </section>
+
+      <section class="panel" id="check-panel">
+        <div class="section-label">Filing check</div>
+        <ul id="check-list" class="preflight-list"></ul>
+        <p id="check-reason" class="status-line"></p>
+      </section>
+
+      <div class="mode-row" role="tablist">
+        <button type="button" class="btn btn-primary" id="mode-daily" data-mode="daily">Daily</button>
+        <button type="button" class="btn btn-ghost" id="mode-fail" data-mode="fail">Failure</button>
+      </div>
+
+      <section id="yt-publish" class="yt-box">
+        <div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#B3261E">
+          Post to YouTube — public — then file the link
+        </div>
+        <p class="chooser-intro">
+          Upload the take publicly to @michealrayberry with this title and description, paste the video link, and file it.
+        </p>
+        <label class="field">
+          <span>Title <button type="button" class="copy-btn mono" data-copy="yt-title">Copy</button></span>
+          <textarea id="yt-title" readonly rows="2" class="mono"></textarea>
+        </label>
+        <label class="field">
+          <span>Description <button type="button" class="copy-btn mono" data-copy="yt-desc">Copy</button></span>
+          <textarea id="yt-desc" readonly rows="8" class="mono"></textarea>
+        </label>
+        <div class="yt-row">
+          <input id="yt-url" type="url" placeholder="https://youtu.be/…" class="mono" />
+          <button type="button" id="yt-file" class="btn btn-primary">File the link</button>
+        </div>
+        <p id="yt-msg" class="mono small" style="color:#B3261E;min-height:14px"></p>
+      </section>
+
+      <section class="panel">
+        <label class="field">
+          <span>Weight (lb)</span>
+          <input id="input-weight" type="number" step="0.1" min="50" max="800" class="mono" placeholder="337.6" />
+        </label>
+        <label class="field">
+          <span>Inspection video — latest overwrites</span>
+          <input id="input-video" type="file" accept="video/*" />
+        </label>
+        <p id="video-status" class="mono small"></p>
+        <label class="field">
+          <span>Photographs (front, left, rear, right)</span>
+          <input id="input-photos" type="file" accept="image/*" multiple />
+        </label>
+        <p id="photo-status" class="mono small"></p>
+        <label class="field">
+          <span>Notes</span>
+          <textarea id="input-notes" rows="3"></textarea>
+        </label>
+      </section>
+
+      <section id="fail-panel" class="panel" hidden>
+        <div class="section-label">What failed</div>
+        <div id="fail-missed" class="miss-grid"></div>
+        <p class="chooser-intro">After 10:00 PM ET a failure may be filed for <em>today only</em>.</p>
+      </section>
+
+      <div class="result-actions">
+        <button type="button" id="btn-file-packet" class="btn btn-primary">File packet</button>
+        <button type="button" id="btn-file-fail" class="btn btn-ghost" hidden>Open violation</button>
+        <a class="btn btn-ghost" href="../">Back to assistant</a>
+      </div>
+      <p id="file-msg" class="status-line mono" role="status"></p>
+    </main>
+  </div>
+  <script src="file.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+/* Filing addition — sits on assistant/styles.css */
+.yt-box {
+  border: 1px solid #141412;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.yt-box textarea,
+#input-notes {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  padding: 8px;
+  border: 1px solid #D8D6CF;
+  background: #F1F0EA;
+  resize: vertical;
+  min-width: 0;
+}
+.yt-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.yt-row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 10px;
+  border: 1px solid #141412;
+  background: #FAFAF7;
+}
+.copy-btn {
+  margin-left: 8px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  text-decoration: underline;
+}
+.mode-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.miss-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.miss-grid label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+.miss-grid input { width: auto; min-height: 0; }
+#app-root { max-width: 560px; }
