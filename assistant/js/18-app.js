@@ -110,8 +110,10 @@
     }
 
     if (type === "daily") {
+      // Read-only: the official figure is the scale-synced reading the server
+      // returns with the challenge. No typed weight exists anymore.
       fields.innerHTML =
-        '<label class="field"><span>Weight (lb)</span><input id="pf-weight" type="number" step="0.1" min="50" max="800" class="mono" placeholder="337.6" required /></label>';
+        '<div class="field"><span>Weight — scale-synced</span><p id="pf-weight-synced" class="mono" style="margin:4px 0 0;font-size:18px;font-weight:600">Fetched with the code at start</p><p class="mono small" style="margin:2px 0 0;color:#8B8A84">From the Withings scale via the record. If no reading synced today, step on the scale first.</p></div>';
     }
 
     if (type === "confirmation") {
@@ -222,14 +224,6 @@
     var type = pending.type;
 
     var weight = null;
-    if (type === "daily") {
-      var wEl = MRB.ui.byId("pf-weight");
-      weight = wEl ? parseFloat(wEl.value) : NaN;
-      if (!weight || isNaN(weight)) {
-        MRB.ui.setStatus("preflight", "Enter documented weight before starting");
-        return;
-      }
-    }
 
     var level = pending.level;
     var entry = pending.entry;
@@ -258,6 +252,19 @@
       MRB.ui.setStatus("preflight", "Challenge failed: " + e.message);
       MRB.ui.byId("btn-preflight-start").disabled = false;
       return;
+    }
+
+    // Daily sessions require the scale-synced weight — the record accepts no
+    // other figure, so a session cannot start without one on file for today.
+    if (type === "daily") {
+      var swEl = MRB.ui.byId("pf-weight-synced");
+      if (!ch.weight) {
+        if (swEl) swEl.textContent = "No synced reading today";
+        MRB.ui.setStatus("preflight", "No scale-synced weight on the record for today. Step on the Withings scale, wait for it to sync, then try again.");
+        MRB.ui.byId("btn-preflight-start").disabled = false;
+        return;
+      }
+      if (swEl) swEl.textContent = Number(ch.weight).toFixed(1) + " lb — official (scale-synced)";
     }
 
     var date = MRB.ui.formatTodayET();
@@ -310,7 +317,7 @@
         day: day,
         date: date,
         code: ch.code,
-        weight: weight,
+        weight: (type === "daily" ? (ch.weight || null) : weight),
         level: level,
         minutes: type === "corrective" ? MRB.config.cornerMinutes(level) : pending.minutes,
         version: version,

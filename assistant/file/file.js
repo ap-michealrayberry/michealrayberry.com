@@ -133,6 +133,20 @@
     return { ok: ok, window: window, reason: reason, checks: checks, today: today };
   }
 
+  function consentCheck(date, now) {
+    var today = todayEt(now);
+    return {
+      ok: true,
+      window: "open",
+      reason: "Consent filing is open any day. Re-record after every amendment.",
+      checks: [
+        { label: "Calendar day", ok: true, detail: today + " (ET)" },
+        { label: "Filing window", ok: true, detail: "No deadline — consent is amendment-driven, not daily" },
+      ],
+      today: today,
+    };
+  }
+
   function ytMeta(type, ctx) {
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
@@ -146,6 +160,14 @@
       return {
         title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
         desc: "Corner time recorded in one continuous, unedited take against violation " + ref + "." + tail,
+      };
+    }
+    if (type === "consent") {
+      return {
+        title: "Consent Confirmation — Agreement as amended · " + ctx.date + brand,
+        desc:
+          "Recorded statement of informed, voluntary consent to the Public Accountability Agreement " +
+          "as amended through " + ctx.date + ". Re-recorded after every amendment." + tail,
       };
     }
     return {
@@ -226,7 +248,7 @@
 
   function renderChecks() {
     var date = todayEt();
-    var check = mode === "fail" ? failCheck(date) : dailyCheck(date);
+    var check = mode === "fail" ? failCheck(date) : mode === "consent" ? consentCheck(date) : dailyCheck(date);
     var ul = $("check-list");
     ul.innerHTML = "";
     check.checks.forEach(function (c) {
@@ -246,6 +268,7 @@
     var locked = !check.ok;
     $("yt-file").disabled = locked;
     $("yt-file").textContent = locked && mode === "daily" ? "Filing closed" : "File the link";
+    $("packet-panel").hidden = mode === "consent";
     $("yt-url").disabled = locked && mode === "daily";
     $("input-weight").disabled = locked && mode === "daily";
     $("input-video").disabled = locked && mode === "daily";
@@ -262,7 +285,7 @@
   function renderMeta() {
     var date = todayEt();
     var packet = getDay(date);
-    var meta = ytMeta("daily", { date: date, day: packet.day });
+    var meta = ytMeta(mode === "consent" ? "consent" : "daily", { date: date, day: packet.day });
     $("yt-title").value = meta.title;
     $("yt-desc").value = meta.desc;
     $("yt-url").value = packet.youtubeUrl || "";
@@ -286,8 +309,10 @@
   function setMode(next) {
     mode = next;
     $("mode-daily").className = next === "daily" ? "btn btn-primary" : "btn btn-ghost";
+    $("mode-consent").className = next === "consent" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-fail").className = next === "fail" ? "btn btn-primary" : "btn btn-ghost";
     renderChecks();
+    renderMeta();
   }
 
   function copyFrom(id, btn) {
@@ -302,11 +327,29 @@
 
   async function fileLink() {
     var date = todayEt();
-    var check = dailyCheck(date);
+    var kind = mode === "consent" ? "consent" : "daily";
+    var check = kind === "consent" ? consentCheck(date) : dailyCheck(date);
     var msg = $("yt-msg");
     if (!check.ok) { msg.textContent = check.reason; return; }
     var url = ($("yt-url").value || "").trim();
     if (!isYt(url)) { msg.textContent = "Paste the full YouTube link."; return; }
+    if (kind === "consent") {
+      $("yt-file").disabled = true;
+      msg.textContent = "Filing…";
+      try {
+        var r = await postYtFiled("consent", date, url);
+        var all = loadAll();
+        all.__consent = { url: url, date: date, filedAt: new Date().toISOString() };
+        localStorage.setItem(STORE_KEY, JSON.stringify(all));
+        msg.textContent = r && r.ok === false
+          ? "Local file saved — server rejected the link. Send it to the AP."
+          : "Consent confirmation filed \u2713 — the AP attaches it to the agreement page.";
+      } catch (e) {
+        msg.textContent = "Filing failed — send the link to the AP.";
+      }
+      $("yt-file").disabled = false;
+      return;
+    }
     var packet = getDay(date);
     var meta = ytMeta("daily", { date: date, day: packet.day });
     $("yt-file").disabled = true;
@@ -413,6 +456,7 @@
 
   function bind() {
     $("mode-daily").addEventListener("click", function () { setMode("daily"); });
+    $("mode-consent").addEventListener("click", function () { setMode("consent"); });
     $("mode-fail").addEventListener("click", function () { setMode("fail"); });
     $("yt-file").addEventListener("click", function () { fileLink(); });
     $("btn-file-packet").addEventListener("click", filePacket);

@@ -90,10 +90,18 @@
         code: code,
         day: mockDay,
         issuedAt: new Date().toISOString(),
+        weight: 331.4, // offline stand-in for the scale-synced figure
         demo: true,
       };
     }
-    var data = await postJson({ action: "challenge", key: key, kind: k });
+    var url =
+      c.execUrl +
+      (c.execUrl.indexOf("?") >= 0 ? "&" : "?") +
+      "action=challenge&kind=" +
+      encodeURIComponent(k) +
+      "&key=" +
+      encodeURIComponent(key);
+    var data = await getJson(url);
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "Challenge request failed");
     }
@@ -123,7 +131,6 @@
       mime: mime, // NOT contentType
     };
     var data = await postJson(body);
-    if (data && data.skipped) return data; // R2 retired — caller files photos / YouTube only
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "r2sign failed");
     }
