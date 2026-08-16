@@ -1723,7 +1723,7 @@ function positionsPage(entries) {
       ${VIEWS.map(([angle, label, req, note]) => {
         const photo = ref && ref.photos && ref.photos[angle];
         const img = photo
-          ? `<img src="${photo.url}" alt="Micheal Ray Berry ${label.toLowerCase()} position, inspection standard — Day ${ref.record.day}" loading="lazy">`
+          ? `<img src="${photo.variants?.[0]?.url || photo.sourceUrl}" alt="Micheal Ray Berry ${label.toLowerCase()} position, inspection standard — Day ${ref.record.day}" loading="lazy">`
           : `<div class="ph">${angle === 'wait' ? 'Wait is recorded on video only<br>no photograph is filed from it' : label + ' reference<br>frame pending'}</div>`;
         return `<figure class="view">${img}<div class="body"><b>${label}</b><span class="req">${req}</span><p>${note}</p></div></figure>`;
       }).join('')}
