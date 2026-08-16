@@ -14,8 +14,6 @@ const ATTEST_CSV = process.env.ATTESTATION_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Attestation';
 const SITE_STATE_CSV = process.env.SITE_STATE_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Site%20State';
-const HEALTH_CSV = process.env.HEALTH_CSV ||
-  'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Health';
 const START_DATE = '2026-08-13';
 const START_WEIGHT = 340;
 const GOAL_WEIGHT = 175;
@@ -233,7 +231,7 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
-function dailyPage({ record, photos, previous, next, attestation, health }) {
+function dailyPage({ record, photos, previous, next, attestation }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Micheal Ray Berry Day ${day} — ${weight.toFixed(1)} lb | ${longDate(date)}`;
@@ -443,7 +441,6 @@ function dailyPage({ record, photos, previous, next, attestation, health }) {
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
-  ${health ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px">Device-synced activity: <strong>${Number(health.steps).toLocaleString('en-US')} steps</strong>${health.zone ? ` · ${Math.round(health.zone)} active-zone minutes` : ''}${health.mi ? ` · ${health.mi.toFixed(1)} mi` : ''}${health.cal ? ` · ${Math.round(health.cal).toLocaleString('en-US')} calories out` : ''} — synced automatically from the connected device, not self-reported.</p>` : ''}
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
   <p><a href="/manifests/${date}.json">View the machine-readable manifest and SHA-256 evidence hashes</a></p>
@@ -643,13 +640,8 @@ function milestonePage(target, entries) {
    Project weeks run Day 1–7, 8–14, and so on. Each page carries that
    week's weights, the net change, and every documented day, giving the
    archive a second navigable axis and a lot more indexable surface. */
-function weekPage(week, weekEntries, allEntries, healthMap) {
+function weekPage(week, weekEntries, allEntries) {
   const firstDay = (week - 1) * 7 + 1;
-  const wkHealth = [...(healthMap || new Map()).entries()]
-    .filter(([d]) => { const n = dayNumber(d); return n >= firstDay && n <= firstDay + 6; })
-    .map(([, a]) => a);
-  const avgSteps = wkHealth.length ? Math.round(wkHealth.reduce((t, a) => t + a.steps, 0) / wkHealth.length) : 0;
-  const zoneTotal = Math.round(wkHealth.reduce((t, a) => t + a.zone, 0));
   const canonical = `${SITE_ORIGIN}/weeks/week-${String(week).padStart(2, '0')}/`;
   const weights = weekEntries.map((e) => e.record.weight);
   const net = weights.length > 1 ? weights[weights.length - 1] - weights[0] : 0;
@@ -712,7 +704,6 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
 </header>
 <main>
   <p class="intro">${htmlEscape(description)}</p>
-  ${wkHealth.length ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px;display:inline-block">Device-synced activity, ${wkHealth.length} synced ${wkHealth.length === 1 ? 'day' : 'days'}: avg ${avgSteps.toLocaleString('en-US')} steps/day${zoneTotal ? ` · ${zoneTotal} active-zone minutes total` : ''}.</p>` : ''}
   ${rows ? `<table><thead><tr><th>Day</th><th>Date</th><th>Weight</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No documented days in this week.</div>'}
   <p>${nav}</p>
   <p><a href="/daily/">Full daily record</a> · <a href="/dashboard">Weigh-in log</a></p>
@@ -1480,14 +1471,14 @@ function violationPage(v, prev, next) {
 /* V-000 — the specimen entry. A permanent demonstration page showing exactly
    what a violation entry looks like and how its status flow works. It answers
    no violation: the log proper starts at V-001. */
-function specimenPage(demoUrl) {
+function specimenPage() {
   const canonical = `${SITE_ORIGIN}/violations/v-000/`;
   const title = 'V-000 — Demonstration Entry — Micheal Ray Berry Public Accountability Project';
   const description =
     'A specimen violation entry: what a permanent entry on the Micheal Ray Berry ' +
     'Public Accountability Project record looks like, and how its status flow works. ' +
     'This entry answers no violation.';
-  const embed = videoEmbed(demoUrl);
+  const embed = null; // the specimen entry carries no recording — it answers no violation
   const graph = [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
     { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumbs`, itemListElement: [
@@ -1565,15 +1556,8 @@ function specimenPage(demoUrl) {
       <div class="flow-row"><span class="vstate resolved">Resolved</span><p>Submitting the recorded session resolves the entry — the published YouTube posting is the evidence. The Accountability Partner reviews it and may overrule, reopening the entry, if it fails the standard. The entry, and the published recording beside it, remain permanently.</p></div>
     </div>
 
-    <h2>The corrective standard, demonstrated</h2>
-    <p>What the corner-time position and standard look like. <strong>This is an explainer, not a
-    corrective session</strong> — it answers no violation and is filed against no entry.</p>
-    ${embed
-      ? `<iframe class="vrec vrec-yt" src="${embed}" title="Corrective session standard — demonstration" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`
-      : `<video class="vrec" src="${demoUrl}" controls preload="metadata" playsinline></video>`}
-    <p>The full standard is on <a href="/corner-time/">the corrective sessions page</a>; the terms are
-    in <a href="/agreement">§8 of the signed agreement</a>. Every confirmed failure gets an entry in
-    <a href="/penalties">the violation log</a> in exactly this format — permanently.</p>
+    <p>The corrective standard is set out on <a href="/corner-time/">the corrective sessions
+    page</a>; the terms are in <a href="/agreement">§8 of the signed agreement</a>.</p>
   </main>
   <div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-bottom"><span>© 2026 Micheal Ray Berry · <a href="/">michealrayberry.com</a></span></div>
@@ -1645,7 +1629,7 @@ function positionsPage(entries) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to shoes. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and a plain black collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and consistent black shoes. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1778,7 +1762,7 @@ function positionsPage(entries) {
 `;
 }
 
-function cornerTimePage(entries, violations, demoUrl) {
+function cornerTimePage(entries, violations) {
   const canonical = `${SITE_ORIGIN}/corner-time/`;
   const title = 'Corrective Sessions — Micheal Ray Berry Public Accountability Project';
   const description =
@@ -1787,7 +1771,6 @@ function cornerTimePage(entries, violations, demoUrl) {
     'in one unbroken take and published beside the entry that caused it.';
 
   const sessions = (violations || []).filter((v) => /^https?:/.test(v.recording || ''));
-  const demo = demoUrl || 'https://pub-944fe11d344847f68307fb252477ba11.r2.dev/corner%20time/PXL_20251116_175931189~3%20(1).mp4';
 
   const graph = [
     {
@@ -1898,7 +1881,7 @@ function cornerTimePage(entries, violations, demoUrl) {
     <h2>The standard</h2>
     <div class="standard">
       <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
-      <div><b>Uniform</b><p>The project uniform — black unitard, plain black shoes, and the collar — the same standard as a daily inspection.</p></div>
+      <div><b>Uniform</b><p>The project uniform — black unitard and plain black shoes — the same standard as a daily inspection.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous, unedited take, fully AI-voiced. The participant does not speak. A verification code issued by the record seconds before capture is burned into every frame, so the footage cannot be older than it claims.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
@@ -1907,9 +1890,8 @@ function cornerTimePage(entries, violations, demoUrl) {
     </div>
 
     <h2>Demonstration</h2>
-    <p>What the position and the standard look like. <strong>This is an explainer, not a corrective
-    session</strong> — it answers no violation and is filed against no entry.</p>
-    <video class="demo" src="${demo}" controls preload="metadata" playsinline></video>
+    <p>The written standard below is the whole requirement. <strong>Corrective sessions on the
+    record are filed against a specific entry</strong>; they appear beside that entry, not here.</p>
 
     <h2>Why it is published</h2>
     <p>The recording is published beside the entry that caused it, and it stays there. Completing a
@@ -2159,12 +2141,11 @@ async function buildSyntheticPages() {
 }
 
 async function main() {
-  const [csv, attestCsv, violationCsv, siteStateCsv, healthCsv] = await Promise.all([
+  const [csv, attestCsv, violationCsv, siteStateCsv] = await Promise.all([
     fetchText(SHEET_CSV, true),
     fetchText(ATTEST_CSV, true),
     fetchText(VIOLATION_CSV, true),
     fetchText(SITE_STATE_CSV, true),
-    fetchText(HEALTH_CSV, true),
   ]);
   if (!csv) {
     // Sheet unreachable (not shared, or Google hiccuping). Publishing new
@@ -2201,26 +2182,7 @@ async function main() {
       if (r[0]) siteState[String(r[0]).trim()] = String(r[1] || '').trim();
     }
   }
-  const demoUrl = /^https?:/.test(siteState.demo_video_url || '')
-    ? siteState.demo_video_url
-    : 'https://pub-944fe11d344847f68307fb252477ba11.r2.dev/corner%20time/PXL_20251116_175931189~3%20(1).mp4';
 
-  /* Health tab: device-synced daily activity. gviz falls back to the FIRST
-     sheet when the named tab is missing, so only parse when the header really
-     is the Health tab's. */
-  const healthMap = new Map();
-  if (healthCsv) {
-    const hrows = parseCSV(healthCsv);
-    const hhead = (hrows[0] || []).map((v) => String(v).toLowerCase());
-    if (hhead[1] === 'steps' && String(hhead[2] || '').startsWith('zone')) {
-      for (const r of hrows.slice(1)) {
-        const d = normalizeDate(r[0]);
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) continue;
-        const a = { steps: parseFloat(r[1]) || 0, zone: parseFloat(r[2]) || 0, mi: parseFloat(r[5]) || 0, cal: parseFloat(r[6]) || 0 };
-        if (a.steps || a.zone || a.mi || a.cal) healthMap.set(d, a);
-      }
-    }
-  }
 
   const rows = parseCSV(csv);
   const records = rows.slice(1).map((r) => ({
@@ -2311,7 +2273,7 @@ async function main() {
     const next = pos >= 0 && pos < sequence.length - 1 ? sequence[pos + 1] : null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
-    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '', health: healthMap.get(record.date) || null });
+    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '' });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
 
     const manifest = {
@@ -2331,7 +2293,6 @@ async function main() {
         video_url: record.video,
         canonical_url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
         attestation: attestMap.get(record.date) || null,
-        activity: healthMap.get(record.date) || null,
       },
       photos: Object.fromEntries(Object.entries(photos).map(([angle, p]) => [angle, {
         url: p.sourceUrl,
@@ -2380,7 +2341,7 @@ async function main() {
   for (let w = 1; w <= maxWeek; w++) {
     const inWeek = generated.filter(({ record }) => Math.ceil(record.day / 7) === w);
     const file = path.join(ROOT, 'weeks', `week-${String(w).padStart(2, '0')}`, 'index.html');
-    if (await writeIfChanged(file, weekPage(w, inWeek, generated, healthMap))) changedUrls.add(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
+    if (await writeIfChanged(file, weekPage(w, inWeek, generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
     extraUrls.push(`${SITE_ORIGIN}/weeks/week-${String(w).padStart(2, '0')}/`);
   }
   if (await writeIfChanged(path.join(ROOT, 'weeks', 'index.html'), weeksIndexPage(generated))) changedUrls.add(`${SITE_ORIGIN}/weeks/`);
@@ -2394,7 +2355,7 @@ async function main() {
   }
   if (violations.length) console.log('Violation entries published: ' + violations.length);
 
-  if (await writeIfChanged(path.join(ROOT, 'violations', 'v-000', 'index.html'), specimenPage(demoUrl))) {
+  if (await writeIfChanged(path.join(ROOT, 'violations', 'v-000', 'index.html'), specimenPage())) {
     changedUrls.add(`${SITE_ORIGIN}/violations/v-000/`);
   }
 
@@ -2402,7 +2363,7 @@ async function main() {
     changedUrls.add(`${SITE_ORIGIN}/positions/`);
   }
 
-  if (await writeIfChanged(path.join(ROOT, 'corner-time', 'index.html'), cornerTimePage(generated, violations, demoUrl))) {
+  if (await writeIfChanged(path.join(ROOT, 'corner-time', 'index.html'), cornerTimePage(generated, violations))) {
     changedUrls.add(`${SITE_ORIGIN}/corner-time/`);
   }
 

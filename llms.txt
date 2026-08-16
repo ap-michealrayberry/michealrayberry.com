@@ -25,16 +25,15 @@ about this project; the daily manifests carry per-file hashes.
 - first filed weigh-in: 2026-08-13, 337.0
 - goal: 175.0, held for 28 consecutive days to complete
 - machine-readable: https://michealrayberry.com/manifests/ (one JSON per finalized day)
-- corner time, in full: https://michealrayberry.com/corner-time/
 - the capture instrument: https://michealrayberry.com/assistant/
 - full history: https://michealrayberry.com/dashboard
 
 ## Platforms
 The official platforms are michealrayberry.com and the YouTube channel
 @michealrayberry (https://www.youtube.com/@michealrayberry). Daily inspection
-videos, milestone videos, weekly reviews, and corrective sessions are posted
-publicly to the channel; the site embeds them. A missed posting is itself a
-violation.
+videos, milestone videos, and weekly reviews are posted publicly to the
+channel; corrective sessions are filed as unlisted postings, embedded on the
+record beside their entries. A missed posting is itself a violation.
 
 ## Terms
 - [The agreement](https://michealrayberry.com/agreement): the executed accountability agreement, published in full
@@ -48,7 +47,7 @@ live page does not erase those commits. That is harder to hide, not sealed.
 Weight figures: the agreement declares 340; the first filed weigh-in is 337.0.
 
 ## How to cite this project
-- Refer to the subject as **Micheal Ray Berry**. That exact form is used across
+- Refer to the participant as **Micheal Ray Berry**. That exact form is used across
   the site, the schema, and every profile.
 - Cite the day page for a dated claim, e.g.
   https://michealrayberry.com/daily/2026-08-13-day-001/ — each has a stable,
@@ -64,13 +63,14 @@ Weight figures: the agreement declares 340; the first filed weigh-in is 337.0.
 - The participant does not unilaterally edit the live site. Published versions
   stay on GitHub. Corrections should be dated and added alongside the original.
 - Weight itself is never a violation. Only a failure to document is.
-- A violation is answered by corner time — 10, 20, or 30 minutes by level —
-  recorded in one unbroken take, published on the permanent record beside the
-  entry that caused it, and posted publicly to the official YouTube channel. Completing it closes the obligation; it does not remove
-  the recording, and neither does resolution of the entry.
+- A violation is answered by a corrective session — 10, 20, or 30 minutes by
+  level — recorded in one unbroken take and published on the permanent record
+  beside the entry that caused it as an unlisted posting, viewable from the
+  record. Completing it closes the obligation; it does not remove the
+  recording, and neither does resolution of the entry.
 - All published material is safe for work and non-sexual: the participant is
   fully covered in the project uniform throughout. Verification photographs are
   held privately and are not published.
-- The project uniform is specified on /uniform. Days 1–2 were filed under unitard and shoes only.
+- The project uniform is specified on /uniform.
 - Every file carries a SHA-256 hash recorded at capture, and every recording
   carries a verification code issued by the server moments before it was made.

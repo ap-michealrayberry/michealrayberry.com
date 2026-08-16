@@ -4227,9 +4227,8 @@
       );
     }
 
-    // Uniform & collar attestation — not machine-checkable. A deliberate tap
-    // confirms it before the Begin button unlocks; a forgotten collar is an
-    // automatic Violation Event, so this is the cheapest insurance in the app.
+    // Uniform attestation — not machine-checkable. A deliberate tap
+    // confirms it before the Begin button unlocks.
     var startBtn = MRB.ui.byId("btn-preflight-start");
     var couldStart = checkResult.canStart;
     startBtn.disabled = true;
@@ -4241,7 +4240,7 @@
       li.tabIndex = 0;
       li.style.cursor = "pointer";
       var left = document.createElement("span");
-      left.textContent = "Uniform — unitard · black shoes · collar closed";
+      left.textContent = "Uniform — unitard · black shoes";
       var right = document.createElement("span");
       var confirmed = false;
       function paint() {

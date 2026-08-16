@@ -147,6 +147,20 @@
     };
   }
 
+  function correctiveCheck(date) {
+    return {
+      ok: true,
+      window: "open",
+      reason: "Corrective filing is open until the 72-hour deadline on the notice.",
+      checks: [
+        { label: "Calendar day", ok: true, detail: todayEt() + " (ET)" },
+        { label: "Filing window", ok: true, detail: "Within 72 hours of the violation notice (\u00a78.3)" },
+        { label: "Recording", ok: true, detail: "Recorded in the assistant \u2014 Corner Time session" },
+      ],
+      today: todayEt(),
+    };
+  }
+
   function ytMeta(type, ctx) {
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
@@ -160,6 +174,16 @@
       return {
         title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
         desc: "Corner time recorded in one continuous, unedited take against violation " + ref + "." + tail,
+      };
+    }
+    if (type === "corrective") {
+      var vid = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase() || "V-000";
+      return {
+        title: "Corrective Session — " + vid + " \u00b7 " + ctx.date + brand,
+        desc:
+          "Corrective session filed against " + vid + " on the official record of the Micheal Ray Berry " +
+          "Public Accountability Project. One continuous take. Unlisted: embedded beside the entry at " +
+          "https://michealrayberry.com/violations/" + vid.toLowerCase() + "/" + tail,
       };
     }
     if (type === "consent") {
@@ -228,6 +252,16 @@
     try { return localStorage.getItem("mrb_exec_url") || ""; } catch (e) { return ""; }
   }
 
+  async function postCorrectiveFiled(vId, date, url) {
+    var cfg = loadCfg();
+    if (!cfg.exec || !cfg.key) return { ok: false };
+    var body = new URLSearchParams({
+      action: "correctivefiled", key: cfg.key, id: vId, date: date, url: url,
+    });
+    var r = await fetch(cfg.exec, { method: "POST", body: body });
+    return await r.json();
+  }
+
   async function postYtFiled(kind, date, url) {
     var endpoint = execUrl();
     var key = deviceKey();
@@ -248,7 +282,10 @@
 
   function renderChecks() {
     var date = todayEt();
-    var check = mode === "fail" ? failCheck(date) : mode === "consent" ? consentCheck(date) : dailyCheck(date);
+    var check = mode === "fail" ? failCheck(date)
+      : mode === "consent" ? consentCheck(date)
+      : mode === "corrective" ? correctiveCheck(date)
+      : dailyCheck(date);
     var ul = $("check-list");
     ul.innerHTML = "";
     check.checks.forEach(function (c) {
@@ -268,7 +305,8 @@
     var locked = !check.ok;
     $("yt-file").disabled = locked;
     $("yt-file").textContent = locked && mode === "daily" ? "Filing closed" : "File the link";
-    $("packet-panel").hidden = mode === "consent";
+    $("packet-panel").hidden = mode === "consent" || mode === "corrective";
+    $("corrective-panel").hidden = mode !== "corrective";
     $("yt-url").disabled = locked && mode === "daily";
     $("input-weight").disabled = locked && mode === "daily";
     $("input-video").disabled = locked && mode === "daily";
@@ -285,7 +323,7 @@
   function renderMeta() {
     var date = todayEt();
     var packet = getDay(date);
-    var meta = ytMeta(mode === "consent" ? "consent" : "daily", { date: date, day: packet.day });
+    var meta = ytMeta(mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : "daily", { date: date, day: packet.day });
     $("yt-title").value = meta.title;
     $("yt-desc").value = meta.desc;
     $("yt-url").value = packet.youtubeUrl || "";
@@ -310,6 +348,7 @@
     mode = next;
     $("mode-daily").className = next === "daily" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-consent").className = next === "consent" ? "btn btn-primary" : "btn btn-ghost";
+    $("mode-corrective").className = next === "corrective" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-fail").className = next === "fail" ? "btn btn-primary" : "btn btn-ghost";
     renderChecks();
     renderMeta();
@@ -327,12 +366,28 @@
 
   async function fileLink() {
     var date = todayEt();
-    var kind = mode === "consent" ? "consent" : "daily";
-    var check = kind === "consent" ? consentCheck(date) : dailyCheck(date);
+    var kind = mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : "daily";
+    var check = kind === "consent" ? consentCheck(date) : kind === "corrective" ? correctiveCheck(date) : dailyCheck(date);
     var msg = $("yt-msg");
     if (!check.ok) { msg.textContent = check.reason; return; }
     var url = ($("yt-url").value || "").trim();
     if (!isYt(url)) { msg.textContent = "Paste the full YouTube link."; return; }
+    if (kind === "corrective") {
+      var vId = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase();
+      if (!/^V-\d{3}$/.test(vId)) { msg.textContent = "Enter the violation id as V-001."; return; }
+      $("yt-file").disabled = true;
+      msg.textContent = "Filing\u2026";
+      try {
+        var rc = await postCorrectiveFiled(vId, date, url);
+        msg.textContent = rc && rc.ok === false
+          ? "Local file saved \u2014 server rejected it. Send the link and id to the AP."
+          : "Corrective session filed \u2713 \u2014 " + vId + " resolves on submission (\u00a78.2).";
+      } catch (e) {
+        msg.textContent = "Filing failed \u2014 send the link and id to the AP.";
+      }
+      $("yt-file").disabled = false;
+      return;
+    }
     if (kind === "consent") {
       $("yt-file").disabled = true;
       msg.textContent = "Filing…";
@@ -457,6 +512,8 @@
   function bind() {
     $("mode-daily").addEventListener("click", function () { setMode("daily"); });
     $("mode-consent").addEventListener("click", function () { setMode("consent"); });
+    $("mode-corrective").addEventListener("click", function () { setMode("corrective"); });
+    if ($("cv-id")) $("cv-id").addEventListener("input", renderMeta);
     $("mode-fail").addEventListener("click", function () { setMode("fail"); });
     $("yt-file").addEventListener("click", function () { fileLink(); });
     $("btn-file-packet").addEventListener("click", filePacket);

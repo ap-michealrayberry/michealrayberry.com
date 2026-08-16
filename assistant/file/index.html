@@ -55,6 +55,7 @@
       <div class="mode-row" role="tablist">
         <button type="button" class="btn btn-primary" id="mode-daily" data-mode="daily">Daily</button>
         <button type="button" class="btn btn-ghost" id="mode-consent" data-mode="consent">Consent</button>
+        <button type="button" class="btn btn-ghost" id="mode-corrective" data-mode="corrective">Corrective</button>
         <button type="button" class="btn btn-ghost" id="mode-fail" data-mode="fail">Failure</button>
       </div>
 
@@ -78,6 +79,14 @@
           <button type="button" id="yt-file" class="btn btn-primary">File the link</button>
         </div>
         <p id="yt-msg" class="mono small" style="color:#B3261E;min-height:14px"></p>
+      </section>
+
+      <section class="panel" id="corrective-panel" hidden>
+        <label class="field">
+          <span>Violation id</span>
+          <input id="cv-id" type="text" class="mono" placeholder="V-002" maxlength="5" />
+        </label>
+        <p class="small">Record the session in the assistant (Corner Time), post it <strong>unlisted</strong>, then paste the link below. Filing resolves the entry under §8.2; the AP may overrule only on the written verification standard.</p>
       </section>
 
       <section class="panel" id="packet-panel">
