@@ -25,7 +25,6 @@ about this project; the daily manifests carry per-file hashes.
 - first filed weigh-in: 2026-08-13, 337.0
 - goal: 175.0, held for 28 consecutive days to complete
 - machine-readable: https://michealrayberry.com/manifests/ (one JSON per finalized day)
-- local AP role: https://michealrayberry.com/partner
 - corner time, in full: https://michealrayberry.com/corner-time/
 - the capture instrument: https://michealrayberry.com/assistant/
 - full history: https://michealrayberry.com/dashboard
