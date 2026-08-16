@@ -46,4 +46,4 @@
   Cache-Control: public, max-age=3600
 
 /photos/*
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=31536000, immutable

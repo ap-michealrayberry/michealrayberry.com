@@ -2,7 +2,6 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
-import { writeArchivePages } from './archive-pages.mjs';
 
 // Netlify sets no workspace var; the build runs from the repo root.
 const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
@@ -19,7 +18,6 @@ const HEALTH_CSV = process.env.HEALTH_CSV ||
   'https://docs.google.com/spreadsheets/d/1zW3QQ4J3e4i-VmM75dhq7O3ayIDRgsjrA0mOEB5bB7o/gviz/tq?tqx=out:csv&sheet=Health';
 const START_DATE = '2026-08-13';
 const START_WEIGHT = 340;
-let OPEN_COUNT = 0;
 const GOAL_WEIGHT = 175;
 const PERSON_ID = `${SITE_ORIGIN}/#micheal-ray-berry`;
 const INDEXNOW_OUTPUT = path.join(ROOT, '.indexnow-urls.json');
@@ -37,7 +35,7 @@ const STATIC_PAGES = [
   ['consent', 'monthly'],
   ['uniform', 'weekly'],
   ['updates', 'daily'],
-  ['partner', 'weekly'],
+  ['verify', 'monthly'],
   ['daily/', 'daily'],
 ];
 
@@ -81,58 +79,6 @@ function dayNumber(date) {
   const start = Date.parse(`${START_DATE}T12:00:00Z`);
   const current = Date.parse(`${date}T12:00:00Z`);
   return Math.round((current - start) / 86400000) + 1;
-}
-
-/** Eastern calendar date (YYYY-MM-DD) and hour (0–23) for a moment. */
-function etNow(now = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(now);
-  const get = (type) => parts.find((p) => p.type === type)?.value || '';
-  return {
-    iso: `${get('year')}-${get('month')}-${get('day')}`,
-    hour: parseInt(get('hour'), 10) || 0,
-  };
-}
-
-function todayEtIso(now = new Date()) {
-  return etNow(now).iso;
-}
-
-/* 10 PM Eastern on an ISO date, with the offset that date actually used. */
-function etDeadlineStamp(iso) {
-  const utc = new Date(`${iso}T22:00:00Z`);
-  const etHour = etNow(utc).hour;
-  let delta = etHour - 22;
-  if (delta > 12) delta -= 24;
-  if (delta < -12) delta += 24;
-  const sign = delta >= 0 ? '+' : '-';
-  return `${iso}T22:00:00${sign}${String(Math.abs(delta)).padStart(2, '0')}:00`;
-}
-
-function normalizeVideoUrl(url = '') {
-  return String(url).replace(/([?&])is=/g, '$1si=');
-}
-
-function csvHeader(rows) {
-  return (rows[0] || []).map((v) => String(v).toLowerCase().trim());
-}
-
-function isWeighInsHeader(head) {
-  return head.includes('weight_lb') || head[1] === 'weight';
-}
-
-/* gviz returns the first sheet when the named tab is missing. Weigh-ins
-   looks nothing like a violation log — refuse to parse that fallback. */
-function isViolationLogHeader(head) {
-  if (!head.length) return false;
-  if (isWeighInsHeader(head) || head.includes('photo_front')) return false;
-  return /date/.test(head[0] || '');
 }
 
 function longDate(date) {
@@ -287,14 +233,13 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
-function dailyPage({ record, photos, previous, next, attestation, health, violation = null }) {
+function dailyPage({ record, photos, previous, next, attestation, health }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Micheal Ray Berry Day ${day} — ${weight.toFixed(1)} lb | ${longDate(date)}`;
   const description = `Day ${day} of Micheal Ray Berry’s public weight-loss accountability record: ${weight.toFixed(1)} pounds on ${longDate(date)}, with four-angle photographs and the daily inspection video.`;
   const front = photos.front.sourceUrl;
   const embed = videoEmbed(video);
-  const portrait = /youtube\.com\/shorts\//i.test(video) || isSelfHosted(video);
   const graph = [
     {
       '@type': 'WebPage',
@@ -339,8 +284,8 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
       headline: title,
       description,
       articleSection: 'Daily Record',
-      datePublished: `${etDeadlineStamp(date)}`,
-      dateModified: `${etDeadlineStamp(date)}`,
+      datePublished: `${date}T22:00:00-04:00`,
+      dateModified: `${date}T22:00:00-04:00`,
       author: { '@id': PERSON_ID },
       publisher: { '@id': `${SITE_ORIGIN}/#website` },
       mainEntityOfPage: { '@id': canonical },
@@ -385,12 +330,12 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
     </figure>`;
   }).join('\n');
   const videoHtml = isSelfHosted(video)
-    ? `<div class="video portrait"><video controls preload="none" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}">
+    ? `<div class="video"><video controls preload="none" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}">
         <source src="${htmlEscape(video)}" type="video/mp4">
         <a href="${htmlEscape(video)}">Download the Day ${day} inspection video</a>
       </video></div>`
     : (embed
-      ? `<div class="video${portrait ? ' portrait' : ''}"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+      ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
       : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`);
   const week = Math.ceil(day / 7);
   const nav = `<nav aria-label="Daily record navigation">
@@ -415,7 +360,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="${htmlEscape(front)}">
-  <meta property="article:published_time" content="${etDeadlineStamp(date)}">
+  <meta property="article:published_time" content="${date}T22:00:00-04:00">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${htmlEscape(title)}">
   <meta name="twitter:description" content="${htmlEscape(description)}">
@@ -425,7 +370,6 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
-    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -475,7 +419,6 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
     .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
     .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-    .video.portrait{max-width:420px;margin-left:auto;margin-right:auto}.video.portrait:has(iframe){padding-top:177.78%}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
     .also{font:12px/1.8 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 0}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
@@ -483,7 +426,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
   </style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -500,7 +443,6 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
-  ${violation ? `<p>Also on this date: <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
   ${health ? `<p style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border:1px solid var(--rule);background:#fff;padding:10px 14px">Device-synced activity: <strong>${Number(health.steps).toLocaleString('en-US')} steps</strong>${health.zone ? ` · ${Math.round(health.zone)} active-zone minutes` : ''}${health.mi ? ` · ${health.mi.toFixed(1)} mi` : ''}${health.cal ? ` · ${Math.round(health.cal).toLocaleString('en-US')} calories out` : ''} — synced automatically from the connected device, not self-reported.</p>` : ''}
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
@@ -518,7 +460,7 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -530,7 +472,6 @@ function dailyPage({ record, photos, previous, next, attestation, health, violat
    day is missing while its page sits published. Days between the start and
    the latest record with no page are shown as gaps, which is the point. */
 const PAGE_CSS = `
-    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -660,7 +601,7 @@ function milestonePage(target, entries) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -691,7 +632,7 @@ function milestonePage(target, entries) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -755,7 +696,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -787,7 +728,7 @@ function weekPage(week, weekEntries, allEntries, healthMap) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -820,7 +761,7 @@ function weeksIndexPage(entries) {
   <style>${PAGE_CSS}</style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -850,7 +791,7 @@ function weeksIndexPage(entries) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -859,11 +800,13 @@ function weeksIndexPage(entries) {
 
 /* True while today's 10 PM Eastern deadline is still ahead. Derived from the
    date rather than a fixed offset so it holds across the DST change. */
-function deadlinePending(iso, now = new Date()) {
-  const { iso: todayIso, hour } = etNow(now);
+function deadlinePending(iso) {
+  const now = new Date();
+  const todayEt = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const todayIso = `${todayEt.getFullYear()}-${String(todayEt.getMonth() + 1).padStart(2, '0')}-${String(todayEt.getDate()).padStart(2, '0')}`;
   if (iso > todayIso) return true;
   if (iso < todayIso) return false;
-  return hour < 22;
+  return todayEt.getHours() < 22;
 }
 
 function dailyIndexPage(entries, gapKinds = new Map()) {
@@ -871,7 +814,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   /* Run to today, not to the last finalized day. Stopping at the last
      complete record makes an unfiled day vanish from the index instead of
      showing as a gap — which is the one thing this page exists to prevent. */
-  const today = todayEtIso();
+  const today = new Date().toISOString().slice(0, 10);
   const lastEntry = entries.at(-1)?.record.date || START_DATE;
   const latest = today > lastEntry ? today : lastEntry;
   const days = [];
@@ -886,8 +829,8 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   const pending = days.filter((d) => !d.entry && deadlinePending(d.date)).length;
   const gaps = days.length - documented - incomplete - pending;
   const canonical = `${SITE_ORIGIN}/daily/`;
-  const title = 'Daily record — Micheal Ray Berry official weigh-in archive';
-  const description = `Every published day of Micheal Ray Berry's official weigh-in record. Declared start 340 lb, first filed 337.0 lb. ${documented} documented days, plus gaps. Photographs, weight, inspection video, SHA-256 manifests.`;
+  const title = 'Daily Record — Micheal Ray Berry Public Accountability Project';
+  const description = `Every published day of the Micheal Ray Berry Public Accountability Project: ${documented} documented days with four-angle photographs, recorded weight, inspection video, and SHA-256 evidence manifests.`;
   const cards = days.map(({ date, day, entry }) => {
     const href = `/daily/${date}-day-${String(day).padStart(3, '0')}/`;
     if (!entry) {
@@ -900,14 +843,15 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
       const flag = partial ? 'Incomplete record' : 'No record';
       const inner = `<div class="thumb"><span>${flag.toUpperCase()}</span></div>
         <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="flag">${flag}</span></div>`;
-      // After the deadline a gap page exists and is in the sitemap — link it.
-      return `<li class="card gap"><a href="${href}">${inner}</a></li>`;
+      // An incomplete day links to its page, which states what was filed and
+      // what was not; a day with nothing filed has nothing to open.
+      return partial ? `<li class="card gap"><a href="${href}">${inner}</a></li>` : `<li class="card gap">${inner}</li>`;
     }
     const front = entry.photos.front;
     const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
     return `<li class="card"><a href="${href}">
       <picture><source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width:720px) 50vw, 25vw">
-      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front, Day ${day}, ${longDate(date)}, ${entry.record.weight.toFixed(1)} lb`)}" loading="lazy" decoding="async"></picture>
+      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front view, Day ${day}, ${longDate(date)}`)}" loading="lazy" decoding="async"></picture>
       <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="wt">${entry.record.weight.toFixed(1)} lb</span></div>
     </a></li>`;
   }).join('\n');
@@ -943,7 +887,6 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
-    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -1004,7 +947,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
   </style>
 </head>
 <body>
-<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
@@ -1034,7 +977,7 @@ function dailyIndexPage(entries, gapKinds = new Map()) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1050,7 +993,7 @@ function rssFeed(entries) {
       <title>${xmlEscape(`Day ${record.day} — ${record.weight.toFixed(1)} lb — ${longDate(record.date)}`)}</title>
       <link>${url}</link>
       <guid isPermaLink="true">${url}</guid>
-      <pubDate>${new Date(etDeadlineStamp(record.date)).toUTCString()}</pubDate>
+      <pubDate>${new Date(`${record.date}T22:00:00-04:00`).toUTCString()}</pubDate>
       <description>${xmlEscape(`Day ${record.day} of the Micheal Ray Berry Public Accountability Project. Recorded weight ${record.weight.toFixed(1)} pounds on ${longDate(record.date)}, with four-angle documentation photographs and the daily inspection video.`)}</description>
       <enclosure url="${xmlEscape(photos.front.sourceUrl)}" type="image/jpeg" length="0"/>
     </item>`;
@@ -1061,7 +1004,7 @@ function rssFeed(entries) {
     <title>Micheal Ray Berry — Public Accountability Project</title>
     <link>${SITE_ORIGIN}/daily/</link>
     <atom:link href="${SITE_ORIGIN}/feed.xml" rel="self" type="application/rss+xml"/>
-    <description>Declared start 340 lb. First filed weigh-in 337.0 lb on Day 1. Daily weight, photographs, and inspection video — or a gap page naming the matching violation.</description>
+    <description>The official daily public record: weight, four-angle photographs, and inspection video, published every day from 340 pounds to 175.</description>
     <language>en-US</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}
@@ -1083,14 +1026,11 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
    sequence with a hole and no explanation), and the absence is itself part of
    the record — stated neutrally, exactly as the agreement requires. These
    pages carry no photographs, no video, and no consequence detail. */
-function noRecordPage({ date, day, previous, next, reason, kind = 'none', violation = null }) {
-  const fromLog = violation && /incomplete/i.test(violation.what || '');
-  if (fromLog) kind = 'incomplete';
+function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   const label = kind === 'incomplete' ? 'Incomplete record' : 'No record';
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
-  const title = `Micheal Ray Berry Day ${day} — ${label} | ${longDate(date)}`;
-  const citation = violation ? ` See ${violation.id || violation.slug}.` : '';
-  const description = `Day ${day} of the Micheal Ray Berry public weigh-in record, ${longDate(date)}: ${kind === 'incomplete' ? 'the record filed for this date is incomplete' : 'no record was filed for this date'}.${citation}`;
+  const title = `Day ${day} — ${label} — ${longDate(date)} — Micheal Ray Berry`;
+  const description = `Day ${day} of the Micheal Ray Berry Public Accountability Project, ${longDate(date)}: ${kind === 'incomplete' ? 'the record filed for this date is incomplete' : 'no record was filed for this date'}.`;
   const graph = [
     {
       '@type': 'WebPage',
@@ -1131,7 +1071,6 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
   <style>
-    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -1184,8 +1123,8 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1200,8 +1139,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
   <main>
     <div class="card">
       <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
-      ${violation ? `<p>Entered as <a href="/violations/${htmlEscape(violation.slug)}/">${htmlEscape(violation.id)}</a> — ${htmlEscape(violation.what)}. Status: ${htmlEscape(violation.state)}.</p>` : ''}
-      <p>He is required to file, by 10 PM Eastern, the inspection video, four photographs, the day's weight, and the tracker update, in the project uniform. A packet counts only when every element is filed on time.</p>
+      <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
     </div>
     <nav aria-label="Daily record navigation">
       ${previous ? `<a rel="prev" href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/">← Day ${previous.day}</a>` : '<span></span>'}
@@ -1221,7 +1159,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', violat
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
   </body>
@@ -1300,8 +1238,8 @@ function consentPage() {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1361,7 +1299,7 @@ function consentPage() {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1383,41 +1321,6 @@ function violationText(raw) {
   if (/incomplete/i.test(s)) return 'Incomplete record — ' + s.replace(/^Missed 10 PM ET deadline\s*—\s*/i, '');
   if (/no packet|not submitted|missing/i.test(s)) return 'No record — ' + s;
   return s;
-}
-
-/* A gap page without a matching log row is a hole in the record. After the
-   10 PM ET deadline, declare it here so /penalties and /violations/v-NNN
-   stay in sync with /daily even if Apps Script did not write the sheet. */
-function declareGapViolations(violations, sequence) {
-  const have = new Set(violations.map((v) => v.date));
-  let n = violations.length;
-  for (const s of sequence) {
-    if (s.complete) continue;
-    if (deadlinePending(s.date)) continue;
-    if (have.has(s.date)) continue;
-    n += 1;
-    const num = String(n).padStart(3, '0');
-    const what = s.kind === 'incomplete'
-      ? 'Incomplete record — the Daily Compliance Packet was not complete'
-      : 'No record — none of the required daily documentation was filed';
-    violations.push({
-      n,
-      id: 'V-' + num,
-      slug: 'v-' + num,
-      date: s.date,
-      day: s.day,
-      what,
-      state: 'open',
-      submitted: '',
-      resolved: '',
-      verification: '',
-      corrections: [],
-      recording: '',
-    });
-    have.add(s.date);
-    console.log('Declared gap violation ' + ('V-' + num) + ' for ' + s.date);
-  }
-  return violations;
 }
 
 function violationPage(v, prev, next) {
@@ -1505,8 +1408,8 @@ function violationPage(v, prev, next) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1566,7 +1469,7 @@ function violationPage(v, prev, next) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1628,8 +1531,8 @@ function specimenPage(demoUrl) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1742,7 +1645,7 @@ function positionsPage(entries) {
     ['Wait posture', 'Separate from the four photographic positions. Feet apart at the established width, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to shoes. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and a plain black collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1785,8 +1688,8 @@ function positionsPage(entries) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1867,7 +1770,7 @@ function positionsPage(entries) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1964,8 +1867,8 @@ function cornerTimePage(entries, violations, demoUrl) {
   </style>
 </head>
 <body>
-  <div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
-  <div class="sitehead"><div class="sitehead-in">
+  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
+<div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
@@ -1995,7 +1898,7 @@ function cornerTimePage(entries, violations, demoUrl) {
     <h2>The standard</h2>
     <div class="standard">
       <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
-      <div><b>Uniform</b><p>The project uniform — black unitard and plain black shoes — the same standard as a daily inspection.</p></div>
+      <div><b>Uniform</b><p>The project uniform — black unitard, plain black shoes, and the collar — the same standard as a daily inspection.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous, unedited take, fully AI-voiced. The participant does not speak. A verification code issued by the record seconds before capture is burned into every frame, so the footage cannot be older than it claims.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
@@ -2038,7 +1941,7 @@ function cornerTimePage(entries, violations, demoUrl) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version is on GitHub — changing the live page does not erase those commits">Site History</a></span>
+      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -2098,7 +2001,7 @@ ${entries.map(({ record, photos }) => {
       ${isSelfHosted(record.video) || !embed
         ? `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`
         : `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>`}
-      <video:publication_date>${etDeadlineStamp(record.date)}</video:publication_date>
+      <video:publication_date>${record.date}T22:00:00-04:00</video:publication_date>
     </video:video>
   </url>`;
 }).join('\n')}
@@ -2137,7 +2040,6 @@ const SYN_CSS = `
     :root{color-scheme:light;--ink:#141412;--paper:#fafaf7;--muted:#6b6a64;--rule:#d8d6cf;--accent:#b3261e}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'IBM Plex Sans',system-ui,-apple-system,sans-serif}
     a{color:var(--ink);text-underline-offset:3px}
-    .authority{background:var(--ink);color:var(--paper);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:8px 32px;display:flex;flex-wrap:wrap;gap:8px 28px}
     .sitehead{border-bottom:2px solid var(--ink);background:var(--paper);padding:0 32px}
     .sitehead-in{max-width:1160px;margin:auto;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .wordmark{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink)}
@@ -2162,16 +2064,14 @@ const SYN_CSS = `
     .sitefoot .links{display:flex;gap:20px;flex-wrap:wrap;font:12px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em}
     .rec{display:inline-flex;align-items:center;gap:7px;color:var(--paper)}.rec:hover{color:#FF6B61}
     .rec-lamp{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}`;
-function synHeader() {
-  return `<div class="authority"><span>Record held by the Accountability Partner</span><span>Subject Micheal Ray Berry</span><span>under agreement · ${OPEN_COUNT} open</span></div>
+const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Collared · Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Subject · official record</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a><a class="ap" href="/partner">Local AP</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection Standard</a><a href="/uniform">Uniform</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
-}
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
@@ -2232,7 +2132,7 @@ function synPage({ title, desc, canonical, body }) {
   <style>${SYN_CSS}</style>
 </head>
 <body>
-${synHeader()}
+${SYN_HEADER}
 <main>
 ${body}
 </main>
@@ -2273,21 +2173,7 @@ async function main() {
     console.warn('Fix: Share > General access > Anyone with the link > Viewer.');
     return;
   }
-  const weighRows = parseCSV(csv);
-  const weighHead = csvHeader(weighRows);
-  if (!isWeighInsHeader(weighHead)) {
-    console.warn('Weigh-ins header unexpected — skipping page generation this build.');
-    console.warn('Got:', (weighRows[0] || []).join(', '));
-    return;
-  }
-
-  const violationRows = violationCsv ? parseCSV(violationCsv) : [];
-  const violationHead = csvHeader(violationRows);
-  if (violationCsv && !isViolationLogHeader(violationHead)) {
-    console.warn('Violation Log tab missing or gviz fell back to Weigh-ins — not publishing violation pages from that CSV.');
-    console.warn('Got:', (violationRows[0] || []).join(', '));
-  }
-  const violations = (isViolationLogHeader(violationHead) ? violationRows.slice(1) : [])
+  const violations = (violationCsv ? parseCSV(violationCsv).slice(1) : [])
     .map((r, i) => {
       const date = normalizeDate(r[0]);
       const num = String(i + 1).padStart(3, '0');
@@ -2336,14 +2222,15 @@ async function main() {
     }
   }
 
-  const records = weighRows.slice(1).map((r) => ({
+  const rows = parseCSV(csv);
+  const records = rows.slice(1).map((r) => ({
     date: normalizeDate(r[0]),
     weight: Number.parseFloat(r[1]),
     note: String(r[2] || '').trim(),
-    video: normalizeVideoUrl(String(r[7] || '').trim()),
+    video: String(r[7] || '').trim(),
   })).filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isFinite(r.weight))
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
-    .filter((r) => r.day >= 1)
+    .filter((r) => r.day >= 0)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const attestMap = new Map();
@@ -2381,7 +2268,7 @@ async function main() {
      with a complete packet and days without. The chain is built over this
      list, so prev/next is continuous and a crawler never sees Day 10 link
      straight to Day 13. */
-  const todayIso = todayEtIso();
+  const todayIso = new Date().toISOString().slice(0, 10);
   const lastDay = Math.max(
     finalized.at(-1)?.record.day || 0,
     ...records.map((r) => r.day || 0),
@@ -2410,20 +2297,7 @@ async function main() {
     sequence.push({ day: d, date, complete: false, kind: have.length ? 'incomplete' : 'none', reason });
   }
 
-  declareGapViolations(violations, sequence);
-  OPEN_COUNT = violations.filter((v) => (v.state || '') === 'open').length;
-  const violationByDate = new Map(violations.map((v) => [v.date, v]));
-  for (const s of sequence) {
-    if (s.complete) continue;
-    const v = violationByDate.get(s.date);
-    if (v && /incomplete/i.test(v.what || '') && s.kind === 'none') {
-      s.kind = 'incomplete';
-      s.reason = v.what;
-    }
-  }
-
   const generated = [];
-  const publishedDaily = [];
   const changedUrls = new Set();
   for (let i = 0; i < finalized.length; i++) {
     const { record, photoPaths } = finalized[i];
@@ -2437,14 +2311,8 @@ async function main() {
     const next = pos >= 0 && pos < sequence.length - 1 ? sequence[pos + 1] : null;
     const pageDir = path.join(ROOT, 'daily', `${record.date}-day-${String(record.day).padStart(3, '0')}`);
     const pageFile = path.join(pageDir, 'index.html');
-    const page = dailyPage({
-      record, photos, previous, next,
-      attestation: attestMap.get(record.date) || '',
-      health: healthMap.get(record.date) || null,
-      violation: violationByDate.get(record.date) || null,
-    });
+    const page = dailyPage({ record, photos, previous, next, attestation: attestMap.get(record.date) || '', health: healthMap.get(record.date) || null });
     if (await writeIfChanged(pageFile, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`);
-    publishedDaily.push({ date: record.date, day: record.day });
 
     const manifest = {
       schema: 'https://michealrayberry.com/schemas/daily-record-manifest-v1.json',
@@ -2494,10 +2362,8 @@ async function main() {
       date: s.date, day: s.day, reason: s.reason, kind: s.kind || 'none',
       previous: i > 0 ? sequence[i - 1] : null,
       next: i < sequence.length - 1 ? sequence[i + 1] : null,
-      violation: violationByDate.get(s.date) || null,
     });
     if (await writeIfChanged(file, page)) changedUrls.add(`${SITE_ORIGIN}/daily/${slug}/`);
-    publishedDaily.push({ date: s.date, day: s.day });
   }
 
   if (await writeIfChanged(path.join(ROOT, 'daily', 'index.html'), dailyIndexPage(generated, new Map(sequence.filter((s) => !s.complete).map((s) => [s.date, s.kind || 'none']))))) {
@@ -2551,30 +2417,15 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/weeks/`);
 
-  const archiveChanged = await writeArchivePages(ROOT, {
-    records,
-    violations,
-    entries: generated,
-  });
-  archiveChanged.forEach((u) => {
-    changedUrls.add(u);
-    extraUrls.push(u);
-  });
-
   if (await writeIfChanged(path.join(ROOT, 'feed.xml'), rssFeed(generated))) {
     changedUrls.add(`${SITE_ORIGIN}/feed.xml`);
   }
 
-  const latestDate = [
-    ...generated.map((g) => g.record.date),
-    ...publishedDaily.map((r) => r.date),
-    ...violations.map((v) => v.resolved || v.submitted || v.date),
-    todayEtIso(),
-  ].filter(Boolean).map(String).sort().at(-1) || START_DATE;
+  const latestDate = generated.at(-1)?.record.date || START_DATE;
   const sitemapFiles = [
     ['sitemap-static.xml', staticSitemap(latestDate)],
     ['sitemap-violations.xml', violationSitemap(violations)],
-    ['sitemap-daily.xml', dailySitemap(publishedDaily)],
+    ['sitemap-daily.xml', dailySitemap(sequence.map((s) => ({ date: s.date, day: s.day })))],
     ['sitemap-pages.xml', extraSitemap(extraUrls, latestDate)],
     ['sitemap-images.xml', imageSitemap(generated)],
     ['sitemap-videos.xml', videoSitemap(generated)],
