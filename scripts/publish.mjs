@@ -1595,7 +1595,7 @@ function positionsPage(entries) {
   const ref = entries.at(-1) || null;
 
   const VIEWS = [
-    ['wait', 'Wait', 'Upright and squared to the camera, feet apart at the established width, hands behind the back, head level, eyes forward.',
+    ['wait', 'Wait', 'Upright and squared to the camera, feet together, hands behind the back, head level, eyes forward.',
       'Every session opens and closes here. At the opening it is held while the day, date, recorded weight, and verification information are established on the record; after the four views are complete the participant returns to it while the session is closed. It files no progress photograph — it gives every recording a defined beginning and end, and a stationary identifiable frame before and after the sequence.'],
     ['front', 'Front', 'Squared to the camera, feet at the established inspection width, hands behind the head, head level, face fully visible.',
       'The primary front reference frame. Hands behind the head keep the torso unobstructed and prevent the arms being used to materially alter the silhouette.'],
@@ -1642,7 +1642,7 @@ function positionsPage(entries) {
 
   const SPEC = [
     ['Inspection posture', 'Upright, weight distributed evenly, feet at the established inspection width, hands behind the head. This keeps the torso visible, moves the arms away from the sides of the body, and reduces the ability to change the apparent silhouette through arm placement. The posture is held naturally and consistently: no deliberate flexing, compressing, twisting, or leaning for the photograph.'],
-    ['Wait posture', 'Separate from the four photographic positions. Feet apart at the established width, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
+    ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to shoes. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
     ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard, consistent black shoes, and a plain black collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
