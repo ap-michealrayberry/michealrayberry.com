@@ -165,11 +165,42 @@
       );
     }
 
-    MRB.ui.byId("btn-preflight-start").disabled = !checkResult.canStart;
+    // Uniform & collar attestation — not machine-checkable. A deliberate tap
+    // confirms it before the Begin button unlocks; a forgotten collar is an
+    // automatic Violation Event, so this is the cheapest insurance in the app.
+    var startBtn = MRB.ui.byId("btn-preflight-start");
+    var couldStart = checkResult.canStart;
+    startBtn.disabled = true;
+    (function () {
+      var ul = MRB.ui.byId("preflight-list");
+      if (!ul) { startBtn.disabled = !couldStart; return; }
+      var li = document.createElement("li");
+      li.setAttribute("role", "button");
+      li.tabIndex = 0;
+      li.style.cursor = "pointer";
+      var left = document.createElement("span");
+      left.textContent = "Uniform — unitard · black shoes · collar closed";
+      var right = document.createElement("span");
+      var confirmed = false;
+      function paint() {
+        right.className = confirmed ? "check-ok" : "check-fail";
+        right.textContent = confirmed ? "Confirmed" : "Tap to confirm";
+        if (couldStart) startBtn.disabled = !confirmed;
+      }
+      function toggle() { confirmed = !confirmed; paint(); }
+      li.addEventListener("click", toggle);
+      li.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+      });
+      li.appendChild(left);
+      li.appendChild(right);
+      ul.appendChild(li);
+      paint();
+    })();
     MRB.ui.setStatus(
       "preflight",
-      checkResult.canStart
-        ? "All blocking checks passed. Frame full body, then begin."
+      couldStart
+        ? "Checks passed. Confirm the uniform, frame full body, then begin."
         : "Blocking checks failed — fix before starting."
     );
 
@@ -232,9 +263,16 @@
     var date = MRB.ui.formatTodayET();
     // Prefer server-issued day; never device clock for day number
     var day = ch.day != null ? ch.day : 1;
+    // issuedAt is a UTC timestamp: taking its first 10 chars stamps TOMORROW'S
+    // date on any session recorded after 8 PM Eastern (UTC has already rolled
+    // over) — the normal window before the 10 PM deadline. Convert to Eastern
+    // before extracting the date.
     if (ch.issuedAt) {
-      var issuedDay = MRB.dates.parseDate(ch.issuedAt.slice(0, 10));
-      if (issuedDay) date = issuedDay.iso;
+      try {
+        var issuedET = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ch.issuedAt));
+        var issuedDay = MRB.dates.parseDate(issuedET);
+        if (issuedDay) date = issuedDay.iso;
+      } catch (e) { /* fall back to formatTodayET() above */ }
     }
 
     var figures = null;

@@ -170,7 +170,7 @@
 
     await speakAndHold(
       session,
-      "Setup. This is not yet the recording. Get fully into frame in Wait position. " +
+      "Setup. This is not yet the recording. Get fully into frame in Wait position: feet together, hands behind the back. " +
         "Full project uniform visible. When recording begins you will move to Inspection: " +
         "feet shoulder-width apart, hands behind the head. " +
         "When you are set, press Ready, or wait for the countdown.",

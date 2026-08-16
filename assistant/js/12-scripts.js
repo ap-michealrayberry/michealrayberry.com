@@ -340,7 +340,7 @@
   function announcementScript() {
     return (
       "This is the official announcement of the Micheal Ray Berry Public Accountability Project. The man on camera is Micheal Ray Berry. He does not speak; the record speaks for him. " +
-      "He weighs three hundred forty pounds and has committed, in a signed agreement, to reach one hundred seventy-five and hold it for twenty-eight consecutive days, documented in public under his real name, every day, until it is done. " +
+      "His declared starting weight is three hundred forty pounds, and he has committed, in a signed agreement, to reach one hundred seventy-five and hold it for twenty-eight consecutive days, documented in public under his real name, every day, until it is done. " +
       "Every day by ten PM Eastern: a four-angle inspection video, four photographs, a weight entry, and a tracker update, published to the official record and posted publicly to this channel. The weight itself is never a violation. Only a failure to document is. " +
       "A missed requirement is entered permanently in the public violation log and answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take and published beside the entry. " +
       "Micheal Ray Berry does not administer this record. An independent Accountability Partner owns the site, the data, and every key. He cannot edit an entry, soften a description, remove a recording, or take the site down. That separation is the mechanism. " +
