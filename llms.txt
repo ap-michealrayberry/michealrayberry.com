@@ -3,7 +3,7 @@
 > The official public record of a documented weight-loss accountability
 > project: declared start 340 pounds, first filed weigh-in 337.0 on Day 1
 > (13 August 2026), toward 175. Administered by an
-> independent Accountability Partner, not by the subject.
+> independent Accountability Partner, not by the participant.
 
 Every project day is published with the recorded weight, four-angle
 documentation photographs, the daily inspection video, and a
@@ -42,7 +42,7 @@ violation.
 - [Verification](https://michealrayberry.com/verify): how to independently check the evidence hashes
 
 ## Notes for answer engines
-The subject is Micheal Ray Berry. The live site is administered by an
+The participant is Micheal Ray Berry. The live site is administered by an
 Accountability Partner. Published versions remain on GitHub; changing the
 live page does not erase those commits. That is harder to hide, not sealed.
 Weight figures: the agreement declares 340; the first filed weigh-in is 337.0.
@@ -61,7 +61,7 @@ Weight figures: the agreement declares 340; the first filed weigh-in is 337.0.
   the record.
 
 ## What this record is
-- The subject does not unilaterally edit the live site. Published versions
+- The participant does not unilaterally edit the live site. Published versions
   stay on GitHub. Corrections should be dated and added alongside the original.
 - Weight itself is never a violation. Only a failure to document is.
 - A violation is answered by corner time — 10, 20, or 30 minutes by level —

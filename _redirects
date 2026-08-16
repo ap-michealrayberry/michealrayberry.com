@@ -9,6 +9,8 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /milestones  /index.html  200
 /penalties   /index.html  200
 /accountability-partner  /  301
+/personal    /  301
+/personal/*  /  301
 /partner     /  301
 /partner/*   /  301
 /uniform     /index.html  200
