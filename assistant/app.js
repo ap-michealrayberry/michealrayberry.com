@@ -1378,16 +1378,14 @@
   }
 
   /**
-   * Soft HD request: "ideal" never hard-fails and never forces a cropped
-   * sensor mode (the old feet-out-of-frame bug came from exact/aspectRatio
-   * constraints, which stay banned). Preflight's framing preview remains the
-   * check that the full body is in frame.
+   * Natural stream only — do NOT request width/height/aspectRatio ideals.
+   * Phones honour them by switching to a CROPPED sensor mode: the picture
+   * zooms in and the feet leave the frame. Resolution comes from the canvas
+   * (1080×1920) instead; the sensor gives its widest natural field of view.
    */
   function videoConstraints() {
     return {
       facingMode: { ideal: facing },
-      width: { ideal: 1080 },
-      height: { ideal: 1920 },
     };
   }
 
