@@ -5,6 +5,10 @@ https://michaelrayberry.com/*      https://michealrayberry.com/:splat  301!
 https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 
 /home        /            301
+# /about and /agreement are static files generated at build time; these
+# rewrites are a FALLBACK only (an existing file always wins over a rewrite).
+/about       /index.html  200
+/agreement   /index.html  200
 /dashboard   /index.html  200
 /milestones  /index.html  200
 /penalties   /index.html  200

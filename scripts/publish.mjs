@@ -2148,10 +2148,17 @@ async function main() {
     fetchText(SITE_STATE_CSV, true),
   ]);
   if (!csv) {
-    // Sheet unreachable (not shared, or Google hiccuping). Publishing new
-    // day pages is skipped; the existing site deploys untouched.
-    console.warn('Record sheet unreadable — skipping page generation this build.');
-    console.warn('Fix: Share > General access > Anyone with the link > Viewer.');
+    /* Sheet unreachable (not shared, or Google hiccuping). The generated
+       directories are NOT in the repo — a "successful" deploy without them
+       ships a site where /daily/, /about, /agreement all 404. Write the
+       sheet-independent pages, then FAIL the build so Netlify keeps the
+       last good deploy instead of publishing a gutted one. */
+    console.warn('Record sheet unreadable — generating sheet-independent pages, then failing the build.');
+    console.warn('Fix: Share > General access > Anyone with the link > Viewer, then retry the deploy.');
+    for (const [slug, html] of await buildSyntheticPages()) {
+      await writeIfChanged(path.join(ROOT, slug, 'index.html'), html);
+    }
+    process.exitCode = 1;
     return;
   }
   const violations = (violationCsv ? parseCSV(violationCsv).slice(1) : [])
