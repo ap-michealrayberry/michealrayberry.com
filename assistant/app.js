@@ -2448,10 +2448,85 @@
   }
 
   /**
-   * Resumable PUT using Range / Content-Range when server supports it.
-   * For R2 presigned URLs, often full PUT only — we still track offset and
-   * retry from last acknowledged byte when possible.
+   * Chunked relay into the AP's Google Drive via Apps Script (vidinit opens a
+   * resumable Drive session; each vidchunk forwards ~4 MB base64 — a multiple
+   * of 256 KiB, as the Drive resumable protocol requires). kind=corrective
+   * lands in the PRIVATE archive folder; everything else in the shared photos
+   * folder, where importPhotos files it onto the record.
    */
+  var DRIVE_CHUNK = 4 * 1024 * 1024;
+
+  function blobChunkB64(blob, offset, size) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(fr.error || new Error("chunk read failed")); };
+      fr.onload = function () {
+        var s = String(fr.result || ""); // data:<mime>;base64,XXXX
+        resolve(s.slice(s.indexOf(",") + 1));
+      };
+      fr.readAsDataURL(blob.slice(offset, Math.min(offset + size, blob.size)));
+    });
+  }
+
+  function driveName(item, blob) {
+    var ext = /webm/i.test(item.mime || blob.type || "") ? "webm" : "mp4";
+    var day3 = ("00" + (item.day || 0)).slice(-3);
+    var stem = { daily: "inspection", corrective: "corrective-session", weekly: "weekly-review", confirmation: "consent-confirmation", demo: "demonstration" }[item.kind] || item.kind;
+    return "micheal-ray-berry-day-" + day3 + "-" + stem + "-" + item.date + "." + ext;
+  }
+
+  async function driveRelayUpload(item, blob, statusWriter) {
+    var cfg = MRB.config.get();
+    if (cfg.demoMode) return { ok: true, demo: true, url: "" };
+    var total = blob.size;
+    var session = item.driveSession || null; // reuse a still-open session on retry
+    var offset = session ? (item.uploadOffset || 0) : 0;
+    if (!session) {
+      var init = await MRB.api.postJson({
+        action: "vidinit",
+        key: cfg.deviceKey,
+        kind: item.kind,
+        name: driveName(item, blob),
+        mime: item.mime || blob.type || "video/webm",
+        size: total,
+      });
+      if (!init || !init.ok || !init.session) throw new Error((init && init.error) || "vidinit failed");
+      session = init.session;
+      item.driveSession = session;
+      item.uploadOffset = 0;
+      offset = 0;
+      await putSession(item);
+    }
+    while (offset < total) {
+      var b64 = await blobChunkB64(blob, offset, DRIVE_CHUNK);
+      var r = await MRB.api.postJson({
+        action: "vidchunk",
+        key: cfg.deviceKey,
+        session: session,
+        mime: item.mime || blob.type || "video/webm",
+        offset: offset,
+        total: total,
+        chunk_b64: b64,
+      });
+      if (!r || !r.ok) {
+        // A dead Drive session must not wedge the queue — clear it so the
+        // next attempt starts fresh from byte 0.
+        if (r && /chunk 4/i.test(String(r.error || ""))) { item.driveSession = null; item.uploadOffset = 0; await putSession(item); }
+        var err = new Error((r && r.error) || "vidchunk failed");
+        err.offset = offset;
+        throw err;
+      }
+      offset = Math.min(offset + DRIVE_CHUNK, total);
+      item.uploadOffset = offset;
+      await putSession(item);
+      if (statusWriter) statusWriter("Uploading " + item.kind + " — " + Math.round((offset / total) * 100) + "% of " + formatBytes(total));
+      if (r.done) return { ok: true, url: r.url || "" };
+    }
+    return { ok: true, url: "" };
+  }
+
+  /* Legacy direct PUT — kept for any old queue item that still carries a
+     presigned URL; new uploads all go through driveRelayUpload. */
   async function resumablePut(uploadUrl, blob, onProgress, priorOffset) {
     var offset = priorOffset || 0;
     var total = blob.size;
@@ -2544,12 +2619,10 @@
     }
     if (!blob) throw new Error("No blob in queue item");
 
-    // Every take ships to the AP's bucket as a BACKUP copy — for corrective
+    // Every take ships to the AP's Google Drive as a BACKUP copy — for corrective
     // sessions the public YouTube posting remains the evidence and the thing
     // that resolves the entry; this copy is disaster recovery only.
-    var sign = await MRB.api.r2sign(item.kind, item.date, item.mime || blob.type || "video/mp4");
-    var uploadUrl = MRB.api.readUploadUrl(sign); // must be uploadUrl
-    await resumablePut(uploadUrl, blob, null, item.uploadOffset || 0);
+    var up = await driveRelayUpload(item, blob, statusWriter);
 
     var attestBody = {
       date: item.date,
@@ -2566,7 +2639,7 @@
     var seal = await MRB.api.attest(attestBody);
     item.seal = seal.seal;
     item.sealed_at = seal.sealed_at;
-    item.publicUrl = sign.publicUrl;
+    item.publicUrl = up.url || "";
 
     if (item.kind === "daily" && item.photos) {
       for (var p = 0; p < item.photos.length; p++) {
