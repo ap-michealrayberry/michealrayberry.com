@@ -1,0 +1,14 @@
+{
+  "name": "mrb-seo-publisher",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/publish.mjs",
+    "indexnow": "node scripts/submit-indexnow.mjs",
+    "build": "node scripts/publish.mjs && node scripts/submit-indexnow.mjs",
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/submit-indexnow.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

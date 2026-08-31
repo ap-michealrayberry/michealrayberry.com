@@ -1893,25 +1893,14 @@ function violationsIndexPage(violations) {
 function livePage() {
   const canonical = `${SITE_ORIGIN}/live/`;
   const title = 'Evening Accountability Stream — Micheal Ray Berry Public Accountability Project';
-  const description = 'The live evening accountability stream: Mondays 6:00–10:00 PM ET on the official channel, full project uniform, home-prepared meal, water only. A week without loss adds a night, to a maximum of five.';
+  const description = 'The live evening accountability stream: Mondays 6:00–10:00 PM ET on the official channel.';
   const body = `
     <p class="crumb"><a href="/">Record</a> · Evening Stream</p>
     <h1>Evening Accountability Stream</h1>
-    <p class="lede"><strong>Mondays, 6:00–10:00 PM Eastern, live and public on the official channel.
-    During the window the stream is live below; outside it, the schedule stands.</strong></p>
-    <div style="position:relative;width:100%;max-width:720px;aspect-ratio:16/9;background:var(--ink);margin:18px 0">
-      <iframe src="https://www.youtube.com/embed/live_stream?channel=${YT_CHANNEL_ID}" title="Evening Accountability Stream — live" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>
-    </div>
-    <p>If the embed shows no player, the stream is not live. Watch on the channel:
+    <p class="lede"><strong>Mondays, 6:00–10:00 PM Eastern, live and public on the official channel.</strong></p>
+    <p>Watch on the channel:
     <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">youtube.com/@michealrayberry/live</a>.</p>
-    <div class="standard">
-      <div><b>The rule (§3.1)</b><p>One fixed camera, kitchen and dining framing only. Full project uniform throughout. Microphone off. Home-prepared evening meal; water only. Nothing is performed to the camera — the window documents presence, the meal, and nothing else.</p></div>
-      <div><b>What runs live</b><p>The weekly review is performed on the Monday stream, including any corner period it requires. The Daily Compliance Packet is filed within the window.</p></div>
-      <div><b>Escalation</b><p>Each weekly review showing no net loss adds one night, from the Sunday–Thursday set, to a maximum of five. Each week with a net loss removes one added night. Reaching a milestone — 320, 300, 275, 250, 225, or 200 — resets the requirement to Monday only. It never falls below one night.</p></div>
-      <div><b>Misses</b><p>A missed or cut stream is a Violation Event under §7; a documented technical failure is handled under §9. Each stream's archive is linked beside that week's entry on the record.</p></div>
-    </div>
-    <p>The weekly review standard is described with <a href="/corner-time/">corrective sessions</a>;
-    the governing terms are in <a href="/agreement">the signed agreement</a>.</p>`;
+    <p>The governing terms are in <a href="/agreement">the signed agreement</a> (§3.1).</p>`;
   return synPage({ title, desc: description, canonical, body });
 }
 

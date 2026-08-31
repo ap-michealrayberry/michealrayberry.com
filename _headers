@@ -1,0 +1,49 @@
+# Header rules (Netlify _headers format).
+#
+# Keep ALL comments at the top of this file. A '#' line inside or directly
+# above a path block made an earlier host skip that block silently — that once
+# reduced this file to 5 of its 10 rules; the habit costs nothing on Netlify.
+#
+# The CSP is a containment boundary rather than an XSS cure: the scripted
+# surfaces need inline+eval for the runtime, so the policy pins where scripts,
+# media, and form posts may come from. Every origin listed is one the site uses.
+#
+# /verify is a private console: noindex and never cached. /assistant
+# is the public capture instrument — indexable, revalidated on every load;
+# filing still requires the device key, which the server checks per action.
+# The archive never changes once written, so it is cached hard.
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin
+  X-Permitted-Cross-Domain-Policies: none
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' blob: https://unpkg.com https://cdn.jsdelivr.net https://storage.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: mediastream: https://pub-944fe11d344847f68307fb252477ba11.r2.dev; connect-src 'self' blob: data: https://docs.google.com https://script.google.com https://script.googleusercontent.com https://api.elevenlabs.io https://cdn.jsdelivr.net https://storage.googleapis.com https://*.r2.cloudflarestorage.com https://pub-944fe11d344847f68307fb252477ba11.r2.dev; worker-src 'self' blob: https://cdn.jsdelivr.net; frame-src 'self' https://drive.google.com https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=3600
+
+/*.json
+  Cache-Control: public, max-age=3600
+
+/assistant/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/verify/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+
+/daily/*
+  Cache-Control: public, max-age=3600
+
+/weeks/*
+  Cache-Control: public, max-age=3600
+
+/photos/*
+  Cache-Control: public, max-age=31536000, immutable
