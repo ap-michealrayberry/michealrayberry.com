@@ -46,6 +46,9 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 
 # Build-only inputs live in the repo but are not part of the served record.
 # (Netlify builds before publishing, so 404-ing them here does not affect the build.)
+/violations/v-000/ /penalties 301
+/violations/v-000 /penalties 301
+
 /scripts/*     /404.html   404
 /package.json  /404.html   404
 /voice-pack.json /404.html 404

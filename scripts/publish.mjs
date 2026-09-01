@@ -60,7 +60,7 @@ function htmlEscape(value = '') {
 /* Rows dated before Day 1 belong to the pre-record system test — label them
    as such rather than rendering a negative day number. */
 function dayLabelOf(v) {
-  return v.day >= 1 ? `Day ${v.day}` : 'System test';
+  return v.day >= 1 ? `Day ${v.day}` : 'Before Day 1';
 }
 
 // JSON-LD must never be able to close its own <script> tag.
@@ -455,7 +455,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -466,7 +466,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 <main>
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
-  <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its GitHub manifest.'}</p>
+  <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its manifest.'}</p>
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
   <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
   <p><a href="/manifests/${date}.json">View the machine-readable manifest and SHA-256 evidence hashes</a></p>
@@ -484,7 +484,6 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -630,7 +629,7 @@ function milestonePage(target, entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -657,7 +656,6 @@ function milestonePage(target, entries) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -721,7 +719,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -748,7 +746,6 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -786,7 +783,7 @@ function weeksIndexPage(entries, lastDay) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -812,7 +809,6 @@ function weeksIndexPage(entries, lastDay) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -986,7 +982,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1013,7 +1009,6 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1164,7 +1159,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1196,7 +1191,6 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
   </body>
@@ -1280,7 +1274,7 @@ function consentPage() {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1301,7 +1295,7 @@ function consentPage() {
 
     <h2>What is confirmed</h2>
     <div class="statement">
-      <div><b>Origin</b><p>Micheal Ray Berry conceived this project, wrote the agreement that governs it, and built the website that publishes it — in answer to a prior contract he failed under the same administrator. The Accountability Partner has held authority over him continuously since October 2025 and administers both the agreement and this record</p></div>
+      <div><b>Origin</b><p>Micheal Ray Berry conceived this project, wrote the agreement that governs it, and built the website that publishes it. He asked, in writing, for structure he does not administer.</p></div>
       <div><b>What he agreed to</b><p>To document himself daily — a weight, four photographs, and a four-angle inspection video — before ten PM Eastern, published under his own name. A failure to document is entered permanently on the public record and answered by corner time, recorded and published beside the entry that caused it. His weight is never a violation; only the failure to document is.</p></div>
       <div><b>What he gave up</b><p>He does not administer the record. He cannot edit an entry, soften a description, remove a recording, or take the site down, and he does not verify his own compliance. The record is permanent: completing a corrective requirement closes the obligation without removing the entry or the recording, and neither does resolution. If he abandons the project, that is recorded too.</p></div>
       <div><b>What he understood</b><p>That this is published under his legal name and is findable by anyone who searches it, including people who did not come looking for the project. That the photographs, video, and weights are permanent and indexed, and no future decision of his removes them. That the exposure is the mechanism rather than a side effect — every previous attempt ended privately, because quitting cost nothing.</p></div>
@@ -1337,7 +1331,6 @@ function consentPage() {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1451,7 +1444,7 @@ function violationPage(v, prev, next) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1489,7 +1482,7 @@ function violationPage(v, prev, next) {
     session page</a>. The full terms are in <a href="/agreement">§8 of the signed agreement</a>.</p>
 
     ${v.day >= 1 ? `<p><a href="/daily/${v.date}-day-${String(v.day).padStart(3, '0')}/">The record for Day ${v.day} →</a></p>`
-      : '<p>This entry predates Day 1 and was recorded during system testing; its files are archived in the repository history.</p>'}
+      : '<p>This entry predates Day 1.</p>'}
 
     <nav aria-label="Violation navigation" style="display:flex;justify-content:space-between;gap:16px;margin:36px 0 12px;font:600 14px 'IBM Plex Mono',ui-monospace,monospace">
       ${prev ? `<a rel="prev" href="/violations/${prev.slug}/">← ${prev.id}</a>` : '<span></span>'}
@@ -1509,107 +1502,7 @@ function violationPage(v, prev, next) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
-  </div></div>
-</body>
-</html>
-`;
-}
-
-/* V-000 — the specimen entry. A permanent demonstration page showing exactly
-   what a violation entry looks like and how its status flow works. It answers
-   no violation: the log proper starts at V-001. */
-function specimenPage() {
-  const canonical = `${SITE_ORIGIN}/violations/v-000/`;
-  const title = 'V-000 — Demonstration Entry — Micheal Ray Berry Public Accountability Project';
-  const description =
-    'A specimen violation entry: what a permanent entry on the Micheal Ray Berry ' +
-    'Public Accountability Project record looks like, and how its status flow works. ' +
-    'This entry answers no violation.';
-  const embed = null; // the specimen entry carries no recording — it answers no violation
-  const graph = [
-    { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
-    { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumbs`, itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
-      { '@type': 'ListItem', position: 2, name: 'Violations', item: `${SITE_ORIGIN}/penalties` },
-      { '@type': 'ListItem', position: 3, name: 'V-000 (demonstration)', item: canonical },
-    ] },
-  ];
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${htmlEscape(title)}</title>
-  <meta name="description" content="${htmlEscape(description)}">
-  <link rel="canonical" href="${canonical}">
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="${htmlEscape(title)}">
-  <meta property="og:description" content="${htmlEscape(description)}">
-  <meta property="og:url" content="${canonical}">
-  <script type="application/ld+json">${jsonLd({ '@context': 'https://schema.org', '@graph': graph })}</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
-  <style>${PAGE_CSS}
-    .vstate{display:inline-block;font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;border:1px solid currentColor;padding:7px 10px}
-    .vstate.open{color:var(--accent)}
-    .vstate.corrected{color:#8A6A1E}
-    .vstate.resolved{color:#3A6B3A}
-    .vtable{border:1px solid var(--ink);margin:22px 0}
-    .vtable div{display:grid;grid-template-columns:210px 1fr;border-bottom:1px solid var(--rule)}
-    .vtable div:last-child{border-bottom:none}
-    .vtable b{padding:14px;border-right:1px solid var(--rule);font:600 12px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
-    .vtable p{padding:14px;margin:0;line-height:1.6}
-    @media(max-width:560px){.vtable div{grid-template-columns:1fr}.vtable b{border-right:none;border-bottom:1px solid var(--rule)}}
-    .flow{display:flex;flex-direction:column;gap:14px;border:1px solid var(--ink);padding:20px;margin:22px 0}
-    .flow-row{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
-    .flow-row p{margin:0;line-height:1.6;flex:1;min-width:240px}
-    .vrec{width:100%;max-width:540px;background:#141412;display:block;margin:16px 0}
-    .vrec-yt{aspect-ratio:9/16;border:0}
-  </style>
-</head>
-<body>
-  <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
-<div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
-  <nav class="sitenav">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
-  </nav>
-</div></div>
-  <header>
-    <div class="eyebrow">Demonstration — not a violation</div>
-    <h1>V-000</h1>
-    <p>The specimen entry: what a permanent violation entry looks like, and how its status flow works.</p>
-  </header>
-  <main>
-    <p class="lede"><strong>No requirement was missed here.</strong> V-000 exists so that anyone reading
-    the record can see the exact format a real entry takes before one exists. The log proper starts at
-    <a href="/penalties">V-001</a>, and every real entry is permanent.</p>
-
-    <div class="vtable">
-      <div><b>Date</b><p>${longDate(START_DATE)} · Day 1 — a real entry carries the date of the missed requirement.</p></div>
-      <div><b>Requirement missed</b><p>None — a real entry names the failed item verbatim: the missed inspection video, photo set, weight entry, or tracker update.</p></div>
-      <div><b>Status</b><p>Specimen — a real entry is always one of the three states walked through below.</p></div>
-      <div><b>Submitted</b><p>— the timestamp at which the corrective session was filed.</p></div>
-      <div><b>Resolved</b><p>— the date the Accountability Partner verified the correction.</p></div>
-      <div><b>AP verification</b><p>— his written result: verified, incomplete, or requiring repetition.</p></div>
-    </div>
-
-    <h2>The three states of a real entry</h2>
-    <div class="flow">
-      <div class="flow-row"><span class="vstate open">Open</span><p>The 10 PM check found a requirement missing and entered it automatically — declared from the record, not by anyone's judgment. The site carries a factual notice on every page while the entry is open, and the corrective session is due within 72 hours.</p></div>
-      <div class="flow-row"><span class="vstate corrected">Corrected</span><p>The corrective session — corner time, 10 / 20 / 30 minutes by level — has been recorded in one unbroken take and submitted. Submission resolves the entry; this state only appears while the filing is in flight.</p></div>
-      <div class="flow-row"><span class="vstate resolved">Resolved</span><p>Submitting the recorded session resolves the entry — the published YouTube posting is the evidence. The Accountability Partner reviews it and may overrule, reopening the entry, if it fails the standard. The entry, and the published recording beside it, remain permanently.</p></div>
-    </div>
-
-    <p>The corrective standard is set out on <a href="/corner-time/">the corrective sessions
-    page</a>; the terms are in <a href="/agreement">§8 of the signed agreement</a>.</p>
-  </main>
-  <div class="sitefoot"><div class="sitefoot-in">
-    <div class="sitefoot-bottom"><span>© 2026 Micheal Ray Berry · <a href="/">michealrayberry.com</a></span></div>
   </div></div>
 </body>
 </html>
@@ -1678,7 +1571,7 @@ function positionsPage(entries) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body footed unitard and no footwear. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1726,7 +1619,7 @@ function positionsPage(entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1735,7 +1628,7 @@ function positionsPage(entries) {
     <p>Wait, then four fixed views, recorded the same way every day.</p>
   </header>
   <main>
-    <div class="viewsw"><a href="/positions/" aria-current="page">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a></div>
+    <div class="viewsw"><a href="/positions/" aria-current="page">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a></div>
     <p class="lede"><strong>The positions are fixed so that changes in posture, clothing, framing, or
     concealment cannot materially alter the visual record from one day to the next.</strong></p>
 
@@ -1812,7 +1705,6 @@ function positionsPage(entries) {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -1860,7 +1752,7 @@ function violationsIndexPage(violations) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1871,7 +1763,6 @@ function violationsIndexPage(violations) {
 <main>
   <p class="intro">${violations.length} ${violations.length === 1 ? 'entry' : 'entries'} on the public log. ${open} open. Each permalink is permanent. The live sheet on <a href="/penalties">/penalties</a> can lead this page by one deploy.</p>
   ${PRIOR_NOTE ? `<div style="border-left:4px solid var(--accent);background:#f1f0ea;padding:12px 16px;margin:0 0 16px;max-width:760px"><strong>Earlier attempt.</strong> ${htmlEscape(PRIOR_NOTE)}</div>` : ''}
-  <p><a href="/violations/v-000/">V-000 specimen</a> (demonstration — not a violation).</p>
   ${violations.length ? `<table><thead><tr><th>ID</th><th>Date</th><th>Day</th><th>Requirement</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No violation entries have been published.</p>'}
   <p><a href="/daily/">Daily record</a> · <a href="/corner-time/">Corrective sessions</a></p>
 </main>
@@ -1892,15 +1783,13 @@ function violationsIndexPage(violations) {
 
 function livePage() {
   const canonical = `${SITE_ORIGIN}/live/`;
-  const title = 'Evening Accountability Stream — Micheal Ray Berry Public Accountability Project';
-  const description = 'The live evening accountability stream: Mondays 6:00–10:00 PM ET on the official channel.';
+  const title = 'Live — Micheal Ray Berry Public Accountability Project';
+  const description = 'Live broadcasts from the official record, when scheduled.';
   const body = `
-    <p class="crumb"><a href="/">Record</a> · Evening Stream</p>
-    <h1>Evening Accountability Stream</h1>
-    <p class="lede"><strong>Mondays, 6:00–10:00 PM Eastern, live and public on the official channel.</strong></p>
-    <p>Watch on the channel:
-    <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">youtube.com/@michealrayberry/live</a>.</p>
-    <p>The governing terms are in <a href="/agreement">the signed agreement</a> (§3.1).</p>`;
+    <p class="crumb"><a href="/">Record</a> · Live</p>
+    <h1>Live</h1>
+    <p class="lede"><strong>When a live broadcast is scheduled, it runs on the official channel.</strong></p>
+    <p>Watch: <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">youtube.com/@michealrayberry/live</a>.</p>`;
   return synPage({ title, desc: description, canonical, body });
 }
 
@@ -1998,7 +1887,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -2024,7 +1913,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <h2>The standard</h2>
     <div class="standard">
       <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
-      <div><b>Uniform</b><p>The correction uniform (§4.2): pink unitard, no footwear. The daily record stays in black; pink on camera marks a corrective session and nothing else.</p><p style="margin-top:10px"><img src="/photos/official/micheal-ray-berry-correction-uniform.jpg" alt="Micheal Ray Berry in the §4.2 correction uniform — pink footed unitard, no footwear, hands behind head" style="width:150px;aspect-ratio:3/4;object-fit:cover;border:1px solid var(--ink);display:block" loading="lazy"></p></div>
+      <div><b>Uniform</b><p>The project uniform (§4.1): plain black unitard — the same standard as every official recording.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous, unedited take, fully AI-voiced. The participant does not speak. A verification code issued by the record seconds before capture is burned into every frame, so the footage cannot be older than it claims.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
@@ -2067,7 +1956,6 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener" title="Every published version of this record, timestamped — the site cannot be quietly rewritten">Site History</a></span>
     </div>
   </div></div>
 </body>
@@ -2078,12 +1966,6 @@ function cornerTimePage(entries, violations, demoUrl = '') {
 function violationSitemap(violations) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${SITE_ORIGIN}/violations/v-000/</loc>
-    <lastmod>${START_DATE}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
 ${violations.map((v) => `  <url>
     <loc>${SITE_ORIGIN}/violations/${v.slug}/</loc>
     <lastmod>${v.resolved || v.submitted || v.date}</lastmod>
@@ -2195,7 +2077,7 @@ const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IB
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corner Time</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -2207,7 +2089,6 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
       <span><a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
-      <span><a href="https://github.com/ap-michealrayberry/michealrayberry.com" target="_blank" rel="noopener">Site History</a></span>
     </div>
   </div></div>`;
 function synExtract(full, startTag, endMarker) {
@@ -2533,9 +2414,6 @@ async function main() {
   }
   if (violations.length) console.log('Violation entries published: ' + violations.length);
 
-  if (await writeIfChanged(path.join(ROOT, 'violations', 'v-000', 'index.html'), specimenPage())) {
-    changedUrls.add(`${SITE_ORIGIN}/violations/v-000/`);
-  }
   if (await writeIfChanged(path.join(ROOT, 'violations', 'index.html'), violationsIndexPage(violations))) {
     changedUrls.add(`${SITE_ORIGIN}/violations/`);
   }

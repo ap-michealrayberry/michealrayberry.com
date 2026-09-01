@@ -48,18 +48,22 @@
     return Math.max(1, Math.floor((cur - start) / (7 * 86400000)) + 1);
   }
 
-  function sundayOfCurrentWeekET() {
+  /* Project weeks run Monday→Sunday from Day 1 (Mon 2026-08-31). The weekly
+     review, recorded Monday, covers the most recently COMPLETED project week. */
+  function completedWeekET() {
     var et = MRB.dates.nowInET();
-    var day = et.getDay(); // 0 Sun
-    var d = new Date(et.getTime());
-    d.setDate(d.getDate() - day);
-    return (
-      MRB.dates.pad4(d.getFullYear()) +
-      "-" +
-      MRB.dates.pad2(d.getMonth() + 1) +
-      "-" +
-      MRB.dates.pad2(d.getDate())
-    );
+    var today = Date.UTC(et.getFullYear(), et.getMonth(), et.getDate());
+    var dayOne = Date.UTC(2026, 7, 31);
+    var daysSince = Math.floor((today - dayOne) / 86400000);
+    var completed = Math.max(1, Math.floor(daysSince / 7));
+    var s = new Date(dayOne + (completed - 1) * 7 * 86400000);
+    return {
+      week: completed,
+      startIso:
+        MRB.dates.pad4(s.getUTCFullYear()) + "-" +
+        MRB.dates.pad2(s.getUTCMonth() + 1) + "-" +
+        MRB.dates.pad2(s.getUTCDate()),
+    };
   }
 
   async function beginSessionFlow(type) {
@@ -180,7 +184,7 @@
       li.tabIndex = 0;
       li.style.cursor = "pointer";
       var left = document.createElement("span");
-      left.textContent = "Uniform — footed unitard · no shoes";
+      left.textContent = "Uniform — black unitard";
       var right = document.createElement("span");
       var confirmed = false;
       function paint() {
@@ -284,7 +288,9 @@
     var figures = null;
     var week = weekNumberFromDate(date);
     if (type === "weekly") {
-      var weekStart = sundayOfCurrentWeekET();
+      var cw = completedWeekET();
+      week = cw.week;
+      var weekStart = cw.startIso;
       var dayOneW = null;
       if (recordCache && recordCache.weighIns && recordCache.weighIns.length) {
         var sorted = recordCache.weighIns.slice().filter(function (w) {
@@ -381,7 +387,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "The official announcement of the Micheal Ray Berry Public Accountability Project: 340 to 200 lb, documented daily in public under his real name, administered by an independent Accountability Partner. Day 1 is August 13, 2026." +
+          "The official announcement of the Micheal Ray Berry Public Accountability Project: 340 to 200 lb, documented daily in public under his real name, administered by an independent Accountability Partner. Day 1 is August 31, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }

@@ -139,7 +139,7 @@
           level +
           ", with an assigned duration of " +
           minutes +
-          " minutes. Remain in Wait position. Full correction uniform clearly visible. " +
+          " minutes. Remain in Wait position. Full project uniform clearly visible. " +
           "This is one continuous take. Verification code is displayed on screen.",
       },
       {
@@ -410,7 +410,7 @@
       "The project is a voluntary accountability arrangement between adults, created at his own written request: a weight commitment from three hundred forty toward two hundred pounds, administered by the Accountability Partner, who owns the site, the data, and every key. Micheal Ray Berry cannot edit, soften, or remove any entry, and the record is public and permanent under his real name. He wears the project uniform. " +
       "He grants the Accountability Partner a license to repost, share, mirror, and archive public content anywhere for the project's accountability and documentation purpose, and — under section ten point two c — to republish public record content on the Partner's own platforms. He knows who the Accountability Partner is and accepts their administration and republication of this record. Private verification photographs and unpublished material are never included. He accepts that public content may be copied and reused by others beyond either party's control. " +
       "He understands that violations are declared automatically from the evidence, that the Accountability Partner has no discretion to excuse or soften them and may only confirm or reject them against the written rules, and that he has forty-eight hours to contest with evidence before a determination stands. " +
-      "He understands that each confirmed violation is answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take in the pink correction uniform, posted publicly to the channel and embedded on the record beside the entry, and completed within seventy-two hours of the notice, and that missing that deadline is itself a new violation at the next level. " +
+      "He understands that each confirmed violation is answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take in the project uniform, posted publicly to the channel and embedded on the record beside the entry, and completed within seventy-two hours of the notice, and that missing that deadline is itself a new violation at the next level. " +
       "Participation ends only by verified completion, by written mutual release, or by the project ending without completion. " +
       "This statement is re-recorded whenever the agreement is amended."
     );

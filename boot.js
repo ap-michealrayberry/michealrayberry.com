@@ -8,7 +8,7 @@
   if (!m) return;
   var n = parseInt(m[1], 10);
   if (!(n >= 1)) return;
-  var start = Date.parse('2026-08-13T12:00:00Z');
+  var start = Date.parse('2026-08-31T12:00:00Z');
   var iso = new Date(start + (n - 1) * 86400000).toISOString().slice(0, 10);
   var pad = String(n).padStart(3, '0');
   location.replace('/daily/' + iso + '-day-' + pad + '/');

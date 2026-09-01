@@ -2,7 +2,7 @@
   "use strict";
 
   var TZ = "America/New_York";
-  var START = "2026-08-13";
+  var START = "2026-08-31";
   var DEADLINE_HOUR = 22;
   var STORE_KEY = "mrb_file_packet_v1";
   var BASE = "https://michealrayberry.com";
