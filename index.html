@@ -168,7 +168,7 @@
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection</a>
           <a href="/uniform" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
-          <a href="/corner-time/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Corrections</a>
+          <a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Corrections</a>
           <a href="/live/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Live</a>
           <a href="/agreement" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
           <a href="/about" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
@@ -192,7 +192,7 @@
       <div>
         <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">A voluntary public accountability project</p>
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 84px); line-height: 0.95; letter-spacing: -0.01em; text-transform: uppercase; margin: 0 0 12px; max-width: 900px;">Micheal Ray Berry is under public accountability</h1>
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64; margin: 0 0 36px;">Created at his own written request · his body, compliance, failures, and assigned corrections are documented here</p>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #6B6A64; margin: 0 0 36px;">Created at his own written request · his weight, compliance, failures, and assigned corrections are documented here</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; border: 1px solid #141412; margin-bottom: 36px; max-width: 720px;">
           <div style="padding: 18px 16px; border-right: 1px solid #D8D6CF; background: #FBF1F0;">
             <span style="display:block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B3261E;">Unresolved violations</span>
@@ -278,7 +278,7 @@
             <h3 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; margin: 0;">A Requirement Is Missed</h3>
             <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5;">
               <li>The 10 PM check runs by itself and enters the date and what was missing.</li>
-              <li>A corrective session follows — recorded, published beside the entry, and verified by him.</li>
+              <li>A corrective session follows — recorded, published beside the entry, and verified by the Accountability Partner.</li>
               <li>The entry stays. Completing the correction closes it; nothing removes it.</li>
             </ul>
             <p style="margin: auto 0 0; font-size: 15px; color: #6B6A64;">Nobody has to decide this. It happens whether or not anyone is watching.</p>
@@ -612,7 +612,7 @@
         <div style="max-width: 680px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
           <p style="margin: 0; padding: 14px 16px; border: 1px solid #141412; border-left: 6px solid #B3261E; font-size: 15px; line-height: 1.6;"><strong>On the numbers.</strong> The agreement declares a start of 340 lb. Day 1 is August 31, 2026; the Day 1 weigh-in states the first recorded figure. The archive at <a href="/daily/" style="color: #141412; font-weight: 600;">/daily/</a> and <a href="/penalties" style="color: #141412; font-weight: 600;">/penalties</a> is the record. The homepage reads the live sheet and can lag.</p>
           <p style="margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; color: #6B6A64;">What follows is Micheal Ray Berry in the first person. It is his account. It is not the holder of the record.</p>
-          <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a voluntary accountability arrangement between adults I asked for in writing: a weight-loss commitment from a declared 340 pounds, kept under inspection, corrective discipline, and a permanent public record. The goal is 200 pounds, held 28 days.</p>
+          <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a voluntary accountability arrangement between adults I asked for in writing: a weight-loss commitment from a declared 340 pounds, kept under inspection, corrective requirements, and a permanent public record. The goal is 200 pounds, held 28 days.</p>
           <p style="margin: 0;">I want structure in real life that I do not get to pick up and put down. Someone else holds the rules, the record, and the consequences. I asked for that because private promises kept failing.</p>
           <p style="margin: 0;">I am required to file the packet every day by 10:00 PM Eastern: inspection video, four photographs, weight, tracker update, in the uniform.</p>
           <p style="margin: 0;">What you see here is still documentation. Weight, packet, uniform, misses. Nothing else. The structure is the point. The photographs are the evidence. The exposure of a public failure record is not an accident of the design — it is part of what I asked for, in writing, within limits I set. I wanted accountability I could not take back, under my own name — that want is as real as the weight loss, and this project serves both.</p>
@@ -819,8 +819,8 @@
               <li>Public documentation under his real name</li>
               <li>Daily inspection in the uniform</li>
               <li>Named inspection positions on camera</li>
-              <li>Corrective discipline — corner time, 10 / 20 / 30 minutes</li>
-              <li>The reputational exposure inherent in real-name documentation of his body, missed requirements, rejected submissions, corrective recordings, failed attempts, and any ending without verified completion</li>
+              <li>Corrective requirements — corner time, 10 / 20 / 30 minutes</li>
+              <li>The reputational exposure inherent in real-name documentation of his weight and appearance, missed requirements, rejected submissions, corrective recordings, failed attempts, and any ending without verified completion</li>
               <li>The Accountability Partner as administering authority</li>
               <li>Republication of public record content on the Partner’s own platforms (§10.2c) — public material only, never verification photographs</li>
             </ul>
@@ -859,7 +859,7 @@
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 32px;">Violation Log</h1>
         <div style="max-width: 640px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
           <p style="margin: 0;">This is the permanent public record of all Violation Events.</p>
-          <p style="margin: 0;">A violation is a documentation failure — a missed, late, incomplete, false, manipulated, concealed, deleted, or refused record. Ordinary weight fluctuation, plateaus, or temporary gains are never violations; a weekly weight gain can draw a corrective consequence only after review by the Accountability Partner (Amendment No. 2).</p>
+          <p style="margin: 0;">A violation is a documentation failure — a missed, late, incomplete, false, manipulated, concealed, deleted, or refused record. Ordinary weight fluctuation, plateaus, or temporary gains are never violations. A week without loss ends the Weekly Review with a fixed 15-minute period on camera (§3) — separate from this log, and it never escalates.</p>
           <p style="margin: 0;">All entries remain visible for the duration of the project. Accountability without consequence is just commentary.</p>
         </div>
 
@@ -868,7 +868,7 @@
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Every violation triggers</span>
             <span style="font-size: 18px; font-weight: 600;">The Corrective Session</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Every confirmed Violation Event triggers corner time (§8.1) — 10 minutes at Level One, 20 at Level Two, 30 at Level Three and after — recorded in one unbroken take — in the project uniform — and published beside the entry, where it stays. The public entry records the date, the requirement missed, the status — open, corrected, or resolved — when the correction was submitted, when it was resolved, and the verification result. A completed requirement never erases the entry.</p>
-            <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #6B6A64;">The first filed session will appear here, beside its entry. <a href="/corner-time/" data-nav="corrective" style="color: #B3261E;">The full standard →</a></p>
+            <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #6B6A64;">The first filed session will appear here, beside its entry. <a href="/corrections/" data-nav="corrective" style="color: #B3261E;">The full standard →</a></p>
           </div>
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #D8D6CF;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">The public record</span>

@@ -53,3 +53,6 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /package.json  /404.html   404
 /voice-pack.json /404.html 404
 /eslint.config.mjs /404.html 404
+
+/corner-time  /corrections/  301
+/corner-time/*  /corrections/:splat  301

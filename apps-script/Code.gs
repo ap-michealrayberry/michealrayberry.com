@@ -164,6 +164,7 @@ function diagnose() {
   out.push('SHEET_ID property: ' + (p.getProperty('SHEET_ID') || '(unset — falling back to CONFIG.SHEET_ID)'));
   out.push('AP_KEY set: ' + (p.getProperty('AP_KEY') ? 'yes' : 'NO — run setApKey()'));
   out.push('Device key set: ' + (p.getProperty('PACKET_KEY') ? 'yes' : 'NO — run setDeviceKey()'));
+  out.push('Assistant unlock code set: ' + (p.getProperty('UNLOCK_CODE') ? 'yes' : 'NO — run setUnlockCode()'));
   try {
     var s = ss();
     out.push('Spreadsheet: ' + s.getName());
@@ -193,6 +194,23 @@ function apOk(k) {
 function setDeviceKey(k) {
   PropertiesService.getScriptProperties().setProperty('PACKET_KEY', String(k || '').trim());
   Logger.log('Device key stored.');
+}
+/* Assistant unlock code — the AP's half of the two-key lock on /assistant/.
+   Distinct from AP_KEY (which authorises record actions and is never given to
+   the participant). Run setUnlockCode('…') and hand the code to Micheal;
+   change it any time to force every device to re-unlock. */
+function setUnlockCode(c) {
+  PropertiesService.getScriptProperties().setProperty('UNLOCK_CODE', String(c || '').trim());
+  Logger.log('Unlock code stored.');
+}
+function unlockOk(c) {
+  var stored = PropertiesService.getScriptProperties().getProperty('UNLOCK_CODE');
+  return !!stored && String(c || '').trim() === stored;
+}
+function handleUnlock(obj) {
+  if (!keyOk(obj.key) || !unlockOk(obj.code)) return jsonOut({ ok: false, error: 'keys not accepted' });
+  var stamped = new Date().toISOString();
+  return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
 }
 function keyOk(k) {
   var stored = PropertiesService.getScriptProperties().getProperty('PACKET_KEY');
@@ -269,6 +287,7 @@ function doPost(e) {
       if (obj && obj.action === 'ytfiled') return keyOk(obj.key) ? handleYtFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'challenge') return keyOk(obj.key) ? issueChallenge(String(obj.kind || 'daily')) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'ping') return keyOk(obj.key) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'vidinit') return keyOk(obj.key) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidchunk') return keyOk(obj.key) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action && String(obj.action).indexOf('ap') === 0) return apOk(obj.key) ? handleApAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
@@ -288,8 +307,8 @@ function setup() {
   ScriptApp.newTrigger('githubMirrorPhotos').timeBased().everyMinutes(15).create();
   ScriptApp.newTrigger('nightlyComplianceCheck').timeBased().everyDays(1).atHour(22).inTimezone('America/New_York').create();
   ScriptApp.newTrigger('abandonmentCheck').timeBased().everyDays(1).atHour(23).inTimezone('America/New_York').create();
-  // Monday: the weekly review is recorded on the Monday evening stream, so
-  // both weekly mails land Monday morning with the week's figures.
+  // Monday: project weeks run Monday→Sunday from Day 1 (Mon Aug 31); the
+  // weekly review is recorded Monday, so both mails land Monday morning.
   ScriptApp.newTrigger('apWeeklyReview').timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(9).inTimezone('America/New_York').create();
   // Micheal's mail: the day's requirements at 07:00, a two-hour warning at
   // 20:00 (silent if the packet is already complete), a Monday review, and an
@@ -375,6 +394,7 @@ function importPhotos() {
       var angle = 'front';
       if (name.indexOf('corner') !== -1 || name.indexOf('corrective') !== -1 || name.indexOf('resolution') !== -1 || name.indexOf('acknowledgment') !== -1) return; // corrective/resolution photos are their own record material — not daily angle photos, never mirrored
       if (name.indexOf('meal') !== -1) return;   // meal photos stay in the folder archive; not an angle column
+      if (name.indexOf('-wait-') !== -1) return; // Wait stills are the /positions reference (Site State), not a record angle
       if (name.indexOf('left') !== -1) angle = 'left';
       else if (name.indexOf('rear') !== -1 || name.indexOf('back') !== -1) angle = 'rear';
       else if (name.indexOf('right') !== -1) angle = 'right';
@@ -609,8 +629,17 @@ function handlePacket(obj) {
   if (obj.image_b64) {
     var name = String(obj.name || ('mrb-daily-photo-' + today + '-front.jpg'));
     var isPrivate = /corrective|corner|resolution|acknowledgment/i.test(name);
-    var blob = Utilities.newBlob(Utilities.base64Decode(String(obj.image_b64)), 'image/jpeg', name);
-    (isPrivate ? correctiveFolder() : photosFolder()).createFile(blob);
+    var isWait = /-wait-/i.test(name);
+    var mime = /\.png$/i.test(name) ? 'image/png' : 'image/jpeg';
+    var blob = Utilities.newBlob(Utilities.base64Decode(String(obj.image_b64)), mime, name);
+    if (isWait) {
+      // Wait-position still: the /positions reference frame, never a record photograph.
+      var wf = publicSubfolder('Wait Stills').createFile(blob);
+      stateSet('wait_still_url', 'https://drive.google.com/thumbnail?id=' + wf.getId() + '&sz=w1200');
+      stateSet('wait_still_date', today);
+    } else {
+      (isPrivate ? correctiveFolder() : photosFolder()).createFile(blob);
+    }
   }
   var videoUrl = String(obj.video_url || '').trim();
   if (videoUrl) {
@@ -1321,8 +1350,7 @@ function netlifyDeploy() {
         out.push(hooks[i].name + ': FAILED — ' + e);
       }
     }
-    if (hooks.length === 1) out.push('Only one host is configured. If the domain still points at Netlify, ' +
-      'add its hook with setSecondaryBuildHook(url) so both stay in step.');
+    if (hooks.length === 1) out.push('Netlify-only stack — one hook is correct.');
     Logger.log(out.join('\n'));
     return;
   }
@@ -1534,6 +1562,9 @@ function autoWeighIn(ds, lb, label) {
 }
 
 /* ═════ GITHUB PHOTO MIRROR ═════ */
+
+var GH_REPO = 'ap-michealrayberry/michealrayberry.com';
+var GH_BRANCH = 'main';
 
 function setGithubToken(t) {
   PropertiesService.getScriptProperties().setProperty('GH_TOKEN', String(t || '').trim());
@@ -2134,7 +2165,7 @@ function milestoneWatch() {
   if (changed) stateSet('milestones_hit', JSON.stringify(hit));
 }
 
-/* Sunday. The same seven days the AP is reviewing, from the other side. */
+/* Monday. The same seven days the AP is reviewing, from the other side. */
 function mrbWeeklyBrief() {
   if (stateGet('abandoned') === 'confirmed') return;
   var today = new Date();

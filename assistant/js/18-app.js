@@ -362,7 +362,7 @@
           "Corner time recorded in one continuous, unedited take against violation " + ref +
           (ctx.violation ? " — missed requirement: " + ctx.violation + "." : ".") +
           " Published beside the entry per §8 of the signed agreement; completing it closes the obligation but removes nothing." +
-          "\nViolation log: " + base + "/penalties\nThe standard: " + base + "/corner-time/" + tail,
+          "\nViolation log: " + base + "/penalties\nThe standard: " + base + "/corrections/" + tail,
       };
     }
     if (type === "weekly") {
@@ -397,7 +397,7 @@
         desc:
           "A demonstration of the corrective-session position and standard. This is an explainer, " +
           "not a corrective session: it answers no violation and is filed against no entry." +
-          "\nThe standard: " + base + "/corner-time/" + tail,
+          "\nThe standard: " + base + "/corrections/" + tail,
       };
     }
     return {
@@ -606,6 +606,8 @@
       refreshHome();
     });
 
+    MRB.ui.byId("lock-form").addEventListener("submit", isolate("unlock", tryUnlock));
+    MRB.ui.byId("btn-lock").addEventListener("click", lockNow);
     MRB.ui.byId("btn-clear-settings").addEventListener("click", function () {
       MRB.config.save({
         deviceKey: "",
@@ -625,6 +627,51 @@
         MRB.ui.renderQueue(s);
       });
     });
+  }
+
+  /* ── Two-key lock ─────────────────────────────────────────────────────
+     The instrument opens only after the record server has accepted BOTH the
+     participant's device key and the AP's unlock code (action "unlock").
+     The server returns a sealed token good for 14 days; "LOCK" in the header
+     or a failed server check clears it. Demo mode (no exec URL) is exempt. */
+  var UNLOCK_DAYS = 14;
+  function isUnlocked() {
+    var c = MRB.config.get();
+    if (c.demoMode && !c.execUrl) return true;
+    var tok = localStorage.getItem("mrb_unlock_token") || "";
+    var until = Number(localStorage.getItem("mrb_unlock_until") || 0);
+    return !!tok && until > Date.now();
+  }
+  function lockNow() {
+    localStorage.removeItem("mrb_unlock_token");
+    localStorage.removeItem("mrb_unlock_until");
+    MRB.ui.showView("lock");
+  }
+  async function tryUnlock(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    var dk = (MRB.ui.byId("lock-device-key").value || "").trim();
+    var ac = (MRB.ui.byId("lock-ap-code").value || "").trim();
+    var err = MRB.ui.byId("lock-error");
+    var btn = MRB.ui.byId("btn-unlock");
+    err.hidden = true;
+    if (!dk || !ac) { err.textContent = "Both keys are required."; err.hidden = false; return; }
+    btn.disabled = true;
+    try {
+      var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
+      if (!r || !r.ok || !r.token) throw new Error((r && r.error) || "Refused");
+      MRB.config.save({ deviceKey: dk });
+      localStorage.setItem("mrb_unlock_token", String(r.token));
+      localStorage.setItem("mrb_unlock_until", String(Date.now() + UNLOCK_DAYS * 86400000));
+      MRB.ui.byId("lock-device-key").value = "";
+      MRB.ui.byId("lock-ap-code").value = "";
+      MRB.ui.showView("home");
+      await refreshHome();
+    } catch (e) {
+      err.textContent = "Refused: " + (e && e.message ? e.message : "keys not accepted");
+      err.hidden = false;
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   async function init() {
@@ -651,8 +698,12 @@
       });
     }
     deadlineTimer = MRB.ui.startDeadlineTicker();
-    MRB.ui.showView("home");
-    await refreshHome();
+    if (isUnlocked()) {
+      MRB.ui.showView("home");
+      await refreshHome();
+    } else {
+      MRB.ui.showView("lock");
+    }
 
 
     // SW for PWA

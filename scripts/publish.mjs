@@ -36,7 +36,7 @@ const STATIC_PAGES = [
   ['about', 'weekly'],
   ['agreement', 'weekly'],
   ['penalties', 'daily'],
-  ['corner-time', 'weekly'],
+  ['corrections', 'weekly'],
   ['positions', 'monthly'],
   ['consent', 'monthly'],
   ['uniform', 'weekly'],
@@ -455,7 +455,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -629,7 +629,7 @@ function milestonePage(target, entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -719,7 +719,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -783,7 +783,7 @@ function weeksIndexPage(entries, lastDay) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -982,7 +982,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1159,7 +1159,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1274,7 +1274,7 @@ function consentPage() {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1444,7 +1444,7 @@ function violationPage(v, prev, next) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1478,7 +1478,7 @@ function violationPage(v, prev, next) {
       : v.state === 'corrected'
         ? 'A corrective session has been submitted, which resolves the entry on the record. The Accountability Partner reviews the published posting and may overrule — reopening the entry — if it fails the standard.'
         : 'No corrective session has been submitted against this entry yet. It remains open, and the site states so on every page until it is answered.'}</p>
-    <p>The standard the correction has to meet is set out on <a href="/corner-time/">the corrective
+    <p>The standard the correction has to meet is set out on <a href="/corrections/">the corrective
     session page</a>. The full terms are in <a href="/agreement">§8 of the signed agreement</a>.</p>
 
     ${v.day >= 1 ? `<p><a href="/daily/${v.date}-day-${String(v.day).padStart(3, '0')}/">The record for Day ${v.day} →</a></p>`
@@ -1509,7 +1509,7 @@ function violationPage(v, prev, next) {
 `;
 }
 
-function positionsPage(entries) {
+function positionsPage(entries, siteState = {}) {
   const canonical = `${SITE_ORIGIN}/positions/`;
   const title = 'Documentation Standard — Micheal Ray Berry Public Accountability Project';
   const description =
@@ -1521,7 +1521,7 @@ function positionsPage(entries) {
   const ref = entries.at(-1) || null;
 
   const VIEWS = [
-    ['wait', 'Wait', 'Upright and squared to the camera, feet together, hands behind the back, head level, eyes forward.',
+    ['wait', 'Wait', 'Upright and squared to the camera, feet together, hands behind the back, head level, eyes forward. Video only — no photograph is filed from it.',
       'Every session opens and closes here. At the opening it is held while the day, date, recorded weight, and verification information are established on the record; after the four views are complete the participant returns to it while the session is closed. It files no progress photograph — it gives every recording a defined beginning and end, and a stationary identifiable frame before and after the sequence.'],
     ['front', 'Front', 'Squared to the camera, feet at the established inspection width, hands behind the head, head level, face fully visible.',
       'The primary front reference frame. Hands behind the head keep the torso unobstructed and prevent the arms being used to materially alter the silhouette.'],
@@ -1619,7 +1619,7 @@ function positionsPage(entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1628,7 +1628,7 @@ function positionsPage(entries) {
     <p>Wait, then four fixed views, recorded the same way every day.</p>
   </header>
   <main>
-    <div class="viewsw"><a href="/positions/" aria-current="page">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a></div>
+    <div class="viewsw"><a href="/positions/" aria-current="page">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a></div>
     <p class="lede"><strong>The positions are fixed so that changes in posture, clothing, framing, or
     concealment cannot materially alter the visual record from one day to the next.</strong></p>
 
@@ -1648,9 +1648,12 @@ function positionsPage(entries) {
     <div class="views">
       ${VIEWS.map(([angle, label, req, note]) => {
         const photo = ref && ref.photos && ref.photos[angle];
+        const waitStill = angle === 'wait' && siteState.wait_still_url ? String(siteState.wait_still_url) : '';
         const img = photo
           ? `<img src="${photo.variants?.[0]?.url || photo.sourceUrl}" alt="Micheal Ray Berry ${label.toLowerCase()} position, inspection standard — Day ${ref.record.day}" loading="lazy">`
-          : `<div class="ph">${angle === 'wait' ? 'Wait is recorded on video only<br>no photograph is filed from it' : label + ' reference<br>frame pending'}</div>`;
+          : waitStill
+            ? `<img src="${htmlEscape(waitStill)}" alt="Micheal Ray Berry, Wait position — still frame from the daily recording" loading="lazy">`
+            : `<div class="ph">${angle === 'wait' ? 'Wait is recorded on video only<br>no photograph is filed from it' : label + ' reference<br>frame pending'}</div>`;
         return `<figure class="view">${img}<div class="body"><b>${label}</b><span class="req">${req}</span><p>${note}</p></div></figure>`;
       }).join('')}
     </div>
@@ -1681,7 +1684,7 @@ function positionsPage(entries) {
 
     <h2>Inspection is not correction</h2>
     <p>These positions produce the daily documentation record. They are separate from the posture
-    required during a <a href="/corner-time/">corrective session</a>, which is governed by its own
+    required during a <a href="/corrections/">corrective session</a>, which is governed by its own
     standard and applies only after a documented violation. Inspection positions document the day;
     corrective positions address a documented failure.</p>
 
@@ -1752,7 +1755,7 @@ function violationsIndexPage(violations) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1764,7 +1767,7 @@ function violationsIndexPage(violations) {
   <p class="intro">${violations.length} ${violations.length === 1 ? 'entry' : 'entries'} on the public log. ${open} open. Each permalink is permanent. The live sheet on <a href="/penalties">/penalties</a> can lead this page by one deploy.</p>
   ${PRIOR_NOTE ? `<div style="border-left:4px solid var(--accent);background:#f1f0ea;padding:12px 16px;margin:0 0 16px;max-width:760px"><strong>Earlier attempt.</strong> ${htmlEscape(PRIOR_NOTE)}</div>` : ''}
   ${violations.length ? `<table><thead><tr><th>ID</th><th>Date</th><th>Day</th><th>Requirement</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No violation entries have been published.</p>'}
-  <p><a href="/daily/">Daily record</a> · <a href="/corner-time/">Corrective sessions</a></p>
+  <p><a href="/daily/">Daily record</a> · <a href="/corrections/">Corrective sessions</a></p>
 </main>
 <div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
@@ -1794,7 +1797,7 @@ function livePage() {
 }
 
 function cornerTimePage(entries, violations, demoUrl = '') {
-  const canonical = `${SITE_ORIGIN}/corner-time/`;
+  const canonical = `${SITE_ORIGIN}/corrections/`;
   const title = 'Corrective Sessions — Micheal Ray Berry Public Accountability Project';
   const description =
     'The corrective session is the requirement that answers a documented failure in the ' +
@@ -1887,7 +1890,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1897,8 +1900,9 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   </header>
   <main>
     <p class="lede"><strong>A corrective session answers one thing: a failure to document the day
-    as required, by ten PM Eastern.</strong> It is not a punishment for the weight. A gain, a plateau,
-    or a bad month breaches nothing in this agreement and carries no consequence at all.</p>
+    as required, by ten PM Eastern.</strong> It is not a consequence for the weight. A gain, a plateau,
+    or a bad month is never a Violation Event. (A week without loss ends the Weekly Review with a fixed
+    15-minute period on camera under §3 — a separate, non-escalating requirement that never enters this log.)</p>
     <p>Every confirmed Violation Event is answered this way, and the requirement is set by the
     Accountability Partner against the project's standards — not against anything outside them.</p>
 
@@ -2077,7 +2081,7 @@ const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IB
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corner-time/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -2419,15 +2423,15 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/violations/`);
 
-  if (await writeIfChanged(path.join(ROOT, 'positions', 'index.html'), positionsPage(generated))) {
+  if (await writeIfChanged(path.join(ROOT, 'positions', 'index.html'), positionsPage(generated, siteState))) {
     changedUrls.add(`${SITE_ORIGIN}/positions/`);
   }
 
   const demoUrl = siteState.demo_video_url || siteState.ytfiled || siteState.demo_url || '';
-  if (await writeIfChanged(path.join(ROOT, 'corner-time', 'index.html'), cornerTimePage(generated, violations, demoUrl))) {
-    changedUrls.add(`${SITE_ORIGIN}/corner-time/`);
+  if (await writeIfChanged(path.join(ROOT, 'corrections', 'index.html'), cornerTimePage(generated, violations, demoUrl))) {
+    changedUrls.add(`${SITE_ORIGIN}/corrections/`);
   }
-  extraUrls.push(`${SITE_ORIGIN}/corner-time/`);
+  extraUrls.push(`${SITE_ORIGIN}/corrections/`);
 
   if (await writeIfChanged(path.join(ROOT, 'live', 'index.html'), livePage())) {
     changedUrls.add(`${SITE_ORIGIN}/live/`);

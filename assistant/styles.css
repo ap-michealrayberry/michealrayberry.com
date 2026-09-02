@@ -410,3 +410,10 @@ input {
   min-height: 44px;
   line-height: 44px;
 }
+
+/* Lock */
+.lock-main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; }
+.lock-panel { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
+.lock-title { margin: 0; font-family: var(--font-cond, 'IBM Plex Sans Condensed', sans-serif); font-size: 24px; letter-spacing: 0.02em; text-transform: uppercase; }
+.lock-error { color: #B3261E; margin: 0; font-size: 12px; }
+.lock-btn { background: none; border: 0; padding: 0; cursor: pointer; color: inherit; font: inherit; }

@@ -29,6 +29,33 @@
       </div>
     </div>
 
+    <!-- Lock — both keys required to open the instrument -->
+    <div id="view-lock" class="view view-lock" hidden>
+      <header class="site-header">
+        <div class="site-header-left">
+          <div class="name">MICHEAL RAY BERRY</div>
+          <div class="tagline">PUBLIC ACCOUNTABILITY PROJECT</div>
+        </div>
+        <div class="site-header-right mono">LOCKED</div>
+      </header>
+      <main class="lock-main">
+        <form class="panel lock-panel" id="lock-form" autocomplete="off">
+          <h1 class="lock-title">Recording Assistant</h1>
+          <p class="settings-note">The capture instrument opens only with both keys: the device key held by the participant and the unlock code issued by the Accountability Partner. Both are checked by the record server.</p>
+          <label class="field">
+            <span>Device key (participant)</span>
+            <input type="password" id="lock-device-key" class="mono" inputmode="text" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Unlock code (Accountability Partner)</span>
+            <input type="password" id="lock-ap-code" class="mono" inputmode="text" autocomplete="off" />
+          </label>
+          <p id="lock-error" class="lock-error mono" hidden></p>
+          <button type="submit" id="btn-unlock" class="btn btn-primary">Unlock</button>
+        </form>
+      </main>
+    </div>
+
     <!-- Home / chooser -->
     <div id="view-home" class="view">
       <header class="site-header">
@@ -36,7 +63,7 @@
           <div class="name">MICHEAL RAY BERRY</div>
           <div class="tagline">PUBLIC ACCOUNTABILITY PROJECT</div>
         </div>
-        <div class="site-header-right mono">RECORD</div>
+        <button type="button" id="btn-lock" class="site-header-right mono lock-btn" title="Lock the instrument">RECORD · LOCK</button>
       </header>
 
       <main class="home-main">
