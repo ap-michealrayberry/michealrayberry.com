@@ -1,5 +1,5 @@
 /* MRB Recording Assistant — minimal offline shell for PWA install */
-var CACHE = "mrb-record-v1";
+var CACHE = "mrb-record-v2";
 var ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest"];
 
 self.addEventListener("install", function (event) {
@@ -31,16 +31,17 @@ self.addEventListener("activate", function (event) {
 self.addEventListener("fetch", function (event) {
   var req = event.request;
   if (req.method !== "GET") return;
+  // Network-first: a new deploy reaches the phone on the next load; the
+  // cache is only the offline fallback. (Cache-first had pinned stale app.js.)
   event.respondWith(
-    caches.match(req).then(function (cached) {
-      return (
-        cached ||
-        fetch(req).then(function (res) {
-          return res;
-        }).catch(function () {
-          return caches.match("index.html");
-        })
-      );
+    fetch(req).then(function (res) {
+      if (res && res.ok && new URL(req.url).origin === self.location.origin) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
+      }
+      return res;
+    }).catch(function () {
+      return caches.match(req).then(function (cached) { return cached || caches.match("index.html"); });
     })
   );
 });

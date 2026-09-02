@@ -1001,7 +1001,7 @@
             <p style="margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-wrap;">{{ up.body }}</p>
             <sc-if value="{{ up.hasLink }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: 20px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
-                <a href="{{ up.link }}" target="_blank">{{ up.linkLabel }}</a>
+                <a href="{{ up.link }}" target="_blank" rel="noopener noreferrer">{{ up.linkLabel }}</a>
               </div>
             </sc-if>
           </div>
@@ -1838,8 +1838,8 @@ class Component extends DCLogic {
         : (u.title.toLowerCase().indexOf('entry') === 0 ? u.title : 'Entry ' + String(num).padStart(3, '0') + ' — ' + u.title),
       body: u.body,
       author: isPersonal ? 'by Micheal Ray Berry' : 'by the AP',
-      hasLink: !!u.link,
-      link: u.link,
+      hasLink: /^https?:\/\//i.test(String(u.link || '')),
+      link: /^https?:\/\//i.test(String(u.link || '')) ? u.link : '',
       linkLabel: 'Link',
       borderColor: isPersonal ? '#D8D6CF' : '#141412',
       bg: isPersonal ? '#F1F0EA' : '#FAFAF7',

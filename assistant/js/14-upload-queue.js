@@ -295,6 +295,7 @@
         date: item.date,
         weight: item.weight,
         video_url: filedUrl,
+        duration_sec: item.durationSec,
         finalize: true,
       });
     } else if (item.kind === "weekly") {

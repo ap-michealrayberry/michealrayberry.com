@@ -52,7 +52,7 @@ var WEIGHT_AUTO_START = '2026-07-30'; // date the scale began writing weights
 /* Tabs, in creation order. The headers are the contract between this
    script and the website — never reorder columns, only append. */
 var TABS = {
-  'Weigh-ins':      ['date', 'weight_lb', 'note', 'photo_front', 'photo_left', 'photo_rear', 'photo_right', 'video'],
+  'Weigh-ins':      ['date', 'weight_lb', 'note', 'photo_front', 'photo_left', 'photo_rear', 'photo_right', 'video', 'video_sec'],
   /* The public record, exactly as the site renders it. Status is normalised
      on the site to open / corrected / resolved, so column C may hold the AP's
      own phrasing. 'corrections' is an append-only, semicolon-separated
@@ -208,7 +208,14 @@ function unlockOk(c) {
   return !!stored && String(c || '').trim() === stored;
 }
 function handleUnlock(obj) {
-  if (!keyOk(obj.key) || !unlockOk(obj.code)) return jsonOut({ ok: false, error: 'keys not accepted' });
+  var cache = CacheService.getScriptCache();
+  var misses = Number(cache.get('unlock_misses') || 0);
+  if (misses >= 5) return jsonOut({ ok: false, error: 'locked out — try again in 15 minutes' });
+  if (!keyOk(obj.key) || !unlockOk(obj.code)) {
+    cache.put('unlock_misses', String(misses + 1), 900);
+    return jsonOut({ ok: false, error: 'keys not accepted' });
+  }
+  cache.remove('unlock_misses');
   var stamped = new Date().toISOString();
   return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
 }
@@ -235,21 +242,19 @@ function routeGet(e) {
      server-side the same second, no copy-paste race. Remove nothing after
      connecting; without ?code this branch never fires. */
   if (e && e.parameter && e.parameter.code && e.parameter.state === 'mrb') {
+    // One-shot: once the scale is bound, an unauthenticated visit cannot
+    // rebind the weight feed to another Withings account. To reconnect, the
+    // AP clears WITHINGS_REFRESH in Script Properties first.
+    if (PropertiesService.getScriptProperties().getProperty('WITHINGS_REFRESH')) {
+      return ContentService.createTextOutput('Withings is already connected. Reconnect requires the AP to clear WITHINGS_REFRESH first.');
+    }
     withingsExchange(e.parameter.code);
     var ok = !!PropertiesService.getScriptProperties().getProperty('WITHINGS_REFRESH');
     return ContentService.createTextOutput(ok
       ? 'Withings connected. First sync has run — close this tab, then run setup() in the editor for the hourly trigger.'
       : 'Exchange failed — check the execution log in the Apps Script editor.');
   }
-  if (e && e.parameter && e.parameter.action === 'challenge') {
-    // Legacy GET path (older assistant builds). POST JSON is preferred — it
-    // keeps the device key out of URLs and request logs.
-    if (!keyOk(e.parameter.key)) return jsonOut({ ok: false, error: 'unauthorized' });
-    return issueChallenge(String(e.parameter.kind || 'daily'));
-  }
-  if (e && e.parameter && e.parameter.action === 'mystate') {
-    return keyOk(e.parameter.key) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized' });
-  }
+  // Device keys travel only in POST bodies — GET never accepts one (URLs are logged).
   if (e && e.parameter && e.parameter.action === 'apstate') {
     return apOk(e.parameter.key) ? handleApState() : jsonOut({ ok: false, error: 'unauthorized' });
   }
@@ -288,6 +293,7 @@ function doPost(e) {
       if (obj && obj.action === 'challenge') return keyOk(obj.key) ? issueChallenge(String(obj.kind || 'daily')) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'ping') return keyOk(obj.key) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
+      if (obj && obj.action === 'mystate') return keyOk(obj.key) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidinit') return keyOk(obj.key) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidchunk') return keyOk(obj.key) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action && String(obj.action).indexOf('ap') === 0) return apOk(obj.key) ? handleApAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
@@ -300,7 +306,19 @@ function doPost(e) {
 
 /* ═════════════════ TRIGGERS ═════════════════ */
 
+/* Adds the video_sec header to an existing Weigh-ins tab (append-only). */
+function ensureWeighinsColumns() {
+  var sh = weighinsSheet();
+  var hdr = sh.getRange(1, 1, 1, Math.max(9, sh.getLastColumn())).getValues()[0];
+  if (String(hdr[8] || '').trim() !== 'video_sec') {
+    sh.getRange(1, 9).setValue('video_sec').setFontWeight('bold').setFontFamily('IBM Plex Mono').setFontSize(10)
+      .setBackground('#141412').setFontColor('#FAFAF7');
+    Logger.log('Weigh-ins: added column I video_sec.');
+  }
+}
+
 function setup() {
+  ensureWeighinsColumns();
   ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('importPhotos').timeBased().everyMinutes(10).create();
   ScriptApp.newTrigger('mirrorToMicheal').timeBased().everyHours(1).create();
@@ -578,6 +596,12 @@ function handleYtFiled(obj) {
   return jsonOut({ ok: false, error: 'unknown kind: ' + kind });
 }
 
+/* Drive filenames from devices: printable, no slashes, bounded. */
+function safeFileName(n, fallback) {
+  var s = String(n || '').replace(/[\x00-\x1f\x7f\/\\]/g, '').trim().slice(0, 160);
+  return s || fallback;
+}
+
 function handleVidInit(obj) {
   var kind = String(obj.kind || '');
   var folder;
@@ -594,7 +618,7 @@ function handleVidInit(obj) {
       'X-Upload-Content-Type': String(obj.mime || 'video/webm'),
       'X-Upload-Content-Length': String(Number(obj.size) || 0)
     },
-    payload: JSON.stringify({ name: String(obj.name || 'video.webm'), parents: [folder.getId()] }),
+    payload: JSON.stringify({ name: safeFileName(obj.name, 'video.webm'), parents: [folder.getId()] }),
     muteHttpExceptions: true
   });
   var headers = r.getAllHeaders();
@@ -604,10 +628,13 @@ function handleVidInit(obj) {
 }
 
 function handleVidChunk(obj) {
+  // The relay only ever writes to a Drive resumable session it opened itself.
+  var session = String(obj.session || '');
+  if (session.indexOf('https://www.googleapis.com/upload/drive/v3/') !== 0) return jsonOut({ ok: false, error: 'bad session' });
   var bytes = Utilities.base64Decode(String(obj.chunk_b64 || ''));
   var offset = Number(obj.offset) || 0;
   var total = Number(obj.total) || 0;
-  var r = UrlFetchApp.fetch(String(obj.session), {
+  var r = UrlFetchApp.fetch(session, {
     method: 'put',
     contentType: String(obj.mime || 'application/octet-stream'),
     headers: { 'Content-Range': 'bytes ' + offset + '-' + (offset + bytes.length - 1) + '/' + total },
@@ -627,7 +654,7 @@ function handleVidChunk(obj) {
 function handlePacket(obj) {
   var today = String(obj.date || Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd'));
   if (obj.image_b64) {
-    var name = String(obj.name || ('mrb-daily-photo-' + today + '-front.jpg'));
+    var name = safeFileName(obj.name, 'mrb-daily-photo-' + today + '-front.jpg');
     var isPrivate = /corrective|corner|resolution|acknowledgment/i.test(name);
     var isWait = /-wait-/i.test(name);
     var mime = /\.png$/i.test(name) ? 'image/png' : 'image/jpeg';
@@ -649,6 +676,8 @@ function handlePacket(obj) {
     for (var v = 1; v < vv.length; v++) if (apDateStr(vv[v][0]) === today) { vrow = v + 1; break; }
     if (!vrow) { vs.appendRow([today]); vrow = vs.getLastRow(); }
     vs.getRange(vrow, 8).setValue(videoUrl); // column H — inspection video
+    var dur = Math.round(Number(obj.duration_sec) || 0);
+    if (dur > 0) vs.getRange(vrow, 9).setValue(dur); // column I — recording length in seconds (VideoObject duration)
   }
 
   /* Manual weight is no longer accepted (AP directive): the official daily

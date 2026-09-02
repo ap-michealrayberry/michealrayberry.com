@@ -2763,6 +2763,7 @@
         date: item.date,
         weight: item.weight,
         video_url: filedUrl,
+        duration_sec: item.durationSec,
         finalize: true,
       });
     } else if (item.kind === "weekly") {
@@ -4205,6 +4206,7 @@
       blob: result.blob,
       blobBuffer: await result.blob.arrayBuffer(),
       blobSize: result.size,
+      durationSec: Math.round(result.durationSec || 0),
       video_sha256: videoHash,
       photo_sha256s: photoHashes.length ? photoHashes : undefined,
       photos: photosB64,

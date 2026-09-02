@@ -333,8 +333,9 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       name: `Micheal Ray Berry Day ${day} daily inspection video — ${date}`,
       description: `Four-angle daily inspection video for Day ${day} of the Micheal Ray Berry Public Accountability Project, recorded at ${weight.toFixed(1)} pounds.`,
       thumbnailUrl: front,
-      uploadDate: date,
+      uploadDate: `${date}T22:00:00-04:00`,
       contentUrl: video,
+      ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}),
       ...(embed ? { embedUrl: embed } : {}),
       ...(isSelfHosted(video)
         ? { encodingFormat: /\.webm(\?|$)/i.test(video) ? 'video/webm' : 'video/mp4' }
@@ -384,6 +385,10 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="${htmlEscape(front)}">
+  ${embed ? `<meta property="og:video" content="${htmlEscape(embed)}">
+  <meta property="og:video:type" content="text/html">
+  <meta property="og:video:width" content="1080">
+  <meta property="og:video:height" content="1920">` : ''}
   <meta property="article:published_time" content="${date}T22:00:00-04:00">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${htmlEscape(title)}">
@@ -1509,6 +1514,12 @@ function violationPage(v, prev, next) {
 `;
 }
 
+function isoDuration(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return 'PT' + (h ? h + 'H' : '') + (m ? m + 'M' : '') + (s || (!h && !m) ? s + 'S' : '');
+}
+
 function positionsPage(entries, siteState = {}) {
   const canonical = `${SITE_ORIGIN}/positions/`;
   const title = 'Documentation Standard — Micheal Ray Berry Public Accountability Project';
@@ -2013,6 +2024,7 @@ ${entries.map(({ record, photos }) => {
       ${isSelfHosted(record.video) || !embed
         ? `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`
         : `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>`}
+      ${record.videoSec > 0 ? `<video:duration>${record.videoSec}</video:duration>` : ''}
       <video:publication_date>${record.date}T22:00:00-04:00</video:publication_date>
     </video:video>
   </url>`;
@@ -2238,6 +2250,7 @@ async function main() {
     weight: Number.parseFloat(r[1]),
     note: String(r[2] || '').trim(),
     video: String(r[7] || '').trim(),
+    videoSec: Math.round(Number.parseFloat(r[8]) || 0),
   })).filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isFinite(r.weight))
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
     .filter((r) => r.day >= 1)
