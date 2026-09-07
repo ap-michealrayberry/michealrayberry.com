@@ -287,7 +287,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       // Must match the sameAs on the home page exactly: one entity, one set of
       // profiles. A day page claiming a narrower set makes the Person node
       // ambiguous instead of corroborating it.
-      sameAs: ["https://www.youtube.com/@michealrayberry", "https://x.com/michealrayberry", "https://bsky.app/profile/michealrayberry.bsky.social", "https://gravatar.com/michealrayberry"],
+      sameAs: ["https://www.youtube.com/@michealrayberry", "https://gravatar.com/michealrayberry", "https://maidrayberry.com/"],
     },
     ...Object.entries(photos).map(([angle, p]) => ({
       '@type': 'ImageObject',
@@ -460,7 +460,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -634,7 +634,7 @@ function milestonePage(target, entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -724,7 +724,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -788,7 +788,7 @@ function weeksIndexPage(entries, lastDay) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -987,7 +987,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1164,7 +1164,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1279,7 +1279,7 @@ function consentPage() {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1449,7 +1449,7 @@ function violationPage(v, prev, next) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1630,7 +1630,7 @@ function positionsPage(entries, siteState = {}) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -1766,7 +1766,7 @@ function violationsIndexPage(violations) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
 <header>
@@ -1804,6 +1804,30 @@ function livePage() {
     <h1>Live</h1>
     <p class="lede"><strong>When a live broadcast is scheduled, it runs on the official channel.</strong></p>
     <p>Watch: <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">youtube.com/@michealrayberry/live</a>.</p>`;
+  return synPage({ title, desc: description, canonical, body });
+}
+
+function maidPage() {
+  const canonical = `${SITE_ORIGIN}/maid/`;
+  const title = 'Maid Ray Berry LLC — Micheal Ray Berry Public Accountability Project';
+  const description = 'Micheal Ray Berry operates Maid Ray Berry LLC, an owner-operated housekeeping business serving Pooler, Savannah, Northeast Florida and surrounding communities. Separate from this record.';
+  const body = `
+    <p class="crumb"><a href="/">Record</a> · Maid Ray Berry LLC</p>
+    <h1>Maid Ray Berry LLC</h1>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,280px);gap:40px;align-items:start">
+      <div>
+        <p class="lede"><strong>Micheal Ray Berry operates a housekeeping business under the name Maid Ray Berry LLC. It is owner-operated: he is the only person who enters a client\u2019s home, performs the work, and answers for it.</strong></p>
+        <p>The business and this project share one principle. The uniform makes the role visible. Instructions are heard and followed. Work is inspected. Deficiencies are corrected rather than defended. What he asks of himself here is what he offers clients there.</p>
+        <p>The two are otherwise separate. Maid Ray Berry LLC provides professional domestic service in Pooler, Savannah, Northeast Florida and surrounding communities. Hiring the business establishes a professional service-provider/client relationship only. Nothing on this site describes, or is part of, that service.</p>
+        <p>Twenty years in uniform. Now putting it to work.</p>
+        <p><a href="https://maidrayberry.com/" rel="me noopener">\u2192 maidrayberry.com</a><br>
+        <a href="tel:+19129126243">912-912-MAID</a> \u00B7 <a href="mailto:maid@maidrayberry.com">maid@maidrayberry.com</a></p>
+      </div>
+      <figure style="margin:0">
+        <img src="/photos/official/maid-ray-berry-portrait.jpg" alt="Micheal Ray Berry in the Maid Ray Berry LLC uniform: black short-sleeved dress with white collar and cuffs, white apron, hands folded, black background." width="1254" height="1254" loading="lazy" style="display:block;width:100%;height:auto;border:1px solid #D9D7CF">
+        <figcaption style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6B6A64;margin-top:8px">Maid Ray Berry LLC · owner-operator</figcaption>
+      </figure>
+    </div>`;
   return synPage({ title, desc: description, canonical, body });
 }
 
@@ -1901,7 +1925,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>
   <header>
@@ -2093,7 +2117,7 @@ const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IB
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -2450,6 +2474,11 @@ async function main() {
     changedUrls.add(`${SITE_ORIGIN}/live/`);
   }
   extraUrls.push(`${SITE_ORIGIN}/live/`);
+
+  if (await writeIfChanged(path.join(ROOT, 'maid', 'index.html'), maidPage())) {
+    changedUrls.add(`${SITE_ORIGIN}/maid/`);
+  }
+  extraUrls.push(`${SITE_ORIGIN}/maid/`);
 
   if (await writeIfChanged(path.join(ROOT, 'consent', 'index.html'), consentPage())) {
     changedUrls.add(`${SITE_ORIGIN}/consent/`);

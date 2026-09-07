@@ -130,16 +130,11 @@ consented — professional, social, or otherwise" item are REMOVED from the
 site; the agreement full text should match. Weekly Position Training
 (§3.3) and the KNEEL position are REMOVED entirely (Aug 31).
 
-## §5.4 Weekly Review corner period — draft clause (user, Aug 30)
+## §5.4 Weekly Review — corner period REMOVED (Sept 7)
 
-"5.4 Weekly Review; no-loss corner period. One Weekly Review is recorded
-each calendar week: the week's figures are read from the Official Record
-to camera. If the week's filed weights show no net loss, the Review
-concludes with a fifteen-minute corner period in the recording, held to the
-§8 corner standard. The period is fixed at fifteen minutes, is not a
-Violation Event, does not escalate, and carries no filing beyond the
-Review itself. §6.4/§9 medical override applies. Weight remains
-incapable of constituting a Violation Event."
+The no-loss corner period is struck. The Weekly Review is the week's
+figures read from the Official Record to camera, plus the assessment.
+No consequence attaches to a week without loss. (Never co-signed.)
 
 ## §4.2 Correction Uniform — REMOVED (Sept 1)
 

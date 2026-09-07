@@ -367,13 +367,6 @@
     );
   }
 
-  function weeklyToCorner() {
-    return (
-      "Corner position. Turn around and face the corner. Do not lean against either wall. Feet planted, shoulder-width apart. Hands behind the head. " +
-      "Hold for fifteen minutes."
-    );
-  }
-
   function weeklyAssessment(documented) {
     return (
       "This week's documented days: " +
@@ -451,7 +444,6 @@
     cornerClosing: cornerClosing,
     weeklyFigures: weeklyFigures,
     weeklyOpening: weeklyOpening,
-    weeklyToCorner: weeklyToCorner,
     weeklyAssessment: weeklyAssessment,
     weeklyWeightMid: weeklyWeightMid,
     weeklyClosing: weeklyClosing,

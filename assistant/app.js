@@ -2271,13 +2271,6 @@
     );
   }
 
-  function weeklyToCorner() {
-    return (
-      "Corner position. Turn around and face the corner. Do not lean against either wall. Feet planted, shoulder-width apart. Hands behind the head. " +
-      "Hold for fifteen minutes."
-    );
-  }
-
   function weeklyAssessment(documented) {
     return (
       "This week's documented days: " +
@@ -2355,7 +2348,6 @@
     cornerClosing: cornerClosing,
     weeklyFigures: weeklyFigures,
     weeklyOpening: weeklyOpening,
-    weeklyToCorner: weeklyToCorner,
     weeklyAssessment: weeklyAssessment,
     weeklyWeightMid: weeklyWeightMid,
     weeklyClosing: weeklyClosing,
@@ -2881,7 +2873,7 @@
 
   function estimateMinutes(type, level) {
     if (type === "corrective") return MRB.config.cornerMinutes(level || 1);
-    if (type === "weekly") return 19;
+    if (type === "weekly") return 4;
     if (type === "daily") return 3;
     if (type === "confirmation") return 2;
     if (type === "announcement") return 3;
@@ -4001,44 +3993,8 @@
 
     MRB.ui.setStatus("session", "Assessment");
     session.poseText = "HOLD · EYES ON CAMERA · HANDS BEHIND HEAD";
-    await speakAndHold(session, fig.assessment || MRB.scripts.weeklyAssessment(fig.documented), fig.noLoss ? 8 : 40);
+    await speakAndHold(session, fig.assessment || MRB.scripts.weeklyAssessment(fig.documented), 40);
     if (session.aborted) return;
-
-    if (fig.noLoss) {
-      /* A week without loss ends in the corner: 10 minutes, on camera.
-         Not a violation and never escalates — the standing weekly
-         consequence of the number itself. */
-      MRB.ui.setStatus("session", "Corner — no loss");
-      session.poseText = "CORNER POSITION · HANDS BEHIND HEAD";
-      await speakAndHold(session, MRB.scripts.weeklyToCorner(), 14);
-      if (session.aborted) return;
-      var cornerSec = 15 * 60;
-      session.remainingSec = cornerSec;
-      session.endsAt = performance.now() + cornerSec * 1000;
-      /* Corner cues: factual-brutal register — every sentence is true and
-         verifiable from the record; no ridicule, no uniform commentary. */
-      var cues = [
-        { at: 120, text: "Stand still. This period exists because the scale did not move this week. Nothing about it is unfair, and nothing about it is negotiable." },
-        { at: Math.round(cornerSec / 2), text: "The scale set this period, not the Accountability Partner. Hold the position." },
-        { at: cornerSec - 180, text: "This period is on the record, under his own name, because the one number he said would fall did not. That is what this record is for." },
-        { at: cornerSec - 60, text: "The week is closed as read. What next week's review says is being decided now — everywhere but in this corner." },
-      ];
-      var cueIdx = 0;
-      while (session.remainingSec > 0 && !session.aborted) {
-        session.remainingSec = Math.max(0, (session.endsAt - performance.now()) / 1000);
-        setMeta("Weekly corner · " + MRB.dates.formatMmSs(session.remainingSec) + " · hands behind head");
-        var elapsed = cornerSec - session.remainingSec;
-        if (cueIdx < cues.length && elapsed >= cues[cueIdx].at) {
-          MRB.audio.speak(cues[cueIdx].text).catch(function () {});
-          cueIdx++;
-        }
-        await sleep(250, session);
-      }
-      if (session.aborted) return;
-      session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
-      await speakAndHold(session, "Corner period complete. Face the camera. The week is closed as read.", 8);
-      if (session.aborted) return;
-    }
 
     MRB.ui.setStatus("session", "Closing");
     session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
