@@ -462,7 +462,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -636,7 +636,7 @@ function milestonePage(target, entries) {
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -726,7 +726,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -790,7 +790,7 @@ function weeksIndexPage(entries, lastDay) {
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -989,7 +989,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -1166,7 +1166,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -1281,7 +1281,7 @@ function consentPage() {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -1451,7 +1451,7 @@ function violationPage(v, prev, next) {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -1632,7 +1632,7 @@ function positionsPage(entries, siteState = {}) {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -1768,7 +1768,7 @@ function violationsIndexPage(violations) {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -2038,7 +2038,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
 <body>
   <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
@@ -2229,7 +2229,7 @@ const SYN_CSS = `
     .rec-lamp{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}`;
 const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
 <div class="sitehead"><div class="sitehead-in">
-  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Public Accountability Project</span></a>
+  <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/penalties">Violations</a><a href="/milestones">Milestones</a></span>
     <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/live/">Live</a><a href="/maid/">Service</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>

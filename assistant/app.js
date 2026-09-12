@@ -830,7 +830,7 @@
   // two inset cards so name / date / code / weight are never covered.
   var SIDE = 18;
   var SAFE_TOP = 118; // top card clears the app's top bar
-  var SAFE_BOT = 220; // bottom card sits lower (below the feet) while still clearing the Shorts handle/description strip
+  var SAFE_BOT = 170; // stamp sits lower still — under the feet — while clearing the Shorts handle/description strip
   var RAIL = 200; // right-side action rail (Like / Share / Remix)
 
   // Shrink the font until the text fits maxW (keeps long lines inside cards).
