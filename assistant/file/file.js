@@ -147,6 +147,13 @@
     };
   }
 
+  function supervisionCheck(date) {
+    return { ok: true, day: dayNumber(date), reason: '', items: [
+      { label: 'Session ended (10:00 PM ET)', ok: true },
+      { label: 'Archive link filed before 10:20 PM ET', ok: true },
+    ] };
+  }
+
   function correctiveCheck(date) {
     return {
       ok: true,
@@ -169,6 +176,15 @@
       "The official record is " + BASE + "/. Recorded through the official Recording Assistant; " +
       "the burned-in verification code and clocks date the footage.\n" +
       "Agreement: " + BASE + "/agreement\nContact: ap@michealrayberry.com";
+    if (type === "supervision") {
+      return {
+        title: "Evening Supervision — Day " + dayN + " · " + ctx.date + brand,
+        desc:
+          "Fixed-camera Evening Supervision session under §3.4 of the agreement, 6:00–10:00 PM ET. " +
+          "Normal evening activity under observation and published rules: full project uniform, water only, home-cooked dinner. " +
+          "Console and rules: " + BASE + "/live/" + tail,
+      };
+    }
     if (type === "corrective") {
       var ref = "V-" + pad3(ctx.vNum || 1);
       return {
@@ -287,6 +303,7 @@
     var check = mode === "fail" ? failCheck(date)
       : mode === "consent" ? consentCheck(date)
       : mode === "corrective" ? correctiveCheck(date)
+      : mode === "supervision" ? supervisionCheck(date)
       : dailyCheck(date);
     var ul = $("check-list");
     ul.innerHTML = "";
@@ -307,8 +324,9 @@
     var locked = !check.ok;
     $("yt-file").disabled = locked;
     $("yt-file").textContent = locked && mode === "daily" ? "Filing closed" : "File the link";
-    $("packet-panel").hidden = mode === "consent" || mode === "corrective";
+    $("packet-panel").hidden = mode === "consent" || mode === "corrective" || mode === "supervision";
     $("corrective-panel").hidden = mode !== "corrective";
+    if ($("supervision-panel")) $("supervision-panel").hidden = mode !== "supervision";
     $("yt-url").disabled = locked && mode === "daily";
     $("input-weight").disabled = locked && mode === "daily";
     $("input-video").disabled = locked && mode === "daily";
@@ -325,7 +343,7 @@
   function renderMeta() {
     var date = todayEt();
     var packet = getDay(date);
-    var meta = ytMeta(mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : "daily", { date: date, day: packet.day });
+    var meta = ytMeta(mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : mode === "supervision" ? "supervision" : "daily", { date: date, day: packet.day });
     $("yt-title").value = meta.title;
     $("yt-desc").value = meta.desc;
     $("yt-url").value = packet.youtubeUrl || "";
@@ -352,6 +370,7 @@
     $("mode-consent").className = next === "consent" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-corrective").className = next === "corrective" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-fail").className = next === "fail" ? "btn btn-primary" : "btn btn-ghost";
+    if ($("mode-supervision")) $("mode-supervision").className = next === "supervision" ? "btn btn-primary" : "btn btn-ghost";
     renderChecks();
     renderMeta();
   }
@@ -368,12 +387,26 @@
 
   async function fileLink() {
     var date = todayEt();
-    var kind = mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : "daily";
-    var check = kind === "consent" ? consentCheck(date) : kind === "corrective" ? correctiveCheck(date) : dailyCheck(date);
+    var kind = mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : mode === "supervision" ? "supervision" : "daily";
+    var check = kind === "consent" ? consentCheck(date) : kind === "corrective" ? correctiveCheck(date) : kind === "supervision" ? supervisionCheck(date) : dailyCheck(date);
     var msg = $("yt-msg");
     if (!check.ok) { msg.textContent = check.reason; return; }
     var url = ($("yt-url").value || "").trim();
     if (!isYt(url)) { msg.textContent = "Paste the full YouTube link."; return; }
+    if (kind === "supervision") {
+      $("yt-file").disabled = true;
+      msg.textContent = "Filing\u2026";
+      try {
+        var rs = await postYtFiled("supervision", date, url);
+        msg.textContent = rs && rs.ok === false
+          ? "Server rejected the link \u2014 send it to the AP before 10:20 PM."
+          : "Evening Supervision filed \u2713 \u2014 tonight is COMPLETED on the record.";
+      } catch (e) {
+        msg.textContent = "Filing failed \u2014 send the link to the AP before 10:20 PM.";
+      }
+      $("yt-file").disabled = false;
+      return;
+    }
     if (kind === "corrective") {
       var vId = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase();
       if (!/^V-\d{3}$/.test(vId)) { msg.textContent = "Enter the violation id as V-001."; return; }
@@ -517,6 +550,7 @@
     $("mode-corrective").addEventListener("click", function () { setMode("corrective"); });
     if ($("cv-id")) $("cv-id").addEventListener("input", renderMeta);
     $("mode-fail").addEventListener("click", function () { setMode("fail"); });
+    if ($("mode-supervision")) $("mode-supervision").addEventListener("click", function () { setMode("supervision"); });
     $("yt-file").addEventListener("click", function () { fileLink(); });
     $("btn-file-packet").addEventListener("click", filePacket);
     $("btn-file-fail").addEventListener("click", fileFail);

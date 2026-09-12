@@ -3,7 +3,8 @@
 Supersedes push-2026-08-29/ (all of its fixes are included here).
 Replace these files in ap-michealrayberry/michealrayberry.com@main:
 
-- index.html, boot.js, llms.txt, manifest.webmanifest, _redirects, .gitignore, 404.html
+- index.html, boot.js, live.js, llms.txt, manifest.webmanifest, _redirects, .gitignore, 404.html
+- assistant/file/index.html (Supervision mode button + panel)
 - scripts/publish.mjs
 - assistant/index.html, assistant/app.js,
   assistant/js/05-api.js, assistant/js/12-scripts.js,
@@ -105,10 +106,39 @@ authorized by this section."
 Consent script updated to state this on camera. The record itself still
 never names or links the Partner's platforms (register, not secrecy).
 
-## Evening Accountability Stream — WITHDRAWN (Sept 1)
+## §3.4 Evening Supervision — ADDED Sept 12 (user ruling; needs co-signature)
 
-Removed from the site before co-signing (never bound). /live remains as a
-plain channel-link page for future scheduled broadcasts.
+Draft clause for the agreement (site, Code.gs, File tool, /live all built):
+
+> §3.4 Evening Supervision. On the evening preceding each scheduled
+> workday — ordinarily Sunday through Thursday — Micheal Ray Berry
+> completes a fixed-camera Evening Supervision session, 6:00–10:00 PM
+> Eastern, broadcast live on the Official Platform and filed to the record
+> by 10:20 PM. Full project uniform including the collar; camera fixed and
+> not repositioned; normal evening activity continues; water only; dinner
+> a healthy home-cooked meal with yogurt for dessert, nothing outside it;
+> monitored areas orderly before the session; the Daily Compliance Packet
+> remains due within the window; bathrooms, changing, work information,
+> private communications, and non-consenting visitors stay off camera.
+> Authorized exceptions, each entered on the record with its reason by the
+> Accountability Partner: work-schedule conflict, travel, illness,
+> emergency, a non-consenting person present, technical failure outside
+> reasonable control. Discomfort, tiredness, preference for privacy, or a
+> wish to order food are not exceptions. A session not filed by 10:20 PM is
+> MISSED; a MISSED session is a Violation Event under §7, declared
+> automatically, answered under §8; completing a later session never
+> erases it. Effective Sunday, 13 September 2026, upon co-signature.
+
+Machinery: Sheet tab **Supervision** (date · required · status · start ·
+end · stream_url · note; auto-created on first use — run setup() after
+pasting Code.gs for the 22:20 trigger). File tool → Supervision mode files
+the YouTube archive link (ytfiled kind 'supervision' → COMPLETED).
+supervisionNightlyCheck at 22:20 ET rules MISSED + Violation Log row.
+AP: MRB menu → "Supervision · mark tonight EXCEPTION". /live is the
+console (live.js computes LIVE/OFFLINE, schedule, countdown; publisher
+renders the record). Homepage shows a live bar when a session is on.
+OBS → YouTube Live (channel UCi_0KqZjgbRUuLVAM5CmStQ); enable Live in
+YouTube Studio ≥24 h before Sept 13.
 
 ## Live endpoints (deployed Aug 31)
 

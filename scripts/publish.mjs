@@ -15,6 +15,8 @@ const ATTEST_CSV = process.env.ATTESTATION_CSV ||
 // YouTube channel ID (UC…) for the live embed on /live — the handle does not
 // work in embed URLs. Set via env or replace the placeholder.
 const YT_CHANNEL_ID = process.env.YT_CHANNEL_ID || 'UCi_0KqZjgbRUuLVAM5CmStQ';
+const SUPERVISION_CSV = process.env.SUPERVISION_CSV ||
+  'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Supervision';
 const SITE_STATE_CSV = process.env.SITE_STATE_CSV ||
   'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Site%20State';
 /* Day 1 of the CURRENT attempt. Overridden at build time by the Site State
@@ -1795,15 +1797,126 @@ function violationsIndexPage(violations) {
 </html>`;
 }
 
-function livePage() {
+function livePage(supervision = [], violations = []) {
   const canonical = `${SITE_ORIGIN}/live/`;
-  const title = 'Live — Micheal Ray Berry Public Accountability Project';
-  const description = 'Live broadcasts from the official record, when scheduled.';
+  const title = 'Evening Supervision — Micheal Ray Berry is under supervision';
+  const description = 'Live evening supervision under §3.4 of the signed agreement: fixed-camera observation, 6:00–10:00 PM Eastern on nights preceding a scheduled workday, with the published rules and the permanent session record.';
+  const SESSION_START = '2026-09-13';
+  const vioByDate = new Map(violations.map((v) => [v.date, v]));
+  const dataBlock = Object.fromEntries(supervision.map((s) => [s.date, { status: s.status, url: s.url }]));
+  const RULES = [
+    ['Uniform required', 'The full project uniform is worn throughout the supervision period while Micheal is in the monitored areas.'],
+    ['Collar required', 'The designated collar is worn as the visible indication that the supervision period is active.'],
+    ['Fixed-camera observation', 'Cameras remain in their designated positions. They are not repositioned to avoid observation.'],
+    ['Normal activity continues', 'Cooking, eating, cleaning, household work, personal administration, television, reading, and ordinary evening activity are permitted. This is not a performance.'],
+    ['Water only', 'Water is the only beverage consumed during the scheduled supervision period.'],
+    ['Dinner is prepared at home', 'Delivery, restaurant takeout, and convenience meals purchased during the period are not permitted.'],
+    ['Meal standard', 'A healthy home-cooked meal; yogurt for dessert. Nothing outside the planned meal.'],
+    ['Visible areas orderly', 'The monitored living and dining areas are brought to the project\u2019s minimum standard of order before the session begins.'],
+    ['Daily accountability remains due', 'Supervision does not substitute for the Daily Inspection, weigh-in, photographs, or tracker update. 10:00 PM remains the deadline; required documentation is complete before the period closes.'],
+    ['Necessary privacy is permitted', 'Bathrooms, changing, sensitive work information, private communications, visitors, and other legitimately private matters remain outside public observation.'],
+    ['A required session cannot disappear', 'If a scheduled session is not completed, its status becomes MISSED unless a predefined exception applies. The system declares it; no one decides it.'],
+    ['The record controls', 'Completing a later session does not erase a missed one. The historical record remains intact.'],
+  ];
+  const past = supervision.filter((s) => s.date >= SESSION_START).slice().reverse();
+  const recordRows = past.length
+    ? past.map((s) => {
+        const st = s.status.toUpperCase();
+        const kind = /^COMPLETED/.test(st) ? 'ok' : /^MISSED/.test(st) ? 'miss' : /^EXCEPTION/.test(st) ? 'exc' : '';
+        const v = vioByDate.get(s.date);
+        const detail = /^COMPLETED/.test(st)
+          ? ((s.start || '6:00 PM') + '–' + (s.end || '10:00 PM') + ' ET' + (s.url ? ' · <a href="' + htmlEscape(s.url) + '" rel="noopener">archive</a>' : ''))
+          : /^MISSED/.test(st)
+            ? ('Required session not completed' + (v ? ' · <a href="/violations/' + v.slug + '/">Violation ' + v.id + '</a>' : ''))
+            : htmlEscape(s.status.replace(/^EXCEPTION\s*[·\-–]?\s*/i, '') || 'Documented exception');
+        return `<div class="rec ${kind}"><b>${htmlEscape(longDate(s.date))}</b><span class="st">${htmlEscape(st.split(/\s*[·\-–]\s*/)[0])}</span><span>${detail}</span>${s.note ? '<span class="note">' + htmlEscape(s.note) + '</span>' : ''}</div>`;
+      }).join('')
+    : '<p>No session has yet been ruled on. The first scheduled session is Sunday, September 13, 2026, 6:00–10:00 PM ET. Each night thereafter is entered here as COMPLETED, MISSED, or EXCEPTION — permanently.</p>';
+
   const body = `
-    <p class="crumb"><a href="/">Record</a> · Live</p>
-    <h1>Live</h1>
-    <p class="lede"><strong>When a live broadcast is scheduled, it runs on the official channel.</strong></p>
-    <p>Watch: <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">youtube.com/@michealrayberry/live</a>.</p>`;
+    <style>
+      .sup-eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:36px 32px 0}
+      .sup-h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(2.2rem,6vw,4.6rem);line-height:.95;margin:10px 32px 18px;max-width:900px}
+      .sup-lede{margin:0 32px 28px;max-width:680px;font-size:17px;line-height:1.65}
+      .sup-wrap{padding:0 32px 56px}
+      .status{background:var(--ink);color:var(--paper);padding:22px 26px;display:flex;flex-direction:column;gap:14px}
+      .status .line{font:700 20px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+      .lamp{width:12px;height:12px;border-radius:50%;background:#5a5955;display:inline-block;flex-shrink:0}
+      .lamp.on{background:var(--accent);box-shadow:0 0 0 0 rgba(179,38,30,.6);animation:supPulse 1.6s ease-out infinite}
+      @keyframes supPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.6)}70%{box-shadow:0 0 0 10px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
+      .detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;border-top:1px solid #3A3935}
+      .detail div{padding:12px 14px 12px 0;display:flex;flex-direction:column;gap:4px}
+      .detail b{font:600 10px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8983}
+      .detail span{font:600 16px/1.3 'IBM Plex Mono',ui-monospace,monospace}
+      .embed{margin:0;background:#000;aspect-ratio:16/9;max-width:100%;display:none}
+      .embed iframe{width:100%;height:100%;border:0;display:block}
+      h2.sup{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:26px;margin:44px 0 12px}
+      .rules{border:1px solid var(--ink)}
+      .rules div{display:grid;grid-template-columns:230px 1fr;border-bottom:1px solid var(--rule)}
+      .rules div:last-child{border-bottom:none}
+      .rules b{padding:14px;border-right:1px solid var(--rule);font:600 12px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:var(--accent)}
+      .rules p{padding:14px;margin:0;line-height:1.6;font-size:15px}
+      @media(max-width:620px){.rules div{grid-template-columns:1fr}.rules b{border-right:none;border-bottom:1px solid var(--rule)}}
+      .why{border-left:3px solid var(--accent);padding-left:16px;max-width:680px}
+      .why p{margin:0 0 12px;line-height:1.65}
+      .why .em{font-weight:600;font-size:17px}
+      .sched{border:1px solid var(--ink);font:600 13px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em}
+      .sched div{display:grid;grid-template-columns:110px 1fr;padding:12px 14px;border-bottom:1px solid var(--rule);color:var(--muted)}
+      .sched div:last-child{border-bottom:none}
+      .sched div.req{color:var(--ink)}
+      .sched div.today{background:#F1F0EA}
+      .sched b{font-weight:700}
+      .exc{max-width:680px}
+      .exc p{margin:0 0 10px;line-height:1.65}
+      .record .rec{display:grid;grid-template-columns:200px 120px 1fr;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule);font-size:15px;align-items:baseline}
+      .record .rec:last-child{border-bottom:none}
+      .record .rec b{font-weight:600}
+      .record .st{font:700 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em}
+      .record .ok .st{color:#3A6B3A}.record .miss .st{color:var(--accent)}.record .exc .st{color:var(--muted)}
+      .record .note{grid-column:3;font-size:13px;color:var(--muted)}
+      @media(max-width:620px){.record .rec{grid-template-columns:1fr}.record .note{grid-column:1}}
+    </style>
+    <script type="application/json" id="supervision-data">${jsonLd(dataBlock)}</script>
+    <script src="/live.js" defer></script>
+    <p class="sup-eyebrow">Public Accountability / Live Supervision</p>
+    <h1 class="sup-h1">Micheal Ray Berry is under supervision</h1>
+    <p class="sup-lede">On nights preceding a scheduled workday, Micheal Ray Berry is required to complete a fixed-camera Evening Supervision session. The purpose is not entertainment. Normal evening activity continues under public observation and documented rules.</p>
+    <div class="sup-wrap">
+      <div class="status">
+        <div class="line" data-live-status><span class="lamp"></span>CHECKING SCHEDULE…</div>
+        <div class="detail" data-live-detail></div>
+      </div>
+      <figure class="embed" data-live-embed></figure>
+
+      <h2 class="sup">Evening Supervision</h2>
+      <p style="max-width:680px">This is a normal evening being conducted under observation. Micheal is not required to entertain, interact with viewers, or remain directly in front of the camera continuously. He is required to follow the published rules until the supervision period ends.</p>
+      <p style="max-width:680px">Scheduled sessions ordinarily occur 6:00–10:00 PM Eastern on nights preceding a scheduled workday, normally Sunday through Thursday. When live, the session runs on the <a href="https://www.youtube.com/@michealrayberry/live" rel="noopener">official channel</a>.</p>
+
+      <h2 class="sup">Rules while under supervision</h2>
+      <div class="rules">${RULES.map(([k, v]) => `<div><b>${k}</b><p>${v}</p></div>`).join('')}</div>
+
+      <h2 class="sup">Why public supervision</h2>
+      <div class="why">
+        <p>Evening Supervision removes a period in which accountability would otherwise depend entirely upon private decision-making.</p>
+        <p>The camera does not make decisions for Micheal. It makes those decisions observable.</p>
+        <p>He established this requirement, in writing, because routine is easier to weaken when nobody can see it. During a scheduled supervision period, compliance becomes visible and independently verifiable.</p>
+        <p class="em">The objective is not constant attention. The objective is accountable behavior when attention may occur.</p>
+      </div>
+
+      <h2 class="sup">Supervision schedule</h2>
+      <p style="max-width:680px">A supervision session is required on the evening immediately preceding a scheduled workday unless a published exception applies. The weekday labels describe the ordinary pattern; the rule governs.</p>
+      <div class="sched" data-live-schedule></div>
+
+      <h2 class="sup">Authorized exceptions</h2>
+      <div class="exc">
+        <p>Work-schedule conflict · travel · illness · emergency · presence of a person who has not consented to appearing on camera · technical failure outside Micheal\u2019s reasonable control. Each is entered on the record by the Accountability Partner, with its reason.</p>
+        <p><strong>Discomfort, tiredness, preference for privacy, a wish to order food, or simply not wanting to be observed are not exceptions.</strong></p>
+      </div>
+
+      <h2 class="sup">Supervision record</h2>
+      <div class="record">${recordRows}</div>
+      <p style="margin-top:24px;font-size:14px;color:var(--muted)">A MISSED session is a Violation Event under §7, declared automatically by the record at 10:20 PM ET and answered under §8. The governing terms are §3.4 of <a href="/agreement">the agreement</a>.</p>
+    </div>`;
   return synPage({ title, desc: description, canonical, body });
 }
 
@@ -1936,8 +2049,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   <main>
     <p class="lede"><strong>A corrective session answers one thing: a failure to document the day
     as required, by ten PM Eastern.</strong> It is not a consequence for the weight. A gain, a plateau,
-    or a bad month is never a Violation Event. (A week without loss ends the Weekly Review with a fixed
-    15-minute period on camera under §3 — a separate, non-escalating requirement that never enters this log.)</p>
+    or a bad month is never a Violation Event.</p>
     <p>Every confirmed Violation Event is answered this way, and the requirement is set by the
     Accountability Partner against the project's standards — not against anything outside them.</p>
 
@@ -2207,13 +2319,14 @@ async function buildSyntheticPages() {
 }
 
 async function main() {
-  let csv, attestCsv, violationCsv, siteStateCsv;
+  let csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv;
   try {
-    [csv, attestCsv, violationCsv, siteStateCsv] = await Promise.all([
+    [csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv] = await Promise.all([
       fetchText(SHEET_CSV, false),
       fetchText(ATTEST_CSV, true),
       fetchText(VIOLATION_CSV, false),
       fetchText(SITE_STATE_CSV, true),
+      fetchText(SUPERVISION_CSV, true),
     ]);
   } catch (error) {
     console.error('Required sheet fetch failed:', error);
@@ -2243,6 +2356,19 @@ async function main() {
     }
   }
   if (/^\d{4}-\d{2}-\d{2}$/.test(siteState.start_date || '')) START_DATE = siteState.start_date;
+  /* Evening Supervision record (§3.4): one row per scheduled night the record
+     has ruled on — COMPLETED / MISSED / EXCEPTION · reason. */
+  const supervision = (supervisionCsv ? parseCSV(supervisionCsv).slice(1) : [])
+    .map((r) => ({
+      date: normalizeDate(r[0]),
+      status: String(r[2] || '').trim(),
+      start: String(r[3] || '').trim(),
+      end: String(r[4] || '').trim(),
+      url: String(r[5] || '').trim(),
+      note: String(r[6] || '').trim(),
+    }))
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s.date) && s.status)
+    .sort((a, b) => a.date.localeCompare(b.date));
   PRIOR_NOTE = siteState.prior_attempt_note || '';
 
   const violations = (violationCsv ? parseCSV(violationCsv).slice(1) : [])
@@ -2470,7 +2596,7 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/corrections/`);
 
-  if (await writeIfChanged(path.join(ROOT, 'live', 'index.html'), livePage())) {
+  if (await writeIfChanged(path.join(ROOT, 'live', 'index.html'), livePage(supervision, violations))) {
     changedUrls.add(`${SITE_ORIGIN}/live/`);
   }
   extraUrls.push(`${SITE_ORIGIN}/live/`);

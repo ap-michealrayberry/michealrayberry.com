@@ -69,7 +69,30 @@ var TABS = {
   'Health':         ['date', 'steps', 'zone_minutes', 'active_minutes', 'synced_at', 'distance_mi', 'calories', 'weight_lb'],
   'Weekly Log':     ['logged_at', 'date', 'week', 'documented', 'required', 'weight_lb', 'open_entries', 'url'],
   'Confirmations':  ['logged_at', 'date', 'version', 'day', 'url'],
+  /* §3.4 Evening Supervision — one row per scheduled night once ruled on.
+     status: COMPLETED · MISSED · EXCEPTION · <reason>. Written by the
+     nightly check (MISSED), the File tool (COMPLETED + stream_url), or the
+     AP via the MRB menu (EXCEPTION). The site reads it on /live. */
+  'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
 };
+
+/* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
+   from Sunday 13 Sept 2026. The nightly check at 22:20 rules on the night. */
+var SUPERVISION_START = '2026-09-13';
+var SUPERVISION_NIGHTS = [0, 1, 2, 3, 4]; // JS getDay: Sun=0 … Thu=4
+function supervisionScheduled(ds) {
+  if (ds < SUPERVISION_START) return false;
+  var a = ds.split('-').map(Number);
+  var dow = new Date(Date.UTC(a[0], a[1] - 1, a[2], 12)).getUTCDay();
+  return SUPERVISION_NIGHTS.indexOf(dow) !== -1;
+}
+function supervisionSheet() { return tab('Supervision'); }
+function supervisionRow(ds) {
+  var sh = supervisionSheet();
+  var v = sh.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (apDateStr(v[i][0]) === ds) return { row: i + 1, vals: v[i] };
+  return null;
+}
 
 /* ═════════════════ FRESH-START BUILD (run once) ═════════════════ */
 
@@ -99,7 +122,7 @@ function createRecordSpreadsheet() {
   }
   var TAB_COLORS = { 'Weigh-ins': '#B3261E', 'Violation Log': '#B3261E', 'Updates': '#B3261E',
     'Attestation': '#6B6A64', 'Corrective Log': '#6B6A64', 'Weekly Log': '#6B6A64',
-    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412' };
+    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412', 'Supervision': '#B3261E' };
   for (var tc in TAB_COLORS) { var tsh = file.getSheetByName(tc); if (tsh) tsh.setTabColor(TAB_COLORS[tc]); }
   file.getSheetByName('Weigh-ins').setColumnWidth(1, 110);
   file.getSheetByName('Violation Log').setColumnWidth(2, 460);
@@ -325,6 +348,8 @@ function setup() {
   ScriptApp.newTrigger('githubMirrorPhotos').timeBased().everyMinutes(15).create();
   ScriptApp.newTrigger('nightlyComplianceCheck').timeBased().everyDays(1).atHour(22).inTimezone('America/New_York').create();
   ScriptApp.newTrigger('abandonmentCheck').timeBased().everyDays(1).atHour(23).inTimezone('America/New_York').create();
+  // §3.4 Evening Supervision ruling, 20 minutes after the packet check.
+  ScriptApp.newTrigger('supervisionNightlyCheck').timeBased().everyDays(1).atHour(22).nearMinute(20).inTimezone('America/New_York').create();
   // Monday: project weeks run Monday→Sunday from Day 1 (Mon Aug 31); the
   // weekly review is recorded Monday, so both mails land Monday morning.
   ScriptApp.newTrigger('apWeeklyReview').timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(9).inTimezone('America/New_York').create();
@@ -590,6 +615,25 @@ function handleYtFiled(obj) {
     cf.appendRow([new Date(), date, '', Math.floor((new Date(date) - new Date(PROJECT_START)) / 864e5) + 1, url]);
     return jsonOut({ ok: true });
   }
+  if (kind === 'supervision') {
+    // Evening Supervision archive link (§3.4). Filing before the 22:20 ruling
+    // marks the night COMPLETED; after a MISSED ruling the link is kept as a
+    // note but the status stands — the record controls.
+    var sr = supervisionRow(date);
+    var ssh = supervisionSheet();
+    var start = String(obj.start || '').trim(), end = String(obj.end || '').trim();
+    if (sr) {
+      var cur = String(sr.vals[2] || '');
+      ssh.getRange(sr.row, 6).setValue(url);
+      if (start) ssh.getRange(sr.row, 4).setValue(start);
+      if (end) ssh.getRange(sr.row, 5).setValue(end);
+      if (/^MISSED/i.test(cur)) ssh.getRange(sr.row, 7).setValue((String(sr.vals[6] || '') + '; link filed after the MISSED ruling').replace(/^; /, ''));
+      else if (!/^EXCEPTION/i.test(cur)) ssh.getRange(sr.row, 3).setValue('COMPLETED');
+    } else {
+      ssh.appendRow([date, supervisionScheduled(date) ? 'yes' : 'no', 'COMPLETED', start, end, url, '']);
+    }
+    return jsonOut({ ok: true });
+  }
   if (kind === 'announcement') { stateSet('intro_video_url', url); return jsonOut({ ok: true }); }
   if (kind === 'demo' || !kind) { stateSet('demo_video_url', url); return jsonOut({ ok: true }); }
   // An unknown kind must never silently overwrite a Site State URL.
@@ -845,6 +889,34 @@ function nightlyComplianceCheck() {
   try { mrbViolationNotice(today, missing, autoDeclared); } catch (e) {}
 }
 
+/* ═════ 10:20 PM SUPERVISION CHECK (§3.4) ═════
+   Rules on tonight. A scheduled night with no COMPLETED row and no EXCEPTION
+   becomes MISSED and a Violation Event is declared automatically. Runs after
+   the 22:00 packet check so the two declarations never collide. */
+function supervisionNightlyCheck() {
+  var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
+  if (!supervisionScheduled(today)) return;
+  var sr = supervisionRow(today);
+  var status = sr ? String(sr.vals[2] || '') : '';
+  if (/^(COMPLETED|EXCEPTION|MISSED)/i.test(status)) return; // already ruled
+  var sh = supervisionSheet();
+  if (sr) sh.getRange(sr.row, 3).setValue('MISSED');
+  else sh.appendRow([today, 'yes', 'MISSED', '', '', '', 'no archive link filed by 10:20 PM ET']);
+  violationLogSheet().appendRow([today, 'Evening Supervision session not completed — 6:00–10:00 PM ET (§3.4) [auto-declared]', 'Unresolved']);
+  netlifyDeploy();
+  var day = dayOf(today);
+  var c = nextConsequence();
+  try {
+    mailAP('MISSED — Evening Supervision ' + today + ' — Violation Event declared',
+      'No Evening Supervision archive link was filed for ' + today + ' (Day ' + day + ') by 10:20 PM ET and no exception is on the record.\n\n' +
+      'The Supervision tab shows MISSED and a Violation Event has been entered on the log. If a §3.4 exception applies, mark it from the MRB menu (Supervision · EXCEPTION) and resolve the entry with a note; the reversal is itself logged.');
+    mailMRB('MISSED — Evening Supervision — Day ' + day + ' — ' + today,
+      'The scheduled 6:00–10:00 PM ET supervision session for ' + today + ' was not filed by 10:20 PM.\n\n' +
+      'Its status is MISSED and a Violation Event has been entered on the public record. It is permanent.\n\n' +
+      'Assigned: ' + c.text + '.\n\nCompleting a later session does not erase a missed one.');
+  } catch (e) {}
+}
+
 function autoDeclareViolation(today, missing) {
   var sh = violationLogSheet();
   var vals = sh.getDataRange().getValues();
@@ -852,7 +924,8 @@ function autoDeclareViolation(today, missing) {
     var ds = vals[i][0] instanceof Date ? Utilities.formatDate(vals[i][0], 'America/New_York', 'yyyy-MM-dd') : String(vals[i][0]).trim();
     // A 72-hour escalation appended earlier tonight is a DIFFERENT violation
     // event — it must not swallow a genuine packet miss on the same date.
-    if (ds === today && String(vals[i][1] || '').indexOf('72-hour corrective deadline') === -1) return false; // already on the log for today
+    var txt = String(vals[i][1] || '');
+    if (ds === today && txt.indexOf('72-hour corrective deadline') === -1 && txt.indexOf('Evening Supervision') === -1) return false; // already on the log for today
   }
   var what = missing.length === 1 ? missing[0] : 'Daily Compliance Packet incomplete (' + missing.length + ' items)';
   sh.appendRow([today, 'Missed 10 PM ET deadline — ' + what + ' [auto-declared]', 'Unresolved']);
@@ -1150,6 +1223,7 @@ function onOpen() {
     .addItem('Declare violation (today)', 'menuDeclareViolation')
     .addItem('Overrule selected entry', 'menuOverrule')
     .addItem('Post update to the site', 'menuPostUpdate')
+    .addItem('Supervision · mark tonight EXCEPTION', 'menuSupervisionException')
     .addSeparator()
     .addItem('Stage · abandonment presumed', 'menuAbandonPresumed')
     .addItem('Stage · abandonment CONFIRMED', 'menuAbandonConfirmed')
@@ -1193,6 +1267,23 @@ function menuOverrule() {
   var note = today + ': overruled — ' + (r.getResponseText().trim() || 'fails the §8 standard') + '; replacement session required';
   sh.getRange(row, 7).setValue(prev ? prev + '; ' + note : note);
   ui.alert('Reopened. The sitewide notice returns on the next publish; a replacement session is required.');
+}
+
+/* §3.4 authorized exception for a scheduled night. Enter the date (default
+   tonight) and the reason; the reason is published on /live. */
+function menuSupervisionException() {
+  var ui = SpreadsheetApp.getUi();
+  var d = ui.prompt('Supervision exception', 'Night (YYYY-MM-DD, blank = tonight):', ui.ButtonSet.OK_CANCEL);
+  if (d.getSelectedButton() !== ui.Button.OK) return;
+  var ds = d.getResponseText().trim() || menuToday();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ds)) { ui.alert('Date must be YYYY-MM-DD.'); return; }
+  var r = ui.prompt('Supervision exception — ' + ds, 'Authorized reason (§3.4: work schedule · travel · illness · emergency · non-consenting person present · technical failure) — published verbatim:', ui.ButtonSet.OK_CANCEL);
+  if (r.getSelectedButton() !== ui.Button.OK || !r.getResponseText().trim()) return;
+  var sr = supervisionRow(ds);
+  var st = 'EXCEPTION · ' + r.getResponseText().trim();
+  if (sr) supervisionSheet().getRange(sr.row, 3).setValue(st);
+  else supervisionSheet().appendRow([ds, supervisionScheduled(ds) ? 'yes' : 'no', st, '', '', '', 'entered by the AP ' + menuToday()]);
+  ui.alert('Recorded. /live shows the exception on the next publish; no MISSED ruling will be made for that night.');
 }
 
 function menuPostUpdate() {
@@ -1332,6 +1423,16 @@ function handleApAction(obj) {
       return jsonOut({ ok: true });
     }
 
+    if (obj.action === 'apsupervision') {
+      var sd = String(obj.date || today);
+      var srow = supervisionRow(sd);
+      var sst = obj.op === 'exception' ? 'EXCEPTION · ' + String(obj.reason || 'documented exception (§3.4)')
+        : obj.op === 'complete' ? 'COMPLETED' : obj.op === 'missed' ? 'MISSED' : '';
+      if (!sst) return jsonOut({ ok: false, error: 'op must be exception | complete | missed' });
+      if (srow) supervisionSheet().getRange(srow.row, 3).setValue(sst);
+      else supervisionSheet().appendRow([sd, supervisionScheduled(sd) ? 'yes' : 'no', sst, '', '', String(obj.url || ''), String(obj.note || '')]);
+      return jsonOut({ ok: true });
+    }
     if (obj.action === 'apdeploy') { netlifyDeploy(); return jsonOut({ ok: true, deployed: true }); }
     return jsonOut({ ok: false, error: 'unknown action' });
   } catch (err) {
@@ -2024,6 +2125,14 @@ function morningBrief() {
     'A packet finished at 10:01 PM is a miss. The server clock decides, not your phone,\n' +
     'and not your intention to do it later.\n\n' +
     'If tonight is missed: ' + c.text + '.\n';
+  if (supervisionScheduled(today)) {
+    var srx = supervisionRow(today);
+    if (!(srx && /^EXCEPTION/i.test(String(srx.vals[2] || '')))) {
+      body += '\nEVENING SUPERVISION tonight, 6:00–10:00 PM Eastern (\u00a73.4): full uniform, collar, fixed camera,\n' +
+        'water only, home-cooked dinner. File the archive link in the File tool before 10:20 PM.\n' +
+        'Not filed = MISSED = a Violation Event, declared by the record at 10:20.\n';
+    }
+  }
   if (c.open) body += '\nYou currently have ' + c.open + ' unresolved ' + (c.open === 1 ? 'entry' : 'entries') + ' on the public record.\n';
   var dl = openCorrectiveDeadline();
   if (dl) body += '\n' + dl.text + '\n' + (dl.assignment ? 'Assigned: ' + dl.assignment + '\n' : '') + 'Record it at ' + PORTAL_URL + '\n';
@@ -2408,7 +2517,7 @@ function migrateRecordFrom(oldId, previewOnly) {
    once, with no redeploy — and pins the column format so new rows stay text. */
 function normalizeDates() {
   var s = ss();
-  var tabs = ['Weigh-ins', 'Violation Log', 'Attestation', 'Corrective Log', 'Health', 'Updates'];
+  var tabs = ['Weigh-ins', 'Violation Log', 'Attestation', 'Corrective Log', 'Health', 'Updates', 'Supervision'];
   var out = ['', '════════ DATE NORMALISATION ════════'];
 
   for (var t = 0; t < tabs.length; t++) {

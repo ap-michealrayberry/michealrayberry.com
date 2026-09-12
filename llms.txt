@@ -20,6 +20,7 @@ above progress on every page.
 - [Milestones](https://michealrayberry.com/milestones): 320, 300, 275, 250, 225, 200 lb — one page per milestone, reached or not
 - [Weekly record](https://michealrayberry.com/weeks/): week-by-week weights and net change
 - [Failure log](https://michealrayberry.com/violations/): every violation, each a permanent evidence page
+- [Evening Supervision](https://michealrayberry.com/live/): live fixed-camera sessions, 6–10 PM ET on nights before a workday (Sun–Thu, from 13 Sept 2026); rules, schedule, and the per-night COMPLETED / MISSED / EXCEPTION record
 - [RSS feed](https://michealrayberry.com/feed.xml): new day pages as they publish
 
 ## Weight history
