@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { buildStaticSite } from './static-site.mjs';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 
@@ -17,6 +18,8 @@ const ATTEST_CSV = process.env.ATTESTATION_CSV ||
 const YT_CHANNEL_ID = process.env.YT_CHANNEL_ID || 'UCi_0KqZjgbRUuLVAM5CmStQ';
 const SUPERVISION_CSV = process.env.SUPERVISION_CSV ||
   'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Supervision';
+const UPDATES_CSV = process.env.UPDATES_CSV ||
+  'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Updates';
 const SITE_STATE_CSV = process.env.SITE_STATE_CSV ||
   'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Site%20State';
 /* Day 1 of the CURRENT attempt. Overridden at build time by the Site State
@@ -1584,7 +1587,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1806,7 +1809,7 @@ function livePage(supervision = [], violations = []) {
   const dataBlock = Object.fromEntries(supervision.map((s) => [s.date, { status: s.status, url: s.url }]));
   const RULES = [
     ['Uniform required', 'The full project uniform is worn throughout the supervision period while Micheal is in the monitored areas.'],
-    ['Collar required', 'The designated collar is worn as the visible indication that the supervision period is active.'],
+    ['Collar required', 'The project collar (§4.1) is worn visibly throughout, as in every official recording.'],
     ['Fixed-camera observation', 'Cameras remain in their designated positions. They are not repositioned to avoid observation.'],
     ['Normal activity continues', 'Cooking, eating, cleaning, household work, personal administration, television, reading, and ordinary evening activity are permitted. This is not a performance.'],
     ['Water only', 'Water is the only beverage consumed during the scheduled supervision period.'],
@@ -2064,7 +2067,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <h2>The standard</h2>
     <div class="standard">
       <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
-      <div><b>Uniform</b><p>The project uniform (§4.1): plain black unitard — the same standard as every official recording.</p></div>
+      <div><b>Uniform</b><p>The project uniform (§4.1): plain black unitard and plain collar — the same standard as every official recording.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous, unedited take, fully AI-voiced. The participant does not speak. A verification code issued by the record seconds before capture is burned into every frame, so the footage cannot be older than it claims.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
@@ -2300,33 +2303,23 @@ ${SYN_FOOTER}
 </body>
 </html>`;
 }
-async function buildSyntheticPages() {
-  const full = await fs.readFile(path.join(ROOT, 'index.html'), 'utf8');
-  return [
-    ['about', synPage({
-      title: 'About the Project \u2014 Micheal Ray Berry',
-      desc: 'Why this public accountability project exists, how it is administered by an independent Accountability Partner, and the documentation standard behind the record.',
-      canonical: `${SITE_ORIGIN}/about`,
-      body: synClean(synExtract(full, '<div data-screen-label="About">', '<!-- ==================== AGREEMENT')),
-    })],
-    ['agreement', synPage({
-      title: 'The Signed Accountability Agreement \u2014 Micheal Ray Berry',
-      desc: 'The full public text of the signed Public Accountability Agreement: daily requirements, documentation standard, weigh-ins, violations, corrective sessions, and record permanence.',
-      canonical: `${SITE_ORIGIN}/agreement`,
-      body: synClean(synExtract(full, '<div data-screen-label="Agreement">', '<!-- ==================== PENALTIES')),
-    })],
-  ];
+function staticCtx(data) {
+  return Object.assign({
+    ROOT, SITE_ORIGIN, START_DATE, todayIso: todayEtIso(),
+    findPhoto, relUrl, videoEmbed, longDate, htmlEscape, normalizeDate,
+  }, data);
 }
 
 async function main() {
-  let csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv;
+  let csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv, updatesCsv;
   try {
-    [csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv] = await Promise.all([
+    [csv, attestCsv, violationCsv, siteStateCsv, supervisionCsv, updatesCsv] = await Promise.all([
       fetchText(SHEET_CSV, false),
       fetchText(ATTEST_CSV, true),
       fetchText(VIOLATION_CSV, false),
       fetchText(SITE_STATE_CSV, true),
       fetchText(SUPERVISION_CSV, true),
+      fetchText(UPDATES_CSV, true),
     ]);
   } catch (error) {
     console.error('Required sheet fetch failed:', error);
@@ -2341,7 +2334,7 @@ async function main() {
        last good deploy instead of publishing a gutted one. */
     console.warn('Record sheet unreadable — generating sheet-independent pages, then failing the build.');
     console.warn('Fix: Share > General access > Anyone with the link > Viewer, then retry the deploy.');
-    for (const [slug, html] of await buildSyntheticPages()) {
+    for (const [slug, html] of await buildStaticSite(staticCtx({ rows: [], violations: [], updates: [], siteState: {}, attestMap: {}, photoFiles: [] }))) {
       await writeIfChanged(path.join(ROOT, slug, 'index.html'), html);
     }
     process.exitCode = 1;
@@ -2611,10 +2604,15 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/consent/`);
 
-  // Standalone, indexable About and Agreement pages, mirrored from index.html.
-  for (const [slug, html] of await buildSyntheticPages()) {
+  /* The public shell — home, dashboard, penalties, milestones, uniform,
+     updates, about, agreement — rendered from site.template.html with every
+     hole filled from the record. Zero template braces reach a visitor. */
+  const updates = (updatesCsv ? parseCSV(updatesCsv).slice(1) : [])
+    .map((r) => ({ date: String(r[0] || '').trim(), type: String(r[1] || 'official').trim(), title: String(r[2] || '').trim(), body: String(r[3] || '').trim(), link: String(r[4] || '').trim() }))
+    .filter((u) => u.title || u.body);
+  for (const [slug, html] of await buildStaticSite(staticCtx({ rows, violations, updates, siteState, attestMap: Object.fromEntries(attestMap), photoFiles }))) {
     if (await writeIfChanged(path.join(ROOT, slug, 'index.html'), html)) changedUrls.add(`${SITE_ORIGIN}/${slug}`);
-    extraUrls.push(`${SITE_ORIGIN}/${slug}`);
+    if (slug) extraUrls.push(`${SITE_ORIGIN}/${slug}`);
   }
   extraUrls.push(`${SITE_ORIGIN}/weeks/`);
 

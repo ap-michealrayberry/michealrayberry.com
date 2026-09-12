@@ -5,20 +5,13 @@ https://michaelrayberry.com/*      https://michealrayberry.com/:splat  301!
 https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 
 /home        /            301
-# /about and /agreement are static files generated at build time; these
-# rewrites are a FALLBACK only (an existing file always wins over a rewrite).
-/about       /index.html  200
-/agreement   /index.html  200
-/dashboard   /index.html  200
-/milestones  /index.html  200
-/penalties   /index.html  200
+# Every public page is a static file generated at build time from
+# site.template.html — no client-side rendering, no SPA rewrites.
 /accountability-partner  /  301
 /personal    /  301
 /personal/*  /  301
 /partner     /  301
 /partner/*   /  301
-/uniform     /index.html  200
-/updates     /index.html  200
 /log         /penalties   301
 /annex/* / 301
 /annex / 301
@@ -50,6 +43,7 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /violations/v-000 /penalties 301
 
 /scripts/*     /404.html   404
+/site.template.html /404.html 404
 /package.json  /404.html   404
 /voice-pack.json /404.html 404
 /eslint.config.mjs /404.html 404

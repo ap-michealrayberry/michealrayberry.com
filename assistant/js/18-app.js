@@ -184,7 +184,7 @@
       li.tabIndex = 0;
       li.style.cursor = "pointer";
       var left = document.createElement("span");
-      left.textContent = "Uniform — black unitard";
+      left.textContent = "Uniform — black unitard · collar";
       var right = document.createElement("span");
       var confirmed = false;
       function paint() {

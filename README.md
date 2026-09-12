@@ -3,7 +3,16 @@
 Supersedes push-2026-08-29/ (all of its fixes are included here).
 Replace these files in ap-michealrayberry/michealrayberry.com@main:
 
-- index.html, boot.js, live.js, llms.txt, manifest.webmanifest, _redirects, .gitignore, 404.html
+- site.template.html (the former index.html — SOURCE ONLY, served as 404),
+  scripts/static-site.mjs (renders it to static HTML at build), record.js,
+  unsw.js, live.js, boot.js, llms.txt, manifest.webmanifest, _redirects,
+  .gitignore, 404.html
+- DELETE index.html from the repo — the build now generates it (and
+  dashboard/, penalties/, milestones/, uniform/, updates/, about/,
+  agreement/ index.html files) from site.template.html with the record
+  filled in. Zero {{ }} placeholders in served HTML; JS only enhances
+  (record.js refreshes counters, live.js runs the supervision console,
+  unsw.js unregisters the old service worker).
 - assistant/file/index.html (Supervision mode button + panel)
 - scripts/publish.mjs
 - assistant/index.html, assistant/app.js,
@@ -77,9 +86,14 @@ superseded. Applied to: consent script, File tool YT description, llms.txt.
 Also removed sitewide: rating=adult meta, violation-page noindex — the
 whole record indexes fully.
 
-## §4.1 uniform wording (revised Sept 1)
+## §4.1 uniform wording (revised Sept 12 — COLLAR RESTORED)
 
-The uniform is stated everywhere as "a plain black unitard" — the
+Sept 12 user ruling: the plain collar returns to §4.1 for every official
+recording (uniform page Requirement 2, positions attire, corrections
+standard, About, llms, preflight row "black unitard · collar"). Amend §4.1
+at co-signing: "a plain black unitard and a plain collar".
+
+Earlier (Sept 1) the uniform was stated everywhere as "a plain black unitard" — the
 footed/no-footwear enumeration was removed as unnecessary. Applied to:
 uniform page, positions attire/camera rows, corner-time standard, corrective voice
 script, assistant preflight confirm row, llms.txt.
