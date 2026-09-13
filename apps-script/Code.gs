@@ -62,6 +62,8 @@ var TABS = {
   'Violation Log':  ['date', 'violation', 'status', 'submitted', 'resolved', 'ap_verification', 'corrections', 'recording'],
   'Attestation':    ['logged_at_server', 'date', 'day', 'event', 'code', 'kind', 'video_sha256', 'photo_sha256s', 'weight', 'status', 'chunk_chain', 'chunk_count', 'server_seal', 'sealed_at'],
   'Corrective Log': ['date', 'assignment', 'due', 'status', 'completed'],
+  /* type: official (AP entry) | personal (Micheal's note) | amendment (\u00a712.1 — also
+     rendered on the agreement page's amendment log). */
   'Updates':        ['date', 'type', 'title', 'body', 'link'],
   'Site State':     ['key', 'value'],
   /* Written by withingsSync (weight only). The activity columns are legacy
@@ -1335,8 +1337,11 @@ function menuPostUpdate() {
   if (t1.getSelectedButton() !== ui.Button.OK || !t1.getResponseText().trim()) return;
   var t2 = ui.prompt('Post update', 'Body — published verbatim under the official AP label:', ui.ButtonSet.OK_CANCEL);
   if (t2.getSelectedButton() !== ui.Button.OK) return;
-  tab('Updates').appendRow([menuToday(), 'official', t1.getResponseText().trim(), t2.getResponseText().trim(), '']);
-  ui.alert('Posted. It appears in the Updates section immediately (the site reads the sheet live).');
+  var kind = ui.alert('Post update', 'Is this an AMENDMENT to the agreement (§12.1)? YES = logged in Updates AND on the agreement page\u2019s amendment log. NO = ordinary update.', ui.ButtonSet.YES_NO_CANCEL);
+  if (kind === ui.Button.CANCEL) return;
+  tab('Updates').appendRow([menuToday(), kind === ui.Button.YES ? 'amendment' : 'official', t1.getResponseText().trim(), t2.getResponseText().trim(), '']);
+  triggerDeploy();
+  ui.alert('Posted. A rebuild was triggered; it appears in Updates' + (kind === ui.Button.YES ? ' and on the agreement page' : '') + ' within a few minutes.');
 }
 
 function menuStage(key, val, label) {
@@ -2554,7 +2559,7 @@ function migrateRecordFrom(oldId, previewOnly) {
 
    The CSV export writes whatever a cell is FORMATTED as, so a real Date value
    comes out "7/31/2026" while the site, the archive publisher and both tools
-   all expect "2026-08-13". The original record stored dates as text and read
+   all expect "2026-08-31". The original record stored dates as text and read
    correctly; the migration copied Date objects into the new one, which is why
    the dashboard fell back to seed data and the corrective tool reported no
    open entry against a log holding three.

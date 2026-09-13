@@ -26,8 +26,8 @@ const VIEWS = [
     desc: 'Official entries by the Accountability Partner and dated notes on the record, newest first.' },
   { page: 'about', slug: 'about', label: 'About', title: 'About the Project \u2014 Micheal Ray Berry',
     desc: 'Why this public accountability project exists, how it is administered by an independent Accountability Partner, and the documentation standard behind the record.' },
-  { page: 'agreement', slug: 'agreement', label: 'Agreement', title: 'The Signed Accountability Agreement \u2014 Micheal Ray Berry',
-    desc: 'The public summary of the signed Public Accountability Agreement: daily requirements, documentation standard, weigh-ins, violations, corrective sessions, and record permanence.' },
+  { page: 'agreement', slug: 'agreement', label: 'Agreement', title: 'The Public Accountability Agreement \u2014 Micheal Ray Berry',
+    desc: 'The public summary of the Public Accountability Agreement: daily requirements, documentation standard, weigh-ins, violations, corrective sessions, and record permanence.' },
 ];
 
 const MILESTONES = [320, 300, 275, 250, 225, 200];
@@ -174,10 +174,13 @@ function computeValues(ctx) {
   // updates
   const ups = (updates && updates.length ? updates : [{ date: 'August 31, 2026', type: 'official', title: 'Entry 001 — Project Commencement', body: 'The project begins under Edition 2 of the agreement. The agreement declares a start of 340 lb. Nothing before this date is on the record.', link: '/daily/' }])
     .slice().sort((a, b) => (Date.parse(a.date) || 0) - (Date.parse(b.date) || 0));
+  // amendments: Updates rows typed 'amendment' render on the agreement page (§12.1 log), newest first
+  const amendments = ups.filter((u) => String(u.type || '').toLowerCase() === 'amendment').reverse()
+    .map((u) => ({ date: esc(u.date), title: esc(u.title || 'Amendment'), summary: esc(u.body || '') }));
   let n = 0;
   const updateRows = ups.map((u) => { const isPersonal = u.type === 'personal'; if (!isPersonal) n++; return { u, isPersonal, num: n }; }).reverse().map(({ u, isPersonal, num }) => ({
     date: esc(u.date), isPersonal,
-    title: esc(isPersonal ? (u.title || 'Personal note') : (String(u.title || '').toLowerCase().indexOf('entry') === 0 ? u.title : 'Entry ' + String(num).padStart(3, '0') + ' — ' + u.title)),
+    title: esc(isPersonal ? (u.title || 'Personal note') : (String(u.title || '').toLowerCase().indexOf('entry') === 0 ? u.title : 'Entry ' + String(num).padStart(3, '0') + ' — ' + (String(u.type || '').toLowerCase() === 'amendment' ? 'Amendment: ' : '') + u.title)),
     body: esc(u.body), author: isPersonal ? 'by Micheal Ray Berry' : 'by the AP',
     hasLink: /^https?:\/\//i.test(String(u.link || '')), link: /^https?:\/\//i.test(String(u.link || '')) ? esc(u.link) : '', linkLabel: 'Link',
     borderColor: isPersonal ? '#D8D6CF' : '#141412', bg: isPersonal ? '#F1F0EA' : '#FAFAF7', titleColor: isPersonal ? '#3A3935' : '#141412',
@@ -223,7 +226,7 @@ function computeValues(ctx) {
     hasAttested: attestedDays > 0, attestedLabel: attestedDays + (attestedDays === 1 ? ' day attested ✓' : ' days attested ✓'),
     logRows, milestoneCells, milestoneRows, penaltyRows, hasPenalties: penaltyRows.length > 0, noPenalties: penaltyRows.length === 0,
     updateRows, photoRows, hasPhotos: photoRows.length > 0, hasExpanded: false, expandedAngles: [], hasExpandedAttested: false,
-    hasAmendments: false, amendments: [],
+    hasAmendments: amendments.length > 0, amendments, amendmentsThrough: amendments.length ? amendments[0].date : '',
     showVideos: true,
     introVideoEmbed: introEmbed, introVideoUrl: introUrl && !introEmbed ? esc(introUrl) : '', noIntroVideo: !introUrl,
     latestVideoEmbed: latestEmbed, latestVideoUrl: latestVideoUrl && !latestEmbed ? esc(latestVideoUrl) : '', noLatestVideo: !latestVideoUrl,

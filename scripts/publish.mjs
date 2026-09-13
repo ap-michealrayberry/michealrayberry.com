@@ -746,7 +746,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -921,7 +921,7 @@ function milestonePage(target, entries) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1021,7 +1021,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1084,7 +1084,7 @@ function weeksIndexPage(entries, lastDay) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1288,7 +1288,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1477,7 +1477,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1579,7 +1579,7 @@ function consentPage() {
     ${latest
       ? `<video class="vid" src="${htmlEscape(latest.url)}" controls preload="metadata" playsinline></video>
       <p><small>Confirmation version ${latest.version}, recorded ${htmlEscape(longDate(latest.date))}.</small></p>`
-      : '<p><em>The confirmation recording has not yet been filed. The terms it states are below and are in force regardless — they are the terms of the signed agreement.</em></p>'}
+      : '<p><em>The confirmation recording has not yet been filed. The terms it states are below and are in force regardless — they are the terms of the agreement.</em></p>'}
 
     <h2>What is confirmed</h2>
     <div class="statement">
@@ -1605,7 +1605,7 @@ function consentPage() {
       ? `<ul class="versions">${CONFIRMATIONS.slice().reverse().map((c) => `<li><a href="${c.url}"><span>Version ${c.version} — ${htmlEscape(longDate(c.date))}</span><span>View →</span></a></li>`).join('')}</ul>`
       : '<p><em>No confirmation has been filed yet.</em></p>'}
 
-    <p><a href="/agreement">Read the signed agreement in full →</a></p>
+    <p><a href="/agreement">Read the agreement →</a></p>
   </main>
   <div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
@@ -1617,7 +1617,7 @@ function consentPage() {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1767,7 +1767,7 @@ function violationPage(v, prev, next) {
         ? 'A corrective session has been submitted, which resolves the entry on the record. The Accountability Partner reviews the published posting and may overrule — reopening the entry — if it fails the standard.'
         : 'No corrective session has been submitted against this entry yet. It remains open, and the site states so on every page until it is answered.'}</p>
     <p>The standard the correction has to meet is set out on <a href="/corrections/">the corrective
-    session page</a>. The full terms are in <a href="/agreement">§8 of the signed agreement</a>.</p>
+    session page</a>. The full terms are in <a href="/agreement">§8 of the agreement</a>.</p>
 
     ${v.day >= 1 ? `<p><a href="/daily/${v.date}-day-${String(v.day).padStart(3, '0')}/">The record for Day ${v.day} →</a></p>`
       : '<p>This entry predates Day 1.</p>'}
@@ -1788,7 +1788,7 @@ function violationPage(v, prev, next) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2000,7 +2000,7 @@ function positionsPage(entries, siteState = {}) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2070,7 +2070,7 @@ function violationsIndexPage(violations) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2137,13 +2137,8 @@ function sharePage(d) {
     <h1>Share the Project</h1>
     <p class="lede"><strong>Micheal Ray Berry asked to be seen. Here is the record.</strong></p>
     <p>Micheal Ray Berry has chosen public accountability under his real name. His weight, required daily conduct, compliance, failures, and corrective requirements are documented on a public record administered by an Accountability Partner.</p>
-    <p><strong>Maximum public exposure is a stated goal of the project.</strong> He invites others to discover the record, recognize him, follow what happens, and share the public material under the conditions below.</p>
+    <p><strong>Wide public visibility is a stated goal of the project.</strong> He invites others to discover the record, recognize him, follow what happens, and share the public material under the conditions below.</p>
     <blockquote style="margin:22px 0;padding:14px 22px;border-left:3px solid var(--accent);font-size:17px;line-height:1.55">“I want this project to be seen. I want people to recognize me, follow my progress, and see whether I meet my commitments—including when I fall short.”<br><small style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">— Micheal Ray Berry</small></blockquote>
-    <h2>Be careful what you ask for</h2>
-    <p>Micheal asked for maximum public exposure. His real name, official photograph, and daily report cards are assembled here for convenient sharing. He has made it remarkably easy to put a face to the paperwork.</p>
-    <p>The unitard, the inspection photographs, and any required corner-time recordings all belong to the same named record. If he misses a requirement, the resulting entry may be considerably less flattering than the introduction.</p>
-    <p>Being recognized through those images—or having an embarrassing entry shared with someone he knows—may feel humiliating. That possibility is part of the public visibility he is deliberately seeking. The facts still have to be accurate, and the sharing conditions below still apply.</p>
-    <p><strong>He asked for an audience. He even supplied the download button.</strong></p>
     <p class="share-actions" style="display:flex;flex-wrap:wrap;gap:10px 22px;font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">
       <button type="button" data-copy="https://michealrayberry.com/" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy website link</button>
       ${card ? `<a href="${card.png}" download>Download latest report card</a>` : ''}
@@ -2215,7 +2210,7 @@ function observerReceivedPage() {
 function livePage(supervision = [], violations = []) {
   const canonical = `${SITE_ORIGIN}/live/`;
   const title = 'Evening Supervision — Micheal Ray Berry is under supervision';
-  const description = 'Live evening supervision under §3.4 of the signed agreement: fixed-camera observation, 6:00–10:00 PM Eastern on nights preceding a scheduled workday, with the published rules and the permanent session record.';
+  const description = 'Live evening supervision under §3.4 of the agreement: fixed-camera observation, 6:00–10:00 PM Eastern on nights preceding a scheduled workday, with the published rules and the permanent session record.';
   const SESSION_START = '2026-09-13';
   const vioByDate = new Map(violations.map((v) => [v.date, v]));
   const dataBlock = Object.fromEntries(supervision.map((s) => [s.date, { status: s.status, url: s.url }]));
@@ -2438,14 +2433,13 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <p>What answers a documented failure, what the standard is, and every session on the record.</p>
   </header>
   <main>
-    <p class="lede"><strong>A corrective session answers one thing: a failure to document the day
-    as required, by ten PM Eastern.</strong> It is not a consequence for the weight. A gain, a plateau,
+    <p class="lede"><strong>A corrective session answers a documented failure: the Daily Compliance Packet
+    not filed by 10 PM Eastern, or a required Evening Supervision session not completed (§3.4).</strong> It is not a consequence for the weight. A gain, a plateau,
     or a bad month is never a Violation Event.</p>
-    <p>Every confirmed Violation Event is answered this way, and the requirement is set by the
-    Accountability Partner against the project's standards — not against anything outside them.</p>
+    <p>Every confirmed Violation Event is answered this way. The level follows automatically from the
+    accumulated count of confirmed violations (§8.1) — the Accountability Partner cannot raise, lower, or waive it.</p>
 
-    <p>The duration follows the accumulated count of confirmed violations, so a second failure costs
-    more than a first and a third costs more than a second.</p>
+    <p>So a second failure costs more than a first and a third costs more than a second.</p>
 
     <table class="levels">
       <thead><tr><th>Level</th><th>Assigned when</th><th>Duration</th></tr></thead>
@@ -2476,7 +2470,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     nobody can see is one that would eventually be discounted too.</p>
     <p>Every published photograph and recording shows the participant in the full project
     uniform. Verification photographs are held privately and are not published.</p>
-    <p>The full terms are in <a href="/agreement">§8.2 and §8.6 of the signed agreement</a>.</p>
+    <p>The full terms are in <a href="/agreement">§8.2 and §8.6 of the agreement</a>.</p>
 
     <h2>Sessions on the record</h2>
     ${sessions.length
@@ -2495,7 +2489,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2629,7 +2623,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>`;
