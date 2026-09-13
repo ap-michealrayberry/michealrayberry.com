@@ -1,3 +1,26 @@
+## Hosting: Cloudflare Pages (Netlify retired Sept 12)
+- Pages project michealrayberry-com ← GitHub repo, branch main.
+  Build command: npm run build · Output directory: / (root) · Node 20.
+- Variables & Secrets (Production): NODE_VERSION=20,
+  SITE_ORIGIN=https://michealrayberry.com, TURNSTILE_SITE_KEY (plain),
+  TURNSTILE_SECRET (secret), OBSERVER_SECRET (secret — same value as
+  setObserverSecret() in Code.gs), APPS_SCRIPT_URL (the /exec URL).
+- Deploy hook: Settings → Builds → Deploy hooks → Add (main) → run
+  setBuildHook(url) in Code.gs. Photo commits carry [skip ci].
+- Typo domain michaelrayberry.com: Cloudflare Redirect Rule (dynamic 301 to
+  https://michealrayberry.com + path); NOT in _redirects (Pages has no
+  host-based rules).
+- Turnstile: Cloudflare → Turnstile → Add widget (michealrayberry.com,
+  managed) → copy site key + secret into the variables above.
+
+## Observer submissions (/observer/)
+- functions/observer.js (Pages Function) verifies Turnstile + honeypot, then
+  POSTs to Apps Script action 'observer' with OBSERVER_SECRET.
+- Rows land on the Observer tab (received_at, type, message, name, email,
+  source_url, quotable, review, ap_note); the AP is emailed per submission.
+- Review col H: received → dismissed / verified / published / actioned.
+  Nothing publishes from the tab; the AP quotes only when quotable = yes.
+
 # Edition 2 deploy set — fresh start, Day 1 = August 31, 2026
 
 Supersedes push-2026-08-29/ (all of its fixes are included here).
@@ -179,6 +202,12 @@ site; the agreement full text should match. Weekly Position Training
 The no-loss corner period is struck. The Weekly Review is the week's
 figures read from the Official Record to camera, plus the assessment.
 No consequence attaches to a week without loss. (Never co-signed.)
+
+## §4.2 Correction Uniform — RESTORED (Sept 12, user text)
+
+Pink unitard + collar for recorded corrective sessions; uniform page
+Requirement 3, corrections standard row, corrective preflight row. Amend
+§4.2 at co-signing. (The Sept 1 removal below is history.)
 
 ## §4.2 Correction Uniform — REMOVED (Sept 1)
 

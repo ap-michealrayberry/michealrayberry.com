@@ -74,6 +74,10 @@ var TABS = {
      nightly check (MISSED), the File tool (COMPLETED + stream_url), or the
      AP via the MRB menu (EXCEPTION). The site reads it on /live. */
   'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
+  /* Observer submissions from /observer/ (Cloudflare Pages Function →
+     action 'observer', shared secret OBSERVER_SECRET). AP-only: never read
+     by the site. review = received | dismissed | verified | published | actioned. */
+  'Observer':       ['received_at', 'type', 'message', 'name', 'email', 'source_url', 'quotable', 'review', 'ap_note'],
 };
 
 /* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
@@ -122,7 +126,7 @@ function createRecordSpreadsheet() {
   }
   var TAB_COLORS = { 'Weigh-ins': '#B3261E', 'Violation Log': '#B3261E', 'Updates': '#B3261E',
     'Attestation': '#6B6A64', 'Corrective Log': '#6B6A64', 'Weekly Log': '#6B6A64',
-    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412', 'Supervision': '#B3261E' };
+    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412', 'Supervision': '#B3261E', 'Observer': '#6B6A64' };
   for (var tc in TAB_COLORS) { var tsh = file.getSheetByName(tc); if (tsh) tsh.setTabColor(TAB_COLORS[tc]); }
   file.getSheetByName('Weigh-ins').setColumnWidth(1, 110);
   file.getSheetByName('Violation Log').setColumnWidth(2, 460);
@@ -242,6 +246,41 @@ function handleUnlock(obj) {
   var stamped = new Date().toISOString();
   return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
 }
+/* ═════ OBSERVER SUBMISSIONS ═════
+   The Pages Function (functions/observer.js) verifies Turnstile, then POSTs
+   here with the shared secret. Rows land on the Observer tab; the AP is
+   mailed. Nothing here touches the public record. */
+function setObserverSecret(s) {
+  PropertiesService.getScriptProperties().setProperty('OBSERVER_SECRET', String(s || '').trim());
+  Logger.log('Observer secret stored. Set the SAME value as OBSERVER_SECRET in Cloudflare Pages → Settings → Variables.');
+}
+function observerOk(s) {
+  var stored = PropertiesService.getScriptProperties().getProperty('OBSERVER_SECRET');
+  return !!stored && String(s || '').trim() === stored;
+}
+function handleObserver(obj) {
+  var clip = function (v, n) { return String(v || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, n); };
+  var TYPES = ['Encouragement', 'I know Micheal personally', 'Possible compliance issue', 'Found/shared elsewhere', 'Question', 'Other'];
+  var type = clip(obj.type, 60); if (TYPES.indexOf(type) === -1) type = 'Other';
+  var message = clip(obj.message, 4000);
+  if (!message) return jsonOut({ ok: false, error: 'empty message' });
+  var name = clip(obj.name, 120), email = clip(obj.email, 200), src = clip(obj.source_url, 500);
+  var quotable = /^(yes|true|on|1)$/i.test(String(obj.quotable || '')) ? 'yes' : 'no';
+  var stamp = Utilities.formatDate(new Date(), 'America/New_York', "yyyy-MM-dd HH:mm 'ET'");
+  var sh = tab('Observer');
+  sh.appendRow([stamp, type, message, name, email, src, quotable, 'received', '']);
+  var n = sh.getLastRow() - 1;
+  try {
+    sendMail(AP_EMAIL, 'Observer submission #' + n + ' — ' + type,
+      'Received ' + stamp + '\nType: ' + type + '\nQuotable anonymously: ' + quotable +
+      (name ? '\nName/nickname: ' + name : '') + (email ? '\nEmail: ' + email : '') + (src ? '\nSource URL: ' + src : '') +
+      '\n\n' + message +
+      '\n\n— Review on the Observer tab (col H: received → dismissed / verified / published / actioned). ' +
+      'A substantiated compliance issue is logged through the MRB menu; nothing publishes from this tab.' + apSign());
+  } catch (e) { Logger.log('Observer mail failed: ' + e); }
+  return jsonOut({ ok: true, n: n });
+}
+
 function keyOk(k) {
   var stored = PropertiesService.getScriptProperties().getProperty('PACKET_KEY');
   return !!stored && String(k || '').trim() === stored;
@@ -317,6 +356,7 @@ function doPost(e) {
       if (obj && obj.action === 'ping') return keyOk(obj.key) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'mystate') return keyOk(obj.key) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'observer') return observerOk(obj.secret) ? handleObserver(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidinit') return keyOk(obj.key) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidchunk') return keyOk(obj.key) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action && String(obj.action).indexOf('ap') === 0) return apOk(obj.key) ? handleApAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
@@ -832,7 +872,7 @@ function nightlyComplianceCheck() {
   // Environment follows the record: end-of-day state drives the home.
   importPhotos(); // final scan so a 9:58 PM upload still counts
   try { withingsSync(); } catch (ew) {} // final weight pull so tonight's reading is on the record
-  netlifyDeploy(); // the ONE production deploy of the day — photo commits are [skip netlify]
+  triggerDeploy(); // the ONE production deploy of the day — photo commits are [skip ci]
 
   var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   if (today < PROJECT_START) return;
@@ -866,7 +906,7 @@ function nightlyComplianceCheck() {
   if (!attested) missing.push('capture attestation (no challenge code / file fingerprints logged today)');
   if (!missing.length) return;
   var autoDeclared = autoDeclareViolation(today, missing);
-  if (autoDeclared) netlifyDeploy(); // violation mode goes live tonight, not tomorrow
+  if (autoDeclared) triggerDeploy(); // violation mode goes live tonight, not tomorrow
 
   var dayNum = Math.floor((new Date(today) - new Date(PROJECT_START)) / 864e5) + 1;
   MailApp.sendEmail({
@@ -903,7 +943,7 @@ function supervisionNightlyCheck() {
   if (sr) sh.getRange(sr.row, 3).setValue('MISSED');
   else sh.appendRow([today, 'yes', 'MISSED', '', '', '', 'no archive link filed by 10:20 PM ET']);
   violationLogSheet().appendRow([today, 'Evening Supervision session not completed — 6:00–10:00 PM ET (§3.4) [auto-declared]', 'Unresolved']);
-  netlifyDeploy();
+  triggerDeploy();
   var day = dayOf(today);
   var c = nextConsequence();
   try {
@@ -966,7 +1006,7 @@ function correctiveDeadlineCheck(today) {
     lapsed.push(noticeStr);
   }
   if (lapsed.length) {
-    netlifyDeploy(); // the new entries go live tonight
+    triggerDeploy(); // the new entries go live tonight
     try {
       MailApp.sendEmail(AP_EMAIL,
         '72-hour corrective deadline missed — ' + lapsed.length + ' new Violation Event(s)',
@@ -1240,7 +1280,7 @@ function menuToday() { return Utilities.formatDate(new Date(), 'America/New_York
 function menuPublish() {
   var ui = SpreadsheetApp.getUi();
   if (ui.alert('Publish', 'Trigger a deploy of michealrayberry.com now?', ui.ButtonSet.OK_CANCEL) !== ui.Button.OK) return;
-  netlifyDeploy();
+  triggerDeploy();
   ui.alert('Deploy triggered. The site rebuilds in about a minute.');
 }
 
@@ -1433,36 +1473,38 @@ function handleApAction(obj) {
       else supervisionSheet().appendRow([sd, supervisionScheduled(sd) ? 'yes' : 'no', sst, '', '', String(obj.url || ''), String(obj.note || '')]);
       return jsonOut({ ok: true });
     }
-    if (obj.action === 'apdeploy') { netlifyDeploy(); return jsonOut({ ok: true, deployed: true }); }
+    if (obj.action === 'apdeploy') { triggerDeploy(); return jsonOut({ ok: true, deployed: true }); }
     return jsonOut({ ok: false, error: 'unknown action' });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err) });
   }
 }
 
-/* ═════ NETLIFY DEPLOY HOOK ═════
-   Netlify → Site configuration → Build & deploy → Build hooks → Add
-   (branch main), copy the URL, then run setNetlifyBuildHook with it. */
+/* ═════ CLOUDFLARE PAGES DEPLOY HOOK ═════
+   Cloudflare → Workers & Pages → michealrayberry-com → Settings → Builds →
+   Deploy hooks → Add (branch main), copy the URL, then run setBuildHook. */
 
-function setNetlifyBuildHook(url) {
-  PropertiesService.getScriptProperties().setProperty('NETLIFY_HOOK', String(url || '').trim());
-  Logger.log('Primary build hook stored (Netlify).');
+function setBuildHook(url) {
+  PropertiesService.getScriptProperties().setProperty('BUILD_HOOK', String(url || '').trim());
+  PropertiesService.getScriptProperties().deleteProperty('NETLIFY_HOOK');
+  Logger.log('Build hook stored (Cloudflare Pages).');
 }
+function setNetlifyBuildHook(url) { setBuildHook(url); } // legacy name
 
-/* Secondary hook — empty in the Netlify-only stack. Kept so a second host can
+/* Secondary hook — empty in the single-host stack. Kept so a second host can
    be rebuilt in lockstep if one is ever added again. */
 function setSecondaryBuildHook(url) {
   PropertiesService.getScriptProperties().setProperty('BUILD_HOOK_2', String(url || '').trim());
-  Logger.log(String(url || '').trim() ? 'Secondary build hook stored (Netlify).' : 'Secondary build hook cleared.');
+  Logger.log(String(url || '').trim() ? 'Secondary build hook stored.' : 'Secondary build hook cleared.');
 }
 
-/* Triggers a rebuild of the live site. NETLIFY_HOOK holds the Netlify build
-   hook. Silence used to mean "no hook set", which is indistinguishable from
-   success when run by hand, so every path logs. */
-function netlifyDeploy() {
+/* Triggers a rebuild of the live site. BUILD_HOOK holds the Cloudflare Pages
+   deploy hook. Silence used to mean "no hook set", which is indistinguishable
+   from success when run by hand, so every path logs. */
+function triggerDeploy() {
   var props = PropertiesService.getScriptProperties();
   var hooks = [
-    { name: 'Netlify', url: props.getProperty('NETLIFY_HOOK') },
+    { name: 'Cloudflare Pages', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
     { name: 'Secondary host (unused)', url: props.getProperty('BUILD_HOOK_2') },
   ].filter(function (x) { return !!x.url; });
 
@@ -1480,7 +1522,7 @@ function netlifyDeploy() {
         out.push(hooks[i].name + ': FAILED — ' + e);
       }
     }
-    if (hooks.length === 1) out.push('Netlify-only stack — one hook is correct.');
+    if (hooks.length === 1) out.push('Single-host stack — one hook is correct.');
     Logger.log(out.join('\n'));
     return;
   }
@@ -1488,9 +1530,9 @@ function netlifyDeploy() {
   var h = null;
   if (!h) {
     Logger.log('NO BUILD HOOK SET — nothing was triggered.\n' +
-      'Netlify → Site configuration → Build & deploy → Build hooks →\n' +
-      'Add build hook (branch main), then run\n' +
-      "setNetlifyBuildHook('https://api.netlify.com/build_hooks/...')");
+      'Cloudflare → Workers & Pages → project → Settings → Builds → Deploy hooks →\n' +
+      'Add (branch main), then run\n' +
+      "setBuildHook('https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/...')");
     return;
   }
   try {

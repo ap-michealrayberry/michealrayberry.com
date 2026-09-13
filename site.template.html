@@ -164,14 +164,14 @@
           <a href="/" onClick="{{ goHome }}" aria-current="{{ isHomeNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</a>
           <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">The Record</a>
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
+          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;"><span data-live-dot style="width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block;"></span><span data-live-label>Live</span></a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
-          <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
         </div>
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection</a>
           <a href="/uniform" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
           <a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Corrections</a>
-          <a href="/live/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Live</a>
+          <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
           <a href="/agreement" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
           <a href="/about" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
           <a href="/updates" onClick="{{ goUpdates }}" aria-current="{{ isUpdatesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Updates</a>
@@ -370,7 +370,7 @@
           </div>
           <div style="padding: 28px 0 28px 24px; border-bottom: 1px solid #D8D6CF; border-left: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">03</span>
-            <span style="font-size: 18px; font-weight: 600;">Report broken links or discrepancies to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</span>
+            <span style="font-size: 18px; font-weight: 600;">Report broken links or discrepancies through the <a href="/observer/">Observer Submission</a> page or to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</span>
           </div>
         </div>
       </div>
@@ -786,6 +786,14 @@
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Real name, real face, real signed agreement, documented daily from August 31, 2026. Every claim on this site is verifiable against the public tracker, the photo archive, and the video archive.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this really is the Micheal Ray Berry you know, and the results are under his real name.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">You are welcome to mention that you found the project. In fact, knowing that someone from his ordinary life may casually say, “I saw your accountability site,” is part of the pressure Micheal deliberately chose.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">You do not need to pretend you never saw it just to spare him the embarrassment. Recognition is part of how the accountability works.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice a possible missed requirement, inconsistency, or something the public record should address, do not argue with Micheal about it. Use the <a href="/observer/" style="color: #B3261E; font-weight: 600;">Observer Submission</a> page (no name or email required) or write to <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>. The Accountability Partner reviews compliance; Micheal does not grade himself.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">A friendly mention is welcome. Harassment, workplace interference, unwanted confrontation, or intrusion into private life is not.</p>
+          </div>
+          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this voluntary?</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Entirely. I designed this system, asked for it in writing, and signed it — precisely because voluntary private promises kept failing. The Accountability Partner administers the structure; he did not impose it.</p>
           </div>
@@ -1036,6 +1044,12 @@
               <span style="font-size: 20px; font-weight: 600;">Accountability collar</span>
               <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">The collar is the visible designation that Micheal Ray Berry is presently under the requirements of the Public Accountability Project. It is required with the project uniform during Daily Inspection, Evening Supervision, and corrective sessions. Removing or omitting it during a required period constitutes noncompliance.</p>
             </div>
+            <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Requirement 3</span>
+              <span style="font-size: 20px; font-weight: 600;">Correction uniform</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">A designated pink unitard is required for recorded corrective sessions. Its use visually distinguishes correction from ordinary Daily Inspection. When it appears in the record, it indicates that a documented requirement was missed and a corrective obligation is being completed.</p>
+              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #141412; font-weight: 600;">The black uniform documents the standard. The pink uniform documents a failure to meet it.</p>
+            </div>
 
           <div style="background: #141412; color: #FAFAF7; padding: 24px 28px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 2; letter-spacing: 0.06em;">
             <span style="display: block;">No anonymous content.</span>
@@ -1136,7 +1150,7 @@
       <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color: #FAFAF7;" style-hover="color: #B3261E;">Consent &amp; boundaries</a></p>
       <div style="border-top: 1px solid #3A3935; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">
         <span style="display: flex; gap: 6px 20px; flex-wrap: wrap;"><span style="white-space: nowrap;">Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">ap@michealrayberry.com</a></span><span style="white-space: nowrap;">Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">contact@michealrayberry.com</a></span></span>
-        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
+        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/observer/" style="color: #FAFAF7; text-decoration: none; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Observer →</a><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
       </div>
     </div>
   </footer>
@@ -1330,7 +1344,7 @@ class Component extends DCLogic {
              navigation. Milestones render within the dashboard, the uniform within
              about. */
           const pages = ['home', 'dashboard', 'milestones', 'about', 'agreement', 'penalties', 'uniform', 'updates'];
-          /* When a static copy of the page exists, Netlify serves it and this
+          /* When a static copy of the page exists, the host serves it and this
              shell never runs. When the SPA rewrite serves this shell instead,
              render the view here — never location.replace to the same path,
              which reloads this shell in an infinite loop. */

@@ -1,8 +1,6 @@
-# Netlify serves the site directly from the repo (Netlify-only stack).
-# michaelrayberry.com (the typo domain) is added as a Netlify domain alias and
-# redirected to the canonical host here — Netlify supports host-based rules.
-https://michaelrayberry.com/*      https://michealrayberry.com/:splat  301!
-https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
+# Cloudflare Pages serves the site from the repo root. The typo domain
+# (michaelrayberry.com) is redirected at the Cloudflare edge: Rules → Redirect
+# Rules → dynamic 301 to https://michealrayberry.com + path. Not here.
 
 /home        /            301
 # Every public page is a static file generated at build time from
@@ -38,7 +36,7 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /Violation%20Acknowledgment.dc.html  /assistant/  301
 
 # Build-only inputs live in the repo but are not part of the served record.
-# (Netlify builds before publishing, so 404-ing them here does not affect the build.)
+# (The build runs before publishing, so 404-ing them here does not affect it.)
 /violations/v-000/ /penalties 301
 /violations/v-000 /penalties 301
 
@@ -52,3 +50,4 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /maid/*       /  301
 /corner-time  /corrections/  301
 /corner-time/*  /corrections/:splat  301
+

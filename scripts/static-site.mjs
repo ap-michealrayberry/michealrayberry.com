@@ -285,6 +285,7 @@ ${helmetStyle}
 <script src="/unsw.js"></script>
 <script src="/live.js" defer></script>
 <script src="/record.js" defer></script>
+<script src="/livenav.js" defer></script>
 </head>
 <body>
 ${body.trim()}
