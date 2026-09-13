@@ -48,4 +48,13 @@
   }
   check();
   setInterval(check, 5 * 60 * 1000);
+  /* Report-card "Copy link": copies the permalink; falls back to following it. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-copy]');
+    if (!a || !navigator.clipboard) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(a.getAttribute('data-copy')).then(function () {
+      var t = a.textContent; a.textContent = 'Copied'; setTimeout(function () { a.textContent = t; }, 1400);
+    }).catch(function () { location.href = a.href; });
+  });
 })();

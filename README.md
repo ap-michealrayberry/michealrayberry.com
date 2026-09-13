@@ -1,50 +1,22 @@
-## Hosting: Cloudflare Pages (Netlify retired Sept 12)
-- Pages project michealrayberry-com ← GitHub repo, branch main.
-  Build command: npm run build · Output directory: / (root) · Node 20.
-- Variables & Secrets (Production): NODE_VERSION=20,
-  SITE_ORIGIN=https://michealrayberry.com, TURNSTILE_SITE_KEY (plain),
-  TURNSTILE_SECRET (secret), OBSERVER_SECRET (secret — same value as
-  setObserverSecret() in Code.gs), APPS_SCRIPT_URL (the /exec URL).
-- Deploy hook: Settings → Builds → Deploy hooks → Add (main) → run
-  setBuildHook(url) in Code.gs. Photo commits carry [skip ci].
-- Typo domain michaelrayberry.com: Cloudflare Redirect Rule (dynamic 301 to
-  https://michealrayberry.com + path); NOT in _redirects (Pages has no
-  host-based rules).
-- Turnstile: Cloudflare → Turnstile → Add widget (michealrayberry.com,
-  managed) → copy site key + secret into the variables above.
+## Hosting: Netlify (Cloudflare Pages move ON HOLD — Sept 13)
+- Netlify deploys straight from the GitHub repo (main). netlify.toml:
+  npm run build · publish "." · Node 20 · SITE_ORIGIN.
+- Build hook: Site configuration → Build & deploy → Build hooks → Add (main)
+  → Code.gs setBuildHook(url). Photo commits carry [skip ci].
+- Typo domain michaelrayberry.com: Netlify domain alias + host-based 301!
+  rules at the top of _redirects.
+- DNS stays where it is (A → 75.2.60.5, www CNAME → the Netlify site).
 
-## Observer submissions (/observer/)
-- functions/observer.js (Pages Function) verifies Turnstile + honeypot, then
-  POSTs to Apps Script action 'observer' with OBSERVER_SECRET.
-- Rows land on the Observer tab (received_at, type, message, name, email,
-  source_url, quotable, review, ap_note); the AP is emailed per submission.
-- Review col H: received → dismissed / verified / published / actioned.
-  Nothing publishes from the tab; the AP quotes only when quotable = yes.
-
-# Edition 2 deploy set — fresh start, Day 1 = August 31, 2026
-
-Supersedes push-2026-08-29/ (all of its fixes are included here).
-Replace these files in ap-michealrayberry/michealrayberry.com@main:
-
-- site.template.html (the former index.html — SOURCE ONLY, served as 404),
-  scripts/static-site.mjs (renders it to static HTML at build), record.js,
-  unsw.js, live.js, boot.js, llms.txt, manifest.webmanifest, _redirects,
-  .gitignore, 404.html
-- DELETE index.html from the repo — the build now generates it (and
-  dashboard/, penalties/, milestones/, uniform/, updates/, about/,
-  agreement/ index.html files) from site.template.html with the record
-  filled in. Zero {{ }} placeholders in served HTML; JS only enhances
-  (record.js refreshes counters, live.js runs the supervision console,
-  unsw.js unregisters the old service worker).
-- assistant/file/index.html (Supervision mode button + panel)
-- scripts/publish.mjs
-- assistant/index.html, assistant/app.js,
-  assistant/js/05-api.js, assistant/js/12-scripts.js,
-  assistant/js/14-upload-queue.js, assistant/js/18-app.js,
-  assistant/file/file.js
-
-Also DELETE voice-pack.json from the repo root.
-
+## Observer submissions (/observer/) — Netlify Forms
+- forms.html at repo root is the detection twin; Netlify registers "observer"
+  from it (served as 404 via _redirects).
+- Netlify → Site → Forms → Form notifications → Email → ap@michealrayberry.com.
+  Optional: Akismet spam filtering under Forms settings.
+- Submissions never publish; the AP quotes only when "quotable" was checked.
+- PARKED for the Cloudflare move: functions/observer.js stays in the repo,
+  inert on Netlify. To switch: form action="/observer", Turnstile widget +
+  CSP origins, env TURNSTILE_SITE_KEY / TURNSTILE_SECRET / OBSERVER_SECRET /
+  APPS_SCRIPT_URL; Code.gs already has the Observer tab + 'observer' action.
 ## ⚠ Gate — do these BEFORE pushing (one-way door)
 
 1. **Edition 2 of the agreement must be co-signed** by Micheal and the AP.

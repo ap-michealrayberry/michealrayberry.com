@@ -21,6 +21,7 @@ above progress on every page.
 - [Weekly record](https://michealrayberry.com/weeks/): week-by-week weights and net change
 - [Failure log](https://michealrayberry.com/violations/): every violation, each a permanent evidence page
 - [Evening Supervision](https://michealrayberry.com/live/)
+- [Reference](https://michealrayberry.com/reference/): factual reference — what the record is, official photograph, current report card, status line, quoting rule
 - [Observer Submission](https://michealrayberry.com/observer/): send a note about
   the record — encouragement, recognition, a question, or a possible
   compliance issue; identification optional; reviewed by the Accountability

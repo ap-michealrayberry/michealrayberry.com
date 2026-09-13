@@ -4,7 +4,7 @@ import { buildStaticSite } from './static-site.mjs';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 
-// Cloudflare Pages sets no workspace var; the build runs from the repo root.
+// Netlify sets no workspace var; the build runs from the repo root.
 const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://michealrayberry.com').replace(/\/$/, '');
 const SHEET_CSV = process.env.WEIGHINS_CSV ||
@@ -262,6 +262,253 @@ async function generateResponsive(source, date, angle, day) {
   };
 }
 
+/* ═════ DAILY REPORT CARD ═════
+   One verdict per Project Day, derived — never typed. Every row is a fact
+   already on the record: weigh-in, inspection filing, photographs,
+   supervision ruling, violation log. Vocabulary is COMPLIANT / INCOMPLETE /
+   VIOLATION / NOT FILED — no grades, no scores, no streaks. */
+let CARD_CTX = null; // set by main(): { rows, violations, supervision }
+function cardStatus(c) {
+  if (c.violation) return c.violation.state === 'open' ? 'VIOLATION' : 'VIOLATION · CORRECTED';
+  if (c.complete) return 'COMPLIANT';
+  if (c.pending) return 'INCOMPLETE';
+  return c.anyFiled ? 'INCOMPLETE' : 'NOT FILED';
+}
+function reportCard(c, { compact = false, link = '' } = {}) {
+  const status = cardStatus(c);
+  const cls = /^VIOLATION$|NOT FILED/.test(status) ? 'bad' : status === 'COMPLIANT' ? 'ok' : 'warn';
+  const wt = Number.isFinite(c.weight) ? c.weight.toFixed(1) + ' lb' : (c.pending ? 'Awaiting scale sync' : 'NOT SYNCED');
+  const dd = c.weight - c.prevWeight;
+  const delta = Number.isFinite(c.weight) && Number.isFinite(c.prevWeight)
+    ? (dd === 0 ? '\u00B10.0' : (dd > 0 ? '+' : '\u2212') + Math.abs(dd).toFixed(1)) + ' from prior day' : '';
+  const total = Number.isFinite(c.weight) ? '\u2212' + (START_WEIGHT - c.weight).toFixed(1) + ' total' : '';
+  const insp = c.video
+    ? 'Filed' + (c.filedAt ? ' ' + c.filedAt + ' ET' : '') + (c.videoSec ? ' \u00B7 recording ' + Math.round(c.videoSec / 60) + ' min' : '')
+    : (c.pending ? 'Not yet filed \u00B7 due 10:00 PM ET' : 'NOT FILED');
+  const photos = c.photoCount + ' of 4' + (c.photoCount < 4 && !c.pending ? ' \u00B7 INCOMPLETE' : '');
+  const sup = c.supervision === null ? 'Not required' : c.supervision ? c.supervision.toUpperCase() : (c.pending ? 'Scheduled 6:00\u201310:00 PM ET' : 'NOT RULED');
+  const vioToday = c.violation
+    ? (c.violation.id + ' \u00B7 ' + ({ open: 'Open \u2014 correction required', corrected: 'Corrected \u2014 awaiting verification', resolved: 'Corrected' })[c.violation.state])
+    : (c.pending ? 'None so far' : 'None');
+  const outstanding = c.openCount ? c.openCount + ' open correction' + (c.openCount === 1 ? '' : 's') + ' on the record' : 'None';
+  const rows = [['Weigh-in', [wt, delta, total].filter(Boolean).join(' \u00B7 ')], ['Inspection', insp], ['Photographs', photos], ['Supervision', sup], ['Violations today', vioToday], ['Outstanding', outstanding]];
+  const isBad = (v) => /NOT FILED|NOT SYNCED|INCOMPLETE|MISSED|Open/.test(v);
+  const photo = c.photo
+    ? `<a class="rc-photo" href="${link || '#photos-heading'}"><img src="${htmlEscape(c.photo.url)}" alt="Micheal Ray Berry, front view, Day ${c.day}" loading="lazy" decoding="async"></a>`
+    : `<div class="rc-photo rc-none"><span>${c.pending ? 'AWAITING INSPECTION' : 'NO PHOTOGRAPH FILED'}</span></div>`;
+  return `<section class="rc ${cls}${compact ? ' compact' : ''}" aria-label="Report card, Day ${c.day}">
+    ${photo}
+    <div class="rc-body">
+      <div class="rc-head">${link ? `<a href="${link}">DAY ${c.day}</a>` : 'DAY ' + c.day}<span>${htmlEscape(longDate(c.date))}</span></div>
+      <div class="rc-status"><span class="lamp"></span>${status}</div>
+      <dl>${rows.map(([k, v]) => `<div${isBad(v) ? ' class="bad"' : ''}><dt>${k}</dt><dd>${htmlEscape(v)}</dd></div>`).join('')}</dl>
+      ${c.pending ? '<p class="rc-next">Packet due 10:00 PM ET. Status is provisional until the deadline passes.</p>' : ''}
+    </div>
+  </section>`;
+}
+const RC_CSS = `
+.rc{display:grid;grid-template-columns:150px 1fr;border:1px solid var(--ink);background:#fff;margin:24px 0}
+.rc.compact{grid-template-columns:96px 1fr;margin:0}
+.rc-photo{display:block;background:var(--ink);aspect-ratio:9/16;overflow:hidden}
+.rc-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.rc-none{display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font:600 10px/1.5 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;color:#8A8983;background:repeating-linear-gradient(45deg,#f6f5f1,#f6f5f1 10px,#eeece6 10px,#eeece6 20px)}
+.rc-body{padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.rc-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:700 13px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em}
+.rc-head a{text-decoration:none;color:inherit}.rc-head span{font-weight:400;color:var(--muted);letter-spacing:.04em}
+.rc-status{font:700 22px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:2px solid var(--ink)}
+.rc.compact .rc-status{font-size:15px;padding:4px 0}
+.rc .lamp{width:11px;height:11px;border-radius:50%;background:#3A6B3A;flex-shrink:0}
+.rc.warn .lamp{background:#8A6A1E}.rc.bad .lamp{background:var(--accent)}.rc.bad .rc-status{color:var(--accent)}
+.rc dl{margin:0;display:grid;grid-template-columns:120px 1fr;gap:5px 14px;font-size:14px;line-height:1.45}
+.rc dl div{display:contents}.rc dt{font:600 11px/1.6 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rc dd{margin:0}.rc dl div.bad dd{color:var(--accent);font-weight:600}
+.rc.compact dl{grid-template-columns:100px 1fr;font-size:13px;gap:3px 12px}
+.rc-next{margin:0;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
+@media(max-width:560px){.rc{grid-template-columns:1fr}.rc-photo{aspect-ratio:4/3}.rc-photo img{object-position:50% 20%}.rc-body{padding:14px 16px;gap:8px}.rc-status{font-size:19px}.rc dl{grid-template-columns:1fr;gap:2px 0}.rc dt{margin-top:6px}}
+`;
+function cardCtx(day, opts = {}) {
+  const X = CARD_CTX || { rows: [], violations: [], supervision: [] };
+  const date = opts.date || dateForDay(day);
+  const row = X.rows.find((r) => r.date === date) || null;
+  const prev = X.rows.filter((r) => r.day < day && Number.isFinite(r.weight)).sort((a, b) => b.day - a.day)[0] || null;
+  const v = X.violations.find((x) => x.date === date) || null;
+  const s = X.supervision.find((x) => x.date === date) || null;
+  const dow = new Date(date + 'T12:00:00Z').getUTCDay();
+  const supRequired = date >= '2026-09-13' && dow <= 4; // Sun–Thu
+  const pending = deadlinePending(date);
+  const photoCount = opts.photoCount ?? 0;
+  const complete = !!(opts.complete || (row && row.video && photoCount === 4));
+  return {
+    day, date,
+    weight: row ? row.weight : NaN, prevWeight: prev ? prev.weight : NaN,
+    video: !!(row && row.video), videoSec: row ? row.videoSec : 0, filedAt: row && row.filedAt ? row.filedAt : '',
+    photoCount, complete, pending, anyFiled: !!(row && (row.weight || row.video)) || photoCount > 0,
+    supervision: supRequired ? (s ? s.status.split(/\s*[\u00B7\-\u2013]\s*/)[0] : '') : null,
+    violation: v, openCount: X.violations.filter((x) => x.state === 'open').length,
+    photo: opts.photo || null,
+  };
+}
+
+/* ═════ CARD IMAGE (1080×1350 PNG) ═════
+   The unit that travels. Composed as SVG from the same ctx as the HTML card,
+   rasterised by sharp (already a build dependency). Photo is embedded as a
+   base64 JPEG so the PNG is self-contained. Fonts: librsvg has no web fonts,
+   so a generic monospace stack — the layout is sized for it. */
+const svgEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+async function cardImage(c) {
+  const W = 1080, H = 1350, PAD = 56;
+  const status = cardStatus(c);
+  const bad = /^VIOLATION$|NOT FILED/.test(status), warn = !bad && status !== 'COMPLIANT';
+  const lamp = bad ? '#B3261E' : warn ? '#8A6A1E' : '#3A6B3A';
+  // photo column: 9:16 at 380 wide
+  const PW = 380, PH = Math.round(PW * 16 / 9);
+  let photoEl = '';
+  if (c.photo && c.photo.path) {
+    try {
+      const buf = await sharp(c.photo.path, { failOn: 'none' }).rotate().resize({ width: PW, height: PH, fit: 'cover' }).jpeg({ quality: 82 }).toBuffer();
+      photoEl = `<image href="data:image/jpeg;base64,${buf.toString('base64')}" x="${PAD}" y="${PAD + 130}" width="${PW}" height="${PH}" preserveAspectRatio="xMidYMid slice"/>`;
+    } catch (e) { photoEl = ''; }
+  }
+  if (!photoEl) {
+    photoEl = `<rect x="${PAD}" y="${PAD + 130}" width="${PW}" height="${PH}" fill="#EEECE6"/>
+      <text x="${PAD + PW / 2}" y="${PAD + 130 + PH / 2}" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="20" font-weight="700" letter-spacing="3" fill="#8A8983">${c.pending ? 'AWAITING INSPECTION' : 'NO PHOTOGRAPH FILED'}</text>`;
+  }
+  const wt = Number.isFinite(c.weight) ? c.weight.toFixed(1) + ' lb' : (c.pending ? 'Awaiting sync' : 'NOT SYNCED');
+  const dd = c.weight - c.prevWeight;
+  const delta = Number.isFinite(c.weight) && Number.isFinite(c.prevWeight) ? (dd === 0 ? '±0.0' : (dd > 0 ? '+' : '−') + Math.abs(dd).toFixed(1)) + ' day' : '';
+  const total = Number.isFinite(c.weight) ? '−' + (START_WEIGHT - c.weight).toFixed(1) + ' total' : '';
+  const filedLine = c.video ? 'Filed' + (c.filedAt ? ' ' + c.filedAt + ' ET' : '') : (c.pending ? 'Not yet filed' : 'NOT FILED');
+  const filedSub = c.video ? (c.videoSec ? 'Recording ' + Math.round(c.videoSec / 60) + ' min \u00B7 due 10:00 PM ET' : 'Due 10:00 PM ET') : 'Due 10:00 PM ET';
+  const vioToday = c.violation
+    ? c.violation.id + ' \u00B7 ' + ({ open: 'Open', corrected: 'Corrected \u2014 awaiting verification', resolved: 'Corrected' })[c.violation.state]
+    : (c.pending ? 'None so far' : 'None');
+  const outstanding = c.openCount ? c.openCount + ' open correction' + (c.openCount === 1 ? '' : 's') : 'None';
+  const rows = [
+    ['WEIGH-IN', wt, [delta, total].filter(Boolean).join(' \u00B7 ')],
+    ['DAILY INSPECTION', filedLine, filedSub],
+    ['PHOTOGRAPHS', photos, ''],
+    ['SUPERVISION', sup, ''],
+    ['VIOLATIONS TODAY', vioToday, c.violation && c.violation.state === 'open' ? 'Correction required' : ''],
+    ['OUTSTANDING CORRECTIONS', outstanding, ''],
+  ];
+  const isBad = (v) => /NOT FILED|NOT SYNCED|INCOMPLETE|MISSED|Open/.test(v);
+  const pageUrl = `${SITE_ORIGIN}/daily/${c.date}-day-${String(c.day).padStart(3, '0')}/`;
+  const qr = qrSvgPath(pageUrl);
+  const X = PAD + PW + 44, RW = W - X - PAD;
+  const rowTop = PAD + 130 + 84 + 46;             // below the status rule
+  const rowBottom = H - PAD - 150 - 24;           // above the footer band (taller: QR)
+  const step = Math.floor((rowBottom - rowTop) / rows.length); // ≈150 for 6 rows
+  let y = rowTop;
+  const rowSvg = rows.map(([k, v, sub]) => {
+    const red = isBad(v) || isBad(sub);
+    const out = `<text x="${X}" y="${y}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="17" font-weight="700" letter-spacing="3" fill="#6B6A64">${svgEsc(k)}</text>
+      <text x="${X}" y="${y + 44}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="34" font-weight="${red ? 700 : 400}" fill="${red ? '#B3261E' : '#141412'}">${svgEsc(v)}</text>
+      ${sub ? `<text x="${X}" y="${y + 76}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="19" fill="${red ? '#B3261E' : '#6B6A64'}">${svgEsc(sub)}</text>` : ''}
+      <line x1="${X}" y1="${y + step - 26}" x2="${W - PAD}" y2="${y + step - 26}" stroke="#D8D6CF" stroke-width="2"/>`;
+    y += step;
+    return out;
+  }).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <rect width="${W}" height="${H}" fill="#FAFAF7"/>
+    <rect x="${PAD}" y="${PAD}" width="${W - PAD * 2}" height="${H - PAD * 2}" fill="#FFFFFF" stroke="#141412" stroke-width="3"/>
+    <text x="${PAD + 30}" y="${PAD + 58}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="22" font-weight="700" letter-spacing="4" fill="#B3261E">MICHEAL RAY BERRY · UNDER PUBLIC ACCOUNTABILITY</text>
+    <text x="${PAD + 30}" y="${PAD + 100}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="26" font-weight="700" letter-spacing="4" fill="#141412">DAY ${c.day}</text>
+    <text x="${W - PAD - 30}" y="${PAD + 100}" text-anchor="end" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="22" fill="#6B6A64">${svgEsc(longDate(c.date))}</text>
+    <line x1="${PAD}" y1="${PAD + 130}" x2="${W - PAD}" y2="${PAD + 130}" stroke="#141412" stroke-width="3"/>
+    ${photoEl}
+    <circle cx="${X + 16}" cy="${PAD + 130 + 52}" r="14" fill="${lamp}"/>
+    <text x="${X + 46}" y="${PAD + 130 + 64}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="${status.length > 12 ? 34 : 44}" font-weight="700" letter-spacing="4" fill="${bad ? '#B3261E' : '#141412'}">${svgEsc(status)}</text>
+    <line x1="${X}" y1="${PAD + 130 + 84}" x2="${W - PAD}" y2="${PAD + 130 + 84}" stroke="#141412" stroke-width="3"/>
+    ${rowSvg}
+    <rect x="${PAD}" y="${H - PAD - 150}" width="${W - PAD * 2}" height="150" fill="#141412"/>
+    <text x="${PAD + 30}" y="${H - PAD - 96}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="24" font-weight="700" letter-spacing="3" fill="#FAFAF7">MICHEAL RAY BERRY</text>
+    <text x="${PAD + 30}" y="${H - PAD - 60}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="19" letter-spacing="2" fill="#FAFAF7">michealrayberry.com/daily/${c.date}-day-${String(c.day).padStart(3, '0')}/</text>
+    <text x="${PAD + 30}" y="${H - PAD - 28}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="17" letter-spacing="2" fill="#8A8983">FULL DAILY RECORD · 340 → 200 LB · PUBLIC ACCOUNTABILITY PROJECT</text>
+    <g transform="translate(${W - PAD - 30 - 118} ${H - PAD - 134})"><rect width="118" height="118" fill="#FAFAF7"/><g transform="translate(6 6) scale(${106 / qr.size})"><path d="${qr.path}" fill="#141412"/></g></g>
+  </svg>`;
+  return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
+}
+/* Minimal QR encoder — byte mode, error-correction L, fixed mask 0. Enough
+   for one short URL; returns { size, path } for an SVG <path>. */
+function qrSvgPath(text) {
+  const bytes = Buffer.from(text, 'utf8');
+  const CAP = [17, 32, 53, 78, 106, 134, 154, 192, 230, 271];          // byte capacity, EC L, v1–v10
+  const ECW = [7, 10, 15, 20, 26, 18, 20, 24, 30, 18];                 // EC codewords per block
+  const BLK = [1, 1, 1, 1, 1, 2, 2, 2, 2, 4];                           // blocks
+  const TOT = [26, 44, 70, 100, 134, 172, 196, 242, 292, 346];          // total codewords
+  let v = CAP.findIndex((c) => c >= bytes.length); if (v < 0) throw new Error('QR: text too long');
+  const size = 17 + 4 * (v + 1);
+  const dataCw = TOT[v] - ECW[v] * BLK[v];
+  const bits = [];
+  const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+  put(0b0100, 4); put(bytes.length, v + 1 >= 10 ? 16 : 8);
+  for (const b of bytes) put(b, 8);
+  put(0, Math.min(4, dataCw * 8 - bits.length));
+  while (bits.length % 8) bits.push(0);
+  const data = []; for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+  for (let p = 0xEC; data.length < dataCw; p ^= 0xEC ^ 0x11) data.push(p);
+  // GF(256) tables
+  const EXP = new Array(512), LOG = new Array(256);
+  for (let i = 0, x = 1; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  const gen = (n) => { let g = [1]; for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; } return g; };
+  const rs = (msg, n) => { const g = gen(n); const res = msg.concat(new Array(n).fill(0)); for (let i = 0; i < msg.length; i++) { const c = res[i]; if (c) for (let j = 0; j < g.length; j++) res[i + j] ^= mul(g[j], c); } return res.slice(msg.length); };
+  // blocks (short blocks first; group sizes for these versions at EC L are uniform or differ by one)
+  const nb = BLK[v], base = Math.floor(dataCw / nb), extra = dataCw % nb;
+  const blocks = [], ecs = []; let off = 0;
+  for (let b = 0; b < nb; b++) { const len = base + (b >= nb - extra ? 1 : 0); const blk = data.slice(off, off + len); off += len; blocks.push(blk); ecs.push(rs(blk, ECW[v])); }
+  const inter = [];
+  for (let i = 0; i < base + 1; i++) for (const blk of blocks) if (i < blk.length) inter.push(blk[i]);
+  for (let i = 0; i < ECW[v]; i++) for (const e of ecs) inter.push(e[i]);
+  // matrix
+  const M = Array.from({ length: size }, () => new Array(size).fill(null));
+  const setF = (r, c, val) => { if (r >= 0 && r < size && c >= 0 && c < size) M[r][c] = val ? 1 : 0; };
+  const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const on = (i >= 0 && i <= 6 && j >= 0 && j <= 6) && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)); setF(r + i, c + j, on); } };
+  finder(0, 0); finder(0, size - 7); finder(size - 7, 0);
+  for (let i = 8; i < size - 8; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+  setF(size - 8, 8, 1);
+  if (v + 1 >= 2) { const pos = [6, size - 7]; if (v + 1 >= 7) pos.splice(1, 0, Math.round((size - 13) / 2 / 2) * 2 + 6); for (const r of pos) for (const c of pos) { if (M[r][c] !== null && !(r === pos[1] && c === pos[1] && pos.length === 3) && (r === 6 || c === 6) && pos.length === 2) continue; if ((r === 6 && c === 6) || (r === 6 && c === size - 7) || (r === size - 7 && c === 6)) continue; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) setF(r + i, c + j, Math.max(Math.abs(i), Math.abs(j)) !== 1); } }
+  // reserve format areas
+  for (let i = 0; i < 9; i++) { if (M[8][i] === null) M[8][i] = 0; if (M[i][8] === null) M[i][8] = 0; }
+  for (let i = size - 8; i < size; i++) { if (M[8][i] === null) M[8][i] = 0; if (M[i][8] === null) M[i][8] = 0; }
+  if (v + 1 >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { M[i][size - 11 + j] = 0; M[size - 11 + j][i] = 0; }
+  const reserved = M.map((row) => row.map((x) => x !== null));
+  // place data, mask 0: (r+c)%2===0
+  let bi = 0; const dbits = inter.flatMap((b) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (b >> k) & 1));
+  for (let c = size - 1; c > 0; c -= 2) { if (c === 6) c--; for (let k = 0; k < size; k++) { const r = ((c + 1) / 2) % 2 === 0 ? k : size - 1 - k; for (const cc of [c, c - 1]) { if (reserved[r][cc]) continue; let bit = bi < dbits.length ? dbits[bi++] : 0; if ((r + cc) % 2 === 0) bit ^= 1; M[r][cc] = bit; } } }
+  // format info: EC L (01), mask 0 → data 01000, BCH → 0x77C4 ^ mask 0x5412 = known table value
+  const fmt = 0b111011111000100; // EC L, mask 0 (pre-masked)
+  for (let i = 0; i < 15; i++) {
+    const bit = (fmt >> i) & 1;
+    if (i < 6) M[i][8] = bit; else if (i < 8) M[i + 1][8] = bit; else M[size - 15 + i][8] = bit;
+    if (i < 8) M[8][size - 1 - i] = bit; else if (i < 9) M[8][15 - i - 1 + 1] = bit; else M[8][15 - i - 1] = bit;
+  }
+  M[size - 8][8] = 1;
+  if (v + 1 >= 7) { const VER = { 7: 0x07C94, 8: 0x085BC, 9: 0x09A99, 10: 0x0A4D3 }[v + 1]; for (let i = 0; i < 18; i++) { const bit = (VER >> i) & 1; M[Math.floor(i / 3)][size - 11 + (i % 3)] = bit; M[size - 11 + (i % 3)][Math.floor(i / 3)] = bit; } }
+  let d = '';
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) if (M[r][c]) d += `M${c} ${r}h1v1h-1z`;
+  return { size, path: d };
+}
+/* Writes /cards/YYYY-MM-DD.png; returns its URL. */
+async function writeCard(c) {
+  const dest = path.join(ROOT, 'cards', `${c.date}.png`);
+  const buf = await cardImage(c);
+  await writeIfChanged(dest, buf);
+  return `${SITE_ORIGIN}/cards/${c.date}.png`;
+}
+/* Plain mono actions under a card. No counters, no icons, no "share". */
+function cardActions(c, pageUrl) {
+  const img = `${SITE_ORIGIN}/cards/${c.date}.png`;
+  const text = encodeURIComponent(`Micheal Ray Berry — Day ${c.day}: ${cardStatus(c)}. ${pageUrl}`);
+  return `<p class="rc-actions" style="margin:6px 0 0;font:600 12px/1.8 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;display:flex;gap:6px 18px;flex-wrap:wrap">
+    <a href="${pageUrl}" data-copy="${pageUrl}">Copy link</a>
+    <a href="${img}" download="micheal-ray-berry-day-${String(c.day).padStart(3, '0')}-report-card.png">Card image</a>
+    <a href="https://x.com/intent/post?text=${text}" rel="noopener">Post to X</a>
+    <a href="https://www.reddit.com/submit?url=${encodeURIComponent(pageUrl)}&title=${encodeURIComponent(`Micheal Ray Berry — Day ${c.day}: ${cardStatus(c)}`)}" rel="noopener">Reddit</a>
+  </p>`;
+}
+
 function dailyPage({ record, photos, previous, next, attestation }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
@@ -389,7 +636,9 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <meta property="og:title" content="${htmlEscape(title)}">
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
-  <meta property="og:image" content="${htmlEscape(front)}">
+  <meta property="og:image" content="${SITE_ORIGIN}/cards/${date}.png">
+  <meta property="og:image:width" content="1080"><meta property="og:image:height" content="1350">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${SITE_ORIGIN}/cards/${date}.png">
   ${embed ? `<meta property="og:video" content="${htmlEscape(embed)}">
   <meta property="og:video:type" content="text/html">
   <meta property="og:video:width" content="1080">
@@ -453,6 +702,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     .intro{max-width:760px;font-size:1.15rem}.attest{border-left:4px solid var(--accent);padding:10px 14px;background:#f1f0ea}
     .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:36px 0}.gallery figure{margin:0;border:1px solid var(--ink);background:#fff}
     .gallery img{display:block;width:100%;height:auto}.gallery figcaption{padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
+    ${RC_CSS}
     .video{margin:24px 0;background:#000}.video video{display:block;width:100%;max-width:420px;height:auto;margin:auto}
     .video:has(iframe){position:relative;padding-top:56.25%}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-top:1px solid var(--rule);padding-top:24px;margin-top:36px}nav a:nth-child(2){text-align:center}nav a:last-child{text-align:right}
@@ -476,6 +726,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <div class="stats"><span>${htmlEscape(longDate(date))}</span><span>${weight.toFixed(1)} LB</span><span>340 → 200 LB</span></div>
 </header>
 <main>
+  ${reportCard(cardCtx(day, { date, complete: true, photoCount: 4, photo: { url: photos.front.variants?.[0]?.url || photos.front.sourceUrl } }))}
+  ${cardActions(cardCtx(day, { date, complete: true, photoCount: 4 }), canonical)}
   <p class="intro">This page permanently documents Day ${day} of the Micheal Ray Berry Public Accountability Project. On ${htmlEscape(longDate(date))}, the official recorded weight was ${weight.toFixed(1)} pounds. The four photographs below show the required front, left-side, rear, and right-side documentation views.</p>
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `Capture attestation recorded: ${htmlEscape(attestation)}.` : 'The public photo and video record is preserved with this daily page and its manifest.'}</p>
@@ -495,7 +747,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -563,6 +815,7 @@ const PAGE_CSS = `
     .gallery figure{margin:0;border:1px solid var(--ink);background:#fff}.gallery img{display:block;width:100%;height:auto}
     .gallery figcaption{padding:8px 10px;font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .pending{border-left:4px solid var(--accent);padding:12px 16px;background:#f1f0ea}
+    ${RC_CSS}
     nav.crumbs{font:12px 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
     footer{color:var(--muted);font-size:.9rem;border-top:1px solid var(--rule)}a{color:var(--ink);text-underline-offset:3px}
 `;
@@ -669,7 +922,7 @@ function milestonePage(target, entries) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -698,6 +951,14 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     <td>${htmlEscape(record.note || '')}</td>
   </tr>`).join('\n');
   const maxWeek = lastWeek || Math.ceil((allEntries.at(-1)?.record.day || 1) / 7);
+  const todayDay = dayNumber(todayEtIso());
+  const weekCards = [];
+  for (let d = firstDay; d <= firstDay + 6 && d <= todayDay; d++) {
+    const e = weekEntries.find((x) => x.record.day === d);
+    const date = e ? e.record.date : dateForDay(d);
+    weekCards.push(reportCard(cardCtx(d, { date, complete: !!e, photoCount: e ? 4 : 0, photo: e ? { url: e.photos.front.variants?.[0]?.url || e.photos.front.sourceUrl } : null }), { compact: true, link: `/daily/${date}-day-${String(d).padStart(3, '0')}/` }));
+  }
+  const compliant = weekCards.filter((h) => />COMPLIANT</.test(h)).length;
   const nav = [
     week > 1 ? `<a rel="prev" href="/weeks/week-${String(week - 1).padStart(2, '0')}/">← Week ${week - 1}</a>` : '',
     week < maxWeek ? `<a rel="next" href="/weeks/week-${String(week + 1).padStart(2, '0')}/">Week ${week + 1} →</a>` : '',
@@ -725,7 +986,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
-  <style>${PAGE_CSS}</style>
+  <style>${PAGE_CSS}${RC_CSS}</style>
 </head>
 <body>
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Under agreement · Savannah, Georgia</span></div>
@@ -744,6 +1005,8 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
 </header>
 <main>
   <p class="intro">${htmlEscape(description)}</p>
+  ${weekCards.length ? `<h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:8px 0 12px">Report cards \u00B7 ${compliant} of ${weekCards.length} days compliant</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:0 0 32px">${weekCards.join('')}</div>` : ''}
   ${rows ? `<table><thead><tr><th>Day</th><th>Date</th><th>Weight</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No documented days in this week.</div>'}
   <p>${nav}</p>
   <p><a href="/daily/">Full daily record</a> · <a href="/dashboard">Weigh-in log</a></p>
@@ -759,7 +1022,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -822,7 +1085,7 @@ function weeksIndexPage(entries, lastDay) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1010,6 +1273,8 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
   <p class="intro">Every published day of the Micheal Ray Berry Public Accountability Project, newest first. Documented days hold that day's four-angle photographs, the recorded weight, the inspection video, and a machine-readable manifest with SHA-256 evidence hashes. Days where the required documentation was not delivered are published too, marked <strong>No record</strong>; days whose record was filed but is missing a required element are marked <strong>Incomplete record</strong>, naming what is absent. The current day shows as <strong>due</strong> until its 10 PM Eastern deadline passes. The gaps are part of the record.</p>
   <p class="count"><strong>${documented}</strong> documented days${incomplete ? ` · <strong>${incomplete}</strong> incomplete ${incomplete === 1 ? 'record' : 'records'}` : ''}${gaps ? ` · <strong>${gaps}</strong> ${gaps === 1 ? 'day' : 'days'} without a record` : ''}${pending ? ` · <strong>${pending}</strong> still due` : ''}</p>
   <p><a href="/">Return to michealrayberry.com</a> · <a href="/weeks/">Weekly record</a> · <a href="/milestones">Milestones</a> · <a href="/dashboard">Weigh-in log and progress grid</a></p>
+  <h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:28px 0 0">Today\u2019s report card</h2>
+  ${(() => { const t = days[0]; const e = t.entry; const cc = cardCtx(t.day, { date: t.date, complete: !!e, photoCount: e ? 4 : (gapKinds.get(t.date) === 'incomplete' ? 1 : 0), photo: e ? { url: e.photos.front.variants?.[0]?.url || e.photos.front.sourceUrl } : null }); const u = `${SITE_ORIGIN}/daily/${t.date}-day-${String(t.day).padStart(3, '0')}/`; return reportCard(cc, { link: u }) + cardActions(cc, u); })()}
   ${PRIOR_NOTE ? `<div style="border-left:4px solid var(--accent);background:#f1f0ea;padding:12px 16px;margin:20px 0;max-width:760px"><strong>Earlier attempt.</strong> ${htmlEscape(PRIOR_NOTE)}</div>` : ''}
   <ul>${cards}</ul>
 </main>
@@ -1024,7 +1289,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1073,7 +1338,7 @@ ${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><l
    sequence with a hole and no explanation), and the absence is itself part of
    the record — stated neutrally, exactly as the agreement requires. These
    pages carry no photographs, no video, and no consequence detail. */
-function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
+function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoCount = 0 }) {
   const label = kind === 'incomplete' ? 'Incomplete record' : 'No record';
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
   const title = `Day ${day} — ${label} — ${longDate(date)} — Micheal Ray Berry`;
@@ -1113,6 +1378,8 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
   <meta property="og:title" content="${htmlEscape(title)}">
   <meta property="og:description" content="${htmlEscape(description)}">
   <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="${SITE_ORIGIN}/cards/${date}.png"><meta property="og:image:width" content="1080"><meta property="og:image:height" content="1350">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${SITE_ORIGIN}/cards/${date}.png">
   <script type="application/ld+json">${jsonLd({ '@context': 'https://schema.org', '@graph': graph })}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1169,6 +1436,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
     nav{display:flex;justify-content:space-between;gap:16px;margin:36px 0 12px;font:600 14px 'IBM Plex Mono',ui-monospace,monospace}
     nav a{color:var(--ink)}footer{border-top:1px solid var(--rule);color:var(--muted);font-size:14px}
     a{color:var(--ink)}a:hover{color:var(--accent)}
+    ${RC_CSS}
   </style>
 </head>
 <body>
@@ -1186,6 +1454,8 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
     <p>${htmlEscape(longDate(date))}</p>
   </header>
   <main>
+    ${reportCard(cardCtx(day, { date, photoCount }))}
+    ${cardActions(cardCtx(day, { date, photoCount }), canonical)}
     <div class="card">
       <p><strong>${kind === 'incomplete' ? 'The record for this date is incomplete.' : 'No record was filed for this date.'}</strong> ${htmlEscape(reason)}</p>
       <p>The Daily Compliance Packet for a Project Day is the four-angle inspection video, four accountability photographs, and the day's weight, all delivered by 10 PM Eastern. A packet counts only when every element is filed on time; a partial packet is an incomplete record, not a completed one. This page exists because the day exists: a gap is documented rather than omitted.</p>
@@ -1208,7 +1478,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none' }) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
   </body>
@@ -1348,7 +1618,7 @@ function consentPage() {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1519,7 +1789,7 @@ function violationPage(v, prev, next) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1731,7 +2001,7 @@ function positionsPage(entries, siteState = {}) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1801,18 +2071,17 @@ function violationsIndexPage(violations) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
 </html>`;
 }
 
-/* /observer/ — controlled submission channel. Plain HTML form → Cloudflare
-   Pages Function (functions/observer.js) → Turnstile check → Apps Script
-   Observer tab + mail to the Accountability Partner. Nothing submitted is
-   published automatically. */
-const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA'; // Cloudflare's always-passes test key until the real one is set in Pages env
+/* /observer/ — controlled submission channel. Netlify Forms (static HTML,
+   no JS); notifications go to the Accountability Partner only. Nothing
+   submitted is published automatically. (Cloudflare Pages variant with
+   Turnstile + Apps Script relay is parked — see README.) */
 function observerPage() {
   const canonical = `${SITE_ORIGIN}/observer/`;
   const title = 'Observer Submission — Micheal Ray Berry Public Accountability Project';
@@ -1824,7 +2093,8 @@ function observerPage() {
     <p class="lede"><strong>You are observing a public accountability record.</strong></p>
     <p>If you know Micheal personally, want to send encouragement, have a question, or believe a published requirement may have been missed, you may submit a note below.</p>
     <p>Identification is optional. No name or email address is required. Submissions are reviewed by the Accountability Partner. Micheal does not determine whether a report about his own compliance is valid.</p>
-    <form name="observer" method="POST" action="/observer" style="display:grid;gap:22px;max-width:640px;margin:32px 0 8px">
+    <form name="observer" method="POST" action="/observer/received/" data-netlify="true" netlify-honeypot="website" style="display:grid;gap:22px;max-width:640px;margin:32px 0 8px">
+      <input type="hidden" name="form-name" value="observer">
       <p style="display:none"><label>Leave this field empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
       <fieldset style="border:0;padding:0;margin:0;display:grid;gap:10px">
         <legend style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px">Type of submission — required</legend>
@@ -1839,8 +2109,6 @@ function observerPage() {
       <label style="display:grid;gap:8px"><span style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase">Public source URL — optional</span>
         <input name="source_url" type="url" maxlength="500" placeholder="Where you found or saw this record shared" style="font:16px inherit;padding:11px 14px;border:1px solid var(--rule);background:#fff;color:var(--ink)"></label>
       <label style="display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.5;cursor:pointer"><input type="checkbox" name="quotable" value="yes" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent)">This message may be quoted anonymously on the public record.</label>
-      <div class="cf-turnstile" data-sitekey="${TURNSTILE_SITE_KEY}" data-theme="light"></div>
-      <noscript><p style="margin:0;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">The verification step needs JavaScript. Without it, write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></noscript>
       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
         <button type="submit" style="font:600 14px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:#fafaf7;border:0;padding:16px 26px;cursor:pointer">Submit to the Accountability Partner</button>
         <p style="margin:0;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Nothing is published automatically. Threats, harassment, or private information about anyone will be discarded and are not part of the record. Ordinary request logs are retained by the hosting provider.</p>
@@ -1848,11 +2116,33 @@ function observerPage() {
     </form>
     <div class="standard" style="margin-top:44px">
       <div><b>Know Micheal personally?</b><p>You are not required to participate. But you also do not need to pretend you never found this record to spare him embarrassment. Recognition is an intentional part of the accountability system. If you see him, you're welcome to tell him you saw it.</p><p style="margin-top:10px"><strong>Compliance questions, however, belong here — not in an argument with Micheal.</strong></p></div>
-      <div><b>If the form returns you here</b><p>A note in the address bar (<code>?error=…</code>) means the verification step failed or the relay was unavailable. Try once more, or write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></div>
       <div><b>What happens to a submission</b><p>The Accountability Partner reads every note. A possible compliance issue is checked against the record and the written rules; if substantiated, the outcome appears in <a href="/updates">Updates</a> or the <a href="/penalties">Violation Log</a>. Encouragement and recognition stay private unless you marked them quotable and the Partner chooses to quote them.</p></div>
     </div>`;
-  return synPage({ title, desc: description, canonical, body })
-    .replace('</head>', '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>\n</head>');
+  return synPage({ title, desc: description, canonical, body });
+}
+
+/* /reference/ — one-screen factual reference for anyone describing the
+   record elsewhere: what it is, the official photograph, today's card,
+   the status line, contact, and the quoting rule. Not "press", not
+   "share": a reference page. */
+function referencePage(latestCard, statusLine) {
+  const canonical = `${SITE_ORIGIN}/reference/`;
+  const title = 'Reference — Micheal Ray Berry Public Accountability Project';
+  const description = 'Factual reference for the Micheal Ray Berry Public Accountability Project: what the record is, the official photograph, the current report card, the status line, contact, and the rule on quoting.';
+  const body = `
+    <p class="crumb"><a href="/">Record</a> · Reference</p>
+    <h1>Reference</h1>
+    <p class="lede"><strong>For anyone describing this record elsewhere.</strong> Everything below may be quoted or reproduced unaltered, with a link to the record.</p>
+    <div class="standard">
+      <div><b>What it is</b><p>Micheal Ray Berry, 42, of Savannah, Georgia, has placed his weight, required daily conduct, compliance, failures, and corrective requirements under a signed public accountability agreement, documented daily under his real name. Declared start 340 lb on August 31, 2026; goal 200 lb, held for 28 consecutive days. The record is administered by an Accountability Partner and cannot be edited, softened, or removed by him.</p></div>
+      <div><b>Status line</b><p><code style="font:600 14px/1.6 'IBM Plex Mono',ui-monospace,monospace">${htmlEscape(statusLine)}</code><br><small>Regenerated at every build; the live figures are on the <a href="/">home page</a>.</small></p></div>
+      <div><b>Official photograph</b><p><a href="/photos/official/micheal-ray-berry-official-front.jpg"><img src="/photos/official/micheal-ray-berry-official-front.jpg" alt="Micheal Ray Berry, official project photograph — Inspection position, project uniform" style="max-width:220px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>Inspection position, project uniform. <a href="/photos/official/micheal-ray-berry-official-front.jpg" download>Full resolution</a>.</small></p></div>
+      <div><b>Current report card</b><p>${latestCard ? `<a href="${latestCard.page}"><img src="${latestCard.png}" alt="Report card, Day ${latestCard.day}" style="max-width:320px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>One card per Project Day at <code>/cards/YYYY-MM-DD.png</code>; each day page carries its own.</small>` : 'The first report card is published after Day 1 closes.'}</p></div>
+      <div><b>Quoting</b><p>Text, photographs, report cards, and recordings from this record may be quoted, embedded, or reproduced <strong>unaltered and in context</strong>, with a link to the source page. Do not crop out the verdict, alter dates or figures, or present a demonstration as a served consequence. The public record is safe for work and non-sexual by agreement (§10.4); reuse that sexualises, harasses, impersonates, or exposes private information is outside the license (§10.2a) and is reported to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></div>
+      <div><b>Contact</b><p>Questions about the record, its rules, or a possible compliance issue: the <a href="/observer/">Observer Submission</a> page or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner answers for the record; Micheal does not grade himself and is not the contact for compliance matters.</p></div>
+      <div><b>Governing documents</b><p><a href="/agreement">The signed agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/penalties">Violation log</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a></p></div>
+    </div>`;
+  return synPage({ title, desc: description, canonical, body });
 }
 
 function observerReceivedPage() {
@@ -2153,7 +2443,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -2287,7 +2577,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>`;
 function synExtract(full, startTag, endMarker) {
@@ -2374,7 +2664,7 @@ async function main() {
     /* Sheet unreachable (not shared, or Google hiccuping). The generated
        directories are NOT in the repo — a "successful" deploy without them
        ships a site where /daily/, /about, /agreement all 404. Write the
-       sheet-independent pages, then FAIL the build so Cloudflare Pages keeps the
+       sheet-independent pages, then FAIL the build so Netlify keeps the
        last good deploy instead of publishing a gutted one. */
     console.warn('Record sheet unreadable — generating sheet-independent pages, then failing the build.');
     console.warn('Fix: Share > General access > Anyone with the link > Viewer, then retry the deploy.');
@@ -2471,11 +2761,19 @@ async function main() {
         const date = normalizeDate(row[dateCol >= 0 ? dateCol : 1]);
         if (row[eventCol] === 'capture-attested' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
           attestMap.set(date, [row[codeCol], statusCol >= 0 ? row[statusCol] : ''].filter(Boolean).join(' · '));
+          // Filing time (ET, h:mm AM/PM) from the server stamp in column A —
+          // the moment the daily inspection was attested, i.e. filed.
+          const stamp = new Date(String(row[0] || '').trim());
+          if (!Number.isNaN(stamp.getTime())) {
+            const rec = records.find((r) => r.date === date);
+            if (rec && !rec.filedAt) rec.filedAt = stamp.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
+          }
         }
       }
     }
   }
 
+  CARD_CTX = { rows: records, violations, supervision };
   const photoFiles = (await walk(path.join(ROOT, 'photos')))
     .filter((f) => /\.(?:jpe?g|png|webp)$/i.test(f) && !f.includes(`${path.sep}responsive${path.sep}`));
   const finalized = [];
@@ -2519,7 +2817,7 @@ async function main() {
     const reason = have.length
       ? 'The record for this Project Day is incomplete. Filed: ' + have.join(', ') + '. Not filed: ' + missing.join(', ') + '.'
       : 'None of the required daily documentation was filed for this Project Day.';
-    sequence.push({ day: d, date, complete: false, kind: have.length ? 'incomplete' : 'none', reason });
+    sequence.push({ day: d, date, complete: false, kind: have.length ? 'incomplete' : 'none', reason, photoCount });
   }
 
   const generated = [];
@@ -2575,6 +2873,18 @@ async function main() {
     generated.push({ record, photos });
   }
 
+  /* Card PNGs — one per Project Day, the shareable unit. Regenerated each
+     build so a verdict change (violation declared, corrected) re-renders. */
+  for (const s of sequence) {
+    try {
+      const done = s.complete ? byDay.get(s.day) : null;
+      const photoPath = done ? done.photoPaths.front : findPhoto(photoFiles, s.date, s.day, 'front');
+      const cc = cardCtx(s.day, { date: s.date, complete: s.complete, photoCount: s.complete ? 4 : (s.photoCount || 0), photo: photoPath ? { path: photoPath } : null });
+      const u = await writeCard(cc);
+      changedUrls.add(u);
+    } catch (e) { console.warn('Card image failed for ' + s.date + ': ' + e.message); }
+  }
+
   for (let i = 0; i < sequence.length; i++) {
     const s = sequence[i];
     if (s.complete) continue;
@@ -2583,7 +2893,7 @@ async function main() {
     const slug = `${s.date}-day-${String(s.day).padStart(3, '0')}`;
     const file = path.join(ROOT, 'daily', slug, 'index.html');
     const page = noRecordPage({
-      date: s.date, day: s.day, reason: s.reason, kind: s.kind || 'none',
+      date: s.date, day: s.day, reason: s.reason, kind: s.kind || 'none', photoCount: s.photoCount || 0,
       previous: i > 0 ? sequence[i - 1] : null,
       next: i < sequence.length - 1 ? sequence[i + 1] : null,
     });
@@ -2643,6 +2953,8 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/observer/`);
   await writeIfChanged(path.join(ROOT, 'observer', 'received', 'index.html'), observerReceivedPage());
+  if (await writeIfChanged(path.join(ROOT, 'reference', 'index.html'), referencePage((() => { const s = sequence.filter((x) => x.complete || !deadlinePending(x.date)).at(-1); return s ? { day: s.day, page: `/daily/${s.date}-day-${String(s.day).padStart(3, '0')}/`, png: `/cards/${s.date}.png` } : null; })(), (() => { const last = records.at(-1); const open = violations.filter((v) => v.state === 'open').length; const d = dayNumber(todayEtIso()); return `Day ${d} · ${last ? last.weight.toFixed(1) + ' lb' : 'awaiting weigh-in'} · ${open} open violation${open === 1 ? '' : 's'} · goal 200 lb · as of ${todayEtIso()}`; })()))) changedUrls.add(`${SITE_ORIGIN}/reference/`);
+  extraUrls.push(`${SITE_ORIGIN}/reference/`);
 
   if (await writeIfChanged(path.join(ROOT, 'consent', 'index.html'), consentPage())) {
     changedUrls.add(`${SITE_ORIGIN}/consent/`);

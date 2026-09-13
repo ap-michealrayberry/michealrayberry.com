@@ -74,8 +74,9 @@ var TABS = {
      nightly check (MISSED), the File tool (COMPLETED + stream_url), or the
      AP via the MRB menu (EXCEPTION). The site reads it on /live. */
   'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
-  /* Observer submissions from /observer/ (Cloudflare Pages Function →
-     action 'observer', shared secret OBSERVER_SECRET). AP-only: never read
+  /* Observer submissions relayed by action 'observer' (shared secret
+     OBSERVER_SECRET). On Netlify the /observer/ form posts to Netlify Forms
+     instead, so this tab fills only if a relay is wired. AP-only; never read
      by the site. review = received | dismissed | verified | published | actioned. */
   'Observer':       ['received_at', 'type', 'message', 'name', 'email', 'source_url', 'quotable', 'review', 'ap_note'],
 };
@@ -247,12 +248,12 @@ function handleUnlock(obj) {
   return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
 }
 /* ═════ OBSERVER SUBMISSIONS ═════
-   The Pages Function (functions/observer.js) verifies Turnstile, then POSTs
-   here with the shared secret. Rows land on the Observer tab; the AP is
+   A relay (functions/observer.js when hosted on Cloudflare Pages) verifies
+   the visitor, then POSTs here with the shared secret. Rows land on the Observer tab; the AP is
    mailed. Nothing here touches the public record. */
 function setObserverSecret(s) {
   PropertiesService.getScriptProperties().setProperty('OBSERVER_SECRET', String(s || '').trim());
-  Logger.log('Observer secret stored. Set the SAME value as OBSERVER_SECRET in Cloudflare Pages → Settings → Variables.');
+  Logger.log('Observer secret stored. Set the SAME value as OBSERVER_SECRET on the relay host.');
 }
 function observerOk(s) {
   var stored = PropertiesService.getScriptProperties().getProperty('OBSERVER_SECRET');
@@ -386,6 +387,8 @@ function setup() {
   ScriptApp.newTrigger('importPhotos').timeBased().everyMinutes(10).create();
   ScriptApp.newTrigger('mirrorToMicheal').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('githubMirrorPhotos').timeBased().everyMinutes(15).create();
+  // 22:00 packet check deploys the day's report card verdict (COMPLIANT /
+  // INCOMPLETE / NOT FILED / VIOLATION) within minutes of the deadline.
   ScriptApp.newTrigger('nightlyComplianceCheck').timeBased().everyDays(1).atHour(22).inTimezone('America/New_York').create();
   ScriptApp.newTrigger('abandonmentCheck').timeBased().everyDays(1).atHour(23).inTimezone('America/New_York').create();
   // §3.4 Evening Supervision ruling, 20 minutes after the packet check.
@@ -1480,14 +1483,15 @@ function handleApAction(obj) {
   }
 }
 
-/* ═════ CLOUDFLARE PAGES DEPLOY HOOK ═════
-   Cloudflare → Workers & Pages → michealrayberry-com → Settings → Builds →
-   Deploy hooks → Add (branch main), copy the URL, then run setBuildHook. */
+/* ═════ BUILD HOOK (Netlify) ═════
+   Netlify → Site configuration → Build & deploy → Build hooks → Add (branch
+   main), copy the URL, then run setBuildHook. Host-neutral: any URL that
+   accepts an empty POST works (Cloudflare Pages deploy hooks too). */
 
 function setBuildHook(url) {
   PropertiesService.getScriptProperties().setProperty('BUILD_HOOK', String(url || '').trim());
   PropertiesService.getScriptProperties().deleteProperty('NETLIFY_HOOK');
-  Logger.log('Build hook stored (Cloudflare Pages).');
+  Logger.log('Build hook stored.');
 }
 function setNetlifyBuildHook(url) { setBuildHook(url); } // legacy name
 
@@ -1498,13 +1502,13 @@ function setSecondaryBuildHook(url) {
   Logger.log(String(url || '').trim() ? 'Secondary build hook stored.' : 'Secondary build hook cleared.');
 }
 
-/* Triggers a rebuild of the live site. BUILD_HOOK holds the Cloudflare Pages
-   deploy hook. Silence used to mean "no hook set", which is indistinguishable
+/* Triggers a rebuild of the live site. BUILD_HOOK holds the host's build
+   hook. Silence used to mean "no hook set", which is indistinguishable
    from success when run by hand, so every path logs. */
 function triggerDeploy() {
   var props = PropertiesService.getScriptProperties();
   var hooks = [
-    { name: 'Cloudflare Pages', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
+    { name: 'Netlify', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
     { name: 'Secondary host (unused)', url: props.getProperty('BUILD_HOOK_2') },
   ].filter(function (x) { return !!x.url; });
 
@@ -1530,9 +1534,9 @@ function triggerDeploy() {
   var h = null;
   if (!h) {
     Logger.log('NO BUILD HOOK SET — nothing was triggered.\n' +
-      'Cloudflare → Workers & Pages → project → Settings → Builds → Deploy hooks →\n' +
-      'Add (branch main), then run\n' +
-      "setBuildHook('https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/...')");
+      'Netlify → Site configuration → Build & deploy → Build hooks →\n' +
+      'Add build hook (branch main), then run\n' +
+      "setBuildHook('https://api.netlify.com/build_hooks/...')");
     return;
   }
   try {
