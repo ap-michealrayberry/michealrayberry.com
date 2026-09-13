@@ -7,6 +7,31 @@
   rules at the top of _redirects.
 - DNS stays where it is (A → 75.2.60.5, www CNAME → the Netlify site).
 
+## OBS overlay (Evening Supervision) — /live/overlay.html
+- OBS → Sources → + → Browser. URL https://michealrayberry.com/live/overlay.html
+  Width 1920 · Height 1080 · FPS 30 · tick "Shutdown source when not visible".
+  Optional params: ?start=18:00&end=22:00, ?demo=1, ?state=live|scheduled|
+  interrupted (preview only), ?rules=0 (hide the rule band), ?every=12
+  (seconds per rule).
+- Bottom bar (full width): record figures (Day · Weight · Goal · Open) |
+  one rule at a time, cross-fading every 12 s through the ten published
+  Evening Supervision rules | michealrayberry.com/live. No scrolling ticker
+  (unreadable on Shorts/phones); one line, then the next.
+- Layout: identity (top-left: MICHEAL RAY BERRY · UNDER PUBLIC
+  ACCOUNTABILITY) over the status box; clock top-right; stamp bottom-left
+  (Day · weight · goal · open violations); URL bottom-right. Centre clear.
+- Status is tied to OBS, not the clock: gray "Supervision scheduled" until
+  OBS reports the stream active → red pulsing "Under supervision — Live"
+  with elapsed session time (+ closes-in) → amber "Feed interrupted" if the
+  stream drops inside the window → full-frame "SESSION CLOSED" at 10 PM.
+  Never shows red outside an actual broadcast.
+- Figures read the public sheet every 5 min; day number from Aug 31.
+  Noindex via _headers; not linked from the site.
+- OBS scene recipe: Scene "Evening Supervision" = Video Capture Device
+  (camera, 1920×1080, fixed) + this Browser source on top. Mic: Settings →
+  Audio → Mic/Aux = Disabled (hard off). Stream: YouTube, key from the
+  channel's Live Control Room; Recording: also record locally as backup.
+
 ## Observer submissions (/observer/) — Netlify Forms
 - forms.html at repo root is the detection twin; Netlify registers "observer"
   from it (served as 404 via _redirects).
@@ -81,9 +106,13 @@ superseded. Applied to: consent script, File tool YT description, llms.txt.
 Also removed sitewide: rating=adult meta, violation-page noindex — the
 whole record indexes fully.
 
-## §4.1 uniform wording (revised Sept 12 — COLLAR RESTORED)
+## §4.1 uniform wording (Sept 13 — COLLAR REMOVED AGAIN, final)
 
-Sept 12 user ruling: the plain collar returns to §4.1 for every official
+Sept 13 user ruling: "remove collar entirely" — the uniform is a plain black
+unitard only; §4.1 at co-signing: "a plain black unitard". The Sept 12 restore
+below is history.
+
+Sept 12 (superseded): the plain collar returned to §4.1 for every official
 recording (uniform page Requirement 2, positions attire, corrections
 standard, About, llms, preflight row "black unitard · collar"). Amend §4.1
 at co-signing: "a plain black unitard and a plain collar".
@@ -106,7 +135,7 @@ This right covers only content already public on the record: it never
 extends to verification photographs, unpublished takes, drafts, personal
 data beyond what the record itself carries, or any material excluded by
 §10.4 (no nudity, full coverage in the uniform — the content republished
-is the same SFW content the record publishes). Republication elsewhere does not alter
+is the same content the record publishes). Republication elsewhere does not alter
 the record: michealrayberry.com remains the only official record and its
 register stays as published. §8.6 (safety takedown) continues to bind the
 Partner for dangerous third-party reuse; it does not restrict republication
@@ -123,7 +152,7 @@ Draft clause for the agreement (site, Code.gs, File tool, /live all built):
 > workday — ordinarily Sunday through Thursday — Micheal Ray Berry
 > completes a fixed-camera Evening Supervision session, 6:00–10:00 PM
 > Eastern, broadcast live on the Official Platform and filed to the record
-> by 10:20 PM. Full project uniform including the collar; camera fixed and
+> by 10:20 PM. Full project uniform; camera fixed and
 > not repositioned; normal evening activity continues; water only; dinner
 > a healthy home-cooked meal with yogurt for dessert, nothing outside it;
 > monitored areas orderly before the session; the Daily Compliance Packet
@@ -175,9 +204,9 @@ The no-loss corner period is struck. The Weekly Review is the week's
 figures read from the Official Record to camera, plus the assessment.
 No consequence attaches to a week without loss. (Never co-signed.)
 
-## §4.2 Correction Uniform — RESTORED (Sept 12, user text)
+## §4.2 Correction Uniform — RESTORED (Sept 12, user text; collar dropped Sept 13)
 
-Pink unitard + collar for recorded corrective sessions; uniform page
+Pink unitard for recorded corrective sessions; uniform page
 Requirement 3, corrections standard row, corrective preflight row. Amend
 §4.2 at co-signing. (The Sept 1 removal below is history.)
 

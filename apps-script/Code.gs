@@ -2174,7 +2174,7 @@ function morningBrief() {
   if (supervisionScheduled(today)) {
     var srx = supervisionRow(today);
     if (!(srx && /^EXCEPTION/i.test(String(srx.vals[2] || '')))) {
-      body += '\nEVENING SUPERVISION tonight, 6:00–10:00 PM Eastern (\u00a73.4): full uniform, collar, fixed camera,\n' +
+      body += '\nEVENING SUPERVISION tonight, 6:00–10:00 PM Eastern (\u00a73.4): full uniform, fixed camera,\n' +
         'water only, home-cooked dinner. File the archive link in the File tool before 10:20 PM.\n' +
         'Not filed = MISSED = a Violation Event, declared by the record at 10:20.\n';
     }

@@ -54,3 +54,7 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /corner-time  /corrections/  301
 /corner-time/*  /corrections/:splat  301
 
+
+# Reference became Share (Sept 13)
+/reference    /share/  301
+/reference/*  /share/  301

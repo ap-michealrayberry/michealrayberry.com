@@ -4413,7 +4413,7 @@
       li.tabIndex = 0;
       li.style.cursor = "pointer";
       var left = document.createElement("span");
-      left.textContent = type === "corrective" ? "Correction uniform — pink unitard · collar" : "Uniform — black unitard · collar";
+      left.textContent = type === "corrective" ? "Correction uniform — pink unitard" : "Uniform — black unitard";
       var right = document.createElement("span");
       var confirmed = false;
       function paint() {

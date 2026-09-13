@@ -21,7 +21,7 @@ const VIEWS = [
   { page: 'milestones', slug: 'milestones', label: 'Milestones', title: 'Milestone Ladder — 320 to 200 | Micheal Ray Berry',
     desc: 'The six official milestones between 340 and 200 pounds, each reached or not, computed live from the weigh-in record.' },
   { page: 'uniform', slug: 'uniform', label: 'Uniform', title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
-    desc: 'The required uniform for all official content: a plain black unitard and a plain collar, worn identically in every recording so the record stays comparable day to day.' },
+    desc: 'The required uniform for all official content: a plain black unitard, worn identically in every recording so the record stays comparable day to day.' },
   { page: 'updates', slug: 'updates', label: 'Updates', title: 'Updates — Micheal Ray Berry Public Accountability Project',
     desc: 'Official entries by the Accountability Partner and dated notes on the record, newest first.' },
   { page: 'about', slug: 'about', label: 'About', title: 'About the Project \u2014 Micheal Ray Berry',

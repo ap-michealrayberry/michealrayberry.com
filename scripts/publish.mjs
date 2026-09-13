@@ -717,7 +717,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -747,7 +747,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -896,7 +896,7 @@ function milestonePage(target, entries) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -922,7 +922,7 @@ function milestonePage(target, entries) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -994,7 +994,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1022,7 +1022,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1060,7 +1060,7 @@ function weeksIndexPage(entries, lastDay) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1085,7 +1085,7 @@ function weeksIndexPage(entries, lastDay) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1261,7 +1261,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1289,7 +1289,7 @@ function dailyIndexPage(entries, gapKinds = new Map(), vioByDate = new Map()) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1445,7 +1445,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -1478,7 +1478,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
   </body>
@@ -1562,7 +1562,7 @@ function consentPage() {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -1587,7 +1587,7 @@ function consentPage() {
       <div><b>What he agreed to</b><p>To document himself daily — a weight, four photographs, and a four-angle inspection video — before ten PM Eastern, published under his own name. A failure to document is entered permanently on the public record and answered by corner time, recorded and published beside the entry that caused it. His weight is never a violation; only the failure to document is.</p></div>
       <div><b>What he gave up</b><p>He does not administer the record. He cannot edit an entry, soften a description, remove a recording, or take the site down, and he does not verify his own compliance. The record is permanent: completing a corrective requirement closes the obligation without removing the entry or the recording, and neither does resolution. If he abandons the project, that is recorded too.</p></div>
       <div><b>What he understood</b><p>That this is published under his legal name and is findable by anyone who searches it, including people who did not come looking for the project. That the photographs, video, and weights are permanent and indexed, and no future decision of his removes them. That the exposure is the mechanism rather than a side effect — every previous attempt ended privately, because quitting cost nothing.</p></div>
-      <div><b>Consent and limits</b><p>Participation is voluntary. He is an adult, entered this freely, and may end it — by completing it, or by stopping and having that recorded. All published material is safe for work: full coverage in the project uniform, always. No third party is invited to contact, pressure, or comment on him. A safety and privacy process applies throughout.</p></div>
+      <div><b>Consent and limits</b><p>Participation is voluntary. He is an adult, entered this freely, and may end it — by completing it, or by stopping and having that recorded. Every published photograph and recording shows him in the full project uniform. No third party is invited to contact, pressure, or comment on him. A safety and privacy process applies throughout.</p></div>
     </div>
 
     <h2>Why the voice is synthetic</h2>
@@ -1618,7 +1618,7 @@ function consentPage() {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1732,7 +1732,7 @@ function violationPage(v, prev, next) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -1789,7 +1789,7 @@ function violationPage(v, prev, next) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -1865,7 +1865,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain collar. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -1913,7 +1913,7 @@ function positionsPage(entries, siteState = {}) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2001,7 +2001,7 @@ function positionsPage(entries, siteState = {}) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -2049,7 +2049,7 @@ function violationsIndexPage(violations) {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -2071,7 +2071,7 @@ function violationsIndexPage(violations) {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -2121,28 +2121,83 @@ function observerPage() {
   return synPage({ title, desc: description, canonical, body });
 }
 
-/* /reference/ — one-screen factual reference for anyone describing the
-   record elsewhere: what it is, the official photograph, today's card,
-   the status line, contact, and the quoting rule. Not "press", not
-   "share": a reference page. */
-function referencePage(latestCard, statusLine) {
-  const canonical = `${SITE_ORIGIN}/reference/`;
-  const title = 'Reference — Micheal Ray Berry Public Accountability Project';
-  const description = 'Factual reference for the Micheal Ray Berry Public Accountability Project: what the record is, the official photograph, the current report card, the status line, contact, and the rule on quoting.';
+/* /share/ — "Share the Project". Third person; one attributed first-person
+   statement of intent; dry teasing confined to "Be careful what you ask
+   for". Facts come from the record object; nothing is inferred from files.
+   No share-kit or email module until those paths exist. */
+function sharePage(d) {
+  const canonical = `${SITE_ORIGIN}/share/`;
+  const title = 'Share the Project | Micheal Ray Berry';
+  const description = "Share Micheal Ray Berry's public accountability project. Find official photographs, daily report cards, current facts, and conditions for accurate reuse.";
+  const na = (v, alt) => (v == null || v === '' ? alt : v);
+  const card = d.latest;
+  const desc = 'Micheal Ray Berry is documenting a public accountability project under his real name in Savannah, Georgia. The record includes daily inspection documentation, recorded weight, missed requirements, and corrective sessions. Public visibility is an intentional goal. Follow the dated record and read the governing standards at https://michealrayberry.com/.';
   const body = `
-    <p class="crumb"><a href="/">Record</a> · Reference</p>
-    <h1>Reference</h1>
-    <p class="lede"><strong>For anyone describing this record elsewhere.</strong> Everything below may be quoted or reproduced unaltered, with a link to the record.</p>
+    <p class="crumb"><a href="/">Record</a> · Share</p>
+    <h1>Share the Project</h1>
+    <p class="lede"><strong>Micheal Ray Berry asked to be seen. Here is the record.</strong></p>
+    <p>Micheal Ray Berry has chosen public accountability under his real name. His weight, required daily conduct, compliance, failures, and corrective requirements are documented on a public record administered by an Accountability Partner.</p>
+    <p><strong>Maximum public exposure is a stated goal of the project.</strong> He invites others to discover the record, recognize him, follow what happens, and share the public material under the conditions below.</p>
+    <blockquote style="margin:22px 0;padding:14px 22px;border-left:3px solid var(--accent);font-size:17px;line-height:1.55">“I want this project to be seen. I want people to recognize me, follow my progress, and see whether I meet my commitments—including when I fall short.”<br><small style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">— Micheal Ray Berry</small></blockquote>
+    <h2>Be careful what you ask for</h2>
+    <p>Micheal asked for maximum public exposure. His real name, official photograph, and daily report cards are assembled here for convenient sharing. He has made it remarkably easy to put a face to the paperwork.</p>
+    <p>The unitard, the inspection photographs, and any required corner-time recordings all belong to the same named record. If he misses a requirement, the resulting entry may be considerably less flattering than the introduction.</p>
+    <p>Being recognized through those images—or having an embarrassing entry shared with someone he knows—may feel humiliating. That possibility is part of the public visibility he is deliberately seeking. The facts still have to be accurate, and the sharing conditions below still apply.</p>
+    <p><strong>He asked for an audience. He even supplied the download button.</strong></p>
+    <p class="share-actions" style="display:flex;flex-wrap:wrap;gap:10px 22px;font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">
+      <button type="button" data-copy="https://michealrayberry.com/" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy website link</button>
+      ${card ? `<a href="${card.png}" download>Download latest report card</a>` : ''}
+      <a href="/daily/">View daily record</a>
+    </p>
+    <h2>The current record</h2>
     <div class="standard">
-      <div><b>What it is</b><p>Micheal Ray Berry, 42, of Savannah, Georgia, has placed his weight, required daily conduct, compliance, failures, and corrective requirements under a signed public accountability agreement, documented daily under his real name. Declared start 340 lb on August 31, 2026; goal 200 lb, held for 28 consecutive days. The record is administered by an Accountability Partner and cannot be edited, softened, or removed by him.</p></div>
-      <div><b>Status line</b><p><code style="font:600 14px/1.6 'IBM Plex Mono',ui-monospace,monospace">${htmlEscape(statusLine)}</code><br><small>Regenerated at every build; the live figures are on the <a href="/">home page</a>.</small></p></div>
-      <div><b>Official photograph</b><p><a href="/photos/official/micheal-ray-berry-official-front.jpg"><img src="/photos/official/micheal-ray-berry-official-front.jpg" alt="Micheal Ray Berry, official project photograph — Inspection position, project uniform" style="max-width:220px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>Inspection position, project uniform. <a href="/photos/official/micheal-ray-berry-official-front.jpg" download>Full resolution</a>.</small></p></div>
-      <div><b>Current report card</b><p>${latestCard ? `<a href="${latestCard.page}"><img src="${latestCard.png}" alt="Report card, Day ${latestCard.day}" style="max-width:320px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>One card per Project Day at <code>/cards/YYYY-MM-DD.png</code>; each day page carries its own.</small>` : 'The first report card is published after Day 1 closes.'}</p></div>
-      <div><b>Quoting</b><p>Text, photographs, report cards, and recordings from this record may be quoted, embedded, or reproduced <strong>unaltered and in context</strong>, with a link to the source page. Do not crop out the verdict, alter dates or figures, or present a demonstration as a served consequence. The public record is safe for work and non-sexual by agreement (§10.4); reuse that sexualises, harasses, impersonates, or exposes private information is outside the license (§10.2a) and is reported to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></div>
-      <div><b>Contact</b><p>Questions about the record, its rules, or a possible compliance issue: the <a href="/observer/">Observer Submission</a> page or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner answers for the record; Micheal does not grade himself and is not the contact for compliance matters.</p></div>
-      <div><b>Governing documents</b><p><a href="/agreement">The signed agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/penalties">Violation log</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a></p></div>
-    </div>`;
-  return synPage({ title, desc: description, canonical, body });
+      <div><b>Current project day</b><p>Day ${na(d.today, '—')}</p></div>
+      <div><b>Latest documented day</b><p>${card ? `Day ${card.day} · ${card.dateLong}` : 'Not recorded'}</p></div>
+      <div><b>Latest recorded weight</b><p>${d.weight ? `${d.weight} lb · measured ${d.weightDate}` : 'Not recorded'}</p></div>
+      <div><b>Open violations</b><p>${d.open} · as of ${d.asOf}</p></div>
+      <div><b>Completion goal</b><p>200 lb held for 28 consecutive days</p></div>
+      <div><b>Record updated</b><p>${d.published}</p></div>
+    </div>
+    ${card ? `<p style="margin:26px 0 8px"><a href="${card.page}"><img src="${card.png}" alt="Report card, Day ${card.day}, ${card.dateLong}" style="max-width:360px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>Day ${card.day} · ${card.dateLong} · <a href="${card.page}">the supporting entry</a></small></p>` : ''}
+    <p>The daily archive records complete submissions, incomplete submissions, and days with no record. Each published report card identifies its Project Day and links to the supporting entry. A missing submission remains visible in the record.</p>
+    <p><a href="/daily/">View the daily archive</a> · <a href="/penalties">View open violations and corrective requirements</a></p>
+    <h2>What the project is</h2>
+    <p>Micheal Ray Berry, of Savannah, Georgia, documents a public accountability project under his real name and a written agreement. The current project began on <strong>August 31, 2026</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
+    <p>The Daily Compliance Packet is due by <strong>10:00 PM Eastern</strong> and includes a recorded weigh-in, a four-angle inspection video, four photographs, and the updated public tracker. The record also documents applicable corrective requirements and scheduled Evening Supervision.</p>
+    <p>The Accountability Partner administers the record and answers official questions about compliance. Micheal does not grade his own submissions. The agreement governs review, corrections, publication, and the limits of participation.</p>
+    <h2>Materials for sharing</h2>
+    <div class="standard">
+      <div><b>Official photograph</b><p><a href="/photos/official/micheal-ray-berry-official-front.jpg"><img src="/photos/official/micheal-ray-berry-official-front.jpg" alt="Micheal Ray Berry in the Inspection position, wearing the project uniform. Official project photograph." style="max-width:220px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small><a href="/photos/official/micheal-ray-berry-official-front.jpg" download>Full resolution</a></small></p><p><strong>Caption:</strong> Micheal Ray Berry in the Inspection position, wearing the project uniform. Official project photograph.</p><p>Use this photograph for a general introduction to the project. Use the photograph from the relevant dated entry when describing a particular day's record.</p></div>
+      <div><b>Daily report cards</b><p>Each published daily page carries its report card. Share the complete card with a link to that day's record so readers can inspect its photographs, documentation, and recorded outcome.</p><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">${card ? `<a href="${card.page}">View latest report</a> · <a href="${card.png}" download>Download latest card</a> · ` : ''}<a href="/daily/">Browse previous days</a></p></div>
+      <div><b>Copy-ready description</b><blockquote id="share-desc" style="margin:8px 0 12px;padding:12px 18px;border-left:3px solid var(--ink);font-size:15px;line-height:1.55">${desc}</blockquote><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase"><button type="button" data-copy-from="share-desc" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy description</button></p></div>
+    </div>
+    <h2>Ways to share</h2>
+    <ul>
+      <li>Send the website link to someone who may be interested in following the project.</li>
+      <li>Share an original project post or an unaltered daily report card with its source link.</li>
+      <li>Refer to the factual description above when discussing the project elsewhere.</li>
+    </ul>
+    <p>Micheal's invitation to share is voluntary and explicit. Following, discussing, or sharing the project does not give a viewer authority to direct his conduct or impose additional requirements.</p>
+    <h2>Sharing conditions</h2>
+    <p>Public project text, photographs, report cards, and recordings may be quoted, embedded, or reproduced <strong>unaltered and in context</strong>, with a link to the relevant source page.</p>
+    <ul>
+      <li>Keep names, dates, figures, status labels, and verdicts intact.</li>
+      <li>Preserve the original framing of photographs and report cards. Do not crop out a verdict or identifying information.</li>
+      <li>Keep demonstrations labeled. Do not present them as completed inspections, actual results, or served corrective sessions.</li>
+      <li>Use the recorded facts when describing compliance. A viewer's opinion is not an official ruling.</li>
+      <li>Sexualized reuse, harassment, impersonation, and disclosure of private information are outside the sharing permissions stated here.</li>
+    </ul>
+    <p>The project publishes clothed, non-explicit material under its agreement. These sharing permissions apply to material already made public by the project; they do not extend to unpublished material or private verification information. The agreement's applicable terms remain controlling.</p>
+    <p>Questions about a proposed reuse, or reports of suspected misuse, may be sent to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>
+    <h2>Follow the record</h2>
+    <p>New entries appear in the daily archive. Visitors can follow the record through RSS or the official YouTube channel, and consult the Evening Supervision page for the published schedule.</p>
+    <p><a href="/daily/">Daily archive</a> · <a href="/feed.xml">RSS feed</a> · <a href="https://www.youtube.com/@michealrayberry" rel="noopener">Official YouTube channel</a> · <a href="/live/">Evening Supervision</a></p>
+    <h2>Questions and governing documents</h2>
+    <p>Questions about the record, its rules, or a possible compliance issue should go to the <a href="/observer/">Observer Submission page</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner answers for the official record.</p>
+    <p><a href="/agreement">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/penalties">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a></p>`;
+  return synPage({ title, desc: description, canonical, body })
+    .replace('</head>', '<script src="/share.js" defer></script>\n</head>')
+    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${SITE_ORIGIN}${card ? card.png : '/og-image.png'}">`);
 }
 
 function observerReceivedPage() {
@@ -2166,7 +2221,6 @@ function livePage(supervision = [], violations = []) {
   const dataBlock = Object.fromEntries(supervision.map((s) => [s.date, { status: s.status, url: s.url }]));
   const RULES = [
     ['Uniform required', 'The full project uniform is worn throughout the supervision period while Micheal is in the monitored areas.'],
-    ['Collar required', 'The project collar (§4.1) is worn visibly throughout, as in every official recording.'],
     ['Fixed-camera observation', 'Cameras remain in their designated positions. They are not repositioned to avoid observation.'],
     ['Normal activity continues', 'Cooking, eating, cleaning, household work, personal administration, television, reading, and ordinary evening activity are permitted. This is not a performance.'],
     ['Water only', 'Water is the only beverage consumed during the scheduled supervision period.'],
@@ -2375,7 +2429,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2401,7 +2455,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <h2>The standard</h2>
     <div class="standard">
       <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
-      <div><b>Uniform</b><p>The correction uniform (§4.2): the designated pink unitard with the accountability collar. The black uniform documents the standard; the pink uniform documents a failure to meet it.</p></div>
+      <div><b>Uniform</b><p>The correction uniform (§4.2): the designated pink unitard. The black uniform documents the standard; the pink uniform documents a failure to meet it.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous, unedited take, fully AI-voiced. The participant does not speak. A verification code issued by the record seconds before capture is burned into every frame, so the footage cannot be older than it claims.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
@@ -2420,9 +2474,8 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <p>The reasoning is the same as for the daily record itself. Every previous attempt at this ended
     quietly, because quitting cost nothing and nobody knew there had been a plan. A consequence
     nobody can see is one that would eventually be discounted too.</p>
-    <p>All published material is safe for work: the participant is fully covered in
-    the project uniform throughout. Verification photographs are held privately and are not
-    published.</p>
+    <p>Every published photograph and recording shows the participant in the full project
+    uniform. Verification photographs are held privately and are not published.</p>
     <p>The full terms are in <a href="/agreement">§8.2 and §8.6 of the signed agreement</a>.</p>
 
     <h2>Sessions on the record</h2>
@@ -2443,7 +2496,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
 </body>
@@ -2566,7 +2619,7 @@ const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IB
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav">
     <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/penalties">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
+    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones">Milestones</a><a href="/share/">Share</a><a href="/agreement">Agreement</a><a href="/about">About</a><a href="/updates">Updates</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -2577,7 +2630,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com">contact@michealrayberry.com</a></span></span>
-      <span><a href="/reference/" style="letter-spacing:.08em;text-transform:uppercase">Reference</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
+      <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>`;
 function synExtract(full, startTag, endMarker) {
@@ -2953,8 +3006,23 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/observer/`);
   await writeIfChanged(path.join(ROOT, 'observer', 'received', 'index.html'), observerReceivedPage());
-  if (await writeIfChanged(path.join(ROOT, 'reference', 'index.html'), referencePage((() => { const s = sequence.filter((x) => x.complete || !deadlinePending(x.date)).at(-1); return s ? { day: s.day, page: `/daily/${s.date}-day-${String(s.day).padStart(3, '0')}/`, png: `/cards/${s.date}.png` } : null; })(), (() => { const last = records.at(-1); const open = violations.filter((v) => v.state === 'open').length; const d = dayNumber(todayEtIso()); return `Day ${d} · ${last ? last.weight.toFixed(1) + ' lb' : 'awaiting weigh-in'} · ${open} open violation${open === 1 ? '' : 's'} · goal 200 lb · as of ${todayEtIso()}`; })()))) changedUrls.add(`${SITE_ORIGIN}/reference/`);
-  extraUrls.push(`${SITE_ORIGIN}/reference/`);
+  {
+    const longDate = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'long', day: 'numeric', year: 'numeric' });
+    const s = sequence.filter((x) => x.complete || !deadlinePending(x.date)).at(-1);
+    const last = records.at(-1);
+    const nowEt = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    const shareData = {
+      today: dayNumber(todayEtIso()),
+      latest: s ? { day: s.day, date: s.date, dateLong: longDate(s.date), page: `/daily/${s.date}-day-${String(s.day).padStart(3, '0')}/`, png: `/cards/${s.date}.png` } : null,
+      weight: last ? last.weight.toFixed(1) : '',
+      weightDate: last ? longDate(last.date) : '',
+      open: violations.filter((v) => v.state === 'open').length,
+      asOf: nowEt,
+      published: nowEt,
+    };
+    if (await writeIfChanged(path.join(ROOT, 'share', 'index.html'), sharePage(shareData))) changedUrls.add(`${SITE_ORIGIN}/share/`);
+    extraUrls.push(`${SITE_ORIGIN}/share/`);
+  }
 
   if (await writeIfChanged(path.join(ROOT, 'consent', 'index.html'), consentPage())) {
     changedUrls.add(`${SITE_ORIGIN}/consent/`);

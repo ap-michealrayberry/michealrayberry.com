@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Evening Supervision — OBS overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
+<style>
+/* OBS Browser Source, 1920×1080, transparent. Three bands, camera clear:
+   TOP-LEFT identity + status · TOP-RIGHT clock · BOTTOM a full-width bar:
+   record figures | rotating rule (one at a time, 12 s) | website.
+   States: scheduled (gray) → live (red, only when OBS reports streaming)
+   → interrupted (amber) → closed (full frame). */
+html,body{margin:0;width:1920px;height:1080px;background:transparent;overflow:hidden;font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;color:#FAFAF7}
+body{position:relative}
+.box{position:absolute;background:rgba(20,20,18,.9);border:2px solid #FAFAF7;display:flex;white-space:nowrap}
+#id{top:44px;left:44px;flex-direction:column;padding:14px 22px 12px}
+#id .name{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:34px;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+#id .under{font-weight:600;font-size:13px;letter-spacing:.24em;color:#D8D6CF;margin-top:7px}
+#status{top:134px;left:44px;flex-direction:column;gap:4px;padding:14px 22px;border-top:0}
+#status .line{display:flex;align-items:center;gap:14px;font-weight:700;font-size:26px;letter-spacing:.12em;text-transform:uppercase}
+#status .dot{width:16px;height:16px;border-radius:50%;background:#8A8983;flex-shrink:0}
+#status .sub{font-size:16px;letter-spacing:.06em;color:#D8D6CF}
+body.live #status .dot{background:#B3261E;animation:pulse 1.6s ease-in-out infinite}
+body.interrupted #status .dot{background:#D9A400}
+body.interrupted #status .line{color:#F3C94A}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+#clock{top:44px;right:44px;flex-direction:column;align-items:flex-end;text-align:right;padding:14px 22px}
+#clock .k{font-size:14px;letter-spacing:.24em;text-transform:uppercase;color:#D8D6CF}
+#clock .v{font-size:40px;font-weight:700;letter-spacing:.06em;font-variant-numeric:tabular-nums;line-height:1.1}
+#clock .v.due{color:#FF6B5E}
+#clock .w{font-size:14px;letter-spacing:.1em;color:#D8D6CF;margin-top:4px}
+/* bottom bar */
+#bar{left:44px;right:44px;bottom:44px;align-items:stretch;padding:0;height:84px}
+#bar>div{display:flex;align-items:center;padding:0 24px}
+#facts{gap:26px;font-size:19px;letter-spacing:.06em;border-right:2px solid #FAFAF7}
+#facts b{font-weight:700}
+#facts .k{font-size:12px;letter-spacing:.2em;color:#D8D6CF;text-transform:uppercase;margin-right:8px}
+#rule{flex:1;min-width:0;gap:18px;overflow:hidden;position:relative}
+#rule .tag{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#FF8A7E;font-weight:700;flex-shrink:0}
+#rule .txt{font-size:20px;letter-spacing:.02em;white-space:normal;line-height:1.25;opacity:1;transition:opacity .5s}
+#rule .txt.fade{opacity:0}
+#rule .n{font-size:12px;letter-spacing:.2em;color:#8A8983;flex-shrink:0;margin-left:auto}
+#site{border-left:2px solid #FAFAF7;flex-direction:column;justify-content:center;align-items:flex-end;gap:3px}
+#site .u{font-size:18px;letter-spacing:.14em;font-weight:700}
+#site .s{font-size:12px;letter-spacing:.2em;color:#D8D6CF;text-transform:uppercase}
+#closed{position:absolute;inset:0;background:rgba(20,20,18,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+#closed h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:96px;letter-spacing:.04em;text-transform:uppercase;margin:0;line-height:1}
+#closed p{font-size:24px;letter-spacing:.1em;text-transform:uppercase;margin:0;color:#D8D6CF}
+body.closed #closed{display:flex}
+body.closed .box{display:none}
+</style>
+</head>
+<body>
+<div id="id" class="box"><div class="name">Micheal Ray Berry</div><div class="under">Under public accountability</div></div>
+<div id="status" class="box">
+  <div class="line"><span class="dot"></span><span id="statusText">Supervision scheduled</span></div>
+  <div class="sub">Evening Supervision · 6–10 PM ET · fixed camera</div>
+</div>
+<div id="clock" class="box">
+  <div class="k" id="clockK">Session begins in</div>
+  <div class="v" id="clockV">--:--:--</div>
+  <div class="w" id="clockW">Closes 10:00 PM ET</div>
+</div>
+<div id="bar" class="box">
+  <div id="facts"><span><span class="k">Day</span><b id="day">—</b></span><span><span class="k">Weight</span><b id="weight">—</b> lb</span><span><span class="k">Goal</span><b>200</b></span><span><span class="k">Open</span><b id="open">—</b></span></div>
+  <div id="rule"><span class="tag">Rule</span><span class="txt" id="ruleTxt"></span><span class="n" id="ruleN"></span></div>
+  <div id="site"><span class="u">michealrayberry.com/live</span><span class="s">Full rules · the record</span></div>
+</div>
+<div id="closed">
+  <h1>Session closed</h1>
+  <p>Evening Supervision · <span id="closedDate"></span></p>
+  <p>michealrayberry.com/live</p>
+</div>
+<script>
+/* Params: ?start=18:00 ?end=22:00 ?demo=1 ?state=live|scheduled|interrupted ?rules=0 (hide the rule band) ?every=12 (seconds per rule) */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var START = (q.get('start') || '18:00').split(':').map(Number), END = (q.get('end') || '22:00').split(':').map(Number);
+  var SHEET = '1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE', DAY1 = Date.UTC(2026, 7, 31);
+  var RULES = [
+    'Full project uniform in every monitored area.',
+    'Fixed camera. It is not repositioned to avoid observation.',
+    'Normal evening activity continues. This is not a performance.',
+    'Water only for the whole period.',
+    'Dinner is a home-prepared meal. No delivery, takeout, or convenience food.',
+    'Yogurt for dessert. Nothing else outside the planned meal.',
+    'Monitored areas are brought to the minimum order standard before the session.',
+    'The Daily Compliance Packet is still due by 10:00 PM ET.',
+    'Bathrooms, changing, private communications, and visitors stay off camera.',
+    'A session not completed is recorded as MISSED. It stays on the record.'
+  ];
+  var streaming = false, forced = q.get('state'), liveSince = null, inObs = !!window.obsstudio;
+  if (inObs) {
+    window.obsstudio.getStatus && window.obsstudio.getStatus(function (s) { streaming = !!(s && s.streaming); if (streaming) liveSince = liveSince || Date.now(); });
+    window.addEventListener('obsStreamingStarted', function () { streaming = true; liveSince = Date.now(); });
+    window.addEventListener('obsStreamingStopped', function () { streaming = false; });
+  }
+  function et() { return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function hms(ms) { ms = Math.max(0, ms); return pad(Math.floor(ms / 3.6e6)) + ':' + pad(Math.floor(ms / 6e4) % 60) + ':' + pad(Math.floor(ms / 1e3) % 60); }
+  function setState(s) { document.body.classList.remove('live', 'interrupted', 'closed'); if (s !== 'scheduled') document.body.classList.add(s); document.getElementById('statusText').textContent = { scheduled: 'Supervision scheduled', live: 'Under supervision — Live', interrupted: 'Feed interrupted', closed: '' }[s]; }
+  function tick() {
+    var now = et();
+    var start = new Date(now); start.setHours(START[0], START[1] || 0, 0, 0);
+    var end = new Date(now); end.setHours(END[0], END[1] || 0, 0, 0);
+    var K = document.getElementById('clockK'), V = document.getElementById('clockV'), W = document.getElementById('clockW');
+    document.getElementById('day').textContent = Math.floor((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - DAY1) / 864e5) + 1;
+    if (now >= end) { document.getElementById('closedDate').textContent = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); setState('closed'); return; }
+    var live = forced ? forced === 'live' : streaming;
+    if (now < start) { setState(forced === 'live' ? 'live' : 'scheduled'); K.textContent = 'Session begins in'; V.textContent = hms(start - now); V.classList.remove('due'); W.textContent = '6:00–10:00 PM ET'; return; }
+    if (live) { setState('live'); K.textContent = 'Session time'; V.textContent = hms(Date.now() - (liveSince || Date.now())); var r = end - now; W.textContent = hms(r) + ' until 10:00 PM ET'; V.classList.toggle('due', r < 15 * 6e4); }
+    else { setState(forced === 'scheduled' ? 'scheduled' : (inObs || forced ? 'interrupted' : 'scheduled')); K.textContent = 'Session closes in'; V.textContent = hms(end - now); V.classList.remove('due'); W.textContent = inObs && !forced ? 'Stream not active' : 'Closes 10:00 PM ET'; }
+  }
+  tick(); setInterval(tick, 1000);
+  // rotating rule
+  var ruleEl = document.getElementById('rule'), txt = document.getElementById('ruleTxt'), nEl = document.getElementById('ruleN');
+  if (q.get('rules') === '0') ruleEl.style.display = 'none';
+  else {
+    var ri = 0, every = Math.max(4, parseInt(q.get('every') || '12', 10)) * 1000;
+    function showRule() { txt.textContent = RULES[ri]; nEl.textContent = (ri + 1) + ' / ' + RULES.length; ri = (ri + 1) % RULES.length; }
+    showRule();
+    setInterval(function () { txt.classList.add('fade'); setTimeout(function () { showRule(); txt.classList.remove('fade'); }, 500); }, every);
+  }
+  if (q.get('demo') === '1') { document.getElementById('weight').textContent = '336.4'; document.getElementById('open').textContent = '0'; return; }
+  function csv(t) { var rows = [], row = [], f = '', qq = false; for (var i = 0; i < t.length; i++) { var c = t[i]; if (qq) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else qq = false; } else f += c; } else if (c === '"') qq = true; else if (c === ',') { row.push(f); f = ''; } else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; } else if (c !== '\r') f += c; } if (f || row.length) { row.push(f); rows.push(row); } return rows; }
+  function get(sheet) { return fetch('https://docs.google.com/spreadsheets/d/' + SHEET + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(sheet), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(csv); }
+  function refresh() {
+    get('Weigh-ins').then(function (rows) { var last = rows.slice(1).filter(function (r) { return parseFloat(r[1]); }).pop(); if (last) document.getElementById('weight').textContent = parseFloat(last[1]).toFixed(1); }).catch(function () {});
+    get('Violation Log').then(function (rows) { var open = rows.slice(1).filter(function (r) { return r[0] && !/resolved|corrected/i.test(r[2] || '') && !/not a violation|specimen/i.test(r[2] || ''); }).length; document.getElementById('open').textContent = open; }).catch(function () {});
+  }
+  refresh(); setInterval(refresh, 5 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
