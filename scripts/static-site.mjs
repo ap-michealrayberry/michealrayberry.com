@@ -10,14 +10,13 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { publicUrl } from './public-data.mjs';
 
 const VIEWS = [
   { page: 'home', slug: '', label: 'Home', title: 'Micheal Ray Berry — under public accountability, 340 to 200',
     desc: 'A voluntary public accountability record. Declared start 340 lb, toward 200, documented daily under his real name. Archive: /daily/. Violations: /penalties.' },
   { page: 'dashboard', slug: 'dashboard', label: 'Dashboard', title: 'Dashboard — weigh-in log, weight chart, daily photographs — Micheal Ray Berry',
     desc: 'The weigh-in log, the weight chart, the milestone ladder, and every daily documentation photograph of the Micheal Ray Berry Public Accountability Project.' },
-  { page: 'penalties', slug: 'penalties', label: 'Penalties', title: 'Violation Log — Micheal Ray Berry Public Accountability Project',
-    desc: 'The permanent public record of every Violation Event: date, requirement missed, status, submission and resolution timestamps, and the Accountability Partner\u2019s verification.' },
   { page: 'milestones', slug: 'milestones', label: 'Milestones', title: 'Milestone Ladder — 320 to 200 | Micheal Ray Berry',
     desc: 'The six official milestones between 340 and 200 pounds, each reached or not, computed live from the weigh-in record.' },
   { page: 'uniform', slug: 'uniform', label: 'Uniform', title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
@@ -38,6 +37,7 @@ function lookup(scope, expr) {
   const p = String(expr).trim();
   if (p === 'true') return true;
   if (p === 'false') return false;
+  if (/^(?:__proto__|constructor|prototype)(?:\.|$)/.test(p)) return undefined;
   return p.split('.').reduce((o, k) => (o == null ? undefined : o[k]), scope);
 }
 function blockEnd(tpl, tag, start) {
@@ -88,14 +88,14 @@ function expand(tpl, scope) {
 }
 
 /* ── values (mirrors the former renderVals, computed from the sheet) ── */
-function computeValues(ctx) {
+export function computeValues(ctx) {
   const { rows, violations, updates, siteState, attestMap, photoFiles, findPhoto, relUrl, videoEmbed, longDate, htmlEscape, normalizeDate, START_DATE, todayIso, SITE_ORIGIN } = ctx;
   const esc = (s) => htmlEscape(String(s == null ? '' : s));
   const startWeight = 340, goalWeight = 200;
   const dayOf = (iso) => Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(START_DATE + 'T12:00:00Z')) / 864e5) + 1;
   const fmt = (n) => (Math.round(n * 10) / 10).toFixed(1);
   const fmtDate = (iso) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(iso + 'T12:00:00Z'));
-  const normalizeDrive = (u) => { const m = String(u || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|thumbnail\?id=|uc\?id=)([\w-]+)/); return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1200' : String(u || ''); };
+  const normalizeDrive = (u) => publicUrl(u, SITE_ORIGIN);
 
   const rawDay = dayOf(todayIso);
   const dayNumber = Math.max(0, rawDay);
@@ -104,7 +104,7 @@ function computeValues(ctx) {
     photo: String(r[3] || '').trim(), left: String(r[4] || '').trim(), rear: String(r[5] || '').trim(), right: String(r[6] || '').trim(), video: String(r[7] || '').trim(),
   })).filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e.date) && e.date >= START_DATE);
   const byDate = {}; all.forEach((e) => { byDate[e.date] = e; });
-  const data = all.filter((e) => !Number.isNaN(e.weight)).sort((a, b) => a.date.localeCompare(b.date));
+  const data = all.filter((e) => Number.isFinite(e.weight)).sort((a, b) => a.date.localeCompare(b.date));
   const last = data.at(-1) || null;
   const current = last ? last.weight : startWeight;
   const lost = Math.max(0, startWeight - current), remaining = Math.max(0, current - goalWeight);
@@ -128,12 +128,12 @@ function computeValues(ctx) {
   const wrCurrent = closedWeek >= 1 ? 'Week ' + (closedWeek + 1) + ' in progress — day ' + ((daysSince % 7) + 1) + ' of 7.' : '';
 
   // chart
-  const X0 = 60, X1 = 990, Y0 = 20, Y1 = 300, W_TOP = 340, W_BOT = 170;
+  const X0 = 60, X1 = 990, Y0 = 20, Y1 = 300, W_TOP = Math.max(340, ...data.map(e => Math.ceil(e.weight / 10) * 10)), W_BOT = Math.min(170, ...data.map(e => Math.floor(e.weight / 10) * 10));
   const maxDay = Math.max(dayNumber, 28);
   const xOf = (d) => X0 + ((d - 1) / Math.max(1, maxDay - 1)) * (X1 - X0);
   const yOf = (w) => Y0 + ((W_TOP - w) / (W_TOP - W_BOT)) * (Y1 - Y0);
   const chartDots = data.map((e) => ({ x: xOf(dayOf(e.date)).toFixed(1), y: yOf(e.weight).toFixed(1) }));
-  const chart = { goalY: yOf(goalWeight).toFixed(1), goalLabelY: (yOf(goalWeight) - 10).toFixed(1), points: chartDots.map((d) => d.x + ',' + d.y).join(' '), dots: chartDots };
+  const chart = { top: W_TOP, mid: (W_TOP + W_BOT) / 2, bottom: W_BOT, goalY: yOf(goalWeight).toFixed(1), goalLabelY: (yOf(goalWeight) - 10).toFixed(1), points: chartDots.map((d) => d.x + ',' + d.y).join(' '), dots: chartDots };
 
   const logRows = data.slice().reverse().map((e, i, arr) => {
     const prev = arr[i + 1];
@@ -144,8 +144,7 @@ function computeValues(ctx) {
   });
 
   // violations
-  const subEnds = (v) => { const m = String(v.submitted || '').match(/(\d{4}-\d{2}-\d{2})(?:[ T](\d{1,2}):(\d{2}))?/); if (!m) return null; const at = Date.parse(m[1] + 'T' + (m[2] ? String(m[2]).padStart(2, '0') + ':' + m[3] : '12:00') + ':00-04:00'); return Number.isNaN(at) ? null : at + 864e5; };
-  const openList = (violations || []).filter((v) => v.state !== 'resolved' && !(v.state === 'corrected' && subEnds(v) && Date.now() >= subEnds(v)));
+  const openList = (violations || []).filter((v) => v.state !== 'resolved');
   const STATE_STYLE = { open: '#B3261E', corrected: '#8A6A1E', resolved: '#3A6B3A' };
   const penaltyRows = (violations || []).map((v) => ({
     num: String(v.n).padStart(3, '0'), href: '/violations/' + v.slug + '/', date: v.date, violation: esc(v.what),
@@ -158,7 +157,7 @@ function computeValues(ctx) {
   const lastViol = violDates.at(-1) || null;
   const cleanDays = rawDay < 1 ? 0 : (lastViol ? Math.max(0, dayOf(todayIso) - dayOf(lastViol)) : dayNumber);
 
-  const attestedDays = Object.keys(attestMap || {}).filter((d) => /VALID/.test(String(attestMap[d] || ''))).length;
+  const attestedDays = Object.keys(attestMap || {}).filter((d) => /^VALID(?:\b|[- —])/.test(String(attestMap[d] || ''))).length;
 
   let nextFound = false;
   const milestoneRows = MILESTONES.map((t) => {
@@ -172,7 +171,7 @@ function computeValues(ctx) {
   const milestoneCells = MILESTONES.map((m) => ({ label: String(m), tag: lowest <= m ? 'Reached' : (m === 200 ? 'Goal' : 'Ahead'), bg: lowest <= m ? '#141412' : '#FAFAF7', color: lowest <= m ? '#FAFAF7' : (m === 200 ? '#B3261E' : '#141412') }));
 
   // updates
-  const ups = (updates && updates.length ? updates : [{ date: 'August 31, 2026', type: 'official', title: 'Entry 001 — Project Commencement', body: 'The project begins under Edition 2 of the agreement. The agreement declares a start of 340 lb. Nothing before this date is on the record.', link: '/daily/' }])
+  const ups = (updates || [])
     .slice().sort((a, b) => (Date.parse(a.date) || 0) - (Date.parse(b.date) || 0));
   // amendments: Updates rows typed 'amendment' render on the agreement page (§12.1 log), newest first
   const amendments = ups.filter((u) => String(u.type || '').toLowerCase() === 'amendment').reverse()
@@ -182,7 +181,7 @@ function computeValues(ctx) {
     date: esc(u.date), isPersonal,
     title: esc(isPersonal ? (u.title || 'Personal note') : (String(u.title || '').toLowerCase().indexOf('entry') === 0 ? u.title : 'Entry ' + String(num).padStart(3, '0') + ' — ' + (String(u.type || '').toLowerCase() === 'amendment' ? 'Amendment: ' : '') + u.title)),
     body: esc(u.body), author: isPersonal ? 'by Micheal Ray Berry' : 'by the AP',
-    hasLink: /^https?:\/\//i.test(String(u.link || '')), link: /^https?:\/\//i.test(String(u.link || '')) ? esc(u.link) : '', linkLabel: 'Link',
+    hasLink: !!publicUrl(u.link, SITE_ORIGIN), link: esc(publicUrl(u.link, SITE_ORIGIN)), linkLabel: 'Link',
     borderColor: isPersonal ? '#D8D6CF' : '#141412', bg: isPersonal ? '#F1F0EA' : '#FAFAF7', titleColor: isPersonal ? '#3A3935' : '#141412',
   }));
 
@@ -210,7 +209,8 @@ function computeValues(ctx) {
   const introEmbed = videoEmbed(introUrl);
 
   const todayRow = byDate[todayIso];
-  const packetDone = !!(todayRow && !Number.isNaN(todayRow.weight) && todayRow.photo);
+  const packetDone = !!(todayRow && Number.isFinite(todayRow.weight) && todayRow.video
+    && ['front', 'left', 'rear', 'right'].every(angle => findPhoto(photoFiles, todayIso, dayOf(todayIso), angle)));
   const openCount = openList.length;
   const ms = MILESTONES.filter((m) => m < current);
 
@@ -233,8 +233,8 @@ function computeValues(ctx) {
     latestVideoLabel: latestWithVideo ? 'Day ' + dayOf(latestWithVideo.date) + ' · ' + latestWithVideo.date : 'Daily inspection archive',
     inViolation: openCount > 0, openCountLabel: String(openCount), agreementStatus: 'under agreement · ' + openCount + ' open',
     complianceLabel: openCount > 0 ? (openCount === 1 ? 'Non-compliant — one unresolved violation' : 'Non-compliant — ' + openCount + ' unresolved violations')
-      : (rawDay < 1 ? 'Under agreement' : packetDone ? 'Compliant — today’s packet filed' : 'Compliant — today’s packet due'),
-    todayPacketLabel: rawDay < 1 ? '' : (packetDone ? 'Filed · ' : 'Not yet filed · ') + todayIso,
+      : (rawDay < 1 ? 'Under agreement' : packetDone ? 'No unresolved violations — today’s packet present' : 'No unresolved violations — today’s packet incomplete'),
+    todayPacketLabel: rawDay < 1 ? '' : (packetDone ? 'Files present · ' : 'Incomplete · ') + todayIso,
     _chart: chart,
   };
 }
@@ -263,12 +263,15 @@ export async function buildStaticSite(ctx) {
     if (v.page === 'dashboard') {
       const c = vals._chart;
       body = body
+        .replace(/(<text data-y-top[^>]*>)[^<]*/, '$1' + c.top)
+        .replace(/(<text data-y-mid[^>]*>)[^<]*/, '$1' + c.mid)
+        .replace(/(<text data-y-bottom[^>]*>)[^<]*/, '$1' + c.bottom)
         .replace(/(<line data-goal-line x1="60" y1=")[^"]*(" x2="990" y2=")[^"]*(")/, `$1${c.goalY}$2${c.goalY}$3`)
         .replace(/(<text data-goal-label x="66" y=")[^"]*(")/, `$1${c.goalLabelY}$2`)
         .replace(/<polyline data-series points=""/, `<polyline data-series points="${c.points}"`)
         .replace(/<g data-dots><\/g>/, '<g data-dots>' + c.dots.map((d) => `<circle cx="${d.x}" cy="${d.y}" r="4" fill="#141412"></circle>`).join('') + '</g>');
     }
-    const canonical = ctx.SITE_ORIGIN + '/' + v.slug;
+    const canonical = ctx.SITE_ORIGIN + '/' + (v.slug ? v.slug + '/' : '');
     const pageHead = head
       .replace(/<title>[^<]*<\/title>/, `<title>${ctx.htmlEscape(v.title)}</title>`)
       .replace(/(<meta name="description" content=")[^"]*(")/, `$1${ctx.htmlEscape(v.desc)}$2`)

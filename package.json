@@ -4,11 +4,15 @@
   "type": "module",
   "scripts": {
     "generate": "node scripts/publish.mjs",
-    "indexnow": "node scripts/submit-indexnow.mjs",
-    "build": "node scripts/publish.mjs && node scripts/submit-indexnow.mjs",
-    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/submit-indexnow.mjs"
+    "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/check-site.mjs dist",
+    "check-syntax": "node scripts/check-syntax.mjs",
+    "test": "node scripts/test-compatible.mjs",
+    "indexnow": "node scripts/submit-indexnow.mjs"
   },
   "dependencies": {
-    "sharp": "^0.33.5"
+    "sharp": "0.35.4"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

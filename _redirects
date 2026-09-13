@@ -12,7 +12,7 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /personal/*  /  301
 /partner     /  301
 /partner/*   /  301
-/log         /penalties   301
+/log         /violations/   301
 /annex/* / 301
 /annex / 301
 /fagspose/* / 301
@@ -39,8 +39,8 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 
 # Build-only inputs live in the repo but are not part of the served record.
 # (Netlify builds before publishing, so 404-ing them here does not affect the build.)
-/violations/v-000/ /penalties 301
-/violations/v-000 /penalties 301
+/violations/v-000/ /violations/ 301
+/violations/v-000 /violations/ 301
 
 /scripts/*     /404.html   404
 /site.template.html /404.html 404
@@ -58,3 +58,16 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 # Reference became Share (Sept 13)
 /reference    /share/  301
 /reference/*  /share/  301
+
+# Public assets are built in dist; old sources remain in Git history only.
+/penalties /violations/ 301!
+/penalties/ /violations/ 301!
+/log /violations/ 301!
+/apps-script/* /404.html 404!
+/README.md /404.html 404!
+/package-lock.json /404.html 404!
+/support.js /404.html 404!
+/boot.js /404.html 404!
+/sw.js /404.html 404!
+/verify/support.js /404.html 404!
+/photos/official/maid-ray-berry-portrait.jpg /404.html 404!

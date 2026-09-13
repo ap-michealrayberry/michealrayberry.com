@@ -48,16 +48,16 @@
 
   function renderConsole() {
     var st = state();
-    var lamp = '<span class="lamp' + (st.live ? ' on' : '') + '"></span>';
+    var lamp = '<span class="lamp' + '' + '"></span>';
     if (st.live) {
-      set('[data-live-status]', lamp + 'LIVE — UNDER SUPERVISION');
+      set('[data-live-status]', lamp + 'SCHEDULED WINDOW — CHECK PLAYER');
       var hh = Math.floor(st.remaining / 3600), mm = Math.floor((st.remaining % 3600) / 60), ss = st.remaining % 60;
       set('[data-live-detail]',
         '<div><b>Session</b><span>' + pad(st.no).padStart(3, '0') + '</span></div>' +
         '<div><b>Started</b><span>6:00 PM ET</span></div>' +
         '<div><b>Required end</b><span>10:00 PM ET</span></div>' +
         '<div><b>Time remaining</b><span data-live-clock>' + pad(hh) + ':' + pad(mm) + ':' + pad(ss) + '</span></div>' +
-        '<div><b>Compliance</b><span>IN PROGRESS</span></div>');
+        '<div><b>Broadcast</b><span>See player for availability</span></div>');
       var embed = document.querySelector('[data-live-embed]');
       if (embed && !embed.querySelector('iframe')) {
         embed.innerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=' + CHANNEL + '" title="Evening Supervision — live" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
@@ -68,7 +68,7 @@
         : st.next.tonight ? 'TONIGHT 6:00 PM ET'
         : st.next.tomorrow ? 'TOMORROW 6:00 PM ET'
         : DOW[dowOf(st.next.iso)].toUpperCase() + ' 6:00 PM ET';
-      set('[data-live-status]', lamp + 'OFFLINE — NEXT SESSION: ' + when);
+      set('[data-live-status]', lamp + 'NEXT SCHEDULED SESSION: ' + when);
       var tonight = st.exemptTonight ? 'Not required tonight — documented exception on the record.'
         : st.tonight ? (st.now.h >= H1 ? 'Tonight\u2019s session window has closed.' : 'Required tonight, 6:00–10:00 PM ET.')
         : 'Not scheduled tonight.';
@@ -98,6 +98,10 @@
     if (document.querySelector('[data-live-status]')) renderConsole();
     renderBar();
   }
-  tick();
+  function refresh() {
+    fetch('/data/supervision.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('feed'); return r.json(); }).then(function (data) { rows = data.sessions || {}; tick(); }).catch(function () {});
+  }
+  tick(); refresh();
   setInterval(tick, 1000);
+  setInterval(refresh, 5 * 60 * 1000);
 })();

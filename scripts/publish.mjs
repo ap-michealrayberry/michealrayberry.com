@@ -1,11 +1,15 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { buildStaticSite } from './static-site.mjs';
+import { buildStaticSite, computeValues } from './static-site.mjs';
+import { SITE_STATE_KEYS, publicUrl, csvDocument, acceptedAttestations } from './public-data.mjs';
+import { polishHtml } from './polish-html.mjs';
+import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 
 // Netlify sets no workspace var; the build runs from the repo root.
-const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+if (path.resolve(process.cwd()) !== ROOT) throw new Error('Run the build from the project directory.');
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://michealrayberry.com').replace(/\/$/, '');
 const SHEET_CSV = process.env.WEIGHINS_CSV ||
   'https://docs.google.com/spreadsheets/d/1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE/gviz/tq?tqx=out:csv&sheet=Weigh-ins';
@@ -36,18 +40,20 @@ const MILESTONES = [320, 300, 275, 250, 225, 200];
 
 const STATIC_PAGES = [
   ['', 'daily'],
-  ['dashboard', 'daily'],
-  ['milestones', 'weekly'],
-  ['about', 'weekly'],
-  ['agreement', 'weekly'],
-  ['penalties', 'daily'],
-  ['corrections', 'weekly'],
-  ['positions', 'monthly'],
-  ['consent', 'monthly'],
-  ['uniform', 'weekly'],
-  ['updates', 'daily'],
-  ['verify', 'monthly'],
+  ['dashboard/', 'daily'],
+  ['milestones/', 'weekly'],
+  ['about/', 'weekly'],
+  ['agreement/', 'weekly'],
+  ['violations/', 'daily'],
+  ['corrections/', 'weekly'],
+  ['positions/', 'monthly'],
+  ['consent/', 'monthly'],
+  ['uniform/', 'weekly'],
+  ['updates/', 'daily'],
   ['daily/', 'daily'],
+  ['share/', 'weekly'],
+  ['live/', 'daily'],
+  ['observer/', 'monthly'],
 ];
 
 function xmlEscape(value = '') {
@@ -126,7 +132,7 @@ async function readMaybe(file) {
 }
 
 async function writeIfChanged(file, data) {
-  const next = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  const next = Buffer.isBuffer(data) ? data : Buffer.from(polishHtml(data, file));
   const current = await readMaybe(file);
   if (current && current.equals(next)) return false;
   await fs.mkdir(path.dirname(file), { recursive: true });
@@ -200,10 +206,12 @@ async function fetchText(url, optional = false) {
       signal: AbortSignal.timeout(30000),
     });
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return await response.text();
+    const body = await response.text();
+    if (/^\s*(?:<!doctype html|<html)/i.test(body)) throw new Error('Expected CSV, received HTML.');
+    return body;
   } catch (error) {
     if (optional) {
-      console.warn(`Optional fetch failed: ${url}: ${error.message}`);
+      console.warn('Optional sheet unavailable; its section will be empty.');
       return '';
     }
     throw error;
@@ -226,7 +234,9 @@ function findPhoto(files, date, day, angle) {
 
 async function generateResponsive(source, date, angle, day) {
   const image = sharp(source, { failOn: 'none' }).rotate();
-  const meta = await image.metadata();
+  const rawMeta = await image.metadata();
+  const rotated = [5,6,7,8].includes(rawMeta.orientation);
+  const meta = rotated ? { ...rawMeta, width: rawMeta.height, height: rawMeta.width } : rawMeta;
   if (!meta.width || !meta.height) throw new Error(`Unable to read image dimensions: ${source}`);
   const maxPublicWidth = Math.min(meta.width, 1600);
   const targetWidths = [...new Set([480, 960, maxPublicWidth].filter((w) => w <= maxPublicWidth))].sort((a, b) => a - b);
@@ -244,7 +254,7 @@ async function generateResponsive(source, date, angle, day) {
     if (await writeIfChanged(dest, buffer)) changedUrls.push(`${SITE_ORIGIN}${relUrl(dest)}`);
     variants.push({
       width,
-      height: Math.round(meta.height * (width / meta.width)),
+      height: (await sharp(buffer).metadata()).height,
       path: dest,
       url: `${SITE_ORIGIN}${relUrl(dest)}`,
       sha256: sha256(buffer),
@@ -253,10 +263,10 @@ async function generateResponsive(source, date, angle, day) {
   }
   return {
     source,
-    sourceUrl: `${SITE_ORIGIN}${relUrl(source)}`,
-    sourceSha256: sha256(await fs.readFile(source)),
-    width: meta.width,
-    height: meta.height,
+    sourceUrl: variants.at(-1).url,
+    sourceSha256: variants.at(-1).sha256,
+    width: variants.at(-1).width,
+    height: variants.at(-1).height,
     variants,
     changedUrls,
   };
@@ -344,7 +354,7 @@ function cardCtx(day, opts = {}) {
     video: !!(row && row.video), videoSec: row ? row.videoSec : 0, filedAt: row && row.filedAt ? row.filedAt : '',
     photoCount, complete, pending, anyFiled: !!(row && (row.weight || row.video)) || photoCount > 0,
     supervision: supRequired ? (s ? s.status.split(/\s*[\u00B7\-\u2013]\s*/)[0] : '') : null,
-    violation: v, openCount: X.violations.filter((x) => x.state === 'open').length,
+    violation: v, openCount: X.violations.filter((x) => x.state !== 'resolved').length,
     photo: opts.photo || null,
   };
 }
@@ -376,13 +386,15 @@ async function cardImage(c) {
   const wt = Number.isFinite(c.weight) ? c.weight.toFixed(1) + ' lb' : (c.pending ? 'Awaiting sync' : 'NOT SYNCED');
   const dd = c.weight - c.prevWeight;
   const delta = Number.isFinite(c.weight) && Number.isFinite(c.prevWeight) ? (dd === 0 ? '±0.0' : (dd > 0 ? '+' : '−') + Math.abs(dd).toFixed(1)) + ' day' : '';
-  const total = Number.isFinite(c.weight) ? '−' + (START_WEIGHT - c.weight).toFixed(1) + ' total' : '';
+  const total = Number.isFinite(c.weight) ? (c.weight <= START_WEIGHT ? '−' : '+') + Math.abs(START_WEIGHT - c.weight).toFixed(1) + ' total' : '';
   const filedLine = c.video ? 'Filed' + (c.filedAt ? ' ' + c.filedAt + ' ET' : '') : (c.pending ? 'Not yet filed' : 'NOT FILED');
   const filedSub = c.video ? (c.videoSec ? 'Recording ' + Math.round(c.videoSec / 60) + ' min \u00B7 due 10:00 PM ET' : 'Due 10:00 PM ET') : 'Due 10:00 PM ET';
   const vioToday = c.violation
     ? c.violation.id + ' \u00B7 ' + ({ open: 'Open', corrected: 'Corrected \u2014 awaiting verification', resolved: 'Corrected' })[c.violation.state]
     : (c.pending ? 'None so far' : 'None');
   const outstanding = c.openCount ? c.openCount + ' open correction' + (c.openCount === 1 ? '' : 's') : 'None';
+  const photos = c.photoCount + ' of 4' + (c.photoCount < 4 && !c.pending ? ' · INCOMPLETE' : '');
+  const sup = c.supervision === null ? 'Not scheduled' : c.supervision || (c.pending ? 'Pending' : 'No ruling recorded');
   const rows = [
     ['WEIGH-IN', wt, [delta, total].filter(Boolean).join(' \u00B7 ')],
     ['DAILY INSPECTION', filedLine, filedSub],
@@ -1307,7 +1319,7 @@ function rssFeed(entries) {
       <guid isPermaLink="true">${url}</guid>
       <pubDate>${new Date(`${record.date}T22:00:00-04:00`).toUTCString()}</pubDate>
       <description>${xmlEscape(`Day ${record.day} of the Micheal Ray Berry Public Accountability Project. Recorded weight ${record.weight.toFixed(1)} pounds on ${longDate(record.date)}, with four-angle documentation photographs and the daily inspection video.`)}</description>
-      <enclosure url="${xmlEscape(photos.front.sourceUrl)}" type="image/jpeg" length="0"/>
+      <enclosure url="${xmlEscape(photos.front.sourceUrl)}" type="image/webp" length="${photos.front.variants.at(-1).bytes}"/>
     </item>`;
   }).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -2157,7 +2169,7 @@ function sharePage(d) {
     <p>The daily archive records complete submissions, incomplete submissions, and days with no record. Each published report card identifies its Project Day and links to the supporting entry. A missing submission remains visible in the record.</p>
     <p><a href="/daily/">View the daily archive</a> · <a href="/penalties">View open violations and corrective requirements</a></p>
     <h2>What the project is</h2>
-    <p>Micheal Ray Berry, of Savannah, Georgia, documents a public accountability project under his real name and a written agreement. The current project began on <strong>August 31, 2026</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
+    <p>Micheal Ray Berry, of Savannah, Georgia, documents a public accountability project under his real name and a written agreement. The current project began on <strong>${htmlEscape(longDate(START_DATE))}</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
     <p>The Daily Compliance Packet is due by <strong>10:00 PM Eastern</strong> and includes a recorded weigh-in, a four-angle inspection video, four photographs, and the updated public tracker. The record also documents applicable corrective requirements and scheduled Evening Supervision.</p>
     <p>The Accountability Partner administers the record and answers official questions about compliance. Micheal does not grade his own submissions. The agreement governs review, corrections, publication, and the limits of participation.</p>
     <h2>Materials for sharing</h2>
@@ -2714,7 +2726,7 @@ async function main() {
        sheet-independent pages, then FAIL the build so Netlify keeps the
        last good deploy instead of publishing a gutted one. */
     console.warn('Record sheet unreadable — generating sheet-independent pages, then failing the build.');
-    console.warn('Fix: Share > General access > Anyone with the link > Viewer, then retry the deploy.');
+    console.warn('Check the existing build feed access and retry the deploy.');
     for (const [slug, html] of await buildStaticSite(staticCtx({ rows: [], violations: [], updates: [], siteState: {}, attestMap: {}, photoFiles: [] }))) {
       await writeIfChanged(path.join(ROOT, slug, 'index.html'), html);
     }
@@ -2726,20 +2738,23 @@ async function main() {
   const siteState = {};
   if (siteStateCsv) {
     for (const r of parseCSV(siteStateCsv).slice(1)) {
-      if (r[0]) siteState[String(r[0]).trim()] = String(r[1] || '').trim();
+      if (SITE_STATE_KEYS.has(String(r[0]).trim())) siteState[String(r[0]).trim()] = String(r[1] || '').trim();
     }
   }
   if (/^\d{4}-\d{2}-\d{2}$/.test(siteState.start_date || '')) START_DATE = siteState.start_date;
+  for (const key of ['intro_video_url', 'wait_still_url', 'demo_video_url', 'demo_url', 'ytfiled']) {
+    if (siteState[key]) siteState[key] = publicUrl(siteState[key], SITE_ORIGIN);
+  }
   /* Evening Supervision record (§3.4): one row per scheduled night the record
      has ruled on — COMPLETED / MISSED / EXCEPTION · reason. */
   const supervision = (supervisionCsv ? parseCSV(supervisionCsv).slice(1) : [])
     .map((r) => ({
       date: normalizeDate(r[0]),
-      status: String(r[2] || '').trim(),
+      status: String(r[2] || '').trim().match(/^(COMPLETED|MISSED|EXCEPTION|LIVE|IN PROGRESS|SCHEDULED|REQUIRED)\b/i)?.[1].toUpperCase() || '',
       start: String(r[3] || '').trim(),
       end: String(r[4] || '').trim(),
-      url: String(r[5] || '').trim(),
-      note: String(r[6] || '').trim(),
+      url: publicUrl(r[5], SITE_ORIGIN),
+      note: '', // The Supervision note can contain private exception details.
     }))
     .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s.date) && s.status)
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -2761,14 +2776,20 @@ async function main() {
         resolved: String(r[4] || '').trim(),
         verification: String(r[5] || '').trim(),
         corrections: String(r[6] || '').split(';').map((x) => x.trim()).filter(Boolean),
-        recording: String(r[7] || '').trim(),
+        recording: publicUrl(r[7], SITE_ORIGIN),
       };
     })
     .filter((v) => /^\d{4}-\d{2}-\d{2}$/.test(v.date) && v.what);
 
 
 
-  const rows = parseCSV(csv);
+  const rows = parseCSV(csv).map(row => row.slice(0, 9));
+  if (String(rows[0]?.[0] || '').trim().toLowerCase() !== 'date'
+    || !/weight/i.test(String(rows[0]?.[1] || ''))) throw new Error('Weigh-ins feed has unexpected headers.');
+  const violationHeader = parseCSV(violationCsv)[0] || [];
+  if (String(violationHeader[0] || '').trim().toLowerCase() !== 'date'
+    || !/violation|requirement|event/i.test(String(violationHeader[1] || ''))) throw new Error('Violation feed has unexpected headers.');
+  for (const row of rows.slice(1)) row[7] = publicUrl(row[7], SITE_ORIGIN);
   const records = rows.slice(1).map((r) => ({
     date: normalizeDate(r[0]),
     weight: Number.parseFloat(r[1]),
@@ -2807,7 +2828,10 @@ async function main() {
       for (const row of arows.slice(1)) {
         const date = normalizeDate(row[dateCol >= 0 ? dateCol : 1]);
         if (row[eventCol] === 'capture-attested' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-          attestMap.set(date, [row[codeCol], statusCol >= 0 ? row[statusCol] : ''].filter(Boolean).join(' · '));
+          const status = String(statusCol >= 0 ? row[statusCol] : '').trim();
+          if (!/^VALID(?:\b|[- —])/i.test(status)) continue;
+          if (!/^daily(?:\b|[-_])/i.test(String(row[head.indexOf('kind')] || ''))) continue;
+          attestMap.set(date, 'VALID');
           // Filing time (ET, h:mm AM/PM) from the server stamp in column A —
           // the moment the daily inspection was attested, i.e. filed.
           const stamp = new Date(String(row[0] || '').trim());
@@ -2820,9 +2844,26 @@ async function main() {
     }
   }
 
+  // Rebuild generated directories so removed or corrected source rows cannot leave stale pages.
+  for (const directory of ['about/','agreement','cards','consent','corrections','daily','data','dashboard','manifests','media/responsive','milestones','observer','penalties','positions','share','uniform','updates','violations','weeks']) {
+    await fs.rm(path.join(ROOT, directory), { recursive: true, force: true });
+    await fs.mkdir(path.join(ROOT, directory), { recursive: true });
+  }
+  const publicAttestations = acceptedAttestations(attestCsv ? parseCSV(attestCsv) : [], normalizeDate);
+  await writeIfChanged(path.join(ROOT, 'data/attestations.json'), JSON.stringify({ schema_version: 1, available: !!attestCsv, records: publicAttestations }) + '\n');
+  await writeIfChanged(path.join(ROOT, 'data/supervision.json'), JSON.stringify({ schema_version: 1, published_at: new Date().toISOString(), sessions: Object.fromEntries(supervision.map(s => [s.date, { status: s.status }])) }) + '\n');
   CARD_CTX = { rows: records, violations, supervision };
   const photoFiles = (await walk(path.join(ROOT, 'photos')))
     .filter((f) => /\.(?:jpe?g|png|webp)$/i.test(f) && !f.includes(`${path.sep}responsive${path.sep}`));
+  // Use local published photo copies in every browser-facing export.
+  for (const row of rows.slice(1)) {
+    const date = normalizeDate(row[0]);
+    for (const [index, angle] of ['front', 'left', 'rear', 'right'].entries()) {
+      const local = findPhoto(photoFiles, date, dayNumber(date), angle);
+      row[3 + index] = local ? SITE_ORIGIN + relUrl(local) : '';
+    }
+  }
+  await writeIfChanged(path.join(ROOT, 'data/weigh-ins.csv'), csvDocument(['date','weight','note','photo','left','rear','right','video','video_sec'], rows.slice(1).filter(row => normalizeDate(row[0]) >= START_DATE)));
   const finalized = [];
   for (const record of records) {
     if (!record.video) continue;
@@ -2929,7 +2970,7 @@ async function main() {
       const cc = cardCtx(s.day, { date: s.date, complete: s.complete, photoCount: s.complete ? 4 : (s.photoCount || 0), photo: photoPath ? { path: photoPath } : null });
       const u = await writeCard(cc);
       changedUrls.add(u);
-    } catch (e) { console.warn('Card image failed for ' + s.date + ': ' + e.message); }
+    } catch (e) { throw new Error('Card image failed for ' + s.date + ': ' + e.message); }
   }
 
   for (let i = 0; i < sequence.length; i++) {
@@ -3029,6 +3070,9 @@ async function main() {
   const updates = (updatesCsv ? parseCSV(updatesCsv).slice(1) : [])
     .map((r) => ({ date: String(r[0] || '').trim(), type: String(r[1] || 'official').trim(), title: String(r[2] || '').trim(), body: String(r[3] || '').trim(), link: String(r[4] || '').trim() }))
     .filter((u) => u.title || u.body);
+  const counters = computeValues(staticCtx({ rows, violations, updates, siteState, attestMap: Object.fromEntries(attestMap), photoFiles }));
+  const publicCounters = Object.fromEntries(['dayCounterLabel','currentLabel','openCountLabel','agreementStatus','complianceLabel','todayPacketLabel'].map(key => [key, counters[key]]));
+  await writeIfChanged(path.join(ROOT, 'data/record.json'), JSON.stringify({ schema_version: 1, start_date: START_DATE, as_of: todayIso, published_at: new Date().toISOString(), counters: publicCounters }) + '\n');
   for (const [slug, html] of await buildStaticSite(staticCtx({ rows, violations, updates, siteState, attestMap: Object.fromEntries(attestMap), photoFiles }))) {
     if (await writeIfChanged(path.join(ROOT, slug, 'index.html'), html)) changedUrls.add(`${SITE_ORIGIN}/${slug}`);
     if (slug) extraUrls.push(`${SITE_ORIGIN}/${slug}`);

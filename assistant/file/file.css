@@ -1,0 +1,42 @@
+.result-main h1 {
+  margin: 0;
+  font-family: "IBM Plex Sans Condensed", sans-serif;
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.mode-row,
+.yt-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.yt-box {
+  display: grid;
+  gap: 16px;
+}
+
+.yt-row .url-label {
+  flex-basis: 100%;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.yt-row input {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.miss-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.miss-grid label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
