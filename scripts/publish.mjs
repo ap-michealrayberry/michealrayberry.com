@@ -486,12 +486,18 @@ function publicVideoUrl(value = '') {
     && /^\/media\/[A-Za-z0-9._/-]+\.(?:mp4|webm)$/i.test(url.pathname) && !url.search) {
     return rootRelativeMedia ? url.pathname : `${url.origin}${url.pathname}`;
   }
-  if (/^(?:www\.)?youtube\.com$/i.test(url.hostname) && url.pathname === '/watch') {
-    const id = url.searchParams.get('v') || '';
-    return /^[A-Za-z0-9_-]{11}$/.test(id) && Array.from(url.searchParams.entries()).length === 1
-      ? `https://www.youtube.com/watch?v=${id}` : '';
+  // YouTube: normalise every public form (watch, youtu.be, shorts, embed,
+  // live, mobile host, share-sheet ?si= tracking) to a canonical link. The
+  // 11-character ID is the only thing that matters; extra params are dropped.
+  if (/^(?:www\.|m\.)?youtube\.com$/i.test(url.hostname)) {
+    if (url.pathname === '/watch') {
+      const id = url.searchParams.get('v') || '';
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? `https://www.youtube.com/watch?v=${id}` : '';
+    }
+    const path = url.pathname.match(/^\/(?:shorts|embed|live|v)\/([A-Za-z0-9_-]{11})\/?$/);
+    return path ? `https://youtu.be/${path[1]}` : '';
   }
-  if (/^youtu\.be$/i.test(url.hostname) && !url.search) {
+  if (/^youtu\.be$/i.test(url.hostname)) {
     const match = url.pathname.match(/^\/([A-Za-z0-9_-]{11})\/?$/);
     return match ? `https://youtu.be/${match[1]}` : '';
   }
