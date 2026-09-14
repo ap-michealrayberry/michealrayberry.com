@@ -2379,7 +2379,60 @@
     );
   }
 
+  /**
+   * Recorded Consent Statement (Edition 2). Two-stage confirmation:
+   * Inspection position = voluntary participation in the recording;
+   * a deliberate nod inside the timed CONFIRMATION WINDOW = consent.
+   * Stillness is never consent — the rejection rule is read aloud.
+   * The statement is heard in Wait (arms down); Inspection is entered after.
+   */
+  function confirmationSegments(ctx) {
+    var date = fmtDateLong(ctx.date);
+    var code = ctx.code || "";
+    var ed = String(ctx.version || "2");
+    return [
+      { id: "open", label: "Opening — Wait", sec: 6, pose: "WAIT POSITION · FACE CAMERA",
+        text: "Public Accountability Project. Recorded consent statement. Recording date, " + date + ". Verification code, " + code + ". " +
+          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for Edition " + ed + " of the Public Accountability Project Agreement, made on " + date + ". " +
+          "The narration is presented by a synthetic voice because Micheal Ray Berry will not speak during this recording. His participation and confirmation are communicated through deliberate physical actions explained in this statement." },
+      { id: "look", label: "Look into camera", sec: 3, pose: "WAIT · LOOK INTO CAMERA", text: "Micheal Ray Berry, look directly into the camera." },
+      { id: "statement", label: "Consent statement", sec: 0, pose: "WAIT · LISTEN",
+        text: "Remain in Wait position while the complete consent statement is presented. The following words constitute Micheal Ray Berry's consent statement. " +
+          "I am Micheal Ray Berry. Before making this recording, I received and read the complete Public Accountability Project Agreement. I understand its purpose, requirements, documentation standards, enforcement procedures, withdrawal provisions, and stated limits. " +
+          "I had the opportunity to review the agreement, consider its consequences, ask questions, and request clarification before deciding whether to accept it. I understand that I should not confirm this statement if I have not read the agreement, do not understand a material term, or do not presently consent to participating. " +
+          "I understand that the project creates a public accountability record under my real name. That record may include my weight, physical progress, daily inspections, photographs, recorded weigh-ins, required videos, completed requirements, missed deadlines, violations, corrective sessions, weekly summaries, and other information expressly authorized by the agreement. " +
+          "I understand that these materials may be publicly accessible and may be viewed, saved, copied, discussed, indexed by search engines, or encountered by people I know. I understand that material published online cannot be guaranteed to disappear completely, even if it is later removed from the project's official website. " +
+          "I understand that this accountability structure is intentionally demanding. Compliance may sometimes be uncomfortable, inconvenient, repetitive, or difficult. Those foreseeable feelings do not, by themselves, excuse a missed requirement or permit me to rewrite an accurate record after the fact. " +
+          "I requested this structure because I want clear standards, consistent documentation, meaningful external accountability, and an accurate record of both compliance and failure. I understand that the project must record failures honestly if the accountability system is to remain credible. " +
+          "I understand that I may not unilaterally edit, soften, conceal, rewrite, falsify, or remove an established project record merely because I later dislike it or regret it. Requests involving factual errors, personal safety, protected private information, withdrawal, or removal must be handled according to the procedures and limits stated in the agreement. " +
+          "I understand that an accurate record may distinguish between the original entry and a later correction. A correction should preserve the integrity of the record while clearly identifying what was inaccurate and what information replaced it. " +
+          "I understand that my participation does not eliminate my personal safety, privacy, legal rights, or ability to withdraw consent. Withdrawal may end future participation and future obligations, subject to the agreement's stated procedure. The treatment of accurate material published before withdrawal is governed by the agreement's record-retention, privacy, and safety provisions. " +
+          "I understand that emergency intervention and safety-takedown procedures remain available when their stated conditions are met. Nothing in the agreement requires me to continue an activity that presents an immediate and genuine threat to health or safety. Nothing authorizes illegal conduct, medical neglect, financial consequences of any kind, workplace interference, or the disclosure of information excluded by the agreement. " +
+          "I understand that the Accountability Partner's authority exists only within the defined scope of the agreement. The Accountability Partner may review evidence, determine compliance, document violations, require agreed corrective actions, and administer the record as authorized by the agreement. That authority does not extend beyond the agreement or override its safety, privacy, legal, and withdrawal provisions. " +
+          "I affirm that I requested this accountability arrangement voluntarily. I have not been threatened, forced, blackmailed, deceived, or improperly pressured into accepting it. I understand that declining to confirm this recording would prevent the agreement from taking effect and would not authorize anyone to represent that I consented. " +
+          "I approved the language used in this recording before it began. I understand that a synthetic voice is presenting the statement while I appear on camera. My deliberate actions on camera are intended to document my identity, attention, and voluntary response. " +
+          "This recording will be submitted to the Accountability Partner for verification. The agreement does not take effect merely because this video was recorded. It takes effect only after the recording has been reviewed, both parties have signed the agreement, and the Accountability Partner has formally confirmed activation. " +
+          "The complete consent statement has now been presented." },
+      { id: "participate", label: "Confirm participation — Inspection", sec: 8, pose: "ENTER INSPECTION · PARTICIPATION",
+        text: "Micheal Ray Berry. You will now voluntarily move from the Wait position into the Inspection position. By doing so, you confirm that you are knowingly participating in this consent recording, that the complete agreement was made available to you before recording began, and that you have heard the complete statement. If you are participating voluntarily, enter the Inspection position now." },
+      { id: "hold", label: "Hold — look into camera", sec: 4, pose: "INSPECTION · LOOK INTO CAMERA",
+        text: "The Inspection position has been acknowledged. Remain in that position and look directly into the camera." },
+      { id: "nod", label: "CONFIRMATION WINDOW", sec: 5, pose: "CONFIRMATION WINDOW · NOD TO CONSENT", tone: "warn",
+        text: "If you have reviewed the complete agreement, understood this statement, and voluntarily consent to the agreement as of " + date + ", clearly nod your head now." },
+      { id: "rule", label: "Rejection rule", sec: 2, pose: "INSPECTION · HOLD",
+        text: "The nod must be deliberate and clearly visible. Silence, continued stillness, an unclear movement, or merely remaining in the Inspection position must not be treated as consent. If no clear nod occurred, this recording must be rejected and the agreement must not be activated. " +
+          "If a clear nod occurred, Micheal Ray Berry's physical confirmation has been recorded. This confirmation remains subject to review by the Accountability Partner and completion of both signatures." },
+      { id: "wait_close", label: "Return to Wait", sec: 5, pose: "WAIT POSITION · FACE CAMERA",
+        text: "Micheal Ray Berry, you may now return to the Wait position. Remain facing the camera for five seconds." },
+      { id: "close", label: "Close", sec: 3, pose: "WAIT POSITION",
+        text: "This consent recording concluded on " + date + " using verification code " + code + "." },
+    ];
+  }
+  // Single-string form of the same statement (transcripts, legacy callers).
   function confirmationScript(ctx) {
+    return confirmationSegments(ctx).map(function (s) { return s.text; }).join(" ");
+  }
+  function confirmationScriptLegacy(ctx) {
     return (
       "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
       (ctx.version || "1") +
@@ -2428,6 +2481,7 @@
     weeklyAssessment: weeklyAssessment,
     weeklyWeightMid: weeklyWeightMid,
     weeklyClosing: weeklyClosing,
+    confirmationSegments: confirmationSegments,
     confirmationScript: confirmationScript,
     demoScript: demoScript,
     fmtDateLong: fmtDateLong,
@@ -3143,7 +3197,7 @@
     if (type === "corrective") return MRB.config.cornerMinutes(level || 1);
     if (type === "weekly") return 4;
     if (type === "daily") return 3;
-    if (type === "confirmation") return 2;
+    if (type === "confirmation") return 8;
     if (type === "announcement") return 3;
     return 2;
   }
@@ -4317,9 +4371,18 @@
   }
 
   async function runConfirmation(session) {
-    MRB.ui.setStatus("session", "Confirmation");
-    session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
-    await speakAndHold(session, MRB.scripts.confirmationScript(session), 30);
+    // Two-stage consent: statement heard in Wait → Inspection = participation
+    // → deliberate nod inside the burned-in CONFIRMATION WINDOW = consent.
+    var segs = MRB.scripts.confirmationSegments({ date: session.date, code: session.code, version: session.version || 2 });
+    for (var i = 0; i < segs.length; i++) {
+      if (session.aborted) return;
+      var s = segs[i];
+      MRB.ui.setStatus("session", s.label);
+      session.poseText = s.pose;
+      session.poseTone = s.tone || "ok";
+      await speakAndHold(session, s.text, s.sec);
+    }
+    session.poseTone = "ok";
   }
 
   async function runDemo(session) {
