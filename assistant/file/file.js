@@ -105,7 +105,7 @@
       window: "inactive",
       reason: waiting
         ? "Agreement status is still being checked. Filing remains locked."
-        : "Edition 2 execution is not verified. " + label + " is proposed and is not currently due or enforceable.",
+        : "The agreement is pending counter-signature. " + label + " is proposed and is not currently due or enforceable.",
       checks: [{
         label: "Agreement execution",
         ok: false,
@@ -507,7 +507,7 @@
         loaded: true,
         active: supervision.agreement_active === true && participantState.agreementActive === true,
         message: supervision.agreement_active === true && participantState.agreementActive === true
-          ? "Edition 2 active"
+          ? "Agreement active"
           : "Not verified · requirements inactive",
       };
     } catch (error) {

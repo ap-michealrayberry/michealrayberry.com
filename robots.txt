@@ -1,6 +1,7 @@
 # The public record is meant to be found. Pages that should stay out of search,
 # including /verify/, publish a noindex directive in their response metadata.
 User-agent: *
+Disallow: /ap/
 Allow: /
 
 # Answer engines and AI crawlers — explicitly permitted, so the record is what

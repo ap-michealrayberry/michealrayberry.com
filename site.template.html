@@ -81,6 +81,9 @@
        outstanding and sits steady once the day is filed, so the navigation
        carries today's status without needing a second element. */
     .rec-lamp { width: 8px; height: 8px; border-radius: 50%; background: #B3261E; flex-shrink: 0; animation: recPulse 2s ease-out infinite; }
+    [data-live-nav].is-live { color: #B3261E !important; }
+    [data-live-nav].is-live [data-live-dot] { background: #B3261E; border-color: #B3261E; animation: livepulse 1.6s ease-in-out infinite; }
+    @keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
     @keyframes recPulse {
       0%   { box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.55); }
       70%  { box-shadow: 0 0 0 7px rgba(179, 38, 30, 0); }
@@ -162,7 +165,7 @@
           <a href="/" onClick="{{ goHome }}" aria-current="{{ isHomeNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</a>
           <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">The Record</a>
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
-          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;"><span data-live-dot style="width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block;"></span><span data-live-label>Live</span></a>
+          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;"><span data-live-dot style="width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block;"></span><span data-live-label>Supervision</span></a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
         </div>
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
@@ -241,7 +244,7 @@
         <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
           <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" data-photo-src="/photos/official/micheal-ray-berry-official-front-v2.jpg" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start 340." style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">The official photograph, in the Edition 2 uniform. Day 1 is August 31, 2026.</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">The official photograph, in the project uniform. Day 1 is August 31, 2026.</span>
       </div>
       </div>
     </section>
@@ -536,7 +539,7 @@
               <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head" style="width: 100%; height: 100%; object-fit: cover; display: block;">
             </div>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #B3261E; font-weight: 600;">OFFICIAL PHOTOGRAPH</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64;">The Edition 2 standard. The record begins August 31.</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6B6A64;">The project standard. The record begins August 31.</span>
           </div>
         </div>
         <sc-if value="{{ hasExpanded }}" hint-placeholder-val="{{ false }}">
@@ -646,9 +649,9 @@
         <div style="display: flex; flex-direction: column; gap: 24px;">
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-            <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" alt="Micheal Ray Berry, official photograph in the Edition 2 uniform. The signed-agreement photograph is not in the repository." style="width: 100%; height: 100%; object-fit: cover; object-position: top;" data-comment-anchor="about-portrait">
+            <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" alt="Micheal Ray Berry, official photograph in the project uniform. The signed-agreement photograph is not in the repository." style="width: 100%; height: 100%; object-fit: cover; object-position: top;" data-comment-anchor="about-portrait">
           </div>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">The official photograph, Edition 2 uniform.</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">The official photograph, project uniform.</span>
         </div>
         
         </div>
@@ -748,7 +751,7 @@
           <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">05</span>
             <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Evening Supervision</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">On evenings immediately preceding a scheduled workday, I am required to complete a period of public Evening Supervision.</p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65;">On evenings assigned by the Accountability Partner and posted in advance on the supervision page, I am required to complete a period of public Evening Supervision. Until further notice, nights are assigned, not automatic.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">The standard session runs from 6:00 PM through 10:00 PM Eastern. A fixed camera observes the monitored living areas while normal evening activity continues. The purpose is not entertainment or performance. The purpose is to make the period in which private decisions are easiest to renegotiate publicly observable.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">During Evening Supervision, the prescribed project uniform is required in monitored areas. Published food, beverage, household-order, and documentation requirements remain in force.</p>
             <p style="margin: 0; font-size: 16px; line-height: 1.65;">Necessary private activity remains private. Bathrooms, changing, confidential work material, private communications, visitors who have not consented to appearing, and other legitimately sensitive matters are not part of the public record.</p>
@@ -837,11 +840,11 @@
     <section style="border-bottom: 1px solid #141412; padding: 72px 32px 80px;">
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 64px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 28px;">
-          <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Edition 2 — awaiting counter-signature · Day 1: August 31, 2026</p>
+          <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Agreement — pending counter-signature · Day 1: August 31, 2026</p>
           <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1>
           <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.65; max-width: 560px;">
             <p style="margin: 0;">The agreement is the governing document of this project. It defines the daily requirements, the documentation standard, the weight-loss schedule, and the consequences that apply when a requirement is missed.</p>
-            <p style="margin: 0;">What follows is the public summary of Edition 2 of the agreement — the restatement prepared for the fresh start of August 31, 2026, which names the project plainly: a voluntary accountability arrangement between adults with defined limits. The full text is published here once both signatures are on it. Corrective requirements are assigned and verified by the Accountability Partner, and the recordings are published on the permanent record; the permanent public record shows the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result. The <a href="/consent/" style="color: #B3261E;">recorded confirmation of consent</a> states what was understood before it was signed.</p>
+            <p style="margin: 0;">What follows is the public summary of the agreement, prepared for the start of August 31, 2026. It is pending the Accountability Partner’s counter-signature; the full text is published once co-signed.<a href="/consent/" style="color: #B3261E;">recorded confirmation of consent</a> states what was understood before it was signed.</p>
           </div>
           <div style="border: 1px solid #141412; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px; max-width: 560px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Covered by the agreement</span>
@@ -850,7 +853,7 @@
               <li>Standardized uniform (§4.1: plain black unitard; §4.2: designated pink unitard for recorded corrective sessions), pose, and four-angle documentation format</li>
               <li>Consequences (§8): corner time, 10 / 20 / 30 minutes by level, recorded and published. The permanent entry records the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result</li>
               <li>Weekly Review — the week’s numbers read to camera from the record every Monday</li>
-              <li>Evening Supervision (§3.4) — a fixed-camera live session, 6:00–10:00 PM ET, on nights preceding a scheduled workday (ordinarily Sunday–Thursday), in full project uniform; water only, home-cooked dinner, published rules; a session not completed is a Violation Event. Effective September 13, 2026 — <a href="/live/" style="color: #141412; font-weight: 600;">the supervision console</a></li>
+              <li>Evening Supervision (§3.4) — a fixed-camera live session, 6:00–10:00 PM ET, on nights assigned by the Accountability Partner and posted in advance (until further notice, assigned rather than automatic), in full project uniform; water only, home-cooked dinner, published rules; a session not completed is a Violation Event. Effective September 13, 2026 — <a href="/live/" style="color: #141412; font-weight: 600;">the supervision console</a></li>
                             <li>Milestone resets at 320 / 300 / 275 / 250 / 225 / 200 lbs</li>
               <li>Violation Events are declared automatically by the record system from objective evidence (§7); the Accountability Partner confirms or rejects against the written rules and has no discretion to excuse or soften. A 48-hour window to contest with evidence, after which the determination stands</li>
               <li>Corrective sessions completed, recorded, and filed within 72 hours of the notice (§8.3); a missed deadline is a new Violation Event at the next level</li>
@@ -862,9 +865,9 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-            <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" alt="Micheal Ray Berry, official photograph in the Edition 2 uniform" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 600px) 100vw, 50vw" decoding="async" alt="Micheal Ray Berry, official photograph in the project uniform" style="width: 100%; height: 100%; object-fit: cover; display: block;">
           </div>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Fig. 1 — The official photograph, Edition 2 uniform.</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Fig. 1 — The official photograph, project uniform.</span>
         </div>
       </div>
     </section>
@@ -892,8 +895,8 @@
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px 88px;">
       <div style="max-width: 880px; margin: 0 auto 0 0; display: flex; flex-direction: column; gap: 16px;">
         <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Full text</p>
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Edition 2 — awaiting counter-signature</h2>
-        <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;">Edition 2 governs this record. Nothing before Day 1 — August 31, 2026 — is on the record. The full text is published here when both parties have signed; no rule binds until it is co-signed. The recorded Consent Confirmation is re-taken against Edition 2 once it is co-signed.</p>
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Agreement — pending counter-signature</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;">The agreement governs this record. Nothing before Day 1 — August 31, 2026 — is on the record. The full text is published here when both parties have signed; no rule binds until it is co-signed. The recorded Consent Confirmation is re-taken against the agreement once it is co-signed.</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border: 1px solid #141412; max-width: 880px;">
           <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;">Consented</span>

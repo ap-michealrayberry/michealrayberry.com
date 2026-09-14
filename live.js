@@ -1,7 +1,8 @@
 /* Evening Supervision console — michealrayberry.com/live and the homepage bar.
-   Schedule is fixed by §3.4: nights preceding a scheduled workday (Sun–Thu),
-   6:00–10:00 PM Eastern, from Sunday 13 September 2026. Record rows (status
-   per night) arrive from the publisher in #supervision-data. */
+   Nights are ASSIGNED by the Accountability Partner (until further notice —
+   not automatic Sun–Thu); a night is required only when the record carries
+   a row for it. 6:00–10:00 PM Eastern. Record rows arrive from the
+   publisher in #supervision-data. */
 (function () {
   var TZ = 'America/New_York', START = '2026-09-13', H0 = 18, H1 = 22, NIGHTS = [0, 1, 2, 3, 4];
   var CHANNEL = 'UCi_0KqZjgbRUuLVAM5CmStQ';
@@ -17,11 +18,13 @@
   }
   function dowOf(iso) { var a = iso.split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2], 12)).getUTCDay(); }
   function addDays(iso, n) { var a = iso.split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2] + n, 12)).toISOString().slice(0, 10); }
-  function scheduled(iso) { return iso >= START && NIGHTS.indexOf(dowOf(iso)) !== -1; }
+  // Assigned, not automatic: a night is scheduled only when the record
+  // carries a row for it marked required (written by the AP console).
+  function scheduled(iso) { var r = rowOf(iso); return iso >= START && !!(r && (r.required === true || /^(yes|true|1)$/i.test(String(r.required || '')))); }
   function rowOf(iso) { return rows[iso] || null; }
   function exempt(iso) { var r = rowOf(iso); return !!(r && /^EXCEPTION/i.test(r.status || '')); }
   function required(iso) { return scheduled(iso) && !exempt(iso); }
-  function sessionNo(iso) { var n = 0; for (var d = START; d <= iso; d = addDays(d, 1)) if (scheduled(d)) n++; return n; }
+  function sessionNo(iso) { var n = 0; Object.keys(rows).sort().forEach(function (d) { if (d <= iso && scheduled(d)) n++; }); return n; }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function label(iso) { var a = iso.split('-'); return DOW[dowOf(iso)].toUpperCase() + ' ' + Number(a[2]); }
   function longLabel(iso) {
@@ -64,14 +67,14 @@
       }
       show('[data-live-embed]', true);
     } else {
-      var when = !st.next ? 'NO SESSION SCHEDULED'
+      var when = !st.next ? 'NO NIGHT ASSIGNED'
         : st.next.tonight ? 'TONIGHT 6:00 PM ET'
         : st.next.tomorrow ? 'TOMORROW 6:00 PM ET'
         : DOW[dowOf(st.next.iso)].toUpperCase() + ' 6:00 PM ET';
       set('[data-live-status]', lamp + 'NEXT SCHEDULED SESSION: ' + when);
       var tonight = st.exemptTonight ? 'Not required tonight — documented exception on the record.'
         : st.tonight ? (st.now.h >= H1 ? 'Tonight\u2019s session window has closed.' : 'Required tonight, 6:00–10:00 PM ET.')
-        : 'Not scheduled tonight.';
+        : 'Not assigned tonight. Nights are assigned by the Accountability Partner and posted here in advance.';
       set('[data-live-detail]', '<div><b>Tonight</b><span>' + tonight + '</span></div>' +
         (st.next ? '<div><b>Next required</b><span>' + longLabel(st.next.iso) + ' · 6:00–10:00 PM ET</span></div>' : ''));
       show('[data-live-embed]', false);

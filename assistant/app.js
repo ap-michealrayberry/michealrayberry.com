@@ -895,6 +895,8 @@
     var dy = (H - dh) / 2;
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(video, dx, dy, dw, dh);
   }
 
@@ -1463,9 +1465,17 @@
    * zooms in and the feet leave the frame. Resolution comes from the canvas
    * (1080×1920) instead; the sensor gives its widest natural field of view.
    */
+  /* Ask for the sensor's full HD frame (browsers rotate to portrait on
+     phones → 1080×1920). Without an explicit request most devices hand back
+     640×480 or 720p, which the 1080×1920 canvas then upscales. 'ideal' never
+     fails the request; the device gives the closest it can. */
   function videoConstraints() {
     return {
       facingMode: { ideal: facing },
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      frameRate: { ideal: 30, max: 30 },
+      resizeMode: "none",
     };
   }
 
@@ -2380,7 +2390,7 @@
   }
 
   /**
-   * Recorded Consent Statement (Edition 2). Two-stage confirmation:
+   * Recorded Consent Statement. Two-stage confirmation:
    * Inspection position = voluntary participation in the recording;
    * a deliberate nod inside the timed CONFIRMATION WINDOW = consent.
    * Stillness is never consent — the rejection rule is read aloud.
@@ -2393,7 +2403,7 @@
     return [
       { id: "open", label: "Opening — Wait", sec: 6, pose: "WAIT POSITION · FACE CAMERA",
         text: "Public Accountability Project. Recorded consent statement. Recording date, " + date + ". Verification code, " + code + ". " +
-          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for Edition " + ed + " of the Public Accountability Project Agreement, made on " + date + ". " +
+          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for the Public Accountability Project Agreement, made on " + date + ". " +
           "The narration is presented by a synthetic voice because Micheal Ray Berry will not speak during this recording. His participation and confirmation are communicated through deliberate physical actions explained in this statement." },
       { id: "look", label: "Look into camera", sec: 3, pose: "WAIT · LOOK INTO CAMERA", text: "Micheal Ray Berry, look directly into the camera." },
       { id: "statement", label: "Consent statement", sec: 0, pose: "WAIT · LISTEN",
@@ -2440,7 +2450,7 @@
       fmtDateLong(ctx.date) +
       ". " +
       "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
-      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
+      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. The agreement remains pending unless the Accountability Partner separately verifies this statement and both signatures."
     );
   }
 
@@ -3702,12 +3712,12 @@
     var agreementActive = !!(record && record.agreementActive === true);
     document.documentElement.dataset.agreementActive = agreementActive ? "true" : "false";
     var agreement = byId("agreement-status");
-    if (agreement) agreement.textContent = agreementActive ? "Edition 2 active" : "Not verified · requirements inactive";
+    if (agreement) agreement.textContent = agreementActive ? "Agreement active" : "Agreement pending · requirements inactive";
     ["card-daily", "card-corrective", "card-weekly"].forEach(function (id) {
       var card = byId(id);
       if (!card) return;
       card.disabled = !agreementActive;
-      card.title = agreementActive ? "" : "Unavailable until Edition 2 execution is verified";
+      card.title = agreementActive ? "" : "Unavailable until the agreement is active";
     });
     var voice = byId("voice-status");
     if (voice) {
@@ -4397,21 +4407,34 @@
     await speakAndHold(session, MRB.scripts.announcementScript(), 60);
   }
 
+  /* Photographs are rendered on their own canvas at the camera's native
+     portrait resolution (never below 1080×1920, capped at 2160×3840), with
+     the overlay scaled to match, then encoded at JPEG 0.95. The on-screen
+     photo canvas stays 1080×1920 for the live preview only. */
   async function capturePhotoBlob(photoCanvas, videoEl, session) {
     var state = overlayStateFrom(session);
     state.videoEl = videoEl;
-    MRB.overlay.drawOverlay(photoCanvas.getContext("2d"), state);
+    var vw = (videoEl && videoEl.videoWidth) || 0, vh = (videoEl && videoEl.videoHeight) || 0;
+    var W0 = MRB.config.CANVAS_W || 1080, H0 = MRB.config.CANVAS_H || 1920;
+    // output width = the camera's shorter side (portrait width), floor 1080, cap 2160
+    var nativeShort = Math.min(vw, vh) || W0;
+    var outW = Math.min(2160, Math.max(W0, nativeShort));
+    var outH = Math.round(outW * H0 / W0);
+    var full = document.createElement("canvas");
+    full.width = outW; full.height = outH;
+    var fctx = full.getContext("2d");
+    fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = "high";
+    MRB.overlay.drawOverlay(fctx, state);
+    // keep the visible preview in step
+    try { MRB.overlay.drawOverlay(photoCanvas.getContext("2d"), state); } catch (e) {}
     return new Promise(function (resolve, reject) {
-      photoCanvas.toBlob(
+      full.toBlob(
         function (blob) {
-          if (!blob) {
-            reject(new Error("Photo capture failed"));
-            return;
-          }
+          if (!blob) { reject(new Error("Photo capture failed")); return; }
           resolve(blob);
         },
         "image/jpeg",
-        0.92
+        0.95
       );
     });
   }
@@ -4713,7 +4736,7 @@
     if (corrective) {
       corrective.disabled = !active || correctiveEntries().length === 0;
       corrective.title = corrective.disabled
-        ? (!active ? "Unavailable until Edition 2 execution is verified" : "No eligible AP corrective assignment")
+        ? (!active ? "Unavailable until the agreement is active" : "No eligible AP corrective assignment")
         : "";
     }
     if (weekly) {
@@ -4724,7 +4747,7 @@
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
       weekly.disabled = !active || !weeklyComplete;
       weekly.title = weekly.disabled
-        ? (!active ? "Unavailable until Edition 2 execution is verified" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
+        ? (!active ? "Unavailable until the agreement is active" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
         : "";
     }
     if (config.demoMode) {
@@ -4744,7 +4767,7 @@
     }
     if (type === "corrective" || type === "weekly") {
       participantStateCache = await MRB.api.myState();
-      if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+      if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
     }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
@@ -4970,7 +4993,7 @@
     if (type === "corrective" || type === "weekly") {
       try {
         participantStateCache = await MRB.api.myState();
-        if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+        if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
         if (type === "corrective") {
           var selectedId = String(entry && entry.id || "");
           var selectedAssignmentId = String(entry && entry.assignmentId || "");

@@ -31,7 +31,7 @@
     },
     {
       "name": "06-overlay.js",
-      "sha256": "e667c6f192f3821714765634e033a867f70935303dfb32ac2b6c8c4e2e1b4f0d"
+      "sha256": "3ecde8ff734ecc1f3a87a7d33e187c97465b3f6f7da2eefbf6e45c12845c4e17"
     },
     {
       "name": "07-audio.js",
@@ -39,7 +39,7 @@
     },
     {
       "name": "08-camera.js",
-      "sha256": "8fb24a9ad3285a37a6b434fa5fb4d8c9e69899acf6a0a5b0361418c35cc312e5"
+      "sha256": "0939374ae0be15ae349b0e437111dba07d4b682efaa76e6450bb2379beb0700c"
     },
     {
       "name": "09-frame-loop.js",
@@ -55,7 +55,7 @@
     },
     {
       "name": "12-scripts.js",
-      "sha256": "d5a3c8b0e35997f7f28b9fede9117269a288c67b4748dccc421b8e4892c55b41"
+      "sha256": "4d601d6cf6f0409abade116c76ab5d47aaa84f9a3fa9e697d400498c8c767e29"
     },
     {
       "name": "13-state-machine.js",
@@ -71,15 +71,15 @@
     },
     {
       "name": "16-ui.js",
-      "sha256": "21457495f3b0731cd82ffe9820f3b54e9730fa94ff29920f2155e5b01e0a3312"
+      "sha256": "b28fa2c6ffc495cf2eafb2b13c134ae2c44805aaaec0d21e1e5611f11cd6bb6a"
     },
     {
       "name": "17-session.js",
-      "sha256": "f418bbe5d5564a8eedc9c64aa864249064d4698ff0de7666e34a8a5710ff510c"
+      "sha256": "e12e20861011bdf0d61063bfaad64cb139fcc0cb5131b836f38facb71e58a91e"
     },
     {
       "name": "18-app.js",
-      "sha256": "963a0c03f6c8420f00092e663d0a18e33ed953355b7b653fe41f73c79e96782c"
+      "sha256": "6ff5d466a45efd9c012716178dacc2d99cc763b290ad9c84eabb952ef4774a7b"
     },
     {
       "name": "19-wake.js",

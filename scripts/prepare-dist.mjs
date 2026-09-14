@@ -35,7 +35,7 @@ const FILES = [
 ];
 
 const DIRECTORIES = [
-  'about', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
+  'about', 'agreement', 'ap', 'assistant', 'cards', 'consent', 'corrections',
   'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
   'observer', 'photos', 'positions', 'schemas', 'share',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
@@ -43,6 +43,7 @@ const DIRECTORIES = [
 
 const REVIEWED_DIRECTORY_FILES = new Set([
   'about/index.html', 'agreement/index.html',
+  'ap/index.html', 'ap/ap.js', 'ap/ap.css',
   'assistant/index.html', 'assistant/app.js', 'assistant/styles.css',
   'assistant/sw.js', 'assistant/manifest.webmanifest',
   'assistant/icons/icon-192.png', 'assistant/icons/icon-512.png',

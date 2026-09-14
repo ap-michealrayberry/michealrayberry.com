@@ -28,8 +28,6 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /record        /assistant/   301
 /record/*      /assistant/   301
 /mrb           /assistant/   301
-/ap            /             301
-/ap/*          /             301
 /mrb/*         /assistant/   301
 /inspection    /assistant/   301
 /portal        /assistant/   301

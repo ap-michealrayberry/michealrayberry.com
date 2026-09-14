@@ -393,7 +393,7 @@
   }
 
   /**
-   * Recorded Consent Statement (Edition 2). Two-stage confirmation:
+   * Recorded Consent Statement. Two-stage confirmation:
    * Inspection position = voluntary participation in the recording;
    * a deliberate nod inside the timed CONFIRMATION WINDOW = consent.
    * Stillness is never consent — the rejection rule is read aloud.
@@ -406,7 +406,7 @@
     return [
       { id: "open", label: "Opening — Wait", sec: 6, pose: "WAIT POSITION · FACE CAMERA",
         text: "Public Accountability Project. Recorded consent statement. Recording date, " + date + ". Verification code, " + code + ". " +
-          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for Edition " + ed + " of the Public Accountability Project Agreement, made on " + date + ". " +
+          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for the Public Accountability Project Agreement, made on " + date + ". " +
           "The narration is presented by a synthetic voice because Micheal Ray Berry will not speak during this recording. His participation and confirmation are communicated through deliberate physical actions explained in this statement." },
       { id: "look", label: "Look into camera", sec: 3, pose: "WAIT · LOOK INTO CAMERA", text: "Micheal Ray Berry, look directly into the camera." },
       { id: "statement", label: "Consent statement", sec: 0, pose: "WAIT · LISTEN",
@@ -453,7 +453,7 @@
       fmtDateLong(ctx.date) +
       ". " +
       "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
-      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
+      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. The agreement remains pending unless the Accountability Partner separately verifies this statement and both signatures."
     );
   }
 

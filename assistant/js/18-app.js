@@ -96,7 +96,7 @@
     if (corrective) {
       corrective.disabled = !active || correctiveEntries().length === 0;
       corrective.title = corrective.disabled
-        ? (!active ? "Unavailable until Edition 2 execution is verified" : "No eligible AP corrective assignment")
+        ? (!active ? "Unavailable until the agreement is active" : "No eligible AP corrective assignment")
         : "";
     }
     if (weekly) {
@@ -107,7 +107,7 @@
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
       weekly.disabled = !active || !weeklyComplete;
       weekly.title = weekly.disabled
-        ? (!active ? "Unavailable until Edition 2 execution is verified" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
+        ? (!active ? "Unavailable until the agreement is active" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
         : "";
     }
     if (config.demoMode) {
@@ -127,7 +127,7 @@
     }
     if (type === "corrective" || type === "weekly") {
       participantStateCache = await MRB.api.myState();
-      if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+      if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
     }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
@@ -353,7 +353,7 @@
     if (type === "corrective" || type === "weekly") {
       try {
         participantStateCache = await MRB.api.myState();
-        if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+        if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
         if (type === "corrective") {
           var selectedId = String(entry && entry.id || "");
           var selectedAssignmentId = String(entry && entry.assignmentId || "");

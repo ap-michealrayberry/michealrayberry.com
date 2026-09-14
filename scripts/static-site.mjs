@@ -18,13 +18,13 @@ const VIEWS = [
   { page: 'milestones', slug: 'milestones', label: 'Milestones', title: 'Weight Thresholds — 320 to 200 | Micheal Ray Berry',
     desc: 'Six published weight thresholds between the declared 340-pound baseline and 200 pounds, each recorded or not from dated weigh-ins.' },
   { page: 'uniform', slug: 'uniform', label: 'Uniform', title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
-    desc: 'Edition 2 defines black for routine documentation and pink for recorded corrective sessions; the agreement page reports current applicability.' },
+    desc: 'The agreement defines black for routine documentation and pink for recorded corrective sessions; the agreement page reports current applicability.' },
   { page: 'updates', slug: 'updates', label: 'Updates', title: 'Updates — Micheal Ray Berry Public Accountability Project',
     desc: 'Official entries by the Accountability Partner and dated notes on the record, newest first.' },
   { page: 'about', slug: 'about', label: 'About', title: 'About the Project \u2014 Micheal Ray Berry',
     desc: 'Why this public accountability project exists, how it is administered by an independent Accountability Partner, and the documentation standard behind the record.' },
   { page: 'agreement', slug: 'agreement', label: 'Agreement', title: 'Accountability Agreement Status \u2014 Micheal Ray Berry',
-    desc: 'The current status and public summary of Edition 2: daily requirements, documentation standards, violations, corrective sessions, and limits.' },
+    desc: 'The current status and public summary of the agreement: daily requirements, documentation standards, violations, corrective sessions, and limits.' },
 ];
 
 const MILESTONES = [320, 300, 275, 250, 225, 200];
@@ -280,13 +280,13 @@ function computeValues(ctx) {
     agreementExecuted, agreementInactive: !agreementExecuted,
     agreementEffectiveDateLong: agreementExecuted ? esc(longDate(agreementEffectiveDate)) : '',
     agreementStatusSentence: agreementExecuted
-      ? 'Edition 2 execution is recorded as verified effective ' + esc(longDate(agreementEffectiveDate)) + '.'
-      : 'Edition 2 execution is not verified; its proposed requirements are inactive.',
-    agreementScopeLabel: agreementExecuted ? 'Edition 2 scope' : 'Proposed Edition 2 scope',
+      ? 'The agreement is recorded as active effective ' + esc(longDate(agreementEffectiveDate)) + '.'
+      : 'The agreement is pending counter-signature; its requirements are not yet active.',
+    agreementScopeLabel: agreementExecuted ? 'Agreement scope' : 'Pending agreement scope',
     agreementRulesNoun: agreementExecuted ? 'The executed agreement' : 'The draft',
-    agreementFullHeading: agreementExecuted ? 'Edition 2 — execution verified' : 'Edition 2 — execution not verified',
+    agreementFullHeading: agreementExecuted ? 'Agreement — active' : 'Agreement — pending counter-signature',
     agreementConsentScopeLabel: agreementExecuted ? 'Recorded consent scope' : 'Proposed consent scope',
-    footerTermsLabel: agreementExecuted ? 'published Edition 2 terms' : 'published proposed terms',
+    footerTermsLabel: agreementExecuted ? 'published terms' : 'published pending terms',
     inViolation: agreementExecuted && openCount > 0,
     openCountHeading: agreementExecuted ? 'Unresolved violations' : 'Operative violations',
     openCountLabel: agreementExecuted ? String(openCount) : '—',
@@ -296,7 +296,7 @@ function computeValues(ctx) {
     projectStatusLabel: agreementExecuted ? 'Under agreement' : 'Public accountability record',
     deadlineHeading: agreementExecuted ? 'Deadline' : 'Proposed deadline',
     deadlineValue: agreementExecuted ? '10:00 PM ET daily' : '10:00 PM ET if activated',
-    complianceLabel: !agreementExecuted ? 'Edition 2 requirements are not active'
+    complianceLabel: !agreementExecuted ? 'Agreement pending — requirements not yet active'
       : openCount > 0 ? (openCount === 1 ? 'One unresolved violation' : openCount + ' unresolved violations')
         : (rawDay < 1 ? 'Record not yet started' : packetDone ? 'Today’s required media and weight filed' : 'Today’s packet due'),
     todayPacketLabel: !agreementExecuted ? 'No filing is due · execution not verified'

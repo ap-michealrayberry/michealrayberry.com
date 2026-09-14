@@ -5,7 +5,7 @@
 > documented daily under his real name at his own written request.
 > Administered by an independent Accountability Partner as the responsible
 > authority, within a signed, co-signed agreement with defined limits.
-> Edition 2 of the agreement governs; Day 1 is <!-- START_DATE_LONG:BEGIN -->31 August 2026<!-- START_DATE_LONG:END -->. Strict in framing; every photograph and recording is in the full project uniform.
+> The agreement (pending counter-signature) governs; Day 1 is <!-- START_DATE_LONG:BEGIN -->31 August 2026<!-- START_DATE_LONG:END -->. Strict in framing; every photograph and recording is in the full project uniform.
 
 Every project day is published with the recorded weight, four-angle
 documentation photographs, the daily inspection video, and a
@@ -25,7 +25,7 @@ above progress on every page.
 - [Observer Submission](https://michealrayberry.com/observer/): send a note about
   the record — encouragement, recognition, a question, or a possible
   compliance issue; identification optional; reviewed by the Accountability
-  Partner, nothing published automatically: live fixed-camera sessions, 6–10 PM ET on nights before a workday (Sun–Thu, from 13 Sept 2026); rules, schedule, and the per-night COMPLETED / MISSED / EXCEPTION record
+  Partner, nothing published automatically: live fixed-camera sessions, 6–10 PM ET on nights assigned by the Accountability Partner and posted in advance (assigned, not automatic, until further notice); rules, schedule, and the per-night COMPLETED / MISSED / EXCEPTION record
 - [RSS feed](https://michealrayberry.com/feed.xml): new day pages as they publish
 
 ## Weight history
@@ -47,7 +47,7 @@ also embedded on the record beside their entries. A missed posting is itself a v
 documentation, bounded by the signed agreement.
 
 ## Terms
-- [The agreement](https://michealrayberry.com/agreement/): Edition 2 summary, consented scope, and hard limits; full text published once co-signed
+- [The agreement](https://michealrayberry.com/agreement/): summary, consented scope, and hard limits; full text published once co-signed
 - [About](https://michealrayberry.com/about/): what the project is, in the participant's own words
 - [Verification](https://michealrayberry.com/verify): how to independently check the evidence hashes
 

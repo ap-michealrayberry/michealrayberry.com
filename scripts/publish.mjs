@@ -1152,7 +1152,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1325,7 +1325,7 @@ function milestonePage(target, entries) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1426,7 +1426,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1490,7 +1490,7 @@ function weeksIndexPage(entries, lastDay) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1708,7 +1708,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1906,7 +1906,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1937,8 +1937,8 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
   const statementQualifier = latest ? 'filed' : 'intended';
   const consentScopeLabel = agreementActive ? 'Recorded scope' : 'Proposed scope';
   const statusNotice = agreementActive
-    ? `The reviewed record reports Edition 2 execution active effective ${htmlEscape(longDate(effectiveDate))}. This page reports the filed confirmation record; it does not independently prove identity, comprehension, voluntariness, or bilateral execution.`
-    : 'Edition 2 execution is not verified. No agreement requirements are represented as active.';
+    ? `The reviewed record reports the agreement active effective ${htmlEscape(longDate(effectiveDate))}. This page reports the filed confirmation record; it does not independently prove identity, comprehension, voluntariness, or bilateral execution.`
+    : 'The agreement is pending counter-signature. No requirements are represented as active.';
 
   const graph = [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description,
@@ -2013,7 +2013,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
 
     ${latest
       ? `${latestEmbed
-        ? `<div class="video-frame"><iframe src="${htmlEscape(latestEmbed)}" title="Edition ${latest.version} consent confirmation" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`
+        ? `<div class="video-frame"><iframe src="${htmlEscape(latestEmbed)}" title="Consent confirmation" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`
         : isSelfHosted(latest.url)
           ? `<video class="vid" src="${htmlEscape(latest.url)}" controls preload="metadata" playsinline></video>`
           : `<p><a href="${htmlEscape(latest.url)}" rel="noopener">View the filed confirmation recording</a></p>`}
@@ -2055,7 +2055,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2197,7 +2197,7 @@ function violationPage(v, prev, next) {
       '@type': 'VideoObject',
       '@id': `${canonical}#corrective`,
       name: `Corrective session — ${v.id}`,
-      description: `The corrective session recorded against entry ${v.id} of the Micheal Ray Berry Public Accountability Project, published beside the entry under Edition 2 §8.`,
+      description: `The corrective session recorded against entry ${v.id} of the Micheal Ray Berry Public Accountability Project, published beside the entry under §8 of the agreement.`,
       ...videoSchemaSource(v.recording),
       thumbnailUrl: `${SITE_ORIGIN}/og-image.png`,
       publisher: { '@id': PERSON_ID },
@@ -2279,7 +2279,7 @@ function violationPage(v, prev, next) {
         ? 'A corrective session has been submitted. The entry remains unresolved while it awaits Accountability Partner verification.'
         : 'No corrective session has been submitted against this entry yet. It remains open in the public violation log until it is answered.'}</p>
     <p>The standard the correction has to meet is set out on <a href="/corrections/">the corrective
-    session page</a>. Edition 2 §8 is summarized on <a href="/agreement/">the agreement page</a>, together with its current execution status.</p>
+    session page</a>. §8 is summarized on <a href="/agreement/">the agreement page</a>, together with its current execution status.</p>
 
     ${v.day >= 1 ? `<p><a href="/daily/${v.date}-day-${String(v.day).padStart(3, '0')}/">The record for Day ${v.day} →</a></p>`
       : '<p>This entry predates Day 1.</p>'}
@@ -2298,7 +2298,7 @@ function violationPage(v, prev, next) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2508,7 +2508,7 @@ function positionsPage(entries, siteState = {}) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2579,7 +2579,7 @@ function violationsIndexPage(violations) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2668,10 +2668,10 @@ function sharePage(d) {
     <p>The daily archive distinguishes days with all listed files present, partial file records, and days with no public file record. These labels do not infer submission timing. Each report card identifies its Project Day and links to the supporting entry.</p>
     <p><a href="/daily/">View the daily archive</a> · <a href="/violations/">View unresolved violations and corrective requirements</a></p>
     <h2>What the project is</h2>
-    <p>Micheal Ray Berry documents a public accountability project under his real name and published Edition 2 terms. The current project began on <strong>${htmlEscape(longDate(START_DATE))}</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
+    <p>Micheal Ray Berry documents a public accountability project under his real name and a published agreement. The current project began on <strong>${htmlEscape(longDate(START_DATE))}</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
     <p>${d.agreementActive
       ? `For dates on or after <strong>${htmlEscape(d.agreementEffectiveDateLong)}</strong>, the active terms set a <strong>10:00 PM Eastern</strong> deadline for the Daily Compliance Packet. Current file presence alone does not establish whether that deadline was met.`
-      : 'Edition 2 describes a 10:00 PM Eastern Daily Compliance Packet deadline, but agreement execution is not verified and no filing requirement is represented as active.'} The packet described by the terms includes a recorded weigh-in, a four-angle inspection video, four photographs, and the updated public tracker.</p>
+      : 'The pending agreement describes a 10:00 PM Eastern Daily Compliance Packet deadline, but agreement execution is not verified and no filing requirement is represented as active.'} The packet described by the terms includes a recorded weigh-in, a four-angle inspection video, four photographs, and the updated public tracker.</p>
     <p>The Accountability Partner administers the record and answers official questions about compliance. Micheal does not grade his own submissions. The published standards describe review, corrections, publication, and the limits of participation; the agreement page shows whether execution has been verified.</p>
     <h2>Materials for sharing</h2>
     <div class="standard">
@@ -2733,7 +2733,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     schema_version: 1,
     agreement_active: agreementActive,
     published_at: buildNow().toISOString(),
-    sessions: Object.fromEntries(supervision.filter((s) => s.date <= today).map((s) => {
+    sessions: Object.fromEntries(supervision.map((s) => {
       const applies = agreementAppliesOn(s.date, agreementActive, effectiveDate);
       return [s.date, {
         required: applies && s.required,
@@ -2751,7 +2751,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     ['Visible areas orderly', 'The monitored living and dining areas are brought to the project\u2019s minimum standard of order before the session begins.'],
     [agreementActive ? 'Daily packet relationship' : 'Proposed daily packet relationship', agreementActive
       ? 'Supervision does not substitute for the Daily Inspection, weigh-in, photographs, or tracker update. The active terms set the packet deadline at 10:00 PM Eastern; current file presence does not prove timeliness.'
-      : 'Edition 2 describes a separate Daily Inspection, weigh-in, photograph, and tracker process. No packet or supervision requirement is active while execution remains unverified.'],
+      : 'The pending agreement describes a separate Daily Inspection, weigh-in, photograph, and tracker process. No packet or supervision requirement is active while execution remains unverified.'],
     ['Necessary privacy is permitted', 'Bathrooms, changing, sensitive work information, private communications, visitors, and other legitimately private matters remain outside public observation.'],
     [agreementActive ? 'A required session remains on the record' : 'Future outcome handling', agreementActive
       ? 'If an activated, scheduled session is not completed, the Accountability Partner may record an adverse outcome unless a documented exception applies.'
@@ -2832,8 +2832,8 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     <p class="sup-eyebrow">Public Accountability / Evening Supervision</p>
     <h1 class="sup-h1">Evening Supervision</h1>
     <p class="sup-lede">${agreementActive
-      ? 'Under the verified execution state, an explicit schedule row may require a fixed-camera Evening Supervision session on a night preceding a scheduled workday.'
-      : 'Edition 2 proposes fixed-camera Evening Supervision on specified nights, but agreement execution is not verified and the requirement is not active.'} Public live video is disabled pending a dedicated privacy and physical-safety review.</p>
+      ? 'Under the verified execution state, a fixed-camera Evening Supervision session is required on nights the Accountability Partner assigns and posts here in advance. Until further notice, nights are assigned, not automatic.'
+      : 'The pending agreement provides for fixed-camera Evening Supervision on specified nights, but agreement execution is not verified and the requirement is not active.'} Public live video is disabled pending a dedicated privacy and physical-safety review.</p>
     <div class="sup-wrap">
       <div class="status">
         <div class="line" data-live-status role="status" aria-live="polite"><span class="lamp"></span>CHECKING SCHEDULE…</div>
@@ -2845,7 +2845,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       <p style="max-width:680px">${agreementActive
         ? 'During an explicitly activated session, normal evening activity continues under observation. Micheal is not required to entertain, interact with viewers, or remain directly in front of the camera continuously; the published rules apply until the period ends.'
         : 'If the agreement-execution gate is later activated and a session is explicitly scheduled, normal evening activity may continue under the proposed observation rules. There is no active session requirement now.'}</p>
-      <p style="max-width:680px">Scheduled sessions ordinarily occur 6:00–10:00 PM Eastern on nights preceding a scheduled workday. ${publicUrlsEnabled ? 'The separate URL-publication flag permits an archive link only for an eligible completed, post-effective session; public live embeds remain disabled.' : 'Public live video and archive URLs are disabled pending a dedicated privacy and physical-safety review.'}</p>
+      <p style="max-width:680px">Sessions run 6:00–10:00 PM Eastern on nights assigned by the Accountability Partner and listed below in advance. ${publicUrlsEnabled ? 'The separate URL-publication flag permits an archive link only for an eligible completed, post-effective session; public live embeds remain disabled.' : 'Public live video and archive URLs are disabled pending a dedicated privacy and physical-safety review.'}</p>
 
       <h2 class="sup">${agreementActive ? 'Rules while under supervision' : 'Proposed rules'}</h2>
       <div class="rules">${RULES.map(([k, v]) => `<div><b>${k}</b><p>${v}</p></div>`).join('')}</div>
@@ -2979,13 +2979,13 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     <p>What answers a documented failure, what the standard is, and every session on the record.</p>
   </header>
   <main id="main-content">
-    <p class="lede"><strong>Edition 2 §8 defines a corrective session that may answer an Accountability Partner-verified failure to file the Daily Compliance Packet by 10 PM Eastern or to complete a required Evening Supervision session (§3.4), while execution is active.</strong> It is not a consequence for the weight. A gain, a plateau, or a bad month is never a Violation Event.</p>
-    <p>While Edition 2 execution is active, each verified, post-effective Violation Event is handled under the published standards. The level follows the accumulated count of confirmed violations (§8.1); the Accountability Partner verifies the record rather than creating requirements outside those terms.</p>
+    <p class="lede"><strong>§8 of the agreement defines a corrective session that may answer an Accountability Partner-verified failure to file the Daily Compliance Packet by 10 PM Eastern or to complete a required Evening Supervision session (§3.4), while execution is active.</strong> It is not a consequence for the weight. A gain, a plateau, or a bad month is never a Violation Event.</p>
+    <p>While the agreement is active, each verified, post-effective Violation Event is handled under the published standards. The level follows the accumulated count of confirmed violations (§8.1); the Accountability Partner verifies the record rather than creating requirements outside those terms.</p>
 
     <p>So a second failure costs more than a first and a third costs more than a second.</p>
 
     <table class="levels">
-      <caption>Edition 2 corrective-session levels</caption>
+      <caption>Corrective-session levels</caption>
       <thead><tr><th scope="col">Level</th><th scope="col">Assigned when</th><th scope="col">Duration</th></tr></thead>
       <tbody>${levels.map(([l, w, d]) => `<tr><td>${l}</td><td>${w}</td><td>${d}</td></tr>`).join('')}</tbody>
     </table>
@@ -2997,7 +2997,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous take, fully AI-voiced. The participant does not speak. A session challenge code is displayed in the recording and logged with the submission; the current system does not independently prove capture time or rule out every form of replay or editing.</p></div>
       <div><b>Invalidation</b><p>Leaving the position, materially changing posture, or ending early invalidates the attempt. The full period is completed again from zero — a shortened session counts for nothing.</p></div>
-      <div><b>Deadline</b><p>Edition 2 allows 72 hours after an assigned violation notice to complete, record, and file the session, subject to documented §9 exceptions and only while execution is active. The server validates the linked assignment and exact due date.</p></div>
+      <div><b>Deadline</b><p>The agreement allows 72 hours after an assigned violation notice to complete, record, and file the session, subject to documented §9 exceptions and only while execution is active. The server validates the linked assignment and exact due date.</p></div>
       <div><b>Verification</b><p>Submitting a session does not resolve the entry. It remains corrected and awaiting verification until the Accountability Partner reviews identity, attire, elapsed time, and continuity against the published standard and records a decision.</p></div>
     </div>
 
@@ -3015,7 +3015,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     nobody can see is one that would eventually be discounted too.</p>
     <p>Every published photograph and recording shows the participant in the full project
     uniform. Verification photographs are held privately and are not published.</p>
-    <p>Edition 2 §8.2 and §8.6 are summarized on <a href="/agreement/">the agreement page</a>, together with their current execution status.</p>
+    <p>§8.2 and §8.6 are summarized on <a href="/agreement/">the agreement page</a>, together with their current execution status.</p>
 
     <h2>Sessions on the record</h2>
     ${sessions.length
@@ -3032,7 +3032,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -3178,7 +3178,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published Edition 2 terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
