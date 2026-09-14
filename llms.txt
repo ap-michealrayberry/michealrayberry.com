@@ -5,7 +5,7 @@
 > documented daily under his real name at his own written request.
 > Administered by an independent Accountability Partner as the responsible
 > authority, within a signed, co-signed agreement with defined limits.
-> Edition 2 of the agreement governs; Day 1 is 31 August 2026. Strict in framing; every photograph and recording is in the full project uniform.
+> Edition 2 of the agreement governs; Day 1 is <!-- START_DATE_LONG:BEGIN -->31 August 2026<!-- START_DATE_LONG:END -->. Strict in framing; every photograph and recording is in the full project uniform.
 
 Every project day is published with the recorded weight, four-angle
 documentation photographs, the daily inspection video, and a
@@ -65,7 +65,7 @@ black unitard; every photograph and recording on the record is in it.
   day page is published once that day's packet is complete, or as a gap page
   after the 10:00 PM Eastern deadline.
 - Weight figures come from the official weigh-in log. The record begins
-  2026-08-31.
+  <!-- START_DATE_LONG:BEGIN -->31 August 2026<!-- START_DATE_LONG:END -->.
 - A day marked "No record" or "Incomplete record" is a documented gap, not
   missing data. The gap is part of the record.
 
