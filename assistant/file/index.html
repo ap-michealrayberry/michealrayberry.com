@@ -23,18 +23,24 @@
     </header>
 
     <main class="result-main">
+      <h1>File a record</h1>
       <p class="mono small" style="letter-spacing:.18em;text-transform:uppercase;color:#B3261E;margin:0">
         Addition to the Recording Assistant
       </p>
       <p class="chooser-intro">
         Record in the <a href="../">Recording Assistant</a>. File the YouTube title, description, and link here.
-        Daily filing is today only, before 10:00 PM ET. A second take on the same day replaces the first.
+        When Edition 2 is active, daily filing is today only and before 10:00 PM ET. The live agreement status below controls all operative filing modes; a consent statement remains available for review.
+        Daily and corrective links can reach the server only when this device has the exact seal from the matching assistant capture. Otherwise, links, packet attachments, and failure notes stay on this device as preparation aids.
       </p>
 
       <section class="panel" id="status-panel">
         <div class="status-row">
           <span class="label">Deadline</span>
           <span id="deadline-countdown" class="mono value">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Agreement</span>
+          <span id="agreement-state" class="mono value">Checking…</span>
         </div>
         <div class="status-row">
           <span class="label">Filing day</span>
@@ -52,12 +58,12 @@
         <p id="check-reason" class="status-line"></p>
       </section>
 
-      <div class="mode-row" role="tablist">
-        <button type="button" class="btn btn-primary" id="mode-daily" data-mode="daily">Daily</button>
-        <button type="button" class="btn btn-ghost" id="mode-consent" data-mode="consent">Consent</button>
-        <button type="button" class="btn btn-ghost" id="mode-corrective" data-mode="corrective">Corrective</button>
-        <button type="button" class="btn btn-ghost" id="mode-supervision" data-mode="supervision">Supervision</button>
-        <button type="button" class="btn btn-ghost" id="mode-fail" data-mode="fail">Failure</button>
+      <div class="mode-row" aria-label="Filing type">
+        <button type="button" class="btn btn-primary" id="mode-daily" data-mode="daily" aria-pressed="true">Daily</button>
+        <button type="button" class="btn btn-ghost" id="mode-consent" data-mode="consent" aria-pressed="false">Consent statement</button>
+        <button type="button" class="btn btn-ghost" id="mode-corrective" data-mode="corrective" aria-pressed="false">Corrective</button>
+        <button type="button" class="btn btn-ghost" id="mode-supervision" data-mode="supervision" aria-pressed="false" disabled title="Disabled pending safety and privacy review">Supervision disabled</button>
+        <button type="button" class="btn btn-ghost" id="mode-fail" data-mode="fail" aria-pressed="false">Failure</button>
       </div>
 
       <section id="yt-publish" class="yt-box">
@@ -76,7 +82,8 @@
           <textarea id="yt-desc" readonly rows="8" class="mono"></textarea>
         </label>
         <div class="yt-row">
-          <input id="yt-url" type="url" placeholder="https://youtu.be/…" class="mono" />
+          <label for="yt-url" class="url-label">YouTube URL</label>
+          <input id="yt-url" type="url" placeholder="https://youtu.be/…" class="mono" autocomplete="url" />
           <button type="button" id="yt-file" class="btn btn-primary">File the link</button>
         </div>
         <p id="yt-msg" class="mono small" style="color:#B3261E;min-height:14px"></p>
@@ -85,13 +92,30 @@
       <section class="panel" id="corrective-panel" hidden>
         <label class="field">
           <span>Violation id</span>
-          <input id="cv-id" type="text" class="mono" placeholder="V-002" maxlength="5" />
+          <input id="cv-id" type="text" class="mono" placeholder="V-A1B2C3D4E5F6" maxlength="14" pattern="V-[0-9A-Fa-f]{12}" autocapitalize="characters" spellcheck="false" aria-describedby="cv-id-help" />
+          <span id="cv-id-help" class="small">Enter the opaque AP-issued id used for the matching recorded session, such as V-A1B2C3D4E5F6.</span>
         </label>
-        <p class="small">Record the session in the assistant (Corner Time), post it <strong>unlisted</strong>, then paste the link below. Filing resolves the entry under §8.2; the AP may overrule only on the written verification standard.</p>
+        <label class="field">
+          <span>Assignment id</span>
+          <input id="cv-assignment-id" type="text" class="mono" placeholder="C-00112233445566778899AABB" maxlength="26" pattern="C-[0-9A-Fa-f]{24}" autocapitalize="characters" spellcheck="false" aria-describedby="cv-assignment-id-help" />
+          <span id="cv-assignment-id-help" class="small">Enter the matching opaque assignment id shown by the recording assistant.</span>
+        </label>
+        <label class="field">
+          <span>Current attempt id</span>
+          <input id="cv-attempt-id" type="text" class="mono" placeholder="A-00112233445566778899AABB" maxlength="26" pattern="A-[0-9A-Fa-f]{24}" autocapitalize="characters" spellcheck="false" aria-describedby="cv-attempt-id-help" />
+          <span id="cv-attempt-id-help" class="small">Enter the current attempt id shown for that session. It changes after an AP rejection.</span>
+        </label>
+        <label class="field">
+          <span>Matching sealed capture</span>
+          <select id="cv-capture" aria-describedby="cv-capture-help"><option value="">Load the matching captures on this device</option></select>
+          <span id="cv-capture-help" class="small">Choose the take you posted. Each receipt keeps its capture date and video fingerprint, including after a reload.</span>
+        </label>
+        <button type="button" id="cv-load-captures" class="btn btn-ghost">Load sealed captures</button>
+        <p class="small">Record the session in the assistant (Corner Time), post it <strong>publicly</strong>, then paste the link below. Filing leaves the entry submitted and awaiting AP verification.</p>
       </section>
 
       <section class="panel" id="supervision-panel" hidden>
-        <p class="small">Evening Supervision (§3.4): when the 6:00–10:00 PM ET stream has ended, paste the YouTube archive link and file it <strong>before 10:20 PM</strong>. Filing marks tonight COMPLETED. Not filed by 10:20 = MISSED = a Violation Event, declared by the record.</p>
+        <p class="small">Public live video and archive filing are disabled pending a separate safety and privacy review. This tool will not accept a supervision link.</p>
       </section>
 
       <section class="panel" id="packet-panel">
@@ -100,7 +124,7 @@
           <input id="input-weight" type="number" step="0.1" min="50" max="800" class="mono" placeholder="337.6" />
         </label>
         <label class="field">
-          <span>Inspection video — latest overwrites</span>
+          <span>Inspection video reference — this page only</span>
           <input id="input-video" type="file" accept="video/*" />
         </label>
         <p id="video-status" class="mono small"></p>
@@ -118,12 +142,12 @@
       <section id="fail-panel" class="panel" hidden>
         <div class="section-label">What failed</div>
         <div id="fail-missed" class="miss-grid"></div>
-        <p class="chooser-intro">After 10:00 PM ET a failure may be filed for <em>today only</em>.</p>
+        <p class="chooser-intro">A private failure note may be saved on this device for <em>today only</em>. It does not open a violation; only the Accountability Partner can verify one.</p>
       </section>
 
       <div class="result-actions">
-        <button type="button" id="btn-file-packet" class="btn btn-primary">File packet</button>
-        <button type="button" id="btn-file-fail" class="btn btn-ghost" hidden>Open violation</button>
+        <button type="button" id="btn-file-packet" class="btn btn-primary">Save packet details locally</button>
+        <button type="button" id="btn-file-fail" class="btn btn-ghost" hidden>Save failure note locally</button>
         <a class="btn btn-ghost" href="../">Back to assistant</a>
       </div>
       <p id="file-msg" class="status-line mono" role="status"></p>

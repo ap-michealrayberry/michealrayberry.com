@@ -27,15 +27,17 @@
   }
 
   function acceptedRecords(payload) {
-    if (!payload || payload.schema_version !== 1 || payload.available === false || !Array.isArray(payload.records)) {
+    if (!payload || payload.schema_version !== 1 || !Array.isArray(payload.records)) {
       throw new Error('public attestation feed schema mismatch');
     }
     return payload.records.filter(function (row) {
       return row
         && row.event === 'capture-attested'
-        && row.status === 'VALID'
-        && (!row.video_sha256 || HASH_PATTERN.test(String(row.video_sha256).toLowerCase()))
+        && row.kind === 'daily'
+        && row.status === 'VALID-CONSUMED'
+        && HASH_PATTERN.test(String(row.video_sha256 || '').toLowerCase())
         && Array.isArray(row.photo_sha256s)
+        && row.photo_sha256s.length === 4
         && row.photo_sha256s.every(function (value) {
           return HASH_PATTERN.test(String(value || '').toLowerCase());
         });
@@ -76,7 +78,7 @@
         showResult(
           '#B3261E',
           'NOT FOUND IN THE LOG',
-          'No accepted capture attestation matches this file byte-for-byte. Re-encoding, screenshots, and re-saving change the hash; if the file claims to be an original from the record, treat it as unverified and report it.',
+          'No accepted daily capture attestation matches this file byte-for-byte. Re-encoding, screenshots, and re-saving change the hash; if the file claims to be an original from the record, treat it as unverified and report it.',
           hash
         );
       }

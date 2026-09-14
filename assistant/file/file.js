@@ -2,10 +2,12 @@
   "use strict";
 
   var TZ = "America/New_York";
-  var START = "2026-08-31";
+  var projectStart = "2026-08-31";
   var DEADLINE_HOUR = 22;
   var STORE_KEY = "mrb_file_packet_v1";
+  var SEAL_STORE_KEY = "mrb_attestation_seals_v1";
   var BASE = "https://michealrayberry.com";
+  var agreementState = { loaded: false, active: false, message: "Checking agreement status…" };
   var MISSABLE = [
     { id: "video", label: "Daily inspection video" },
     { id: "photos", label: "Four-angle photographs" },
@@ -37,7 +39,7 @@
   }
 
   function dayNumber(date) {
-    var start = Date.parse(START + "T00:00:00Z");
+    var start = Date.parse(projectStart + "T00:00:00Z");
     var cur = Date.parse(date + "T00:00:00Z");
     return Math.floor((cur - start) / 86400000) + 1;
   }
@@ -96,7 +98,25 @@
     return "open";
   }
 
+  function inactiveCheck(label) {
+    var waiting = !agreementState.loaded;
+    return {
+      ok: false,
+      window: "inactive",
+      reason: waiting
+        ? "Agreement status is still being checked. Filing remains locked."
+        : "Edition 2 execution is not verified. " + label + " is proposed and is not currently due or enforceable.",
+      checks: [{
+        label: "Agreement execution",
+        ok: false,
+        detail: waiting ? "Status unavailable" : "Not verified · requirements inactive",
+      }],
+      today: todayEt(),
+    };
+  }
+
   function dailyCheck(date, now) {
+    if (!agreementState.active) return inactiveCheck("Daily filing");
     now = now || new Date();
     var today = todayEt(now);
     var window = classify(date, now);
@@ -116,6 +136,7 @@
   }
 
   function failCheck(date, now) {
+    if (!agreementState.active) return inactiveCheck("Failure note");
     now = now || new Date();
     var today = todayEt(now);
     var ok = date === today;
@@ -127,9 +148,9 @@
     ];
     var reason = ok
       ? window === "after-deadline"
-        ? "Deadline passed. A failure may be filed for today only."
-        : "Failure filing is open for today."
-      : date > today ? "Cannot file a future day." : "Cannot file a past day.";
+        ? "Deadline passed. A private failure note may be saved for today only."
+        : "A private failure note may be saved for today."
+      : date > today ? "Cannot save a note for a future day." : "Cannot save a note for a past day.";
     return { ok: ok, window: window, reason: reason, checks: checks, today: today };
   }
 
@@ -138,30 +159,30 @@
     return {
       ok: true,
       window: "open",
-      reason: "Consent filing is open any day. Re-record after every amendment.",
+      reason: "A participant statement may be submitted for Accountability Partner review. It is not automatic proof of consent or execution.",
       checks: [
         { label: "Calendar day", ok: true, detail: today + " (ET)" },
-        { label: "Filing window", ok: true, detail: "No deadline — consent is amendment-driven, not daily" },
+        { label: "Review state", ok: true, detail: "Submission remains pending until separately verified" },
       ],
       today: today,
     };
   }
 
   function supervisionCheck(date) {
-    return { ok: true, day: dayNumber(date), reason: '', items: [
-      { label: 'Session ended (10:00 PM ET)', ok: true },
-      { label: 'Archive link filed before 10:20 PM ET', ok: true },
+    return { ok: false, day: dayNumber(date), reason: 'Public supervision video and archive filing are disabled pending a separate safety and privacy review.', checks: [
+      { label: 'Public supervision media', ok: false, detail: 'Feature disabled' },
     ] };
   }
 
   function correctiveCheck(date) {
+    if (!agreementState.active) return inactiveCheck("Corrective filing");
     return {
       ok: true,
-      window: "open",
-      reason: "Corrective filing is open until the 72-hour deadline on the notice.",
+      window: "server-verified",
+      reason: "The server accepts only the exact open AP assignment identity. A rejected session may be repeated against that same assignment after its initial due date.",
       checks: [
         { label: "Calendar day", ok: true, detail: todayEt() + " (ET)" },
-        { label: "Filing window", ok: true, detail: "Within 72 hours of the violation notice (\u00a78.3)" },
+        { label: "Eligibility gate", ok: true, detail: "Assignment and due date checked server-side when filed" },
         { label: "Recording", ok: true, detail: "Recorded in the assistant \u2014 Corner Time session" },
       ],
       today: todayEt(),
@@ -172,28 +193,21 @@
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — 340 to 200 lb, documented daily in public. " +
+      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
       "The official record is " + BASE + "/. Recorded through the official Recording Assistant; " +
-      "the burned-in verification code and clocks date the footage.\n" +
+      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
       "Agreement: " + BASE + "/agreement\nContact: ap@michealrayberry.com";
     if (type === "supervision") {
       return {
         title: "Evening Supervision — Day " + dayN + " · " + ctx.date + brand,
         desc:
-          "Fixed-camera Evening Supervision session under §3.4 of the agreement, 6:00–10:00 PM ET. " +
-          "Normal evening activity under observation and published rules: full project uniform, water only, home-cooked dinner. " +
+          "Recorded Evening Supervision submission under the proposed §3.4 process, 6:00–10:00 PM ET. " +
+          "Public live video is disabled pending safety review; any archive and status await Accountability Partner review. " +
           "Console and rules: " + BASE + "/live/" + tail,
       };
     }
     if (type === "corrective") {
-      var ref = "V-" + pad3(ctx.vNum || 1);
-      return {
-        title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
-        desc: "Corner time recorded in one continuous, unedited take against violation " + ref + "." + tail,
-      };
-    }
-    if (type === "corrective") {
-      var vid = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase() || "V-000";
+      var vid = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase() || "ENTRY REQUIRED";
       return {
         title: "Corrective Session — " + vid + " \u00b7 " + ctx.date + brand,
         desc:
@@ -204,10 +218,10 @@
     }
     if (type === "consent") {
       return {
-        title: "Consent Confirmation — Agreement as amended · " + ctx.date + brand,
+        title: "Consent Statement — Pending Review · " + ctx.date + brand,
         desc:
-          "Recorded statement of informed, voluntary consent to the Public Accountability Agreement " +
-          "as amended through " + ctx.date + ". Re-recorded after every amendment." + tail,
+          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement on " +
+          ctx.date + ". The recording alone does not prove comprehension, consent, or agreement execution." + tail,
       };
     }
     return {
@@ -220,7 +234,22 @@
   }
 
   function isYt(url) {
-    return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test((url || "").trim());
+    try {
+      var raw = (url || "").trim();
+      var parsed = new URL(raw);
+      var host = parsed.hostname.toLowerCase();
+      if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port || parsed.hash) return false;
+      if (host === "youtu.be") {
+        return /^\/[A-Za-z0-9_-]{11}$/.test(parsed.pathname) && !parsed.search
+          && raw === "https://youtu.be" + parsed.pathname;
+      }
+      if (host !== "youtube.com" && host !== "www.youtube.com") return false;
+      var id = parsed.searchParams.get("v") || "";
+      return parsed.pathname === "/watch" && /^[A-Za-z0-9_-]{11}$/.test(id)
+        && parsed.search === "?v=" + id && raw === "https://" + host + "/watch?v=" + id;
+    } catch (error) {
+      return false;
+    }
   }
 
   function loadAll() {
@@ -246,13 +275,18 @@
       takeCount: 0,
       lastTakeAt: null,
       filedAt: null,
+      serverFiled: null,
+      serverFiledAt: null,
+      serverFilingError: null,
       failedAt: null,
     };
   }
 
   function getDay(date) {
     var all = loadAll();
-    return all[date] || emptyDay(date);
+    var packet = all[date] || emptyDay(date);
+    packet.day = dayNumber(date);
+    return packet;
   }
 
   function saveDay(packet) {
@@ -261,35 +295,187 @@
     localStorage.setItem(STORE_KEY, JSON.stringify(all));
   }
 
+  function correctiveDraftKey(vId, assignmentId, attemptId) {
+    return String(vId || "").trim().toUpperCase() + "|" +
+      String(assignmentId || "").trim().toUpperCase() + "|" +
+      String(attemptId || "").trim().toUpperCase();
+  }
+
+  function saveCorrectiveDraft(vId, assignmentId, attemptId, draft) {
+    try {
+      var all = loadAll();
+      if (!all.__correctiveDrafts || typeof all.__correctiveDrafts !== "object") {
+        all.__correctiveDrafts = {};
+      }
+      all.__correctiveDrafts[correctiveDraftKey(vId, assignmentId, attemptId)] = draft;
+      localStorage.setItem(STORE_KEY, JSON.stringify(all));
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   function deviceKey() {
     try { return localStorage.getItem("mrb_packet_key") || ""; } catch (e) { return ""; }
   }
   function execUrl() {
-    try { return localStorage.getItem("mrb_exec_url") || "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec"; } catch (e) { return "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec"; }
+    try { return localStorage.getItem("mrb_exec_url") || ""; } catch (e) { return ""; }
+  }
+  function unlockToken() {
+    try { return localStorage.getItem("mrb_unlock_token") || ""; } catch (e) { return ""; }
   }
 
-  async function postCorrectiveFiled(vId, date, url) {
+  function filingSeal(kind, date, ref, assignmentId, attemptId) {
+    var key = kind + "|" + date;
+    if (kind === "corrective") {
+      var canonicalRef = String(ref || "").trim().toUpperCase();
+      var canonicalAssignmentId = String(assignmentId || "").trim().toUpperCase();
+      var canonicalAttemptId = String(attemptId || "").trim().toUpperCase();
+      if (!/^V-[A-F0-9]{12}$/.test(canonicalRef) || !/^C-[A-F0-9]{24}$/.test(canonicalAssignmentId) ||
+          !/^A-[A-F0-9]{24}$/.test(canonicalAttemptId)) return "";
+      key += "|" + canonicalRef + "|" + canonicalAssignmentId + "|" + canonicalAttemptId;
+    }
+    try {
+      var stored = JSON.parse(localStorage.getItem(SEAL_STORE_KEY) || "{}");
+      var seal = String(stored && stored[key] || "").trim().toLowerCase();
+      return /^[a-f0-9]{64}$/.test(seal) ? seal : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function readCaptureReceipts() {
+    return new Promise(function (resolve) {
+      if (typeof indexedDB === "undefined") { resolve([]); return; }
+      var request;
+      try { request = indexedDB.open("mrb_record_queue"); }
+      catch (error) { resolve([]); return; }
+      request.onupgradeneeded = function () { request.transaction.abort(); };
+      request.onerror = request.onblocked = function () { resolve([]); };
+      request.onsuccess = function () {
+        var db = request.result;
+        if (!db.objectStoreNames.contains("sessions")) { db.close(); resolve([]); return; }
+        try {
+          var tx = db.transaction("sessions", "readonly");
+          var records = tx.objectStore("sessions").getAll();
+          records.onsuccess = function () { db.close(); resolve(records.result || []); };
+          records.onerror = function () { db.close(); resolve([]); };
+        } catch (error) { db.close(); resolve([]); }
+      };
+    });
+  }
+
+  async function correctiveCaptureReceipts(ref, assignmentId, attemptId) {
+    var candidates = [];
+    try {
+      var stored = JSON.parse(localStorage.getItem(SEAL_STORE_KEY) || "{}");
+      Object.keys(stored).forEach(function (key) {
+        var parts = key.split("|");
+        if (parts.length !== 5 || parts[0] !== "corrective" || parts[2] !== ref ||
+            parts[3] !== assignmentId || parts[4] !== attemptId) return;
+        var bucket = stored[key];
+        if (typeof bucket === "string") candidates.push({ seal: bucket, date: parts[1] });
+        else if (bucket && bucket.version === 2 && bucket.captures) {
+          Object.keys(bucket.captures).forEach(function (seal) {
+            var capture = bucket.captures[seal] || {};
+            candidates.push({ seal: seal, date: parts[1], video_sha256: capture.videoHash,
+              sealed_at: capture.sealedAt, code: capture.code });
+          });
+        }
+      });
+    } catch (error) { /* IndexedDB remains an independent recovery source. */ }
+    (await readCaptureReceipts()).forEach(function (capture) {
+      if (capture.kind === "corrective" && capture.vRef === ref &&
+          capture.assignmentId === assignmentId && capture.attemptId === attemptId) candidates.push(capture);
+    });
+    var unique = {};
+    candidates.forEach(function (capture) {
+      if (/^[a-f0-9]{64}$/.test(String(capture.seal || "")) &&
+          /^\d{4}-\d{2}-\d{2}$/.test(String(capture.date || ""))) unique[capture.seal] = capture;
+    });
+    return Object.keys(unique).map(function (seal) { return unique[seal]; });
+  }
+
+  async function loadCorrectiveCaptures() {
+    var ref = $("cv-id").value.trim().toUpperCase();
+    var assignmentId = $("cv-assignment-id").value.trim().toUpperCase();
+    var attemptId = $("cv-attempt-id").value.trim().toUpperCase();
+    var select = $("cv-capture");
+    var previous = select.value;
+    var captures = await correctiveCaptureReceipts(ref, assignmentId, attemptId);
+    if ($("cv-id").value.trim().toUpperCase() !== ref ||
+        $("cv-assignment-id").value.trim().toUpperCase() !== assignmentId ||
+        $("cv-attempt-id").value.trim().toUpperCase() !== attemptId) return [];
+    select.replaceChildren();
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = captures.length ? "Choose the take you posted" : "No matching sealed capture found";
+    select.appendChild(placeholder);
+    captures.forEach(function (capture) {
+      var option = document.createElement("option");
+      option.value = capture.seal;
+      option.dataset.captureDate = capture.date;
+      option.textContent = capture.date + " · code " + (capture.code || "—") +
+        " · video " + String(capture.video_sha256 || capture.seal).slice(0, 16);
+      select.appendChild(option);
+    });
+    if (captures.some(function (capture) { return capture.seal === previous; })) select.value = previous;
+    else if (captures.length === 1) select.value = captures[0].seal;
+    renderCorrectiveCaptureMeta();
+    return captures;
+  }
+
+  function renderCorrectiveCaptureMeta() {
+    var option = $("cv-capture").selectedOptions[0];
+    var date = option && option.dataset.captureDate;
+    if (mode !== "corrective" || !/^\d{4}-\d{2}-\d{2}$/.test(String(date || ""))) return;
+    var meta = ytMeta("corrective", { date: date, day: dayNumber(date) });
+    $("yt-title").value = meta.title;
+    $("yt-desc").value = meta.desc;
+    $("filing-day").textContent = date + " · Day " + pad3(dayNumber(date)) + " · sealed capture";
+  }
+
+  async function postCorrectiveFiled(vId, assignmentId, attemptId, date, url, seal) {
     var endpoint = execUrl();
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured" };
     var res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "correctivefiled", key: key, id: vId, date: date, url: url }),
+      body: JSON.stringify({ action: "correctivefiled", key: key, unlock: unlockToken(), id: vId,
+        assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal }),
     });
     return res.json();
   }
 
-  async function postYtFiled(kind, date, url) {
+  async function postYtFiled(kind, date, url, seal) {
     var endpoint = execUrl();
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured", local: true };
     var res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ action: "ytfiled", key: key, kind: kind, date: date, url: url }),
+      body: JSON.stringify({ action: "ytfiled", key: key, unlock: unlockToken(), kind: kind, date: date, url: url,
+        attestation_seal: seal || "" }),
     });
     return res.json();
+  }
+
+  async function postMyState() {
+    var endpoint = execUrl();
+    var key = deviceKey();
+    if (!endpoint || !key) throw new Error("Participant server is not configured");
+    var res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "mystate", key: key, unlock: unlockToken() }),
+    });
+    var state = await res.json();
+    if (!state || !state.ok || !/^\d{4}-\d{2}-\d{2}$/.test(String(state.projectStart || "")) ||
+        typeof state.agreementActive !== "boolean") {
+      throw new Error((state && state.error) || "Participant state is unavailable");
+    }
+    return state;
   }
 
   var mode = "daily";
@@ -297,6 +483,40 @@
   var photoFiles = [];
 
   function $(id) { return document.getElementById(id); }
+
+  async function loadAgreementState() {
+    try {
+      var responses = await Promise.all([
+        fetch("/data/feed-manifest.json", { credentials: "omit", cache: "no-store" }),
+        fetch("/data/supervision.json", { credentials: "omit", cache: "no-store" }),
+      ]);
+      if (!responses[0].ok || !responses[1].ok) throw new Error("status feed unavailable");
+      var values = await Promise.all([responses[0].json(), responses[1].json()]);
+      var manifest = values[0];
+      var supervision = values[1];
+      var participantState = await postMyState();
+      var stamp = Date.parse(manifest && manifest.published_at || "");
+      if (!manifest || manifest.schema_version !== 1 || !isFinite(stamp) || Date.now() - stamp > 48 * 60 * 60 * 1000 || stamp - Date.now() > 5 * 60 * 1000) {
+        throw new Error("status feed stale");
+      }
+      if (!supervision || supervision.schema_version !== 1 || typeof supervision.agreement_active !== "boolean" || supervision.published_at !== manifest.published_at) {
+        throw new Error("status feed inconsistent");
+      }
+      projectStart = String(participantState.projectStart);
+      agreementState = {
+        loaded: true,
+        active: supervision.agreement_active === true && participantState.agreementActive === true,
+        message: supervision.agreement_active === true && participantState.agreementActive === true
+          ? "Edition 2 active"
+          : "Not verified · requirements inactive",
+      };
+    } catch (error) {
+      agreementState = { loaded: true, active: false, message: "Unavailable · filing locked" };
+    }
+    if ($("agreement-state")) $("agreement-state").textContent = agreementState.message;
+    renderChecks();
+    renderMeta();
+  }
 
   function renderChecks() {
     var date = todayEt();
@@ -321,10 +541,16 @@
     $("check-reason").textContent = check.reason;
     $("check-reason").style.color = check.ok ? "" : "#B3261E";
 
+    ["mode-daily", "mode-corrective", "mode-fail"].forEach(function (id) {
+      if ($(id)) $(id).disabled = !agreementState.active;
+    });
+    if ($("mode-supervision")) $("mode-supervision").disabled = true;
+
     var locked = !check.ok;
     $("yt-file").disabled = locked;
     $("yt-file").textContent = locked && mode === "daily" ? "Filing closed" : "File the link";
-    $("packet-panel").hidden = mode === "consent" || mode === "corrective" || mode === "supervision";
+    $("yt-publish").hidden = mode === "fail" || mode === "supervision";
+    $("packet-panel").hidden = mode !== "daily";
     $("corrective-panel").hidden = mode !== "corrective";
     if ($("supervision-panel")) $("supervision-panel").hidden = mode !== "supervision";
     $("yt-url").disabled = locked && mode === "daily";
@@ -335,32 +561,55 @@
     $("btn-file-packet").disabled = locked && mode === "daily";
     $("btn-file-fail").disabled = mode === "fail" && !failCheck(date).ok;
     $("btn-file-fail").hidden = mode !== "fail";
-    $("btn-file-packet").hidden = mode === "fail";
+    $("btn-file-packet").hidden = mode !== "daily";
     $("fail-panel").hidden = mode !== "fail";
     return check;
   }
 
-  function renderMeta() {
+  function renderMeta(preserveStatus) {
     var date = todayEt();
     var packet = getDay(date);
+    var all = loadAll();
+    var linkRecord = packet;
+    if (mode === "consent") {
+      linkRecord = all.__consent || {};
+    } else if (mode === "corrective") {
+      var correctiveId = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase();
+      var correctiveAssignmentId = (($("cv-assignment-id") && $("cv-assignment-id").value) || "").trim().toUpperCase();
+      var correctiveAttemptId = (($("cv-attempt-id") && $("cv-attempt-id").value) || "").trim().toUpperCase();
+      linkRecord = (all.__correctiveDrafts &&
+        all.__correctiveDrafts[correctiveDraftKey(correctiveId, correctiveAssignmentId, correctiveAttemptId)]) || {};
+    }
     var meta = ytMeta(mode === "consent" ? "consent" : mode === "corrective" ? "corrective" : mode === "supervision" ? "supervision" : "daily", { date: date, day: packet.day });
     $("yt-title").value = meta.title;
     $("yt-desc").value = meta.desc;
-    $("yt-url").value = packet.youtubeUrl || "";
+    $("yt-url").value = linkRecord.url || linkRecord.youtubeUrl || "";
     $("input-weight").value = packet.weight != null ? packet.weight : "";
     $("input-notes").value = packet.notes || "";
     $("filing-day").textContent = date + " · Day " + pad3(packet.day);
     $("take-status").textContent = packet.takeCount
       ? "Take " + packet.takeCount + (packet.videoName ? " · " + packet.videoName : "")
       : "None";
-    if (packet.youtubeUrl) $("yt-msg").textContent = "On file: " + packet.youtubeUrl;
+    if (!preserveStatus) {
+      var savedUrl = linkRecord.url || linkRecord.youtubeUrl || "";
+      if (!savedUrl) {
+        $("yt-msg").textContent = "";
+      } else if (linkRecord.serverFiled === true) {
+        $("yt-msg").textContent = "Server filing accepted: " + savedUrl;
+      } else if (linkRecord.serverFiled === false) {
+        $("yt-msg").textContent = "Saved locally on this device; not accepted by the server: " + savedUrl;
+      } else {
+        $("yt-msg").textContent = "Saved locally on this device; server filing status is unknown: " + savedUrl;
+      }
+    }
   }
 
   function tick() {
     var date = todayEt();
     var left = msUntil(date);
-    $("deadline-countdown").textContent =
-      (left <= 0 ? "00:00:00" : formatCountdown(left)) + " to 10 PM ET";
+    $("deadline-countdown").textContent = agreementState.active
+      ? (left <= 0 ? "00:00:00" : formatCountdown(left)) + " to 10 PM ET"
+      : "Proposed · not currently due";
     renderChecks();
   }
 
@@ -371,6 +620,9 @@
     $("mode-corrective").className = next === "corrective" ? "btn btn-primary" : "btn btn-ghost";
     $("mode-fail").className = next === "fail" ? "btn btn-primary" : "btn btn-ghost";
     if ($("mode-supervision")) $("mode-supervision").className = next === "supervision" ? "btn btn-primary" : "btn btn-ghost";
+    document.querySelectorAll('[data-mode]').forEach(function (button) {
+      button.setAttribute('aria-pressed', button.getAttribute('data-mode') === next ? 'true' : 'false');
+    });
     renderChecks();
     renderMeta();
   }
@@ -400,7 +652,7 @@
         var rs = await postYtFiled("supervision", date, url);
         msg.textContent = rs && rs.ok === false
           ? "Server rejected the link \u2014 send it to the AP before 10:20 PM."
-          : "Evening Supervision filed \u2713 \u2014 tonight is COMPLETED on the record.";
+          : "Evening Supervision archive submitted — awaiting Accountability Partner review.";
       } catch (e) {
         msg.textContent = "Filing failed \u2014 send the link to the AP before 10:20 PM.";
       }
@@ -409,16 +661,61 @@
     }
     if (kind === "corrective") {
       var vId = (($("cv-id") && $("cv-id").value) || "").trim().toUpperCase();
-      if (!/^V-\d{3}$/.test(vId)) { msg.textContent = "Enter the violation id as V-001."; return; }
+      if (!/^V-[0-9A-F]{12}$/.test(vId)) {
+        msg.textContent = "Enter the opaque AP-issued id from the recorded session, such as V-A1B2C3D4E5F6.";
+        return;
+      }
+      var assignmentId = (($("cv-assignment-id") && $("cv-assignment-id").value) || "").trim().toUpperCase();
+      if (!/^C-[0-9A-F]{24}$/.test(assignmentId)) {
+        msg.textContent = "Enter the opaque assignment id from the recorded session, such as C-00112233445566778899AABB.";
+        return;
+      }
+      var attemptId = (($("cv-attempt-id") && $("cv-attempt-id").value) || "").trim().toUpperCase();
+      if (!/^A-[0-9A-F]{24}$/.test(attemptId)) {
+        msg.textContent = "Enter the current attempt id from the recorded session, such as A-00112233445566778899AABB.";
+        return;
+      }
+      var captures = await loadCorrectiveCaptures();
+      var capture = captures.find(function (candidate) { return candidate.seal === $("cv-capture").value; });
+      var correctiveSeal = capture ? capture.seal : "";
+      if (capture) date = capture.date;
+      if (!correctiveSeal) {
+        saveCorrectiveDraft(vId, assignmentId, attemptId, { url: url, date: date, attemptedAt: new Date().toISOString(),
+          serverFiled: false, serverFiledAt: null,
+          serverFilingError: "No exact attestation seal is available for this recorded corrective context" });
+        msg.textContent = captures.length
+          ? "Choose the matching sealed take above, then file its public link."
+          : "Not filed. No matching sealed capture was found on this device.";
+        return;
+      }
       $("yt-file").disabled = true;
       msg.textContent = "Filing\u2026";
       try {
-        var rc = await postCorrectiveFiled(vId, date, url);
-        msg.textContent = rc && rc.ok === false
-          ? "Local file saved \u2014 server rejected it. Send the link and id to the AP."
-          : "Corrective session filed \u2713 \u2014 " + vId + " resolves on submission (\u00a78.2).";
+        var rc = await postCorrectiveFiled(vId, assignmentId, attemptId, date, url, correctiveSeal);
+        var correctiveAccepted = !!(rc && rc.ok === true);
+        saveCorrectiveDraft(vId, assignmentId, attemptId, {
+          url: url,
+          date: date,
+          attemptedAt: new Date().toISOString(),
+          serverFiled: correctiveAccepted,
+          serverFiledAt: correctiveAccepted ? new Date().toISOString() : null,
+          serverFilingError: correctiveAccepted ? null : String(rc && rc.error || "Server did not confirm the filing"),
+        });
+        msg.textContent = correctiveAccepted
+          ? rc.status === "resolved" ? "Already filed — " + vId + " is resolved."
+            : rc.status === "completed-awaiting-resolution" ? "Already filed — assignment completed; source resolution is pending."
+              : "Corrective session submitted \u2713 \u2014 " + vId + " awaits AP verification."
+          : "The server rejected the link. Send the link and all three opaque ids to the AP.";
       } catch (e) {
-        msg.textContent = "Filing failed \u2014 send the link and id to the AP.";
+        saveCorrectiveDraft(vId, assignmentId, attemptId, {
+          url: url,
+          date: date,
+          attemptedAt: new Date().toISOString(),
+          serverFiled: false,
+          serverFiledAt: null,
+          serverFilingError: e && e.message ? e.message : "Filing request failed",
+        });
+        msg.textContent = "Filing failed. Send the link and all three opaque ids to the AP.";
       }
       $("yt-file").disabled = false;
       return;
@@ -428,40 +725,84 @@
       msg.textContent = "Filing…";
       try {
         var r = await postYtFiled("consent", date, url);
+        var consentAccepted = !!(r && r.ok === true);
         var all = loadAll();
-        all.__consent = { url: url, date: date, filedAt: new Date().toISOString() };
+        all.__consent = {
+          url: url,
+          date: date,
+          attemptedAt: new Date().toISOString(),
+          serverFiled: consentAccepted,
+          serverFiledAt: consentAccepted ? new Date().toISOString() : null,
+          serverFilingError: consentAccepted ? null : String(r && r.error || "Server did not confirm the filing"),
+        };
         localStorage.setItem(STORE_KEY, JSON.stringify(all));
-        msg.textContent = r && r.ok === false
-          ? "Local file saved — server rejected the link. Send it to the AP."
-          : "Consent confirmation filed \u2713 — the AP attaches it to the agreement page.";
+        msg.textContent = consentAccepted
+          ? "Participant statement submitted — awaiting separate Accountability Partner verification."
+          : "Saved locally on this device; the server rejected the link. Send it to the AP.";
       } catch (e) {
-        msg.textContent = "Filing failed — send the link to the AP.";
+        var failedConsent = loadAll();
+        failedConsent.__consent = {
+          url: url,
+          date: date,
+          attemptedAt: new Date().toISOString(),
+          serverFiled: false,
+          serverFiledAt: null,
+          serverFilingError: e && e.message ? e.message : "Filing request failed",
+        };
+        localStorage.setItem(STORE_KEY, JSON.stringify(failedConsent));
+        msg.textContent = "Saved locally on this device; filing failed. Send the link to the AP.";
       }
       $("yt-file").disabled = false;
       return;
     }
     var packet = getDay(date);
     var meta = ytMeta("daily", { date: date, day: packet.day });
-    $("yt-file").disabled = true;
-    msg.textContent = "Filing…";
-    try {
-      var remote = await postYtFiled("daily", date, url);
+    var dailySeal = filingSeal("daily", date);
+    if (!dailySeal) {
       packet.youtubeUrl = url;
       packet.youtubeTitle = meta.title;
       packet.youtubeDesc = meta.desc;
       packet.filedAt = new Date().toISOString();
+      packet.serverFiled = false;
+      packet.serverFiledAt = null;
+      packet.serverFilingError = "No exact same-day daily attestation seal is available";
+      saveDay(packet);
+      msg.textContent = "Saved locally only. Complete and seal today's daily capture in the assistant before server filing.";
+      renderMeta(true);
+      return;
+    }
+    $("yt-file").disabled = true;
+    msg.textContent = "Filing…";
+    try {
+      var remote = await postYtFiled("daily", date, url, dailySeal);
+      var dailyAccepted = !!(remote && remote.ok === true);
+      packet.youtubeUrl = url;
+      packet.youtubeTitle = meta.title;
+      packet.youtubeDesc = meta.desc;
+      packet.filedAt = new Date().toISOString();
+      packet.serverFiled = dailyAccepted;
+      packet.serverFiledAt = dailyAccepted ? new Date().toISOString() : null;
+      packet.serverFilingError = dailyAccepted ? null : String(remote && remote.error || "Server did not confirm the filing");
       var w = parseFloat($("input-weight").value);
       if (w && !isNaN(w)) packet.weight = w;
       packet.notes = $("input-notes").value || "";
       saveDay(packet);
-      msg.textContent = remote && remote.ok === false
-        ? "Local file saved — server rejected the link. Send it to the AP."
-        : "Filed ✓ — latest link is on this day's packet.";
+      msg.textContent = dailyAccepted
+        ? "Filed ✓ — the server accepted this day's public link."
+        : "Saved locally on this device; the server rejected the link. Send it to the AP.";
     } catch (e) {
-      msg.textContent = "Filing failed — send the link to the AP.";
+      packet.youtubeUrl = url;
+      packet.youtubeTitle = meta.title;
+      packet.youtubeDesc = meta.desc;
+      packet.filedAt = new Date().toISOString();
+      packet.serverFiled = false;
+      packet.serverFiledAt = null;
+      packet.serverFilingError = e && e.message ? e.message : "Filing request failed";
+      saveDay(packet);
+      msg.textContent = "Saved locally on this device; filing failed. Send the link to the AP.";
     }
     $("yt-file").disabled = false;
-    renderMeta();
+    renderMeta(true);
   }
 
   function attachVideo(file) {
@@ -480,13 +821,16 @@
       packet.youtubeTitle = null;
       packet.youtubeDesc = null;
       packet.filedAt = null;
+      packet.serverFiled = null;
+      packet.serverFiledAt = null;
+      packet.serverFilingError = null;
     }
     saveDay(packet);
     $("video-status").textContent = replacing
-      ? "Take " + packet.takeCount + " replaced the previous take · " + file.name
-      : "Take 1 stored · " + file.name;
+      ? "Take " + packet.takeCount + " selected on this page · " + file.name
+      : "Take 1 selected on this page · " + file.name;
     $("yt-msg").textContent = replacing ? "Previous YouTube link cleared — file the new posting." : "";
-    renderMeta();
+    renderMeta(true);
   }
 
   function attachPhotos(list) {
@@ -509,7 +853,7 @@
     packet.notes = $("input-notes").value || "";
     packet.filedAt = new Date().toISOString();
     saveDay(packet);
-    $("file-msg").textContent = "Packet saved for " + date + ". Latest take is the only take on this day.";
+    $("file-msg").textContent = "Packet details saved on this device for " + date + ". No media or packet was uploaded.";
     renderMeta();
   }
 
@@ -525,7 +869,7 @@
     packet.notes = $("input-notes").value || packet.notes;
     packet.missed = picked;
     saveDay(packet);
-    $("file-msg").textContent = "Failure filed for today: " + picked.join(", ") + ".";
+    $("file-msg").textContent = "Private failure note saved on this device: " + picked.join(", ") + ". No violation was opened.";
   }
 
   function buildMissed() {
@@ -549,6 +893,12 @@
     $("mode-consent").addEventListener("click", function () { setMode("consent"); });
     $("mode-corrective").addEventListener("click", function () { setMode("corrective"); });
     if ($("cv-id")) $("cv-id").addEventListener("input", renderMeta);
+    if ($("cv-assignment-id")) $("cv-assignment-id").addEventListener("input", renderMeta);
+    if ($("cv-attempt-id")) $("cv-attempt-id").addEventListener("input", renderMeta);
+    $("cv-load-captures").addEventListener("click", function () {
+      loadCorrectiveCaptures().catch(function () { $("yt-msg").textContent = "Unable to load local capture receipts."; });
+    });
+    $("cv-capture").addEventListener("change", renderCorrectiveCaptureMeta);
     $("mode-fail").addEventListener("click", function () { setMode("fail"); });
     if ($("mode-supervision")) $("mode-supervision").addEventListener("click", function () { setMode("supervision"); });
     $("yt-file").addEventListener("click", function () { fileLink(); });
@@ -566,6 +916,7 @@
     buildMissed();
     renderMeta();
     tick();
+    loadAgreementState();
     setInterval(tick, 1000);
   }
 

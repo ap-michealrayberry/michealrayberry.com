@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="screen-orientation" content="portrait" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0F0F0D" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -52,6 +51,8 @@
           </label>
           <p id="lock-error" class="lock-error mono" hidden></p>
           <button type="submit" id="btn-unlock" class="btn btn-primary">Unlock</button>
+          <button type="button" id="btn-demo-unlock" class="btn btn-ghost">Open demonstration only</button>
+          <p class="settings-note mono small">Demonstration mode is an explicit local preview. It cannot activate, attest, or file an agreement-gated session.</p>
         </form>
       </main>
     </div>
@@ -77,6 +78,10 @@
             <span id="packet-status" class="mono value">Loading…</span>
           </div>
           <div class="status-row">
+            <span class="label">Agreement</span>
+            <span id="agreement-status" class="mono value">Loading…</span>
+          </div>
+          <div class="status-row">
             <span class="label">Voice</span>
             <span id="voice-status" class="mono value">—</span>
           </div>
@@ -97,38 +102,38 @@
         <section class="chooser" aria-label="Sessions">
           <h2 class="chooser-heading">Sessions</h2>
           <p class="chooser-intro">One instrument. Every session. Shared camera, overlay, monitor, voice, hashing, and upload — only the script and filing destination differ.</p>
-          <p class="chooser-intro" style="color:#8A8983;font-size:12.5px">Visitors: this is the official capture instrument behind the record. Filing requires the device key issued to Micheal, checked server-side on every action — without it the tool runs as a demonstration and nothing reaches the record. The standard it enforces is documented at <a href="/positions/" style="color:inherit">michealrayberry.com/positions</a>.</p>
+          <p class="chooser-intro" style="color:#6B6A64;font-size:12.5px">Visitors: this is the official capture instrument behind the record. Filing requires the device key issued to Micheal, checked server-side on every action. Without verified access, operative sessions stay unavailable; the separate demonstration can be opened deliberately and reaches no record. The standard it enforces is documented at <a href="/positions/" style="color:inherit">michealrayberry.com/positions</a>.</p>
 
           <button type="button" class="session-card" data-session="daily" id="card-daily">
             <div class="session-card-top">
               <span class="session-name">Daily Inspection</span>
-              <span class="session-when mono">Due 10 PM ET</span>
+              <span class="session-when mono">10 PM ET if active</span>
             </div>
-            <p class="session-desc">Four-angle video (~90s), four photographs, the weight. Evidence for the public record.</p>
+            <p class="session-desc">Four-angle video (~90s), four photographs, and weight. The deadline is enforceable only while Edition 2 execution is verified.</p>
           </button>
 
           <button type="button" class="session-card" data-session="corrective" id="card-corrective">
             <div class="session-card-top">
               <span class="session-name">Corrective Session</span>
-              <span class="session-when mono">After confirmed violation</span>
+              <span class="session-when mono">If active · after AP ruling</span>
             </div>
-            <p class="session-desc">10 / 20 / 30 min by level, monitored throughout. Posted publicly to @michealrayberry and published beside the entry.</p>
+            <p class="session-desc">Proposed 10 / 20 / 30 min by level. Available only after verified execution and an Accountability Partner ruling.</p>
           </button>
 
           <button type="button" class="session-card" data-session="weekly" id="card-weekly">
             <div class="session-card-top">
               <span class="session-name">Weekly Review</span>
-              <span class="session-when mono">Weekly · required</span>
+              <span class="session-when mono">Mondays if active</span>
             </div>
-            <p class="session-desc">The week read from the record, to camera: weight change, remaining distance, filings, misses, open entries — and the assessment as the numbers fall. (~4 min).</p>
+            <p class="session-desc">The proposed weekly review reads the week from the record to camera. It is required only while Edition 2 execution is verified.</p>
           </button>
 
           <button type="button" class="session-card" data-session="confirmation" id="card-confirmation">
             <div class="session-card-top">
               <span class="session-name">Consent Confirmation</span>
-              <span class="session-when mono">Once · on each amendment</span>
+              <span class="session-when mono">For execution or amendment</span>
             </div>
-            <p class="session-desc">Recorded statement of understanding. Re-recorded when the agreement is amended.</p>
+            <p class="session-desc">A participant statement submitted for review. The recording alone does not prove understanding, consent, or execution.</p>
           </button>
 
           <button type="button" class="session-card" data-session="announcement" id="card-announcement">
@@ -136,7 +141,7 @@
               <span class="session-name">Project Announcement</span>
               <span class="session-when mono">Launch · once</span>
             </div>
-            <p class="session-desc">The opening statement of the project. Posted publicly to @michealrayberry and set as the site’s introduction.</p>
+            <p class="session-desc">The opening statement describes the project and proposed terms; it does not activate the agreement.</p>
           </button>
 
           <button type="button" class="session-card" data-session="demo" id="card-demo">
@@ -170,10 +175,6 @@
               <input type="url" id="input-exec-url" class="mono" placeholder="https://script.google.com/…/exec" />
             </label>
             <label class="field">
-              <span>Sheet ID (public CSV)</span>
-              <input type="text" id="input-sheet-id" class="mono" placeholder="Spreadsheet ID" />
-            </label>
-            <label class="field">
               <span>ElevenLabs key (optional)</span>
               <input type="password" id="input-el-key" class="mono" autocomplete="off" placeholder="mrb_el_key" />
             </label>
@@ -185,7 +186,7 @@
               <button type="button" id="btn-save-settings" class="btn btn-primary">Save</button>
               <button type="button" id="btn-clear-settings" class="btn btn-ghost">Clear keys</button>
             </div>
-            <p class="settings-note mono small">Keys stay on this device only. The AP key is never used here. Demo mode runs without a server when exec URL is empty.</p>
+            <p class="settings-note mono small">Keys stay on this device only. The AP key is never used here. Missing server configuration fails closed; offline demonstration requires the separate explicit opt-in.</p>
           </div>
         </section>
       </main>

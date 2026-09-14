@@ -199,7 +199,7 @@
         {
           atSec: 5 * 60,
           text:
-            "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.",
+            "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
         },
         {
           atSec: 60,
@@ -213,7 +213,7 @@
       {
         atSec: 20 * 60,
         text:
-          "Twenty minutes remaining. The original compliance failure remains part of the permanent project record. Maintain the Corner Position.",
+          "Twenty minutes remaining. The original compliance entry remains documented in the current public record. Maintain the Corner Position.",
       },
       {
         atSec: 15 * 60,
@@ -227,7 +227,7 @@
       {
         atSec: 5 * 60,
         text:
-          "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.",
+          "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
       },
       {
         atSec: 60,
@@ -247,7 +247,7 @@
       return "One minute remaining. Maintain the Corner Position until released by the timer.";
     }
     if (m === 5) {
-      return "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.";
+      return "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.";
     }
     return m + " minutes remaining. Maintain the Corner Position.";
   }
@@ -258,7 +258,7 @@
     return (
       "Time complete. Before release, the record states the failure in full. " +
       "Micheal Ray Berry failed " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
-      "The failure is permanent. This session closes the corrective requirement; it does not erase the entry. " +
+      "The compliance entry remains documented. This completed capture still requires sealing, public filing, and Accountability Partner verification; it does not itself close or erase the entry. " +
       "Wait position."
     );
   }
@@ -268,7 +268,7 @@
       "Remain in Wait position. Hands behind the back. Head upright. Eyes forward. Hold. " +
       "Level " +
       (ctx.level || 1) +
-      " Corrective Session is complete. Completion of the corrective requirement is filed to the project record. Session complete. Release."
+      " Corrective Session capture is complete. It is ready to be sealed and backed up; public filing and Accountability Partner verification remain pending. Session complete. Release."
     );
   }
 
@@ -332,7 +332,7 @@
     if (startW != null) lines.push("Weight at start of week: " + startW + " pounds.");
     if (endW != null) lines.push("Weight at end of week: " + endW + " pounds.");
     if (change != null) lines.push("Change across the week: " + change + " pounds.");
-    if (totalChange != null) lines.push("Total change since Day One: " + totalChange + " pounds.");
+    if (totalChange != null) lines.push("Change from the declared 340-pound baseline: " + totalChange + " pounds.");
     if (remaining != null) lines.push("Distance remaining to two hundred: " + remaining + " pounds.");
     if (open.length) {
       lines.push("Open entries: " + open.length + ".");
@@ -394,18 +394,13 @@
 
   function confirmationScript(ctx) {
     return (
-      "This is a consent confirmation for the Public Accountability Project, version " +
+      "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
       (ctx.version || "1") +
       ", recorded on " +
       fmtDateLong(ctx.date) +
       ". " +
-      "Stand facing the camera with hands behind the head. Micheal Ray Berry states for the record that he has read the agreement, understands its terms, and participates voluntarily. He consents by name to the reputational exposure inherent in real-name documentation of his body, his missed requirements, rejected submissions, corrective recordings, failed attempts, and any ending without verified completion — and he states that this is what he asked for, within the written limits. " +
-      "The project is a voluntary accountability arrangement between adults, created at his own written request: a weight commitment from three hundred forty toward two hundred pounds, administered by the Accountability Partner, who owns the site, the data, and every key. Micheal Ray Berry cannot edit, soften, or remove any entry, and the record is public and permanent under his real name. He wears the project uniform. " +
-      "He grants the Accountability Partner a license to repost, share, mirror, and archive public content anywhere for the project's accountability and documentation purpose, and — under section ten point two c — to republish public record content on the Partner's own platforms. He knows who the Accountability Partner is and accepts their administration and republication of this record. Private verification photographs and unpublished material are never included. He accepts that public content may be copied and reused by others beyond either party's control. " +
-      "He understands that violations are declared automatically from the evidence, that the Accountability Partner has no discretion to excuse or soften them and may only confirm or reject them against the written rules, and that he has forty-eight hours to contest with evidence before a determination stands. " +
-      "He understands that each confirmed violation is answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take in the project uniform, posted publicly to the channel and embedded on the record beside the entry, and completed within seventy-two hours of the notice, and that missing that deadline is itself a new violation at the next level. " +
-      "Participation ends only by verified completion, by written mutual release, or by the project ending without completion. " +
-      "This statement is re-recorded whenever the agreement is amended."
+      "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
+      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
     );
   }
 
@@ -414,20 +409,19 @@
       "This is a demonstration of the Public Accountability Project capture standard. Stand facing the camera with hands behind the head. " +
       "It is not a session, not a consequence, and answers no violation. " +
       "The overlay reads demonstration, not a session. " +
-      "A real session uses one continuous take, a challenge code burned into every frame, a rolling hash chain, and dual-path narration. " +
+      "The production workflow is designed to use one continuous take, a displayed challenge code, a rolling hash chain, and recorded narration. Those signals assist review but do not independently prove authenticity. " +
       "This demonstration ends here."
     );
   }
 
   function announcementScript() {
     return (
-      "This is the official announcement of the Micheal Ray Berry Public Accountability Project. The man on camera is Micheal Ray Berry. He does not speak; the record speaks for him. The arrangement is voluntary, between adults, created at his own written request, with consent and hard limits in writing. He wears the uniform because he asked to. " +
-      "His declared starting weight is three hundred forty pounds, and he has committed, in a signed agreement, to reach two hundred and hold it for twenty-eight consecutive days, documented in public under his real name, every day, until it is done. " +
+      "This is an announcement of the Micheal Ray Berry Public Accountability Project. The man on camera is Micheal Ray Berry. The project was requested in writing, with published proposed limits. Agreement execution and consent are not established by this announcement. " +
+      "His declared starting weight is three hundred forty pounds, and he has published a proposed commitment to reach two hundred and hold it for twenty-eight consecutive days, documented in public under his real name. The agreement is not in force unless both parties sign. " +
       "Every day by ten PM Eastern: a four-angle inspection video, four photographs, a weight entry, and a tracker update, published to the official record and posted publicly to this channel. Every week: a weekly review. The weight itself is never a violation. Only a failure to document is. " +
-      "A missed requirement is entered permanently in the public violation log and answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take and published beside the entry. " +
-      "Micheal Ray Berry does not administer this record. An independent Accountability Partner owns the site, the data, and every key. He cannot edit an entry, soften a description, remove a recording, or take the site down. That separation is the mechanism. " +
-      "There are exactly three ways this ends. He reaches two hundred and holds it, verified. Both parties release him in writing. Or he stops, and this site becomes his permanent abandonment record, stated factually, forever. " +
-      "Day one begins August thirty-first, twenty twenty-six. There is no unrecorded ending to this project."
+      "Under the proposed process, a confirmed missed requirement is entered in the public violation log and may require a recorded corrective session. Submission and Accountability Partner verification are separate steps. " +
+      "The Accountability Partner administers the official record. Public entries may be corrected, redacted, or removed when safety, privacy, consent, or law requires it, with a transparent change notice where appropriate. " +
+      "Day one is August thirty-first, twenty twenty-six. The agreement page reports the current execution status."
     );
   }
 

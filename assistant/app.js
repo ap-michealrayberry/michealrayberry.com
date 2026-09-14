@@ -25,7 +25,7 @@
     unlockUntil: "mrb_unlock_until",
     deviceKey: "mrb_packet_key",
     execUrl: "mrb_exec_url",
-    sheetId: "mrb_sheet_id",
+    demoMode: "mrb_demo_mode",
     elKey: "mrb_el_key",
     elVoice: "mrb_el_voice",
   };
@@ -86,18 +86,17 @@
   function getConfig() {
     return {
       deviceKey: readStorage(STORAGE.deviceKey, ""),
-      execUrl: readStorage(STORAGE.execUrl, "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec"),
-      sheetId: readStorage(STORAGE.sheetId, "1sEL0SWIh4NnNji4XUAVVG4pQSZe7a0y3vDmvvLNV6wE"),
+      execUrl: readStorage(STORAGE.execUrl, ""),
       elKey: readStorage(STORAGE.elKey, ""),
       elVoice: readStorage(STORAGE.elVoice, DEFAULT_EL_VOICE) || DEFAULT_EL_VOICE,
-      demoMode: !readStorage(STORAGE.execUrl, ""),
+      demoMode: readStorage(STORAGE.demoMode, "") === "enabled",
     };
   }
 
   function saveConfig(partial) {
     if (partial.deviceKey !== undefined) writeStorage(STORAGE.deviceKey, partial.deviceKey);
     if (partial.execUrl !== undefined) writeStorage(STORAGE.execUrl, partial.execUrl);
-    if (partial.sheetId !== undefined) writeStorage(STORAGE.sheetId, partial.sheetId);
+    if (partial.demoMode !== undefined) writeStorage(STORAGE.demoMode, partial.demoMode ? "enabled" : "");
     if (partial.elKey !== undefined) writeStorage(STORAGE.elKey, partial.elKey);
     if (partial.elVoice !== undefined) writeStorage(STORAGE.elVoice, partial.elVoice || DEFAULT_EL_VOICE);
     return getConfig();
@@ -107,10 +106,8 @@
   var EXTERNAL_ORIGINS = [
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
-    "https://cdn.jsdelivr.net",
     "https://storage.googleapis.com",
     "https://api.elevenlabs.io",
-    "https://docs.google.com",
     "blob:",
   ];
 
@@ -454,6 +451,7 @@
       return {
         raw: r,
         index: idx,
+        id: String(r.id || "").trim().toUpperCase(),
         date: dateParsed ? dateParsed.iso : r.date,
         dateParsed: dateParsed,
         violation: r.violation || "",
@@ -545,7 +543,7 @@
   }
 
   async function getJson(url) {
-    var res = await fetch(url, { method: "GET", credentials: "omit" });
+    var res = await fetch(url, { method: "GET", credentials: "omit", cache: "no-store" });
     var text = await res.text();
     try {
       return JSON.parse(text);
@@ -561,13 +559,23 @@
    */
   async function postJson(body) {
     var c = cfg();
-    if (!c.execUrl) {
-      return mockPost(body);
+    var payload = Object.assign({}, body || {});
+    if (payload.action !== "unlock") {
+      try {
+        var unlock = localStorage.getItem("mrb_unlock_token") || "";
+        if (unlock) payload.unlock = unlock;
+      } catch (e) {
+        /* Storage can be unavailable in private browsing; the server fails closed. */
+      }
     }
+    if (c.demoMode) {
+      return mockPost(payload);
+    }
+    if (!c.execUrl) throw new Error("Apps Script exec URL missing; offline demo was not explicitly enabled");
     var res = await fetch(c.execUrl, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
       credentials: "omit",
       redirect: "follow",
     });
@@ -581,6 +589,14 @@
 
   function mockPost(body) {
     var action = body.action;
+    if (action === "unlock") {
+      return Promise.resolve({
+        ok: true,
+        token: "DEMO-UNLOCK-TOKEN",
+        expires: 4102444799000,
+        demo: true,
+      });
+    }
     if (action === "attest") {
       return Promise.resolve({
         ok: true,
@@ -600,17 +616,34 @@
         demo: true,
       });
     }
-    if (action === "packet" || action === "apweekly" || action === "apconfirmation" || action === "ping" || action === "challenge") {
+    if (action === "mystate") {
+      return Promise.resolve({
+        ok: true,
+        projectStart: "2026-08-31",
+        agreementActive: false,
+        corrective: [],
+        weekly: {
+          eligible: false,
+          reason: "Offline demonstration cannot activate agreement-gated sessions.",
+          date: "",
+          day: 0,
+          week: 0,
+        },
+        demo: true,
+      });
+    }
+    if (action === "packet" || action === "weeklyfiled" || action === "confirmationfiled" || action === "ping" || action === "challenge" || action === "ytfiled" || action === "correctivefiled") {
       return Promise.resolve({ ok: true, demo: true, code: action === "challenge" ? "1001" : undefined });
     }
     return Promise.resolve({ ok: false, error: "Unknown mock action " + action });
   }
 
-  async function challenge(kind) {
+  async function challenge(kind, ref, assignmentId, attemptId) {
     var c = cfg();
     var key = ensureKey();
     var k = MRB.config.KIND_MAP[kind] || kind;
-    if (!c.execUrl) {
+    if (c.demoMode) {
+      if (k !== "demo") throw new Error("Offline demo permits only the demonstration session");
       mockIssued += 1;
       var code = String(1000 + (mockIssued % 9000));
       return {
@@ -622,9 +655,26 @@
         demo: true,
       };
     }
-    var data = await postJson({ action: "challenge", key: key, kind: k });
+    if (!c.execUrl) throw new Error("Apps Script exec URL missing");
+    var body = { action: "challenge", key: key, kind: k };
+    if (k === "corrective") {
+      body.ref = String(ref || "").trim().toUpperCase();
+      body.assignment_id = String(assignmentId || "").trim().toUpperCase();
+      body.attempt_id = String(attemptId || "").trim().toUpperCase();
+      if (!/^V-[A-F0-9]{12}$/.test(body.ref) || !/^C-[A-F0-9]{24}$/.test(body.assignment_id) ||
+          !/^A-[A-F0-9]{24}$/.test(body.attempt_id)) {
+        throw new Error("Corrective assignment or attempt identity is incomplete");
+      }
+    }
+    var data = await postJson(body);
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "Challenge request failed");
+    }
+    if (k === "corrective" &&
+        (String(data.ref || "").trim().toUpperCase() !== body.ref ||
+         String(data.assignment_id || "").trim().toUpperCase() !== body.assignment_id ||
+         String(data.attempt_id || "").trim().toUpperCase() !== body.attempt_id)) {
+      throw new Error("Challenge response does not match the selected corrective assignment");
     }
     return data;
   }
@@ -671,63 +721,95 @@
     return data;
   }
 
-  async function apweekly(payload) {
+  async function weeklyfiled(payload) {
     var key = ensureKey();
-    return postJson(Object.assign({ action: "apweekly", key: key }, payload));
+    var data = await postJson(Object.assign({ action: "weeklyfiled", key: key }, payload));
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Weekly filing failed");
+    }
+    return data;
   }
 
-  async function apconfirmation(payload) {
+  async function confirmationfiled(payload) {
     var key = ensureKey();
-    return postJson(Object.assign({ action: "apconfirmation", key: key }, payload));
+    var data = await postJson(Object.assign({ action: "confirmationfiled", key: key }, payload));
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Confirmation filing failed");
+    }
+    return data;
+  }
+
+  async function myState() {
+    var key = ensureKey();
+    var data = await postJson({ action: "mystate", key: key });
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Participant state request failed");
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(data.projectStart || "")) ||
+        typeof data.agreementActive !== "boolean" || !Array.isArray(data.corrective) ||
+        !data.weekly || typeof data.weekly.eligible !== "boolean") {
+      throw new Error("Participant state response is incomplete");
+    }
+    return data;
   }
 
   async function fetchSheetCsv(sheetName) {
-    var c = cfg();
-    if (!c.sheetId) {
-      return mockSheet(sheetName);
+    var feeds = {
+      "Weigh-ins": "/data/weigh-ins.csv",
+      "Violation Log": "/data/violations.csv",
+    };
+    var expected = {
+      "Weigh-ins": ["date", "weight_lb", "note", "photo_front", "photo_left", "photo_rear", "photo_right", "video", "published_at"],
+      "Violation Log": ["id", "date", "violation", "status", "submitted", "resolved", "ap_verification", "corrections", "recording", "published_at"],
+    };
+    var url = feeds[sheetName];
+    if (!url) throw new Error("Unknown public record feed: " + sheetName);
+    var res = await fetch(url, { credentials: "omit", cache: "no-store" });
+    if (!res.ok) throw new Error("Public record feed failed: " + sheetName + " (" + res.status + ")");
+    var text = await res.text();
+    var rows = MRB.csv.parseCsv(text);
+    var header = (rows[0] || []).map(function (value) { return String(value || "").trim().toLowerCase(); });
+    if (header.length !== expected[sheetName].length || expected[sheetName].some(function (value, index) { return header[index] !== value; })) {
+      throw new Error("Public record feed schema mismatch: " + sheetName);
     }
-    var url =
-      "https://docs.google.com/spreadsheets/d/" +
-      encodeURIComponent(c.sheetId) +
-      "/gviz/tq?tqx=out:csv&sheet=" +
-      encodeURIComponent(sheetName);
-    var res = await fetch(url, { credentials: "omit" });
-    if (!res.ok) throw new Error("Sheet fetch failed: " + sheetName + " (" + res.status + ")");
-    return res.text();
-  }
-
-  function mockSheet(sheetName) {
-    if (sheetName === "Weigh-ins" || sheetName.indexOf("Weigh") === 0) {
-      return Promise.resolve(
-        "date,weight_lb,note,photo_front,photo_left,photo_rear,photo_right,video\n" +
-          "2026-08-15,338.2,,,,,,\n" +
-          "8/14/2026,339.0,,,,,,\n" +
-          "2026-08-13,340.0,,,,,,\n"
-      );
+    if (rows.length > 1) {
+      var publishedIndex = header.indexOf("published_at");
+      var stamp = Date.parse(String(rows[1][publishedIndex] || ""));
+      if (!isFinite(stamp) || Date.now() - stamp > 48 * 60 * 60 * 1000 || stamp - Date.now() > 5 * 60 * 1000) {
+        throw new Error("Public record feed is stale: " + sheetName);
+      }
     }
-    // Violation Log with mixed date formats + open entries
-    return Promise.resolve(
-      "date,violation,status,submitted,resolved,ap_verification,corrections\n" +
-        "2026-08-20,Missed inspection,open,2026-08-20,,,\n" +
-        "8/18/2026,Late packet,confirmed — corrective assigned,8/18/2026,,,\n" +
-        "2026-08-15,Missed photos,resolved — verified,2026-08-15,2026-08-16,,\n"
-    );
+    return text;
   }
 
   async function loadRecord() {
-    var weighText = await fetchSheetCsv("Weigh-ins");
-    var violText = await fetchSheetCsv("Violation Log");
+    var manifest = await getJson("/data/feed-manifest.json");
+    var published = Date.parse(manifest && manifest.published_at || "");
+    if (!manifest || manifest.schema_version !== 1 || !isFinite(published) || Date.now() - published > 48 * 60 * 60 * 1000 || published - Date.now() > 5 * 60 * 1000) {
+      throw new Error("Public record feed manifest is missing or stale");
+    }
+    var results = await Promise.all([
+      fetchSheetCsv("Weigh-ins"),
+      fetchSheetCsv("Violation Log"),
+      getJson("/data/supervision.json"),
+    ]);
+    var weighText = results[0];
+    var violText = results[1];
+    var supervision = results[2];
+    if (!supervision || supervision.schema_version !== 1 || typeof supervision.agreement_active !== "boolean" || supervision.published_at !== manifest.published_at) {
+      throw new Error("Agreement status feed is missing or inconsistent");
+    }
     return {
       weighIns: MRB.csv.parseWeighIns(weighText),
       violations: MRB.csv.parseViolationLog(violText),
+      agreementActive: supervision.agreement_active === true,
     };
   }
 
   async function pingServer() {
     var c = cfg();
-    if (!c.execUrl) {
-      return { ok: true, demo: true, message: "Demo mode (no exec URL)" };
-    }
+    if (c.demoMode) return { ok: true, demo: true, message: "Explicit offline demonstration" };
+    if (!c.execUrl) return { ok: false, message: "Apps Script exec URL not set" };
     if (!c.deviceKey) {
       return { ok: false, message: "Device key not set" };
     }
@@ -756,8 +838,9 @@
     attest: attest,
     r2sign: r2sign,
     packet: packet,
-    apweekly: apweekly,
-    apconfirmation: apconfirmation,
+    weeklyfiled: weeklyfiled,
+    confirmationfiled: confirmationfiled,
+    myState: myState,
     loadRecord: loadRecord,
     fetchSheetCsv: fetchSheetCsv,
     pingServer: pingServer,
@@ -1097,8 +1180,8 @@
     return base + " · CODE " + code;
   }
 
-  function buildCornerBottom(vNum, level, remainingMmSs) {
-    return "V-" + String(vNum).padStart(3, "0") + " — LEVEL " + level + " · REMAINING " + remainingMmSs;
+  function buildCornerBottom(vRef, level, remainingMmSs) {
+    return String(vRef || "").trim().toUpperCase() + " — LEVEL " + level + " · REMAINING " + remainingMmSs;
   }
 
   function buildSecondary(dateIso) {
@@ -2103,7 +2186,7 @@
         {
           atSec: 5 * 60,
           text:
-            "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.",
+            "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
         },
         {
           atSec: 60,
@@ -2117,7 +2200,7 @@
       {
         atSec: 20 * 60,
         text:
-          "Twenty minutes remaining. The original compliance failure remains part of the permanent project record. Maintain the Corner Position.",
+          "Twenty minutes remaining. The original compliance entry remains documented in the current public record. Maintain the Corner Position.",
       },
       {
         atSec: 15 * 60,
@@ -2131,7 +2214,7 @@
       {
         atSec: 5 * 60,
         text:
-          "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.",
+          "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
       },
       {
         atSec: 60,
@@ -2151,7 +2234,7 @@
       return "One minute remaining. Maintain the Corner Position until released by the timer.";
     }
     if (m === 5) {
-      return "Five minutes remaining. Completion of this session satisfies the assigned corrective requirement. It does not remove the original violation from the record. Maintain the Corner Position.";
+      return "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.";
     }
     return m + " minutes remaining. Maintain the Corner Position.";
   }
@@ -2162,7 +2245,7 @@
     return (
       "Time complete. Before release, the record states the failure in full. " +
       "Micheal Ray Berry failed " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
-      "The failure is permanent. This session closes the corrective requirement; it does not erase the entry. " +
+      "The compliance entry remains documented. This completed capture still requires sealing, public filing, and Accountability Partner verification; it does not itself close or erase the entry. " +
       "Wait position."
     );
   }
@@ -2172,7 +2255,7 @@
       "Remain in Wait position. Hands behind the back. Head upright. Eyes forward. Hold. " +
       "Level " +
       (ctx.level || 1) +
-      " Corrective Session is complete. Completion of the corrective requirement is filed to the project record. Session complete. Release."
+      " Corrective Session capture is complete. It is ready to be sealed and backed up; public filing and Accountability Partner verification remain pending. Session complete. Release."
     );
   }
 
@@ -2236,7 +2319,7 @@
     if (startW != null) lines.push("Weight at start of week: " + startW + " pounds.");
     if (endW != null) lines.push("Weight at end of week: " + endW + " pounds.");
     if (change != null) lines.push("Change across the week: " + change + " pounds.");
-    if (totalChange != null) lines.push("Total change since Day One: " + totalChange + " pounds.");
+    if (totalChange != null) lines.push("Change from the declared 340-pound baseline: " + totalChange + " pounds.");
     if (remaining != null) lines.push("Distance remaining to two hundred: " + remaining + " pounds.");
     if (open.length) {
       lines.push("Open entries: " + open.length + ".");
@@ -2298,18 +2381,13 @@
 
   function confirmationScript(ctx) {
     return (
-      "This is a consent confirmation for the Public Accountability Project, version " +
+      "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
       (ctx.version || "1") +
       ", recorded on " +
       fmtDateLong(ctx.date) +
       ". " +
-      "Stand facing the camera with hands behind the head. Micheal Ray Berry states for the record that he has read the agreement, understands its terms, and participates voluntarily. He consents by name to the reputational exposure inherent in real-name documentation of his body, his missed requirements, rejected submissions, corrective recordings, failed attempts, and any ending without verified completion — and he states that this is what he asked for, within the written limits. " +
-      "The project is a voluntary accountability arrangement between adults, created at his own written request: a weight commitment from three hundred forty toward two hundred pounds, administered by the Accountability Partner, who owns the site, the data, and every key. Micheal Ray Berry cannot edit, soften, or remove any entry, and the record is public and permanent under his real name. He wears the project uniform. " +
-      "He grants the Accountability Partner a license to repost, share, mirror, and archive public content anywhere for the project's accountability and documentation purpose, and — under section ten point two c — to republish public record content on the Partner's own platforms. He knows who the Accountability Partner is and accepts their administration and republication of this record. Private verification photographs and unpublished material are never included. He accepts that public content may be copied and reused by others beyond either party's control. " +
-      "He understands that violations are declared automatically from the evidence, that the Accountability Partner has no discretion to excuse or soften them and may only confirm or reject them against the written rules, and that he has forty-eight hours to contest with evidence before a determination stands. " +
-      "He understands that each confirmed violation is answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take in the project uniform, posted publicly to the channel and embedded on the record beside the entry, and completed within seventy-two hours of the notice, and that missing that deadline is itself a new violation at the next level. " +
-      "Participation ends only by verified completion, by written mutual release, or by the project ending without completion. " +
-      "This statement is re-recorded whenever the agreement is amended."
+      "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
+      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
     );
   }
 
@@ -2318,20 +2396,19 @@
       "This is a demonstration of the Public Accountability Project capture standard. Stand facing the camera with hands behind the head. " +
       "It is not a session, not a consequence, and answers no violation. " +
       "The overlay reads demonstration, not a session. " +
-      "A real session uses one continuous take, a challenge code burned into every frame, a rolling hash chain, and dual-path narration. " +
+      "The production workflow is designed to use one continuous take, a displayed challenge code, a rolling hash chain, and recorded narration. Those signals assist review but do not independently prove authenticity. " +
       "This demonstration ends here."
     );
   }
 
   function announcementScript() {
     return (
-      "This is the official announcement of the Micheal Ray Berry Public Accountability Project. The man on camera is Micheal Ray Berry. He does not speak; the record speaks for him. The arrangement is voluntary, between adults, created at his own written request, with consent and hard limits in writing. He wears the uniform because he asked to. " +
-      "His declared starting weight is three hundred forty pounds, and he has committed, in a signed agreement, to reach two hundred and hold it for twenty-eight consecutive days, documented in public under his real name, every day, until it is done. " +
+      "This is an announcement of the Micheal Ray Berry Public Accountability Project. The man on camera is Micheal Ray Berry. The project was requested in writing, with published proposed limits. Agreement execution and consent are not established by this announcement. " +
+      "His declared starting weight is three hundred forty pounds, and he has published a proposed commitment to reach two hundred and hold it for twenty-eight consecutive days, documented in public under his real name. The agreement is not in force unless both parties sign. " +
       "Every day by ten PM Eastern: a four-angle inspection video, four photographs, a weight entry, and a tracker update, published to the official record and posted publicly to this channel. Every week: a weekly review. The weight itself is never a violation. Only a failure to document is. " +
-      "A missed requirement is entered permanently in the public violation log and answered by corner time, ten, twenty, or thirty minutes by level, recorded in one unbroken take and published beside the entry. " +
-      "Micheal Ray Berry does not administer this record. An independent Accountability Partner owns the site, the data, and every key. He cannot edit an entry, soften a description, remove a recording, or take the site down. That separation is the mechanism. " +
-      "There are exactly three ways this ends. He reaches two hundred and holds it, verified. Both parties release him in writing. Or he stops, and this site becomes his permanent abandonment record, stated factually, forever. " +
-      "Day one begins August thirty-first, twenty twenty-six. There is no unrecorded ending to this project."
+      "Under the proposed process, a confirmed missed requirement is entered in the public violation log and may require a recorded corrective session. Submission and Accountability Partner verification are separate steps. " +
+      "The Accountability Partner administers the official record. Public entries may be corrected, redacted, or removed when safety, privacy, consent, or law requires it, with a transparent change notice where appropriate. " +
+      "Day one is August thirty-first, twenty twenty-six. The agreement page reports the current execution status."
     );
   }
 
@@ -2462,9 +2539,81 @@
   "use strict";
 
   var DB_NAME = "mrb_record_queue";
-  var DB_VER = 1;
+  var DB_VER = 2;
   var STORE = "sessions";
   var dbPromise = null;
+  var UPLOAD_LEASE_MS = 20 * 60 * 1000;
+  var SEAL_STORE_KEY = "mrb_attestation_seals_v1";
+
+  function hasCurrentCorrectiveIdentity(item) {
+    return /^V-[A-F0-9]{12}$/.test(String(item && item.vRef || "").trim().toUpperCase()) &&
+      /^C-[A-F0-9]{24}$/.test(String(item && item.assignmentId || "").trim().toUpperCase()) &&
+      /^A-[A-F0-9]{24}$/.test(String(item && item.attemptId || "").trim().toUpperCase());
+  }
+
+  function filingSealKey(item) {
+    var kind = String(item && item.kind || "").toLowerCase();
+    var date = String(item && item.date || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
+    if (kind === "corrective") {
+      var ref = String(item.vRef || item.ref || "").trim().toUpperCase();
+      var assignmentId = String(item.assignmentId || item.assignment_id || "").trim().toUpperCase();
+      var attemptId = String(item.attemptId || item.attempt_id || "").trim().toUpperCase();
+      return /^V-[A-F0-9]{12}$/.test(ref) && /^C-[A-F0-9]{24}$/.test(assignmentId) &&
+        /^A-[A-F0-9]{24}$/.test(attemptId)
+        ? kind + "|" + date + "|" + ref + "|" + assignmentId + "|" + attemptId : "";
+    }
+    if (kind === "weekly") {
+      var week = Number(item.week);
+      return isFinite(week) && Math.floor(week) === week && week > 0 ? kind + "|" + date + "|" + week : "";
+    }
+    if (kind === "confirmation") return kind + "|" + date + "|" + String(item.version || "2");
+    return kind === "daily" ? kind + "|" + date : "";
+  }
+
+  function rememberFilingSeal(item) {
+    var key = filingSealKey(item);
+    var seal = String(item && item.seal || "").trim().toLowerCase();
+    if (!key || !/^[a-f0-9]{64}$/.test(seal)) return false;
+    try {
+      var raw = localStorage.getItem(SEAL_STORE_KEY);
+      var stored = raw ? JSON.parse(raw) : {};
+      if (!stored || typeof stored !== "object" || Array.isArray(stored)) stored = {};
+      if (item.kind === "corrective") {
+        var bucket = stored[key];
+        if (!bucket || bucket.version !== 2 || !bucket.captures ||
+            typeof bucket.captures !== "object" || Array.isArray(bucket.captures)) {
+          bucket = { version: 2, captures: {} };
+          if (/^[a-f0-9]{64}$/.test(String(stored[key] || ""))) {
+            bucket.captures[stored[key]] = { seal: stored[key] };
+          }
+        }
+        bucket.captures[seal] = {
+          seal: seal, videoHash: item.video_sha256 || "",
+          sealedAt: item.sealed_at || "", code: item.code || ""
+        };
+        stored[key] = bucket;
+        localStorage.setItem(SEAL_STORE_KEY, JSON.stringify(stored));
+        var confirmed = JSON.parse(localStorage.getItem(SEAL_STORE_KEY) || "{}");
+        return !!(confirmed[key] && confirmed[key].captures && confirmed[key].captures[seal]);
+      }
+      if (stored[key] === "AMBIGUOUS") return false;
+      if (stored[key] && stored[key] !== seal) {
+        stored[key] = "AMBIGUOUS";
+        localStorage.setItem(SEAL_STORE_KEY, JSON.stringify(stored));
+        return false;
+      }
+      stored[key] = seal;
+      localStorage.setItem(SEAL_STORE_KEY, JSON.stringify(stored));
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function renewUploadLease(item) {
+    item.leaseUntil = new Date(Date.now() + UPLOAD_LEASE_MS).toISOString();
+  }
 
   function openDb() {
     if (dbPromise) return dbPromise;
@@ -2474,10 +2623,28 @@
         return;
       }
       var req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = function () {
+      req.onupgradeneeded = function (event) {
         var db = req.result;
         if (!db.objectStoreNames.contains(STORE)) {
           db.createObjectStore(STORE, { keyPath: "id" });
+        } else if (event.oldVersion < 2) {
+          var store = req.transaction.objectStore(STORE);
+          var cursorRequest = store.openCursor();
+          cursorRequest.onsuccess = function () {
+            var cursor = cursorRequest.result;
+            if (!cursor) return;
+            var item = cursor.value;
+            if (String(item && item.kind || "").toLowerCase() === "corrective" &&
+                !hasCurrentCorrectiveIdentity(item)) {
+              item.status = "blocked";
+              item.phase = "legacy-identity-missing";
+              item.leaseUntil = null;
+              item.nextRetry = null;
+              item.lastError = "Legacy corrective capture retained locally; record a new attempt with current assignment identity.";
+              cursor.update(item);
+            }
+            cursor.continue();
+          };
         }
       };
       req.onsuccess = function () {
@@ -2504,7 +2671,11 @@
   async function putSession(record) {
     var db = await openDb();
     var tx = db.transaction(STORE, "readwrite");
-    await idbReq(tx.objectStore(STORE).put(record));
+    await new Promise(function (resolve, reject) {
+      tx.oncomplete = resolve;
+      tx.onabort = tx.onerror = function () { reject(tx.error || new Error("Queue write did not commit")); };
+      tx.objectStore(STORE).put(record);
+    });
     return record.id;
   }
 
@@ -2560,6 +2731,19 @@
     var total = blob.size;
     var session = item.driveSession || null; // reuse a still-open session on retry
     var offset = session ? (item.uploadOffset || 0) : 0;
+    // A previous page may have persisted the final offset just before it was
+    // able to persist Drive's finalized URL. That state is not proof that the
+    // URL is recoverable client-side, so restart instead of silently filing an
+    // empty pointer.
+    if (session && offset >= total) {
+      if (item.publicUrl) return { ok: true, recovered: true, url: item.publicUrl };
+      item.driveSession = null;
+      item.uploadOffset = 0;
+      item.phase = "video-restart-required";
+      session = null;
+      offset = 0;
+      await putSession(item);
+    }
     if (!session) {
       var init = await MRB.api.postJson({
         action: "vidinit",
@@ -2573,10 +2757,13 @@
       session = init.session;
       item.driveSession = session;
       item.uploadOffset = 0;
+      item.phase = "video-uploading";
       offset = 0;
       await putSession(item);
     }
     while (offset < total) {
+      renewUploadLease(item);
+      await putSession(item);
       var b64 = await blobChunkB64(blob, offset, DRIVE_CHUNK);
       var r = await MRB.api.postJson({
         action: "vidchunk",
@@ -2597,11 +2784,26 @@
       }
       offset = Math.min(offset + DRIVE_CHUNK, total);
       item.uploadOffset = offset;
+      if (r.done) {
+        item.publicUrl = r.url || r.publicUrl || "";
+        if (!item.publicUrl) {
+          item.driveSession = null;
+          item.uploadOffset = 0;
+          item.phase = "video-restart-required";
+          await putSession(item);
+          throw new Error("Drive finalized the upload without returning its private URL");
+        }
+        item.phase = "video-uploaded";
+      }
       await putSession(item);
       if (statusWriter) statusWriter("Uploading " + item.kind + " — " + Math.round((offset / total) * 100) + "% of " + formatBytes(total));
-      if (r.done) return { ok: true, url: r.url || "" };
+      if (r.done) return { ok: true, url: item.publicUrl };
     }
-    return { ok: true, url: "" };
+    item.driveSession = null;
+    item.uploadOffset = 0;
+    item.phase = "video-restart-required";
+    await putSession(item);
+    throw new Error("Drive upload ended without a finalized private URL");
   }
 
   /* Legacy direct PUT — kept for any old queue item that still carries a
@@ -2652,6 +2854,7 @@
       nextRetry: null,
       attempts: sessionRecord.attempts || 0,
       uploadOffset: sessionRecord.uploadOffset || 0,
+      phase: sessionRecord.phase || "queued",
       status: "waiting",
     });
     await putSession(rec);
@@ -2672,6 +2875,12 @@
     var now = Date.now();
     var items = await getAll();
     var waiting = items.filter(function (x) {
+      if (x.status === "uploading") {
+        var lease = Date.parse(x.leaseUntil || "");
+        if (!isNaN(lease) && lease > now) return false;
+        x.status = "error";
+        x.lastError = "Interrupted upload recovered for retry";
+      }
       if (x.status !== "waiting" && x.status !== "error") return false;
       if (x.nextRetry) {
         var t = Date.parse(x.nextRetry);
@@ -2679,12 +2888,14 @@
       }
       return true;
     });
+    var outcomes = [];
     for (var i = 0; i < waiting.length; i++) {
       var item = waiting[i];
       try {
         item.status = "uploading";
         item.lastAttempt = new Date().toISOString();
         item.attempts = (item.attempts || 0) + 1;
+        renewUploadLease(item);
         await putSession(item);
         if (statusWriter) {
           statusWriter(
@@ -2693,20 +2904,40 @@
         }
         await fileItem(item, statusWriter);
         item.status = "done";
-        await putSession(item);
-        await remove(item.id);
+        item.leaseUntil = null;
+        if (item.kind === "corrective") {
+          // Keep a compact exact-capture receipt even when localStorage is
+          // unavailable. Binary media is released only by this atomic write.
+          await putSession({
+            id: item.id, kind: item.kind, status: "done", phase: item.phase,
+            date: item.date, vRef: item.vRef, assignmentId: item.assignmentId,
+            attemptId: item.attemptId, seal: item.seal, sealed_at: item.sealed_at,
+            video_sha256: item.video_sha256, code: item.code,
+            sealPersisted: item.sealPersisted === true
+          });
+        } else {
+          await putSession(item);
+          await remove(item.id);
+        }
+        outcomes.push({ id: item.id, ok: true, phase: item.phase || "complete", attestationSeal: item.seal || "" });
       } catch (e) {
         item.status = "error";
+        item.leaseUntil = null;
         item.lastError = e.message || String(e);
         item.nextRetry = new Date(Date.now() + Math.min(300000, 5000 * item.attempts)).toISOString();
         if (e.offset != null) item.uploadOffset = e.offset;
         await putSession(item);
+        outcomes.push({ id: item.id, ok: false, error: item.lastError });
         if (statusWriter) statusWriter("Upload error: " + item.lastError);
       }
     }
+    return outcomes;
   }
 
   async function fileItem(item, statusWriter) {
+    if (item.kind === "corrective" && !hasCurrentCorrectiveIdentity(item)) {
+      throw new Error("Corrective capture lacks the current assignment and attempt identity; record a new attempt.");
+    }
     // Rebuild blob from stored ArrayBuffer if needed
     var blob = item.blob;
     if (!blob && item.blobBuffer) {
@@ -2715,9 +2946,15 @@
     if (!blob) throw new Error("No blob in queue item");
 
     // Every take ships to the AP's Google Drive as a BACKUP copy — for corrective
-    // sessions the public YouTube posting remains the evidence and the thing
-    // that resolves the entry; this copy is disaster recovery only.
+    // sessions the public YouTube posting remains evidence submitted for AP
+    // review; this copy is disaster recovery only.
     var up = await driveRelayUpload(item, blob, statusWriter);
+    item.publicUrl = (up && (up.url || up.publicUrl)) || item.publicUrl || "";
+    if (!MRB.config.get().demoMode && !item.publicUrl) {
+      throw new Error("Private video backup URL is unavailable");
+    }
+    item.phase = "video-uploaded";
+    await putSession(item);
 
     var attestBody = {
       date: item.date,
@@ -2730,15 +2967,25 @@
     };
     if (item.weight != null) attestBody.weight = item.weight;
     if (item.photo_sha256s) attestBody.photo_sha256s = item.photo_sha256s;
+    if (item.kind === "corrective") {
+      attestBody.ref = item.vRef;
+      attestBody.assignment_id = item.assignmentId;
+      attestBody.attempt_id = item.attemptId;
+    }
 
     if (!item.seal) {
+      item.phase = "attesting";
+      await putSession(item);
       var seal = await MRB.api.attest(attestBody);
       item.seal = seal.seal;
       item.sealed_at = seal.sealed_at;
+      item.phase = "attested";
       await putSession(item);
     }
-    item.publicUrl = (up && (up.url || up.publicUrl)) || item.publicUrl || "";
+    item.sealPersisted = rememberFilingSeal(item);
     var filedUrl = item.publicUrl;
+    item.phase = "filing";
+    await putSession(item);
 
     if (item.kind === "daily" && item.photos) {
       for (var p = 0; p < item.photos.length; p++) {
@@ -2748,6 +2995,7 @@
           name: ph.name,
           image_b64: ph.b64,
           weight: p === 0 ? item.weight : undefined,
+          attestation_seal: item.seal,
           finalize: false,
         });
       }
@@ -2756,34 +3004,52 @@
         weight: item.weight,
         video_url: filedUrl,
         duration_sec: item.durationSec,
+        attestation_seal: item.seal,
         finalize: true,
       });
     } else if (item.kind === "weekly") {
-      await MRB.api.apweekly({
+      await MRB.api.weeklyfiled({
         date: item.date,
+        day: item.day,
         week: item.week,
         documented: item.documented,
         required: item.required,
         weight: item.weight,
         open: item.openCount,
         url: filedUrl,
+        attestation_seal: item.seal,
       });
     } else if (item.kind === "confirmation") {
-      await MRB.api.apconfirmation({
+      // Record the accepted capture as a pending confirmation before the
+      // result screen later files its canonical public YouTube URL.
+      await MRB.api.confirmationfiled({
         date: item.date,
-        version: item.version,
         day: item.day,
-        url: filedUrl,
+        version: item.version,
+        attestation_seal: item.seal,
       });
     } else if (item.kind === "corrective") {
       // Backup uploaded above; nothing filed to the record yet. Posting the
-      // take to YouTube and filing the link on the result screen is what
-      // resolves the entry (correctivefiled).
+      // take to YouTube and filing the link on the result screen submits it
+      // for AP verification (correctivefiled).
     } else {
       // demo — the attestation is enough
     }
 
-    if (statusWriter) statusWriter("Filed and sealed.");
+    item.phase = item.kind === "corrective" || item.kind === "confirmation" || item.kind === "announcement"
+      ? "private-backup-sealed"
+      : item.kind === "demo" ? "demo-complete" : "filed";
+    await putSession(item);
+    if (statusWriter) {
+      statusWriter(item.kind === "corrective"
+        ? "Private backup sealed; public link filing remains pending."
+        : item.kind === "confirmation"
+          ? "Participant statement sealed; public link filing remains pending."
+        : item.kind === "announcement"
+          ? "Announcement capture sealed; public link filing remains pending."
+          : item.kind === "demo" ? "Demo capture complete; nothing filed."
+            : "Filed and sealed.");
+    }
     return item;
   }
 
@@ -2832,6 +3098,8 @@
     blobToBuffer: blobToBuffer,
     getAll: getAll,
     remove: remove,
+    filingSealKey: filingSealKey,
+    rememberFilingSeal: rememberFilingSeal,
   };
 })(window.MRB);
 
@@ -3191,6 +3459,7 @@
     "lock-device-key",
     "lock-ap-code",
     "lock-error",
+    "btn-demo-unlock",
     "btn-lock",
     "view-error",
     "error-message",
@@ -3198,6 +3467,7 @@
     "view-home",
     "deadline-countdown",
     "packet-status",
+    "agreement-status",
     "voice-status",
     "key-status",
     "open-entries",
@@ -3215,7 +3485,6 @@
     "settings-body",
     "input-device-key",
     "input-exec-url",
-    "input-sheet-id",
     "input-el-key",
     "input-el-voice",
     "btn-save-settings",
@@ -3307,6 +3576,7 @@
       var li = document.createElement("li");
       li.innerHTML =
         '<div class="mono small">' +
+        escapeHtml(e.id ? e.id + " · " : "") +
         escapeHtml(e.date || "") +
         "</div><div>" +
         escapeHtml(e.violation || "Open entry") +
@@ -3355,7 +3625,6 @@
     var map = {
       "input-device-key": c.deviceKey,
       "input-exec-url": c.execUrl,
-      "input-sheet-id": c.sheetId,
       "input-el-key": c.elKey,
       "input-el-voice": c.elVoice,
     };
@@ -3369,7 +3638,6 @@
     return {
       deviceKey: (byId("input-device-key") || {}).value || "",
       execUrl: (byId("input-exec-url") || {}).value || "",
-      sheetId: (byId("input-sheet-id") || {}).value || "",
       elKey: (byId("input-el-key") || {}).value || "",
       elVoice: (byId("input-el-voice") || {}).value || "",
     };
@@ -3377,6 +3645,16 @@
 
   function updateHomeStatus(record) {
     var c = MRB.config.get();
+    var agreementActive = !!(record && record.agreementActive === true);
+    document.documentElement.dataset.agreementActive = agreementActive ? "true" : "false";
+    var agreement = byId("agreement-status");
+    if (agreement) agreement.textContent = agreementActive ? "Edition 2 active" : "Not verified · requirements inactive";
+    ["card-daily", "card-corrective", "card-weekly"].forEach(function (id) {
+      var card = byId(id);
+      if (!card) return;
+      card.disabled = !agreementActive;
+      card.title = agreementActive ? "" : "Unavailable until Edition 2 execution is verified";
+    });
     var voice = byId("voice-status");
     if (voice) {
       var mode = MRB.audio.voiceMode();
@@ -3393,7 +3671,9 @@
     }
 
     var packet = byId("packet-status");
-    if (packet && record) {
+    if (packet && !agreementActive) {
+      packet.textContent = "Proposed · not currently due";
+    } else if (packet && record) {
       var todayEt = formatTodayET();
       var row = (record.weighIns || []).find(function (w) {
         return w.date === todayEt;
@@ -3413,7 +3693,7 @@
         packet.textContent = parts.join(" · ");
       }
     } else if (packet) {
-      packet.textContent = c.sheetId || c.demoMode ? "—" : "Configure sheet ID";
+      packet.textContent = "Public record unavailable";
     }
 
     if (record) renderOpenEntries(record.violations);
@@ -3444,7 +3724,9 @@
     function tick() {
       var el = byId("deadline-countdown");
       if (!el) return;
-      el.textContent = MRB.dates.formatCountdown(MRB.dates.msUntil10pmET()) + " to 10 PM ET";
+      el.textContent = document.documentElement.dataset.agreementActive === "true"
+        ? MRB.dates.formatCountdown(MRB.dates.msUntil10pmET()) + " to 10 PM ET"
+        : "Proposed · not currently due";
     }
     tick();
     return setInterval(tick, 1000);
@@ -3503,7 +3785,7 @@
       bottomPrimary = MRB.overlay.buildDailyBottom(session.day, session.code, session.weight);
     } else if (session.type === "corrective") {
       bottomPrimary = MRB.overlay.buildCornerBottom(
-        session.vNum || session.level,
+        session.vRef,
         session.level,
         MRB.dates.formatMmSs(session.remainingSec || 0)
       );
@@ -3542,7 +3824,7 @@
       line1 = "DAY " + MRB.dates.padDay(session.day) + " \u00B7 " + dateStr;
       stat = session.weight ? session.weight + " LB" : "";
     } else if (session.type === "corrective") {
-      line1 = "V-" + String(session.vNum || session.level).padStart(3, "0") + " \u00B7 LEVEL " + session.level + " \u00B7 " + dateStr;
+      line1 = session.vRef + " \u00B7 LEVEL " + session.level + " \u00B7 " + dateStr;
     } else if (session.type === "weekly") {
       line1 = "WEEK " + (session.week || "") + " \u00B7 " + dateStr;
     } else if (session.type === "confirmation") {
@@ -3707,6 +3989,15 @@
 
   async function runSession(opts) {
     if (active) throw new Error("A session is already active");
+    if (opts.type === "corrective" && !/^V-[A-F0-9]{12}$/.test(String(opts.vRef || "").trim().toUpperCase())) {
+      throw new Error("Corrective entry reference unavailable.");
+    }
+    if (opts.type === "corrective" && !/^C-[A-F0-9]{24}$/.test(String(opts.assignmentId || "").trim().toUpperCase())) {
+      throw new Error("Corrective assignment identity unavailable.");
+    }
+    if (opts.type === "corrective" && !/^A-[A-F0-9]{24}$/.test(String(opts.attemptId || "").trim().toUpperCase())) {
+      throw new Error("Corrective attempt identity unavailable.");
+    }
 
     var session = {
       type: opts.type,
@@ -3719,7 +4010,9 @@
       minutes: opts.minutes || 10,
       version: opts.version || "1",
       week: opts.week || 1,
-      vNum: opts.vNum || 1,
+      vRef: String(opts.vRef || "").trim().toUpperCase(),
+      assignmentId: String(opts.assignmentId || "").trim().toUpperCase(),
+      attemptId: String(opts.attemptId || "").trim().toUpperCase(),
       violation: opts.violation || "",
       violationDate: opts.violationDate || opts.date,
       record: opts.record,
@@ -3734,6 +4027,9 @@
       inSetup: false,
     };
     active = session;
+    var rec = null;
+    var recorderStopped = false;
+    try {
     session.machine.go("preflight");
     session.machine.go("recording");
 
@@ -3774,7 +4070,7 @@
       return { outcome: "error", error: "Setup aborted" };
     }
 
-    var rec = MRB.recorder.create({
+    rec = MRB.recorder.create({
       canvas: compose,
       challengeCode: session.code,
     });
@@ -3807,6 +4103,7 @@
 
     MRB.audio.stop();
     var result = await rec.stop();
+    recorderStopped = true;
 
     if (session.discard) {
       session.machine.go("invalidated");
@@ -3836,8 +4133,8 @@
     session.machine.go("filing");
     var filedOk = await fileResult(session, result, {});
     var links = await autoDownload(session, result);
+    await cleanup(session, true);
     active = null;
-    await cleanup(session, false);
     return {
       outcome: "complete",
       filed: filedOk,
@@ -3845,10 +4142,21 @@
       photos: session.photos,
       downloads: links,
     };
+    } finally {
+      if (rec && !recorderStopped) {
+        try { await rec.stop(); } catch (recorderCleanupError) { /* best effort */ }
+      }
+      // Cleanup is deliberately unconditional and idempotent. In particular,
+      // a completed daily session must not leave its camera/microphone stream
+      // active behind the result screen.
+      try { await cleanup(session, true); } catch (sessionCleanupError) { /* best effort */ }
+      if (active === session) active = null;
+    }
   }
 
   async function autoDownload(session, result) {
     if (!MRB.download || !result || !result.blob) return [];
+    if (MRB.download.revokeAll) MRB.download.revokeAll();
     var thumbBlob = null;
     try {
       thumbBlob = await MRB.download.renderThumbnail(session.thumbFrame ? thumbStateFrom(session) : titleCardStateFrom(session));
@@ -4155,7 +4463,9 @@
       kind: MRB.config.KIND_MAP[session.type] || session.type,
       date: session.date,
       day: session.day,
-      vNum: session.vNum,
+      vRef: session.vRef,
+      assignmentId: session.assignmentId,
+      attemptId: session.attemptId,
       code: session.code,
       weight: session.weight,
       mime: result.mime || "video/webm",
@@ -4175,18 +4485,36 @@
       openCount: session.figures && session.figures.open ? session.figures.open.length : 0,
     };
 
+    var queued = null;
     try {
       if (!navigator.onLine) throw new Error("offline");
-      var queued = await MRB.queue.enqueue(item);
-      await MRB.queue.processQueue(function (msg) {
+      queued = await MRB.queue.enqueue(item);
+      var outcomes = await MRB.queue.processQueue(function (msg) {
         MRB.ui.setStatus("session", msg);
       });
+      var ownOutcome = (outcomes || []).find(function (outcome) { return outcome.id === queued.id; });
+      if (!ownOutcome || !ownOutcome.ok) {
+        session.machine.go("queued");
+        return {
+          ok: false,
+          id: queued.id,
+          queued: true,
+          error: (ownOutcome && ownOutcome.error) || "Filing is still pending in the upload queue",
+        };
+      }
       session.machine.go("complete");
-      return { ok: true, id: queued.id, immediate: true };
+      return {
+        ok: true,
+        id: queued.id,
+        immediate: true,
+        phase: ownOutcome.phase || "complete",
+        attestationSeal: ownOutcome.attestationSeal || "",
+        publicLinkPending: session.type === "corrective" || session.type === "confirmation" || session.type === "announcement",
+      };
     } catch (e) {
-      await MRB.queue.enqueue(item);
+      if (!queued) queued = await MRB.queue.enqueue(item);
       session.machine.go("queued");
-      return { ok: true, queued: true, error: e.message };
+      return { ok: false, id: queued.id, queued: true, error: e.message };
     }
   }
 
@@ -4205,10 +4533,7 @@
 
   async function cleanup(session, dropCamera) {
     MRB.audio.stop();
-    if (session && session.type !== "daily") {
-      MRB.camera.stop();
-    }
-    if (dropCamera) MRB.camera.stop();
+    if (session || dropCamera) MRB.camera.stop();
     var setupEl = MRB.ui.byId("setup-controls");
     if (setupEl) setupEl.hidden = true;
   }
@@ -4231,6 +4556,7 @@
   "use strict";
 
   var recordCache = null;
+  var participantStateCache = null;
   var deadlineTimer = null;
   var initDone = false;
   var handlersBound = false;
@@ -4255,7 +4581,15 @@
       recordCache = { weighIns: [], violations: [] };
       MRB.ui.setStatus("preflight", "Record load: " + e.message);
     }
+    try {
+      participantStateCache = await MRB.api.myState();
+    } catch (stateError) {
+      participantStateCache = null;
+      MRB.ui.setStatus("preflight", "Participant state: " + stateError.message);
+    }
+    recordCache.agreementActive = !!(recordCache.agreementActive && participantStateCache && participantStateCache.agreementActive);
     MRB.ui.updateHomeStatus(recordCache);
+    applyAuthoritativeAvailability();
     try {
       var q = await MRB.queue.queueSummary();
       MRB.ui.renderQueue(q);
@@ -4264,38 +4598,91 @@
     }
     // Process queue in background
     if (navigator.onLine) {
-      MRB.queue.processQueue().catch(function () {});
+      MRB.queue.processQueue().then(function () {
+        return MRB.queue.queueSummary();
+      }).then(function (summary) {
+        MRB.ui.renderQueue(summary);
+      }).catch(function () {});
     }
   }
 
-  function weekNumberFromDate(iso) {
-    var p = MRB.dates.parseDate(iso);
-    if (!p) return 1;
-    // Approx week from a project day-one of 2026-01-01 — or use day field
-    var start = Date.UTC(2026, 7, 31);
-    var cur = Date.UTC(p.y, p.m - 1, p.d);
-    return Math.max(1, Math.floor((cur - start) / (7 * 86400000)) + 1);
+  function weekStartIso(projectStart, week) {
+    var start = MRB.dates.parseDate(projectStart);
+    var n = Number(week);
+    if (!start || !isFinite(n) || Math.floor(n) !== n || n < 1) return "";
+    var date = new Date(Date.UTC(start.y, start.m - 1, start.d + (n - 1) * 7));
+    return MRB.dates.pad4(date.getUTCFullYear()) + "-" +
+      MRB.dates.pad2(date.getUTCMonth() + 1) + "-" + MRB.dates.pad2(date.getUTCDate());
   }
 
-  /* Project weeks run Monday→Sunday from Day 1 (Mon 2026-08-31). The weekly
-     review, recorded Monday, covers the most recently COMPLETED project week. */
-  function completedWeekET() {
-    var et = MRB.dates.nowInET();
-    var today = Date.UTC(et.getFullYear(), et.getMonth(), et.getDate());
-    var dayOne = Date.UTC(2026, 7, 31);
-    var daysSince = Math.floor((today - dayOne) / 86400000);
-    var completed = Math.max(1, Math.floor(daysSince / 7));
-    var s = new Date(dayOne + (completed - 1) * 7 * 86400000);
-    return {
-      week: completed,
-      startIso:
-        MRB.dates.pad4(s.getUTCFullYear()) + "-" +
-        MRB.dates.pad2(s.getUTCMonth() + 1) + "-" +
-        MRB.dates.pad2(s.getUTCDate()),
-    };
+  function correctiveEntries() {
+    return ((participantStateCache && participantStateCache.corrective) || []).filter(function (entry) {
+      return /^V-[A-F0-9]{12}$/.test(String(entry && entry.id || "").trim().toUpperCase()) &&
+        /^C-[A-F0-9]{24}$/.test(String(entry && entry.assignmentId || "").trim().toUpperCase()) &&
+        /^A-[A-F0-9]{24}$/.test(String(entry && entry.attemptId || "").trim().toUpperCase()) &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(entry.violationDate || "")) &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(entry.due || "")) &&
+        isFinite(Number(entry.level)) && Number(entry.level) >= 1 && Number(entry.level) <= 3 &&
+        isFinite(Number(entry.minutes)) && Number(entry.minutes) > 0;
+    }).map(function (entry) {
+      return {
+        id: String(entry.id).trim().toUpperCase(),
+        assignmentId: String(entry.assignmentId).trim().toUpperCase(),
+        attemptId: String(entry.attemptId).trim().toUpperCase(),
+        date: String(entry.violationDate),
+        violationDate: String(entry.violationDate),
+        violation: String(entry.violation || ""),
+        assignment: String(entry.assignment || ""),
+        due: String(entry.due),
+        level: Math.floor(Number(entry.level)),
+        minutes: Math.floor(Number(entry.minutes)),
+      };
+    });
+  }
+
+  function applyAuthoritativeAvailability() {
+    var config = MRB.config.get();
+    var active = !!(recordCache && recordCache.agreementActive && participantStateCache && participantStateCache.agreementActive);
+    var daily = MRB.ui.byId("card-daily");
+    var corrective = MRB.ui.byId("card-corrective");
+    var weekly = MRB.ui.byId("card-weekly");
+    if (daily) daily.disabled = !active;
+    if (corrective) {
+      corrective.disabled = !active || correctiveEntries().length === 0;
+      corrective.title = corrective.disabled
+        ? (!active ? "Unavailable until Edition 2 execution is verified" : "No eligible AP corrective assignment")
+        : "";
+    }
+    if (weekly) {
+      var weeklyState = participantStateCache && participantStateCache.weekly;
+      var weeklyComplete = !!weeklyState && weeklyState.eligible === true &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) &&
+        Number(weeklyState.day) >= 8 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
+        Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
+      weekly.disabled = !active || !weeklyComplete;
+      weekly.title = weekly.disabled
+        ? (!active ? "Unavailable until Edition 2 execution is verified" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
+        : "";
+    }
+    if (config.demoMode) {
+      ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement"].forEach(function (id) {
+        var card = MRB.ui.byId(id);
+        if (card) {
+          card.disabled = true;
+          card.title = "Offline demonstration mode permits only the demonstration session";
+        }
+      });
+    }
   }
 
   async function beginSessionFlow(type) {
+    if (MRB.config.get().demoMode && type !== "demo") {
+      throw new Error("Offline demonstration mode permits only the demonstration session.");
+    }
+    if (type === "corrective" || type === "weekly") {
+      participantStateCache = await MRB.api.myState();
+      if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+    }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
       MRB.config.SESSION_TAGS[type] || type;
@@ -4309,37 +4696,52 @@
     var level = 1;
     var entry = null;
     if (type === "corrective") {
-      var open = ((recordCache && recordCache.violations) || []).filter(function (v) {
-        return v.open;
-      });
+      var open = correctiveEntries();
       if (!open.length) {
-        // Allow demo selection
-        open = [
-          {
-            date: MRB.ui.formatTodayET(),
-            violation: "Demo open entry",
-            status: "open",
-            open: true,
-          },
-        ];
+        throw new Error("No server-eligible corrective assignment is available.");
       }
-      level = MRB.csv.violationLevel((recordCache && recordCache.violations) || open);
       entry = open[0];
+      level = entry.level;
       fields.innerHTML =
         '<label class="field"><span>Open entry</span><select id="pf-entry" class="mono"></select></label>' +
-        '<label class="field"><span>Level (1–3)</span><input id="pf-level" type="number" min="1" max="3" value="' +
-        level +
-        '" class="mono" /></label>';
+        '<div class="field"><span>Assignment id</span><p id="pf-assignment-id" class="mono small"></p></div>' +
+        '<div class="field"><span>Current attempt id</span><p id="pf-attempt-id" class="mono small"></p></div>' +
+        '<div class="field"><span>AP assignment</span><p id="pf-assignment" class="mono small"></p></div>' +
+        '<div class="field"><span>Required session</span><p id="pf-corrective-terms" class="mono small"></p></div>';
       var sel = MRB.ui.byId("pf-entry");
       open.forEach(function (e, idx) {
         var opt = document.createElement("option");
         opt.value = String(idx);
-        opt.textContent = (e.date || "") + " — " + (e.violation || "").slice(0, 48);
+        opt.textContent = (e.id ? e.id + " · " : "") + (e.date || "") + " — " + (e.violation || "").slice(0, 48);
         sel.appendChild(opt);
       });
-      sel.onchange = function () {
-        entry = open[+sel.value];
-      };
+      sel.disabled = true;
+      function showCorrectiveTerms() {
+        var assignmentId = MRB.ui.byId("pf-assignment-id");
+        var attemptId = MRB.ui.byId("pf-attempt-id");
+        var assignment = MRB.ui.byId("pf-assignment");
+        var terms = MRB.ui.byId("pf-corrective-terms");
+        if (assignmentId) assignmentId.textContent = entry.assignmentId;
+        if (attemptId) attemptId.textContent = entry.attemptId;
+        if (assignment) assignment.textContent = entry.assignment || entry.violation || "AP corrective assignment";
+        if (terms) terms.textContent = "Level " + entry.level + " · " + entry.minutes + " minutes · due " + entry.due;
+      }
+      showCorrectiveTerms();
+    }
+
+    if (type === "weekly") {
+      var weeklyState = participantStateCache && participantStateCache.weekly;
+      if (!weeklyState || weeklyState.eligible !== true) {
+        throw new Error(String(weeklyState && weeklyState.reason || "Weekly review is not due."));
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) ||
+          Number(weeklyState.day) < 8 || Math.floor(Number(weeklyState.day)) !== Number(weeklyState.day) ||
+          Number(weeklyState.week) < 1 || Math.floor(Number(weeklyState.week)) !== Number(weeklyState.week)) {
+        throw new Error("Server weekly schedule is incomplete.");
+      }
+      fields.innerHTML = '<div class="field"><span>Server schedule</span><p id="pf-weekly-terms" class="mono small"></p></div>';
+      MRB.ui.byId("pf-weekly-terms").textContent = "Week " + String(weeklyState.week) +
+        " · Day " + String(weeklyState.day) + " · " + String(weeklyState.date);
     }
 
     if (type === "daily") {
@@ -4351,13 +4753,10 @@
 
     if (type === "confirmation") {
       fields.innerHTML =
-        '<label class="field"><span>Agreement version</span><input id="pf-version" type="text" class="mono" value="1" /></label>';
+        '<label class="field"><span>Agreement version</span><input id="pf-version" type="text" class="mono" value="2" readonly aria-readonly="true" /></label>';
     }
 
-    var minutes = MRB.preflight.estimateMinutes(
-      type,
-      type === "corrective" ? level : 1
-    );
+    var minutes = type === "corrective" ? entry.minutes : MRB.preflight.estimateMinutes(type, 1);
 
     var checkResult = await MRB.preflight.runChecks(type, {
       minutes: minutes,
@@ -4388,24 +4787,22 @@
     } catch (e) {
       MRB.ui.setStatus("preflight", "Camera: " + e.message);
       checkResult.canStart = false;
-      MRB.ui.renderPreflightList(
-        checkResult.checks.concat([
-          {
-            label: "Live camera",
-            level: "fail",
-            detail: e.message,
-            blocking: true,
-          },
-        ])
-      );
+      checkResult.checks = checkResult.checks.concat([{
+        label: "Live camera",
+        level: "fail",
+        detail: e.message,
+        blocking: true,
+      }]);
     }
 
-    // Uniform attestation — not machine-checkable. A deliberate tap
-    // confirms it before the Begin button unlocks.
     var startBtn = MRB.ui.byId("btn-preflight-start");
-    var couldStart = checkResult.canStart;
-    startBtn.disabled = true;
-    (function () {
+    function renderChecksWithUniform(result) {
+      // Uniform attestation is not machine-checkable. Rebuild it whenever an
+      // assignment changes so a longer duration cannot reuse stale battery or
+      // storage checks—or a prior confirmation tap.
+      MRB.ui.renderPreflightList(result.checks);
+      var couldStart = result.canStart;
+      startBtn.disabled = true;
       var ul = MRB.ui.byId("preflight-list");
       if (!ul) { startBtn.disabled = !couldStart; return; }
       var li = document.createElement("li");
@@ -4430,13 +4827,15 @@
       li.appendChild(right);
       ul.appendChild(li);
       paint();
-    })();
-    MRB.ui.setStatus(
-      "preflight",
-      couldStart
+      MRB.ui.setStatus(
+        "preflight",
+        couldStart
         ? "Checks passed. Confirm the uniform, frame full body, then begin."
         : "Blocking checks failed — fix before starting."
-    );
+      );
+    }
+
+    renderChecksWithUniform(checkResult);
 
     // Store context for start button
     MRB._pending = {
@@ -4444,10 +4843,51 @@
       level: level,
       entry: entry,
       minutes: minutes,
-      open: ((recordCache && recordCache.violations) || []).filter(function (v) {
-        return v.open;
-      }),
+      open: type === "corrective" ? open : [],
     };
+
+    if (type === "corrective" && sel) {
+      sel.disabled = false;
+      sel.onchange = async function () {
+        entry = open[+sel.value];
+        level = entry.level;
+        minutes = entry.minutes;
+        showCorrectiveTerms();
+        startBtn.disabled = true;
+        sel.disabled = true;
+        MRB.ui.setStatus("preflight", "Assignment changed — rerunning duration checks…");
+        try {
+          var refreshed = await MRB.preflight.runChecks(type, {
+            minutes: minutes,
+            level: level,
+            entry: entry,
+          });
+          // A camera failure from the initial preview remains blocking; changing
+          // an assignment cannot make the missing stream valid.
+          var cameraFailure = checkResult.checks.filter(function (check) {
+            return check.label === "Live camera" && check.level === "fail";
+          });
+          if (cameraFailure.length) {
+            refreshed.canStart = false;
+            refreshed.checks = refreshed.checks.concat(cameraFailure);
+          }
+          checkResult = refreshed;
+          MRB._pending = {
+            type: type,
+            level: level,
+            entry: entry,
+            minutes: minutes,
+            open: open,
+          };
+          renderChecksWithUniform(checkResult);
+        } catch (selectionError) {
+          MRB.ui.setStatus("preflight", "Assignment checks failed: " + selectionError.message);
+          startBtn.disabled = true;
+        } finally {
+          sel.disabled = false;
+        }
+      };
+    }
   }
 
   async function onStartSession() {
@@ -4460,16 +4900,46 @@
     var level = pending.level;
     var entry = pending.entry;
     if (type === "corrective") {
-      var lv = MRB.ui.byId("pf-level");
-      if (lv) level = Math.max(1, Math.min(3, parseInt(lv.value, 10) || 1));
       var sel = MRB.ui.byId("pf-entry");
       if (sel && pending.open) entry = pending.open[+sel.value] || entry;
     }
 
-    var version = "1";
+    if (type === "corrective" || type === "weekly") {
+      try {
+        participantStateCache = await MRB.api.myState();
+        if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
+        if (type === "corrective") {
+          var selectedId = String(entry && entry.id || "");
+          var selectedAssignmentId = String(entry && entry.assignmentId || "");
+          var selectedAttemptId = String(entry && entry.attemptId || "");
+          entry = correctiveEntries().find(function (candidate) {
+            return candidate.id === selectedId && candidate.assignmentId === selectedAssignmentId &&
+              candidate.attemptId === selectedAttemptId;
+          }) || null;
+          if (!entry) throw new Error("That corrective assignment is no longer eligible.");
+          level = entry.level;
+        } else {
+          var currentWeekly = participantStateCache.weekly;
+          if (!currentWeekly || currentWeekly.eligible !== true) {
+            throw new Error(String(currentWeekly && currentWeekly.reason || "Weekly review is not due."));
+          }
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(currentWeekly.date || "")) ||
+              Number(currentWeekly.day) < 8 || Math.floor(Number(currentWeekly.day)) !== Number(currentWeekly.day) ||
+              Number(currentWeekly.week) < 1 || Math.floor(Number(currentWeekly.week)) !== Number(currentWeekly.week)) {
+            throw new Error("Server weekly schedule is incomplete.");
+          }
+        }
+      } catch (stateError) {
+        MRB.ui.setStatus("preflight", "Eligibility check failed: " + stateError.message);
+        MRB.ui.byId("btn-preflight-start").disabled = false;
+        return;
+      }
+    }
+
+    var version = "2";
     if (type === "confirmation") {
       var vEl = MRB.ui.byId("pf-version");
-      if (vEl) version = vEl.value || "1";
+      if (vEl) version = vEl.value || "2";
     }
 
     MRB.ui.byId("btn-preflight-start").disabled = true;
@@ -4479,7 +4949,10 @@
     var kind = MRB.config.KIND_MAP[type];
     var ch;
     try {
-      ch = await MRB.api.challenge(kind);
+      ch = await MRB.api.challenge(kind,
+        type === "corrective" && entry ? entry.id : "",
+        type === "corrective" && entry ? entry.assignmentId : "",
+        type === "corrective" && entry ? entry.attemptId : "");
     } catch (e) {
       MRB.ui.setStatus("preflight", "Challenge failed: " + e.message);
       MRB.ui.byId("btn-preflight-start").disabled = false;
@@ -4515,24 +4988,25 @@
     }
 
     var figures = null;
-    var week = weekNumberFromDate(date);
+    var week = 1;
     if (type === "weekly") {
-      var cw = completedWeekET();
-      week = cw.week;
-      var weekStart = cw.startIso;
-      var dayOneW = null;
-      if (recordCache && recordCache.weighIns && recordCache.weighIns.length) {
-        var sorted = recordCache.weighIns.slice().filter(function (w) {
-          return w.weight_lb != null;
-        });
-        if (sorted.length) dayOneW = sorted[sorted.length - 1].weight_lb;
-        // earliest
-        sorted.sort(function (a, b) {
-          return String(a.date).localeCompare(String(b.date));
-        });
-        if (sorted[0]) dayOneW = sorted[0].weight_lb;
+      var weekly = participantStateCache.weekly;
+      if (!ch.demo && (String(weekly.date) !== date || Number(weekly.day) !== Number(day))) {
+        MRB.ui.setStatus("preflight", "Server schedule changed while starting. Run preflight again.");
+        MRB.ui.byId("btn-preflight-start").disabled = false;
+        return;
       }
-      figures = MRB.scripts.weeklyFigures(recordCache, weekStart, dayOneW);
+      date = String(weekly.date);
+      day = Number(weekly.day);
+      week = Number(weekly.week);
+      ch.day = day;
+      var weekStart = weekStartIso(participantStateCache.projectStart, week);
+      if (!weekStart) {
+        MRB.ui.setStatus("preflight", "Server project start is invalid. Filing remains blocked.");
+        MRB.ui.byId("btn-preflight-start").disabled = false;
+        return;
+      }
+      figures = MRB.scripts.weeklyFigures(recordCache, weekStart, 340);
     }
 
     try {
@@ -4551,19 +5025,24 @@
         day: day,
         date: date,
         code: ch.code,
-        weight: (type === "daily" ? (ch.weight || null) : weight),
+        weight: type === "daily" ? (ch.weight || null) : type === "weekly" ? figures.endW : weight,
         level: level,
-        minutes: type === "corrective" ? MRB.config.cornerMinutes(level) : pending.minutes,
+        minutes: type === "corrective" ? entry.minutes : pending.minutes,
         version: version,
         week: week,
-        vNum: entry ? 1 : level,
+        vRef: entry ? entry.id : "",
+        assignmentId: entry ? entry.assignmentId : "",
+        attemptId: entry ? entry.attemptId : "",
         violation: entry ? entry.violation : "",
         violationDate: entry ? entry.date : date,
         record: recordCache,
         figures: figures,
       });
 
-      showResult(outcome, type, ch, { date: date, day: day, level: level, week: week, version: version, vNum: entry ? 1 : level, violation: entry ? entry.violation : "" });
+      showResult(outcome, type, ch, { date: date, day: day, level: level, week: week,
+        version: version, vRef: entry ? entry.id : "", assignmentId: entry ? entry.assignmentId : "",
+        attemptId: entry ? entry.attemptId : "",
+        violation: entry ? entry.violation : "" });
     } catch (e) {
       MRB.camera.stop();
       MRB.ui.showError(e.message || String(e));
@@ -4579,19 +5058,22 @@
     var brand = " | Micheal Ray Berry"; // short suffix survives YouTube's ~70-char truncation; the project name lives in the channel + description
     var dayN = ytPad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — 340 to 200 lb, documented daily in public. " +
+      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
       "The official record is " + base + "/. Recorded through the official Recording Assistant; " +
-      "the burned-in verification code and clocks date the footage.\n" +
+      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
       "Agreement: " + base + "/agreement\nContact: ap@michealrayberry.com";
     if (type === "corrective") {
-      var ref = "V-" + ytPad3(ctx.vNum || 1);
+      var ref = String(ctx.vRef || "").trim().toUpperCase();
+      if (!/^V-[A-F0-9]{12}$/.test(ref)) {
+        throw new Error("Corrective entry reference unavailable.");
+      }
       return {
         title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
         desc:
           "Corner time recorded in one continuous, unedited take against violation " + ref +
           (ctx.violation ? " — missed requirement: " + ctx.violation + "." : ".") +
-          " Published beside the entry per §8 of the signed agreement; completing it closes the obligation but removes nothing." +
-          "\nViolation log: " + base + "/penalties\nThe standard: " + base + "/corrections/" + tail,
+          " Published beside the entry under the proposed §8 process; submission awaits Accountability Partner verification, and the public record remains visible." +
+          "\nViolation log: " + base + "/violations/\nThe standard: " + base + "/corrections/" + tail,
       };
     }
     if (type === "weekly") {
@@ -4599,16 +5081,16 @@
         title: "Weekly Review — Week " + (ctx.week || "") + " · " + ctx.date + brand,
         desc:
           "The week read from the record: days documented, the weight, entries still open. " +
-          "Not a consequence — a fixed ten-minute review." +
+          "Not a consequence — a concise review of the completed week." +
           "\nWeekly record: " + base + "/weeks/" + tail,
       };
     }
     if (type === "confirmation") {
       return {
-        title: "Consent Confirmation — " + ctx.date + brand,
+        title: "Consent Statement — Pending Review · " + ctx.date + brand,
         desc:
-          "Recorded statement of understanding of the Public Accountability Agreement as amended, " +
-          "re-recorded on each amendment. The full agreement text is public." +
+          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement. " +
+          "The recording alone does not prove comprehension, consent, or agreement execution." +
           "\nAgreement: " + base + "/agreement" + tail,
       };
     }
@@ -4616,7 +5098,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "The official announcement of the Micheal Ray Berry Public Accountability Project: 340 to 200 lb, documented daily in public under his real name, administered by an independent Accountability Partner. Day 1 is August 31, 2026." +
+          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is August 31, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }
@@ -4636,6 +5118,25 @@
         "filed with the day's weight and four documentation photographs." +
         "\nDay page: " + base + "/daily/" + ctx.date + "-day-" + dayN + "/" + tail,
     };
+  }
+
+  function isCanonicalYouTubeUrl(value) {
+    try {
+      var raw = String(value || "").trim();
+      var parsed = new URL(raw);
+      var host = parsed.hostname.toLowerCase();
+      if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.port || parsed.hash) return false;
+      if (host === "youtu.be") {
+        return /^\/[A-Za-z0-9_-]{11}$/.test(parsed.pathname) && !parsed.search
+          && raw === "https://youtu.be" + parsed.pathname;
+      }
+      if (host !== "youtube.com" && host !== "www.youtube.com") return false;
+      var id = parsed.searchParams.get("v") || "";
+      return parsed.pathname === "/watch" && /^[A-Za-z0-9_-]{11}$/.test(id)
+        && parsed.search === "?v=" + id && raw === "https://" + host + "/watch?v=" + id;
+    } catch (error) {
+      return false;
+    }
   }
 
   /** Post-to-YouTube step on the result screen: copyable title/description and
@@ -4675,24 +5176,44 @@
     btn.addEventListener("click", async function () {
       var msg = wrap.querySelector("#yt-msg");
       var u = (wrap.querySelector("#yt-url").value || "").trim();
-      if (!/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(u)) { msg.textContent = "Paste the full YouTube link."; return; }
+      if (!isCanonicalYouTubeUrl(u)) { msg.textContent = "Paste a canonical HTTPS YouTube watch or youtu.be link."; return; }
       btn.disabled = true; msg.textContent = "Filing…";
       try {
         var j = await MRB.api.postJson({
           action: "ytfiled",
           key: MRB.config.get().deviceKey,
-          kind: type,
+          kind: type === "confirmation" ? "consent" : type,
           date: ctx.date,
-          ref: type === "corrective" ? "V-" + ytPad3(ctx.vNum || 1) : "",
+          ref: type === "corrective" ? ctx.vRef : "",
+          assignment_id: type === "corrective" ? ctx.assignmentId : "",
+          attempt_id: type === "corrective" ? ctx.attemptId : "",
           url: u,
+          attestation_seal: ctx.attestationSeal || "",
         });
-        msg.textContent = j && j.ok ? "Filed ✓ — the entry is resolved; the record embeds the posting on the next build. The AP reviews it and may overrule." : "Filing failed — send the link to the AP.";
+        if (!j || !j.ok) {
+          msg.textContent = "Filing failed" + (j && j.error ? ": " + j.error : " — send the link to the AP.");
+        } else if (type === "corrective") {
+          msg.textContent = j.status === "resolved"
+            ? "Already filed ✓ — " + ctx.vRef + " is resolved."
+            : j.status === "completed-awaiting-resolution"
+              ? "Already filed ✓ — assignment completed; source resolution is pending."
+              : "Filed ✓ — " + ctx.vRef + " remains unresolved pending AP verification.";
+        } else if (type === "confirmation") {
+          msg.textContent = "Participant statement submitted ✓ — awaiting separate AP verification.";
+        } else {
+          msg.textContent = "Filed ✓ — the record will embed the posting on the next build.";
+        }
       } catch (e) { msg.textContent = "Filing failed — send the link to the AP."; }
       btn.disabled = false;
     });
   }
 
   function showResult(outcome, type, ch, ctx) {
+    if ((!outcome.downloads || !outcome.downloads.length) && MRB.download && MRB.download.revokeAll) MRB.download.revokeAll();
+    var stalePublish = document.getElementById("yt-publish");
+    if (stalePublish) stalePublish.remove();
+    var staleDownloads = MRB.ui.byId("result-downloads");
+    if (staleDownloads) { staleDownloads.innerHTML = ""; staleDownloads.hidden = true; }
     MRB.ui.showView("result");
     var title = MRB.ui.byId("result-title");
     var sub = MRB.ui.byId("result-subtitle");
@@ -4717,11 +5238,16 @@
       return;
     }
 
-    var demo = MRB.config.get().demoMode || type === "demo";
+    var demo = type === "demo";
+    var filed = outcome.filed || {};
     title.textContent = "Session complete";
     sub.textContent = demo
       ? "Demo — nothing sent to the record"
-      : "Filed to the record";
+      : filed.ok
+        ? filed.publicLinkPending
+          ? "Capture sealed · public link filing pending"
+          : "Filed to the record"
+        : "Saved locally · filing pending";
     var lines = [
       "Type: " + type,
       "Challenge code: " + ch.code,
@@ -4741,7 +5267,18 @@
     if (outcome.photos) {
       lines.push("Photographs: " + outcome.photos.length);
     }
-    lines.push("", "Filing: " + JSON.stringify(outcome.filed || {}, null, 2));
+    if (type === "corrective" && ctx && ctx.vRef) {
+      lines.push("Violation: " + ctx.vRef);
+      lines.push("Assignment: " + ctx.assignmentId);
+      lines.push("Attempt: " + ctx.attemptId);
+    }
+    if (!demo && filed.publicLinkPending) {
+      lines.push("", "Private backup sealed. Public YouTube filing and Accountability Partner verification remain pending.");
+    }
+    if (!demo && !filed.ok) {
+      lines.push("", "Filing is pending in the upload queue: " + (filed.error || "retry required"));
+    }
+    lines.push("", "Filing: " + JSON.stringify(filed, null, 2));
     body.textContent = lines.join("\n");
 
     // Auto-download + visible field links
@@ -4762,7 +5299,11 @@
     }
     if (MRB.download) MRB.download.renderLinks(dl, links);
 
-    renderYtPublish(type, ctx || {}, ch);
+    var publishContext = Object.assign({}, ctx || {}, { attestationSeal: filed.attestationSeal || "" });
+    var exactSealRequired = ["daily", "corrective", "weekly", "confirmation"].indexOf(type) !== -1;
+    if (demo || (filed.ok && (!exactSealRequired || /^[a-f0-9]{64}$/.test(publishContext.attestationSeal)))) {
+      renderYtPublish(type, publishContext, ch);
+    }
   }
 
   function ensurePortraitGeometry() {
@@ -4811,6 +5352,9 @@
 
     MRB.ui.byId("btn-result-home").addEventListener("click", function () {
       MRB.camera.stop();
+      if (MRB.download && MRB.download.revokeAll) MRB.download.revokeAll();
+      var publish = document.getElementById("yt-publish");
+      if (publish) publish.remove();
       var dl = MRB.ui.byId("result-downloads");
       if (dl) { dl.innerHTML = ""; dl.hidden = true; }
       MRB.ui.showView("home");
@@ -4830,23 +5374,34 @@
     });
 
     MRB.ui.byId("btn-save-settings").addEventListener("click", function () {
-      MRB.config.save(MRB.ui.readSettingsForm());
+      var wasDemo = MRB.config.get().demoMode;
+      var settings = MRB.ui.readSettingsForm();
+      settings.demoMode = false;
+      MRB.config.save(settings);
+      if (wasDemo) { lockNow(); return; }
       MRB.ui.setStatus("preflight", "Settings saved");
       refreshHome();
     });
 
     MRB.ui.byId("lock-form").addEventListener("submit", isolate("unlock", tryUnlock));
+    MRB.ui.byId("btn-demo-unlock").addEventListener("click", function () {
+      localStorage.removeItem("mrb_unlock_token");
+      localStorage.removeItem("mrb_unlock_until");
+      MRB.config.save({ demoMode: true });
+      MRB.ui.showView("home");
+      refreshHome();
+    });
     MRB.ui.byId("btn-lock").addEventListener("click", lockNow);
     MRB.ui.byId("btn-clear-settings").addEventListener("click", function () {
       MRB.config.save({
         deviceKey: "",
         execUrl: "",
-        sheetId: "",
         elKey: "",
         elVoice: MRB.config.DEFAULT_EL_VOICE,
+        demoMode: false,
       });
       MRB.ui.fillSettingsForm();
-      refreshHome();
+      lockNow();
     });
 
     window.addEventListener("online", function () {
@@ -4861,12 +5416,12 @@
   /* ── Two-key lock ─────────────────────────────────────────────────────
      The instrument opens only after the record server has accepted BOTH the
      participant's device key and the AP's unlock code (action "unlock").
-     The server returns a sealed token good for 14 days; "LOCK" in the header
-     or a failed server check clears it. Demo mode (no exec URL) is exempt. */
-  var UNLOCK_DAYS = 14;
+     The server returns a sealed token with its authoritative expiry and checks
+     that token again on every participant action. Explicit offline demonstration
+     mode is local-only and permits only the demonstration session. */
   function isUnlocked() {
     var c = MRB.config.get();
-    if (c.demoMode && !c.execUrl) return true;
+    if (c.demoMode) return true;
     var tok = localStorage.getItem("mrb_unlock_token") || "";
     var until = Number(localStorage.getItem("mrb_unlock_until") || 0);
     return !!tok && until > Date.now();
@@ -4874,6 +5429,7 @@
   function lockNow() {
     localStorage.removeItem("mrb_unlock_token");
     localStorage.removeItem("mrb_unlock_until");
+    MRB.config.save({ demoMode: false });
     MRB.ui.showView("lock");
   }
   async function tryUnlock(ev) {
@@ -4886,11 +5442,15 @@
     if (!dk || !ac) { err.textContent = "Both keys are required."; err.hidden = false; return; }
     btn.disabled = true;
     try {
+      MRB.config.save({ demoMode: false });
       var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
-      if (!r || !r.ok || !r.token) throw new Error((r && r.error) || "Refused");
+      var expires = Number(r && r.expires);
+      if (!r || !r.ok || !r.token || !isFinite(expires) || expires <= Date.now()) {
+        throw new Error((r && r.error) || "Server returned an invalid unlock grant");
+      }
       MRB.config.save({ deviceKey: dk });
       localStorage.setItem("mrb_unlock_token", String(r.token));
-      localStorage.setItem("mrb_unlock_until", String(Date.now() + UNLOCK_DAYS * 86400000));
+      localStorage.setItem("mrb_unlock_until", String(expires));
       MRB.ui.byId("lock-device-key").value = "";
       MRB.ui.byId("lock-ap-code").value = "";
       MRB.ui.showView("home");
@@ -5112,13 +5672,17 @@
 (function (MRB) {
   "use strict";
 
+  var activeObjectUrls = [];
+
   /**
    * Field download: auto-save finished artifacts + keep a visible link.
-   * Capture time is proven by the challenge code; local file is a working copy.
+   * Capture time is correlated with the issued challenge code, not independently
+   * verified by it; the local file is a working copy.
    */
   function triggerDownload(blob, filename) {
     if (!blob) return null;
     var url = URL.createObjectURL(blob);
+    activeObjectUrls.push(url);
     var a = document.createElement("a");
     a.href = url;
     a.download = filename || "mrb-capture.bin";
@@ -5135,6 +5699,13 @@
       }
     }, 0);
     return url;
+  }
+
+  function revokeAll() {
+    var urls = activeObjectUrls.splice(0, activeObjectUrls.length);
+    for (var i = 0; i < urls.length; i++) {
+      try { URL.revokeObjectURL(urls[i]); } catch (error) { /* ignore */ }
+    }
   }
 
   function extensionForMime(mime) {
@@ -5274,5 +5845,6 @@
     buildThumbName: buildThumbName,
     renderThumbnail: renderThumbnail,
     extensionForMime: extensionForMime,
+    revokeAll: revokeAll,
   };
 })(window.MRB);

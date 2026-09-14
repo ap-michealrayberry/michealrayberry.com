@@ -1,5 +1,5 @@
 /* MRB Recording Assistant — minimal offline shell for PWA install */
-var CACHE = "mrb-record-v2";
+var CACHE = "mrb-record-v3";
 var ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest"];
 
 self.addEventListener("install", function (event) {
@@ -17,7 +17,7 @@ self.addEventListener("activate", function (event) {
     caches.keys().then(function (keys) {
       return Promise.all(
         keys.filter(function (k) {
-          return k !== CACHE;
+          return /^mrb-record-/.test(k) && k !== CACHE;
         }).map(function (k) {
           return caches.delete(k);
         })
@@ -35,13 +35,18 @@ self.addEventListener("fetch", function (event) {
   // cache is only the offline fallback. (Cache-first had pinned stale app.js.)
   event.respondWith(
     fetch(req).then(function (res) {
-      if (res && res.ok && new URL(req.url).origin === self.location.origin) {
+      var requestUrl = new URL(req.url);
+      var isShellAsset = ASSETS.some(function (asset) { return requestUrl.pathname === new URL(asset, self.registration.scope).pathname; });
+      if (res && res.ok && requestUrl.origin === self.location.origin && isShellAsset) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
       }
       return res;
     }).catch(function () {
-      return caches.match(req).then(function (cached) { return cached || caches.match("index.html"); });
+      return caches.match(req).then(function (cached) {
+        if (cached) return cached;
+        return req.mode === "navigate" ? caches.match("index.html") : Response.error();
+      });
     })
   );
 });

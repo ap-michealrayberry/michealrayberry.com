@@ -17,7 +17,7 @@
   }
 
   async function getJson(url) {
-    var res = await fetch(url, { method: "GET", credentials: "omit" });
+    var res = await fetch(url, { method: "GET", credentials: "omit", cache: "no-store" });
     var text = await res.text();
     try {
       return JSON.parse(text);
@@ -33,13 +33,23 @@
    */
   async function postJson(body) {
     var c = cfg();
-    if (!c.execUrl) {
-      return mockPost(body);
+    var payload = Object.assign({}, body || {});
+    if (payload.action !== "unlock") {
+      try {
+        var unlock = localStorage.getItem("mrb_unlock_token") || "";
+        if (unlock) payload.unlock = unlock;
+      } catch (e) {
+        /* Storage can be unavailable in private browsing; the server fails closed. */
+      }
     }
+    if (c.demoMode) {
+      return mockPost(payload);
+    }
+    if (!c.execUrl) throw new Error("Apps Script exec URL missing; offline demo was not explicitly enabled");
     var res = await fetch(c.execUrl, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
       credentials: "omit",
       redirect: "follow",
     });
@@ -53,6 +63,14 @@
 
   function mockPost(body) {
     var action = body.action;
+    if (action === "unlock") {
+      return Promise.resolve({
+        ok: true,
+        token: "DEMO-UNLOCK-TOKEN",
+        expires: 4102444799000,
+        demo: true,
+      });
+    }
     if (action === "attest") {
       return Promise.resolve({
         ok: true,
@@ -72,17 +90,34 @@
         demo: true,
       });
     }
-    if (action === "packet" || action === "apweekly" || action === "apconfirmation" || action === "ping" || action === "challenge") {
+    if (action === "mystate") {
+      return Promise.resolve({
+        ok: true,
+        projectStart: "2026-08-31",
+        agreementActive: false,
+        corrective: [],
+        weekly: {
+          eligible: false,
+          reason: "Offline demonstration cannot activate agreement-gated sessions.",
+          date: "",
+          day: 0,
+          week: 0,
+        },
+        demo: true,
+      });
+    }
+    if (action === "packet" || action === "weeklyfiled" || action === "confirmationfiled" || action === "ping" || action === "challenge" || action === "ytfiled" || action === "correctivefiled") {
       return Promise.resolve({ ok: true, demo: true, code: action === "challenge" ? "1001" : undefined });
     }
     return Promise.resolve({ ok: false, error: "Unknown mock action " + action });
   }
 
-  async function challenge(kind) {
+  async function challenge(kind, ref, assignmentId, attemptId) {
     var c = cfg();
     var key = ensureKey();
     var k = MRB.config.KIND_MAP[kind] || kind;
-    if (!c.execUrl) {
+    if (c.demoMode) {
+      if (k !== "demo") throw new Error("Offline demo permits only the demonstration session");
       mockIssued += 1;
       var code = String(1000 + (mockIssued % 9000));
       return {
@@ -94,9 +129,26 @@
         demo: true,
       };
     }
-    var data = await postJson({ action: "challenge", key: key, kind: k });
+    if (!c.execUrl) throw new Error("Apps Script exec URL missing");
+    var body = { action: "challenge", key: key, kind: k };
+    if (k === "corrective") {
+      body.ref = String(ref || "").trim().toUpperCase();
+      body.assignment_id = String(assignmentId || "").trim().toUpperCase();
+      body.attempt_id = String(attemptId || "").trim().toUpperCase();
+      if (!/^V-[A-F0-9]{12}$/.test(body.ref) || !/^C-[A-F0-9]{24}$/.test(body.assignment_id) ||
+          !/^A-[A-F0-9]{24}$/.test(body.attempt_id)) {
+        throw new Error("Corrective assignment or attempt identity is incomplete");
+      }
+    }
+    var data = await postJson(body);
     if (!data || !data.ok) {
       throw new Error((data && data.error) || "Challenge request failed");
+    }
+    if (k === "corrective" &&
+        (String(data.ref || "").trim().toUpperCase() !== body.ref ||
+         String(data.assignment_id || "").trim().toUpperCase() !== body.assignment_id ||
+         String(data.attempt_id || "").trim().toUpperCase() !== body.attempt_id)) {
+      throw new Error("Challenge response does not match the selected corrective assignment");
     }
     return data;
   }
@@ -143,63 +195,95 @@
     return data;
   }
 
-  async function apweekly(payload) {
+  async function weeklyfiled(payload) {
     var key = ensureKey();
-    return postJson(Object.assign({ action: "apweekly", key: key }, payload));
+    var data = await postJson(Object.assign({ action: "weeklyfiled", key: key }, payload));
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Weekly filing failed");
+    }
+    return data;
   }
 
-  async function apconfirmation(payload) {
+  async function confirmationfiled(payload) {
     var key = ensureKey();
-    return postJson(Object.assign({ action: "apconfirmation", key: key }, payload));
+    var data = await postJson(Object.assign({ action: "confirmationfiled", key: key }, payload));
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Confirmation filing failed");
+    }
+    return data;
+  }
+
+  async function myState() {
+    var key = ensureKey();
+    var data = await postJson({ action: "mystate", key: key });
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "Participant state request failed");
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(data.projectStart || "")) ||
+        typeof data.agreementActive !== "boolean" || !Array.isArray(data.corrective) ||
+        !data.weekly || typeof data.weekly.eligible !== "boolean") {
+      throw new Error("Participant state response is incomplete");
+    }
+    return data;
   }
 
   async function fetchSheetCsv(sheetName) {
-    var c = cfg();
-    if (!c.sheetId) {
-      return mockSheet(sheetName);
+    var feeds = {
+      "Weigh-ins": "/data/weigh-ins.csv",
+      "Violation Log": "/data/violations.csv",
+    };
+    var expected = {
+      "Weigh-ins": ["date", "weight_lb", "note", "photo_front", "photo_left", "photo_rear", "photo_right", "video", "published_at"],
+      "Violation Log": ["id", "date", "violation", "status", "submitted", "resolved", "ap_verification", "corrections", "recording", "published_at"],
+    };
+    var url = feeds[sheetName];
+    if (!url) throw new Error("Unknown public record feed: " + sheetName);
+    var res = await fetch(url, { credentials: "omit", cache: "no-store" });
+    if (!res.ok) throw new Error("Public record feed failed: " + sheetName + " (" + res.status + ")");
+    var text = await res.text();
+    var rows = MRB.csv.parseCsv(text);
+    var header = (rows[0] || []).map(function (value) { return String(value || "").trim().toLowerCase(); });
+    if (header.length !== expected[sheetName].length || expected[sheetName].some(function (value, index) { return header[index] !== value; })) {
+      throw new Error("Public record feed schema mismatch: " + sheetName);
     }
-    var url =
-      "https://docs.google.com/spreadsheets/d/" +
-      encodeURIComponent(c.sheetId) +
-      "/gviz/tq?tqx=out:csv&sheet=" +
-      encodeURIComponent(sheetName);
-    var res = await fetch(url, { credentials: "omit" });
-    if (!res.ok) throw new Error("Sheet fetch failed: " + sheetName + " (" + res.status + ")");
-    return res.text();
-  }
-
-  function mockSheet(sheetName) {
-    if (sheetName === "Weigh-ins" || sheetName.indexOf("Weigh") === 0) {
-      return Promise.resolve(
-        "date,weight_lb,note,photo_front,photo_left,photo_rear,photo_right,video\n" +
-          "2026-08-15,338.2,,,,,,\n" +
-          "8/14/2026,339.0,,,,,,\n" +
-          "2026-08-13,340.0,,,,,,\n"
-      );
+    if (rows.length > 1) {
+      var publishedIndex = header.indexOf("published_at");
+      var stamp = Date.parse(String(rows[1][publishedIndex] || ""));
+      if (!isFinite(stamp) || Date.now() - stamp > 48 * 60 * 60 * 1000 || stamp - Date.now() > 5 * 60 * 1000) {
+        throw new Error("Public record feed is stale: " + sheetName);
+      }
     }
-    // Violation Log with mixed date formats + open entries
-    return Promise.resolve(
-      "date,violation,status,submitted,resolved,ap_verification,corrections\n" +
-        "2026-08-20,Missed inspection,open,2026-08-20,,,\n" +
-        "8/18/2026,Late packet,confirmed — corrective assigned,8/18/2026,,,\n" +
-        "2026-08-15,Missed photos,resolved — verified,2026-08-15,2026-08-16,,\n"
-    );
+    return text;
   }
 
   async function loadRecord() {
-    var weighText = await fetchSheetCsv("Weigh-ins");
-    var violText = await fetchSheetCsv("Violation Log");
+    var manifest = await getJson("/data/feed-manifest.json");
+    var published = Date.parse(manifest && manifest.published_at || "");
+    if (!manifest || manifest.schema_version !== 1 || !isFinite(published) || Date.now() - published > 48 * 60 * 60 * 1000 || published - Date.now() > 5 * 60 * 1000) {
+      throw new Error("Public record feed manifest is missing or stale");
+    }
+    var results = await Promise.all([
+      fetchSheetCsv("Weigh-ins"),
+      fetchSheetCsv("Violation Log"),
+      getJson("/data/supervision.json"),
+    ]);
+    var weighText = results[0];
+    var violText = results[1];
+    var supervision = results[2];
+    if (!supervision || supervision.schema_version !== 1 || typeof supervision.agreement_active !== "boolean" || supervision.published_at !== manifest.published_at) {
+      throw new Error("Agreement status feed is missing or inconsistent");
+    }
     return {
       weighIns: MRB.csv.parseWeighIns(weighText),
       violations: MRB.csv.parseViolationLog(violText),
+      agreementActive: supervision.agreement_active === true,
     };
   }
 
   async function pingServer() {
     var c = cfg();
-    if (!c.execUrl) {
-      return { ok: true, demo: true, message: "Demo mode (no exec URL)" };
-    }
+    if (c.demoMode) return { ok: true, demo: true, message: "Explicit offline demonstration" };
+    if (!c.execUrl) return { ok: false, message: "Apps Script exec URL not set" };
     if (!c.deviceKey) {
       return { ok: false, message: "Device key not set" };
     }
@@ -228,8 +312,9 @@
     attest: attest,
     r2sign: r2sign,
     packet: packet,
-    apweekly: apweekly,
-    apconfirmation: apconfirmation,
+    weeklyfiled: weeklyfiled,
+    confirmationfiled: confirmationfiled,
+    myState: myState,
     loadRecord: loadRecord,
     fetchSheetCsv: fetchSheetCsv,
     pingServer: pingServer,
