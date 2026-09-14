@@ -65,6 +65,7 @@ const PRIVATE_PATHS = new Set([
   'assistant/bundle-sections.json',
   'assistant/js',
   'live/overlay.html',
+  'live/overlay.js',
 ]);
 
 const PUBLIC_EXTENSIONS = new Set([
