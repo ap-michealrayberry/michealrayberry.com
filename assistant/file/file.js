@@ -193,17 +193,16 @@
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
-      "The official record is " + BASE + "/. Recorded through the official Recording Assistant; " +
-      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
-      "Agreement: " + BASE + "/agreement\nContact: ap@michealrayberry.com";
+      "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
+      "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
+      "The record: " + BASE + "/\nThe agreement: " + BASE + "/agreement\nQuestions or reports: " + BASE + "/observer/ · ap@michealrayberry.com";
     if (type === "supervision") {
       return {
         title: "Evening Supervision — Day " + dayN + " · " + ctx.date + brand,
         desc:
-          "Recorded Evening Supervision submission under the proposed §3.4 process, 6:00–10:00 PM ET. " +
-          "Public live video is disabled pending safety review; any archive and status await Accountability Partner review. " +
-          "Console and rules: " + BASE + "/live/" + tail,
+          "Evening Supervision archive for Day " + dayN + " (" + ctx.date + "), 6:00–10:00 PM ET, on a night assigned by the Accountability Partner under §3.4. " +
+          "Fixed camera, normal evening activity, published rules. Status is ruled on the record." +
+          "\nSupervision: " + BASE + "/live/" + tail,
       };
     }
     if (type === "corrective") {
@@ -211,24 +210,25 @@
       return {
         title: "Corrective Session — " + vid + " \u00b7 " + ctx.date + brand,
         desc:
-          "Corrective session filed against " + vid + " on the official record of the Micheal Ray Berry " +
-          "Public Accountability Project. One continuous take. Public: embedded beside the entry at " +
-          "https://michealrayberry.com/violations/" + vid.toLowerCase() + "/" + tail,
+          "Corner time recorded in one continuous unedited take against violation " + vid + ". " +
+          "Filed to the record under §8 and published beside the entry once the Accountability Partner accepts it.\n" +
+          "Entry: " + BASE + "/violations/" + vid.toLowerCase() + "/\nThe standard: " + BASE + "/corrections/" + tail,
       };
     }
     if (type === "consent") {
       return {
-        title: "Consent Statement — Pending Review · " + ctx.date + brand,
+        title: "Recorded Consent Statement · " + ctx.date + brand,
         desc:
-          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement on " +
-          ctx.date + ". The recording alone does not prove comprehension, consent, or agreement execution." + tail,
+          "Micheal Ray Berry's recorded consent to the Public Accountability Project Agreement, made on " + ctx.date + ". " +
+          "The statement is read by a synthetic voice while he appears on camera; participation is confirmed by entering the Inspection position and consent by a deliberate nod inside the timed confirmation window. " +
+          "Submitted to the Accountability Partner for review; the agreement takes effect only when both signatures and this recording are verified.\n" +
+          "Agreement: " + BASE + "/agreement" + tail,
       };
     }
     return {
       title: "Daily Inspection — Day " + dayN + " · " + ctx.date + brand,
       desc:
-        "Standardized four-angle daily inspection for Day " + dayN + " (" + ctx.date + "), " +
-        "filed with the day's weight and four documentation photographs.\n" +
+        "Day " + dayN + " of the record (" + ctx.date + "): the standardized four-angle daily inspection, filed with the day's scale-synced weight and four documentation photographs before the 10:00 PM ET deadline.\n" +
         "Day page: " + BASE + "/daily/" + ctx.date + "-day-" + dayN + "/" + tail,
     };
   }

@@ -504,10 +504,9 @@
     var brand = " | Micheal Ray Berry"; // short suffix survives YouTube's ~70-char truncation; the project name lives in the channel + description
     var dayN = ytPad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
-      "The official record is " + base + "/. Recorded through the official Recording Assistant; " +
-      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
-      "Agreement: " + base + "/agreement\nContact: ap@michealrayberry.com";
+      "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
+      "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
+      "The record: " + base + "/\nThe agreement: " + base + "/agreement\nQuestions or reports: " + base + "/observer/ · ap@michealrayberry.com";
     if (type === "corrective") {
       var ref = String(ctx.vRef || "").trim().toUpperCase();
       if (!/^V-[A-F0-9]{12}$/.test(ref)) {
@@ -516,9 +515,9 @@
       return {
         title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
         desc:
-          "Corner time recorded in one continuous, unedited take against violation " + ref +
+          "Corner time, Level " + (ctx.level || 1) + ", recorded in one continuous unedited take against violation " + ref +
           (ctx.violation ? " — missed requirement: " + ctx.violation + "." : ".") +
-          " Published beside the entry under the proposed §8 process; submission awaits Accountability Partner verification, and the public record remains visible." +
+          " Filed to the record under §8 and published beside the entry once the Accountability Partner accepts it." +
           "\nViolation log: " + base + "/violations/\nThe standard: " + base + "/corrections/" + tail,
       };
     }
@@ -526,17 +525,18 @@
       return {
         title: "Weekly Review — Week " + (ctx.week || "") + " · " + ctx.date + brand,
         desc:
-          "The week read from the record: days documented, the weight, entries still open. " +
-          "Not a consequence — a concise review of the completed week." +
+          "Week " + (ctx.week || "") + " read from the record to camera: days documented, the weight and its change, entries still open. " +
+          "A review of the completed week, not a consequence." +
           "\nWeekly record: " + base + "/weeks/" + tail,
       };
     }
     if (type === "confirmation") {
       return {
-        title: "Consent Statement — Pending Review · " + ctx.date + brand,
+        title: "Recorded Consent Statement · " + ctx.date + brand,
         desc:
-          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement. " +
-          "The recording alone does not prove comprehension, consent, or agreement execution." +
+          "Micheal Ray Berry's recorded consent to the Public Accountability Project Agreement, made on " + ctx.date + ". " +
+          "The statement is read by a synthetic voice while he appears on camera; participation is confirmed by entering the Inspection position and consent by a deliberate nod inside the timed confirmation window. " +
+          "Submitted to the Accountability Partner for review; the agreement takes effect only when both signatures and this recording are verified." +
           "\nAgreement: " + base + "/agreement" + tail,
       };
     }
@@ -544,7 +544,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is August 31, 2026." +
+          "Announcement of the Micheal Ray Berry Public Accountability Project: 340 lb declared start, 200 lb goal, and a daily public documentation standard under a written agreement. Day 1 is August 31, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }
@@ -560,8 +560,7 @@
     return {
       title: "Daily Inspection — Day " + dayN + " · " + ctx.date + brand,
       desc:
-        "Standardized four-angle daily inspection for Day " + dayN + " (" + ctx.date + "), " +
-        "filed with the day's weight and four documentation photographs." +
+        "Day " + dayN + " of the record (" + ctx.date + "): the standardized four-angle daily inspection, filed with the day's scale-synced weight and four documentation photographs before the 10:00 PM ET deadline." +
         "\nDay page: " + base + "/daily/" + ctx.date + "-day-" + dayN + "/" + tail,
     };
   }
