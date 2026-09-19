@@ -1000,7 +1000,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   ];
   const figures = Object.entries(photos).map(([angle, p]) => {
     const srcset = p.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
-    const alt = `Micheal Ray Berry ${imageLabel(angle)} accountability photograph on ${longDate(date)}, Day ${day}, at ${weight.toFixed(1)} pounds`;
+    const alt = `Micheal Ray Berry, Day ${day} daily inspection, ${imageLabel(angle)}, ${longDate(date)}, ${weight.toFixed(1)} lb, project uniform`;
     return `<figure id="${angle}-photo">
       <picture>
         <source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width: 720px) 100vw, 50vw">
@@ -1154,7 +1154,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1327,7 +1327,7 @@ function milestonePage(target, entries) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1428,7 +1428,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1492,7 +1492,7 @@ function weeksIndexPage(entries, lastDay) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1575,7 +1575,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
     const srcset = front.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
     return `<li class="card"><a href="${href}">
       <picture><source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width:720px) 50vw, 25vw">
-      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry front view, Day ${day}, ${longDate(date)}`)}" loading="lazy" decoding="async"></picture>
+      <img src="${htmlEscape(front.sourceUrl)}" width="${front.width}" height="${front.height}" alt="${htmlEscape(`Micheal Ray Berry, Day ${day} daily inspection, front view, ${longDate(date)}`)}" loading="lazy" decoding="async"></picture>
       <div class="meta"><strong>Day ${day}</strong><span>${htmlEscape(longDate(date))}</span><span class="wt">${entry.record.weight.toFixed(1)} lb</span>${dayGrade(date, true, vioByDate, obligationActive, entry.record.deadlineVerdict || '')}</div>
     </a></li>`;
   }).join('\n');
@@ -1710,7 +1710,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -1908,7 +1908,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2057,7 +2057,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2300,7 +2300,7 @@ function violationPage(v, prev, next) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2377,7 +2377,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium neck ring, worn continuously. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -2510,7 +2510,7 @@ function positionsPage(entries, siteState = {}) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -2581,7 +2581,7 @@ function violationsIndexPage(violations) {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -3034,7 +3034,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>
@@ -3065,11 +3065,17 @@ ${records.map((r) => `  <url><loc>${SITE_ORIGIN}/daily/${r.date}-day-${String(r.
 }
 
 function imageSitemap(entries) {
+  const official = `  <url>
+    <loc>${SITE_ORIGIN}/</loc>
+    <image:image><image:loc>${SITE_ORIGIN}/photos/official/micheal-ray-berry-official-front-v2.jpg</image:loc><image:title>Micheal Ray Berry — official photograph, project uniform</image:title><image:caption>Official photograph of Micheal Ray Berry in the Inspection position, project uniform. Public Accountability Project: declared start 340 lb, goal 200 lb, documented daily under his real name.</image:caption></image:image>
+  </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${official}
 ${entries.map(({ record, photos }) => `  <url>
     <loc>${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/</loc>
-${Object.entries(photos).map(([angle, p]) => `    <image:image><image:loc>${xmlEscape(p.sourceUrl)}</image:loc><image:title>${xmlEscape(`Micheal Ray Berry Day ${record.day} ${imageLabel(angle)}`)}</image:title><image:caption>${xmlEscape(`Micheal Ray Berry ${imageLabel(angle)} accountability photograph on ${longDate(record.date)}, at ${record.weight.toFixed(1)} pounds.`)}</image:caption></image:image>`).join('\n')}
+${Object.entries(photos).map(([angle, p]) => `    <image:image><image:loc>${xmlEscape(p.sourceUrl)}</image:loc><image:title>${xmlEscape(`Micheal Ray Berry — Day ${record.day} daily inspection, ${imageLabel(angle)}, ${longDate(record.date)}`)}</image:title><image:caption>${xmlEscape(`Micheal Ray Berry, Day ${record.day} of the public accountability record, ${imageLabel(angle)}, ${longDate(record.date)}. Recorded weight ${record.weight.toFixed(1)} lb. Project uniform.`)}</image:caption></image:image>`).join('\n')}
+    <image:image><image:loc>${SITE_ORIGIN}/cards/${record.date}.png</image:loc><image:title>${xmlEscape(`Micheal Ray Berry — Day ${record.day} report card, ${longDate(record.date)}`)}</image:title><image:caption>${xmlEscape(`Daily report card for Day ${record.day}: recorded weight ${record.weight.toFixed(1)} lb, packet status, and requirements. michealrayberry.com`)}</image:caption></image:image>
   </url>`).join('\n')}
 </urlset>
 `;
@@ -3180,7 +3186,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     </div>
     <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
-      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span></span>
+      <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/observer/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Observer →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
     </div>
   </div></div>`;

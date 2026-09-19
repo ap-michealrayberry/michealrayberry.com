@@ -292,14 +292,14 @@ function computeValues(ctx) {
     openCountLabel: agreementExecuted ? String(openCount) : '—',
     agreementStatus: agreementExecuted
       ? 'agreement executed · ' + openCount + ' unresolved'
-      : 'agreement execution not verified · requirements inactive',
+      : 'agreement pending counter-signature · requirements not yet active',
     projectStatusLabel: agreementExecuted ? 'Under agreement' : 'Public accountability record',
     deadlineHeading: agreementExecuted ? 'Deadline' : 'Proposed deadline',
     deadlineValue: agreementExecuted ? '10:00 PM ET daily' : '10:00 PM ET if activated',
     complianceLabel: !agreementExecuted ? 'Agreement pending — requirements not yet active'
       : openCount > 0 ? (openCount === 1 ? 'One unresolved violation' : openCount + ' unresolved violations')
         : (rawDay < 1 ? 'Record not yet started' : packetDone ? 'Today’s required media and weight filed' : 'Today’s packet due'),
-    todayPacketLabel: !agreementExecuted ? 'No filing is due · execution not verified'
+    todayPacketLabel: !agreementExecuted ? 'Filed daily · counts toward the record once the agreement is active'
       : rawDay < 1 ? '' : (packetDone ? 'Required media and weight filed · ' : 'Due · ') + todayIso,
     _chart: chart,
   };
