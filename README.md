@@ -4,6 +4,7 @@ Static public record, built from the Google Sheet by `scripts/publish.mjs`
 into `dist/`, hosted on **Cloudflare Pages**. DNS at Cloudflare; registrar
 Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
 
+
 ## Cloudflare Pages — one-time setup (AP account)
 
 1. **Add the domain**: Cloudflare → Add a domain → michealrayberry.com → Free.
