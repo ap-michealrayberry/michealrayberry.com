@@ -2629,10 +2629,12 @@ function violationsIndexPage(violations) {
 </html>`;
 }
 
-/* /observer/ — controlled submission channel. Netlify Forms (static HTML,
-   no JS); notifications go to the Accountability Partner only. Nothing
+/* /observer/ — controlled submission channel. Plain form → Pages Function
+   (functions/observer.js) → Turnstile → Apps Script Observer tab; the AP is
+   notified. Nothing
    submitted is published automatically. (Cloudflare Pages variant with
    Turnstile + Apps Script relay is parked — see README.) */
+const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA'; // Cloudflare always-passes test key until the real one is set
 function observerPage() {
   const canonical = `${SITE_ORIGIN}/observer/`;
   const title = 'Observer Submission — Micheal Ray Berry Public Accountability Project';
@@ -2644,8 +2646,7 @@ function observerPage() {
     <p class="lede"><strong>You are observing a public accountability record.</strong></p>
     <p>If you know Micheal personally, want to send encouragement, have a question, or believe a published requirement may have been missed, you may submit a note below.</p>
     <p>Identification is optional. No name or email address is required. Submissions are reviewed by the Accountability Partner. Micheal does not determine whether a report about his own compliance is valid.</p>
-    <form name="observer" method="POST" action="/observer/received/" data-netlify="true" netlify-honeypot="website" style="display:grid;gap:22px;max-width:640px;margin:32px 0 8px">
-      <input type="hidden" name="form-name" value="observer">
+    <form name="observer" method="POST" action="/observer" style="display:grid;gap:22px;max-width:640px;margin:32px 0 8px">
       <p style="display:none"><label>Leave this field empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
       <fieldset style="border:0;padding:0;margin:0;display:grid;gap:10px">
         <legend style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px">Type of submission — required</legend>
@@ -2661,12 +2662,15 @@ function observerPage() {
         <input name="source_url" type="url" maxlength="500" autocomplete="url" placeholder="Where you found or saw this record shared" style="font:16px inherit;padding:11px 14px;border:1px solid var(--rule);background:#fff;color:var(--ink)"></label>
       <label style="display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.5;cursor:pointer"><input type="checkbox" name="quotable" value="yes" style="width:18px;height:18px;margin-top:2px;accent-color:var(--accent)">This message may be quoted anonymously on the public record.</label>
       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div class="cf-turnstile" data-sitekey="${TURNSTILE_SITE_KEY}" data-theme="light" style="margin-bottom:12px"></div>
+        <noscript><p style="margin:0 0 12px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">The verification step needs JavaScript. Without it, write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></noscript>
         <button type="submit" style="font:600 14px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:#fafaf7;border:0;padding:16px 26px;cursor:pointer">Submit to the Accountability Partner</button>
         <p style="margin:0;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Nothing is published automatically. Threats, harassment, or private information about anyone will be discarded and are not part of the record. Ordinary request logs are retained by the hosting provider.</p>
       </div>
     </form>
     <div class="standard" style="margin-top:44px">
       <div><b>Know Micheal personally?</b><p>You are not required to participate. Recognition is an intended part of the public project, but this page does not invite confrontation, workplace involvement, or contact with unrelated people.</p><p style="margin-top:10px"><strong>Questions about the record belong here — not in an argument with Micheal.</strong></p></div>
+      <div><b>If the form returns you here</b><p>A note in the address bar (<code>?error=…</code>) means the verification step failed or the relay was unavailable. Try once more, or write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></div>
       <div><b>What happens to a submission</b><p>The Accountability Partner reads every note. A possible compliance issue is checked against the record and the written rules; if substantiated, the outcome appears in <a href="/updates/">Updates</a> or the <a href="/violations/">Violation Log</a>. Encouragement and recognition stay private unless you marked them quotable and the Partner chooses to quote them.</p></div>
     </div>`;
   return synPage({ title, desc: description, canonical, body });
@@ -2743,9 +2747,9 @@ function sharePage(d) {
     <h2>Questions and governing documents</h2>
     <p>Questions about the record, its rules, or a possible compliance issue should go to the <a href="/observer/">Observer Submission page</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner answers for the official record.</p>
     <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a></p>`;
-  return synPage({ title, desc: description, canonical, body })
+  return (synPage({ title, desc: description, canonical, body })
     .replace('</head>', '<script src="/share.js" defer></script>\n</head>')
-    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${SITE_ORIGIN}${card ? card.png : '/og-image.png'}">`);
+    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${SITE_ORIGIN}${card ? card.png : '/og-image.png'}">`)).replace('</head>', '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>\n</head>');
 }
 
 function observerReceivedPage() {
@@ -3350,7 +3354,7 @@ async function main() {
     /* Required record feed unreadable. The generated
        directories are NOT in the repo — a "successful" deploy without them
        ships a site where /daily/, /about, /agreement all 404. Write the
-       sheet-independent pages, then FAIL the build so Netlify keeps the
+       sheet-independent pages, then FAIL the build so the host keeps the
        last good deploy instead of publishing a gutted one. */
     console.warn('Required record feed unreadable — generating sheet-independent pages, then failing the build.');
     console.warn('Verify the deployment feed URL and its authorized read access, then retry. Do not make the operational workbook public.');

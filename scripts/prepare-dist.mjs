@@ -27,8 +27,6 @@ const FILES = [
   'live.js', 'livenav.js', 'share.js', 'unsw.js',
   'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json',
   'data/weigh-ins.csv', 'data/violations.csv',
-  // Netlify uses this hidden page to discover the observer form at deploy time.
-  'forms.html',
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
   'sitemap-violations.xml',

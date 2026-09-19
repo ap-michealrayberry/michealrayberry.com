@@ -1,50 +1,56 @@
-# Micheal Ray Berry — compatible website update
+# Micheal Ray Berry — michealrayberry.com
 
-This is the smaller update for the existing GitHub → Netlify website.
-It replaces the earlier full-site-sweep proposal. It does not require an
-Apps Script deployment, spreadsheet migration, new data service, new feed URLs,
-or new signing keys. The existing Apps Script and recording/filing JavaScript
-are unchanged from GitHub main at `58fa9dcf1493a8129efc0647069a111420872020`.
+Static public record, built from the Google Sheet by `scripts/publish.mjs`
+into `dist/`, hosted on **Cloudflare Pages**. DNS at Cloudflare; registrar
+Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
 
-## Install in four steps
+## Cloudflare Pages — one-time setup (AP account)
 
-1. Extract `michealrayberry-simple-update.zip`. Open its `UPLOAD` folder.
-2. In GitHub, open `ap-michealrayberry/michealrayberry.com`. Create a branch
-   called `simple-site-update` from `main`. Choose **Add file → Upload files**.
-   Upload everything **inside UPLOAD** to the repository root and commit it to
-   that branch. `package.json` and `netlify.toml` must be at the top level.
-   Upload the files, not the ZIP and not an enclosing UPLOAD folder.
-3. Open a pull request into `main`. Review the Netlify deploy preview when it
-   is available: homepage, Dashboard, Daily Record, one dated entry, Share,
-   Supervision, and the assistant/File screen. Check at phone width too.
-   Use demonstration mode for the assistant check; do not file a test record.
-   If your project does not create previews, run `npm ci`, `npm test`, and
-   `npm run build` in a checkout with Node 24 before merging.
-4. Merge the pull request. The existing Netlify integration builds and
-   publishes automatically. Confirm the production deploy succeeds and check
-   the homepage and Dashboard. If the build fails, Netlify retains the last
-   successful deployment; inspect the build log before retrying.
+1. **Add the domain**: Cloudflare → Add a domain → michealrayberry.com → Free.
+   Or, from Porkbun: Domain → "Your Cloudflare" → Connect (copies the zone).
+   Verify the imported records: A/CNAME for the site, MX + SPF for Porkbun
+   mail. Nameservers move to Cloudflare's two.
+2. **Turnstile**: Cloudflare → Turnstile → Add widget → hostname
+   michealrayberry.com, Managed → copy Site key + Secret key.
+3. **Pages project**: Workers & Pages → Create → Pages → Connect to Git →
+   this repo, branch `main`. Build command `npm run build`. Build output
+   directory `dist`. Root directory blank. (`wrangler.toml` also declares
+   `pages_build_output_dir = "dist"`.)
+4. **Variables & Secrets (Production)** — same names as on Netlify plus four:
+   NODE_VERSION=24 · SITE_ORIGIN=https://michealrayberry.com ·
+   WEIGHINS_CSV, VIOLATION_CSV, ATTESTATION_CSV, CONFIRMATIONS_CSV,
+   SUPERVISION_CSV, UPDATES_CSV, SITE_STATE_CSV · ATTESTATION_SEAL_SECRET
+   (secret) · **TURNSTILE_SITE_KEY** · **TURNSTILE_SECRET** (secret) ·
+   **OBSERVER_SECRET** (secret — same value as `setObserverSecret()` in
+   Code.gs) · **APPS_SCRIPT_URL** (the /exec URL).
+5. **Deploy** → green → check the `*.pages.dev` URL: home, /daily/, one day,
+   /observer/ (Turnstile widget renders), /assistant/ opens in demo mode.
+6. **Custom domains**: Pages → Custom domains → add michealrayberry.com and
+   www.michealrayberry.com (Cloudflare writes the DNS records itself;
+   remove any leftover Netlify A/CNAME).
+7. **Deploy hook**: Pages → Settings → Builds → Deploy hooks → Add (main) →
+   copy URL → Code.gs `setBuildHook('<url>')` → `triggerDeploy()` logs OK.
+8. **Typo domain**: add michaelrayberry.com to Cloudflare the same way, then
+   Rules → Redirect Rules → dynamic 301 to
+   `concat("https://michealrayberry.com", http.request.uri.path)`.
+9. **Verify**, then delete the Netlify site.
 
-There are no manual deletions. The included Netlify configuration automatically
-publishes the generated `dist` folder. Old source files can remain in GitHub;
-they are excluded from the deployed website. Keep existing environment
-variables, Apps Script properties, Google permissions, device keys, and build
-hooks as they are. Do not run `setup()` for this update.
-
-This package uses the code baseline above and preserves later daily photo uploads. If the earlier full-sweep
-backend was separately installed, do not use this package as a backend rollback.
+## Observer submissions
+`functions/observer.js` (Pages Function, POST /observer) → honeypot →
+Turnstile siteverify → JSON to Apps Script action `observer` with
+OBSERVER_SECRET → Observer tab + mail to ap@. Nothing publishes from it.
+The form falls back to Cloudflare's always-pass Turnstile test key until
+TURNSTILE_SITE_KEY is set.
 
 ## Rollback
 
-For an immediate website rollback, open the project in Netlify → **Deploys**,
-select the successful production deploy immediately before this update, and
-choose **Publish Deploy**. Then open the merged GitHub pull request, choose
+For an immediate website rollback, open the project in Cloudflare Pages → the project → **Deployments** → the last good production deployment → **Rollback to this deployment**. Then open the merged GitHub pull request, choose
 **Revert**, and merge the resulting revert pull request so future deployments
 use the previous code. There is no database or Apps Script rollback.
 
 Official instructions: [GitHub uploads](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository),
 [GitHub pull-request reverts](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/reverting-a-pull-request),
-[Netlify rollbacks](https://docs.netlify.com/deploy/manage-deploys/manage-deploys-overview/#rollbacks).
+[Pages rollbacks](https://developers.cloudflare.com/pages/configuration/rollbacks/).
 
 ## What changes
 
@@ -96,7 +102,7 @@ This code update does not execute or amend the accountability agreement.
 
 ## Developer checks
 
-Use Node 24. Netlify selects it automatically from `netlify.toml`.
+Use Node 24. Set NODE_VERSION=24 in the Pages environment.
 
 ```sh
 npm ci
@@ -118,7 +124,7 @@ IndexNow submission remains available as `npm run indexnow` after production
 publication; it is no longer sent while a build is still in progress.
 
 The package was built against the existing Google Sheets feeds. It has not
-been published to GitHub or Netlify. Real recording, Google permissions,
+been published to GitHub or Cloudflare Pages. Real recording, Google permissions,
 and observer form submissions have not been exercised during this update.
 
 Automated builds against the existing feeds passed internal-link, photo-metadata,

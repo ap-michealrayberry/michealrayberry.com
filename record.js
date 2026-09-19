@@ -1,4 +1,4 @@
-/* Refresh only the public snapshot produced by the normal Netlify build. */
+/* Refresh only the public snapshot produced by the normal Pages build. */
 (function () {
   function refresh() {
     fetch('/data/record.json', { cache: 'no-store' }).then(function (r) {
