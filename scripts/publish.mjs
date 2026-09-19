@@ -917,6 +917,45 @@ function cardActions(c, pageUrl) {
   </p>`;
 }
 
+/* Watch page: the inspection video as the page's main content, so Google
+   indexes it as a video result ("video isn't on a watch page" otherwise).
+   One per complete day at /daily/<date>-day-NNN/video/. The day page keeps
+   its own embed; this page is the one the video sitemap points at. */
+function watchPage({ record, photos, previous, next }) {
+  const { date, day, weight, video } = record;
+  const dayPath = `/daily/${date}-day-${String(day).padStart(3, '0')}/`;
+  const canonical = `${SITE_ORIGIN}${dayPath}video/`;
+  const embed = videoEmbed(video);
+  if (!embed && !isSelfHosted(video)) return null;
+  const front = photos.front.sourceUrl;
+  const title = `Day ${day} Daily Inspection — ${longDate(date)} — Micheal Ray Berry`;
+  const description = `Micheal Ray Berry's Day ${day} daily inspection video, ${longDate(date)}: four positions in the project uniform, recorded weight ${weight.toFixed(1)} lb. Public Accountability Project.`;
+  const graph = [
+    { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, datePublished: date, dateModified: date, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` }, primaryImageOfPage: front,
+      mainEntity: { '@id': `${canonical}#video` } },
+    { '@type': 'VideoObject', '@id': `${canonical}#video`, name: `Micheal Ray Berry — Day ${day} daily inspection, ${longDate(date)}`, description, uploadDate: date, thumbnailUrl: [front], contentUrl: isSelfHosted(video) ? video : undefined, embedUrl: embed || undefined, ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}), creator: { '@id': PERSON_ID }, isFamilyFriendly: true },
+    { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumbs`, itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
+      { '@type': 'ListItem', position: 2, name: 'Daily Record', item: `${SITE_ORIGIN}/daily/` },
+      { '@type': 'ListItem', position: 3, name: `Day ${day}`, item: `${SITE_ORIGIN}${dayPath}` },
+      { '@type': 'ListItem', position: 4, name: 'Inspection video', item: canonical } ] },
+  ];
+  const player = isSelfHosted(video)
+    ? `<video controls preload="metadata" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(title)}" style="width:100%;max-width:540px;aspect-ratio:9/16;background:#000;display:block;margin:0 auto"><source src="${htmlEscape(video)}" type="${/\.webm(\?|$)/i.test(video) ? 'video/webm' : 'video/mp4'}"></video>`
+    : `<div style="position:relative;width:100%;max-width:540px;aspect-ratio:9/16;background:#000;margin:0 auto"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(title)}" allow="encrypted-media; picture-in-picture" allowfullscreen loading="eager" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`;
+  const strip = Object.entries(photos).map(([angle, ph]) => `<a href="${dayPath}#${angle}-photo"><img src="${htmlEscape(ph.variants?.[0]?.url || ph.sourceUrl)}" width="${ph.width}" height="${ph.height}" alt="${htmlEscape(`Micheal Ray Berry, Day ${day} daily inspection, ${imageLabel(angle)}, ${longDate(date)}`)}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;border:1px solid var(--rule)"></a>`).join('');
+  const body = `
+    <p class="crumb"><a href="/">Record</a> · <a href="/daily/">The Record</a> · <a href="${dayPath}">Day ${day}</a> · Video</p>
+    <h1 style="font-size:clamp(2rem,5vw,3.4rem)">Day ${day} — Daily Inspection</h1>
+    <p class="lede"><strong>${htmlEscape(longDate(date))} · recorded weight ${weight.toFixed(1)} lb · project uniform.</strong> One continuous take: Wait, Inspection, Left, Rear, Right. The burned-in stamp carries the day, weight, verification code and date.</p>
+    ${player}
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:760px;margin:24px auto 0">${strip}</div>
+    <p style="text-align:center;margin-top:18px"><a href="${dayPath}">Full record for Day ${day} →</a>${previous ? ` · <a href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/video/">← Day ${previous.day}</a>` : ''}${next ? ` · <a href="/daily/${next.date}-day-${String(next.day).padStart(3, '0')}/video/">Day ${next.day} →</a>` : ''}</p>`;
+  return synPage({ title, desc: description, canonical, body })
+    .replace('</head>', `<script type="application/ld+json">${jsonLd({ '@context': 'https://schema.org', '@graph': graph })}</script>\n</head>`)
+    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${htmlEscape(front)}"><meta property="og:type" content="video.other">${embed ? `<meta property="og:video" content="${htmlEscape(embed)}"><meta property="og:video:type" content="text/html"><meta property="og:video:width" content="720"><meta property="og:video:height" content="1280">` : ''}`);
+}
+
 function dailyPage({ record, photos, previous, next, attestation }) {
   const { date, weight, note, video, day } = record;
   const canonical = `${SITE_ORIGIN}/daily/${date}-day-${String(day).padStart(3, '0')}/`;
@@ -1140,7 +1179,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   ${note ? `<p>${htmlEscape(note)}</p>` : ''}
   <p class="attest">${attestation ? `A structurally valid capture-attestation row is recorded: ${htmlEscape(attestation)}. It supports a byte-match comparison but does not independently prove capture time, authorship, or filing timeliness.` : 'The public files are listed with this daily page and its manifest; no accepted capture-attestation row is published for this date.'}</p>
   <section aria-labelledby="photos-heading"><h2 id="photos-heading">Daily accountability photographs</h2><div class="gallery">${figures}</div></section>
-  <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}</section>
+  <section aria-labelledby="video-heading"><h2 id="video-heading">Daily inspection video</h2>${videoHtml}
+    <p class="watch-link" style="margin:8px 0 0;font:600 12px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase"><a href="video/">Watch page for this inspection →</a></p></section>
   <p><a href="/manifests/${date}.json">View the machine-readable manifest and SHA-256 evidence hashes</a></p>
   ${nav}
 </main>
@@ -3059,7 +3099,8 @@ ${violations.map((v) => `  <url>
 function dailySitemap(records) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${records.map((r) => `  <url><loc>${SITE_ORIGIN}/daily/${r.date}-day-${String(r.day).padStart(3, '0')}/</loc><lastmod>${r.date}</lastmod><changefreq>never</changefreq><priority>0.8</priority></url>`).join('\n')}
+${records.map((r) => `  <url><loc>${SITE_ORIGIN}/daily/${r.date}-day-${String(r.day).padStart(3, '0')}/</loc><lastmod>${r.date}</lastmod><changefreq>never</changefreq><priority>0.8</priority></url>
+  <url><loc>${SITE_ORIGIN}/daily/${r.date}-day-${String(r.day).padStart(3, '0')}/video/</loc><lastmod>${r.date}</lastmod><changefreq>never</changefreq><priority>0.7</priority></url>`).join('\n')}
 </urlset>
 `;
 }
@@ -3087,7 +3128,7 @@ function videoSitemap(entries) {
 ${entries.map(({ record, photos }) => {
   const embed = videoEmbed(record.video);
   return `  <url>
-    <loc>${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/</loc>
+    <loc>${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/video/</loc>
     <video:video>
       <video:thumbnail_loc>${xmlEscape(photos.front.sourceUrl)}</video:thumbnail_loc>
       <video:title>${xmlEscape(`Micheal Ray Berry Day ${record.day} daily inspection video`)}</video:title>
@@ -3841,6 +3882,15 @@ async function main() {
     const manifestHash = sha256(Buffer.from(manifestText));
     await writeIfChanged(path.join(ROOT, 'manifests', `${record.date}.sha256`), `${manifestHash}  ${record.date}.json\n`);
     generated.push({ record, photos });
+    {
+      const g = generated.at(-1);
+      const gPrev = generated.at(-2);
+      const wp = watchPage({ record: g.record, photos: g.photos, previous: gPrev ? gPrev.record : null, next: null });
+      if (wp) {
+        const wdir = path.join(ROOT, 'daily', `${g.record.date}-day-${String(g.record.day).padStart(3, '0')}`, 'video');
+        if (await writeIfChanged(path.join(wdir, 'index.html'), wp)) changedUrls.add(`${SITE_ORIGIN}/daily/${g.record.date}-day-${String(g.record.day).padStart(3, '0')}/video/`);
+      }
+    }
   }
 
   const generatedByDate = new Map(generated.map((entry) => [entry.record.date, entry]));

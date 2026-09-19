@@ -97,7 +97,7 @@ function isReviewedDirectoryFile(relativePath) {
   if (REVIEWED_MANIFEST_ASSETS.has(relativePath)) return true;
   return [
     /^cards\/\d{4}-\d{2}-\d{2}\.png$/,
-    /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/index\.html$/,
+    /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/(?:video\/)?index\.html$/,
     /^manifests\/\d{4}-\d{2}-\d{2}\.(?:json|sha256)$/,
     /^milestones\/(?:200|225|250|275|300|320)-lb\/index\.html$/,
     /^violations\/v-[a-f0-9]{12}\/index\.html$/,
