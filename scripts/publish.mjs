@@ -50,6 +50,7 @@ const SHEET_CSV = String(process.env.WEIGHINS_CSV || '').trim();
 const VIOLATION_CSV = String(process.env.VIOLATION_CSV || '').trim();
 const ATTEST_CSV = String(process.env.ATTESTATION_CSV || '').trim();
 const CONFIRMATIONS_CSV = String(process.env.CONFIRMATIONS_CSV || '').trim();
+const RECEIPTS_CSV = String(process.env.RECEIPTS_CSV || '').trim(); // optional: signed daily packet receipts
 const SUPERVISION_CSV = String(process.env.SUPERVISION_CSV || '').trim();
 const UPDATES_CSV = String(process.env.UPDATES_CSV || '').trim();
 const SITE_STATE_CSV = String(process.env.SITE_STATE_CSV || '').trim();
@@ -687,7 +688,17 @@ function publicPhotoDerivative(photo) {
    A card reports public file presence. Adverse compliance language is allowed
    only on/after a fail-closed agreement effective date. Current file presence
    is not proof that every component was filed before its deadline. */
-let CARD_CTX = null; // set by main(): { rows, violations, supervision, agreementActive, agreementEffectiveDate }
+let CARD_CTX = null;
+let CARD_CTX_RECEIPTS = new Map();
+/* Receipt block for a day page. Times are server-stamped ET; the seal lets
+   anyone re-derive the receipt against the record's Attestation rows. */
+function receiptBlock(date) {
+  const r = CARD_CTX_RECEIPTS.get(date); if (!r) return '';
+  const fmt = (iso) => { if (!iso) return '<span style="color:#B3261E">not received</span>'; const d = new Date(iso); if (Number.isNaN(d.getTime())) return htmlEscape(iso); return d.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }) + ' ET'; };
+  const rows = [['Weight', r.weightAt], ['Front', r.frontAt], ['Left', r.leftAt], ['Rear', r.rearAt], ['Right', r.rightAt], ['Video', r.videoAt], ['Attestation', r.attestAt]];
+  const bad = r.verdict !== 'COMPLIANT';
+  return `<section class="standard" style="margin-top:28px"><div style="grid-column:1/-1"><b>Packet receipt · ${htmlEscape(r.verdict)}${bad ? '' : ' · on time'}</b><p style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;margin:6px 0 10px">Deadline 10:00 PM ET · each time below is when that component reached the record, by server clock.</p><table style="font:13px/1.7 'IBM Plex Mono',ui-monospace,monospace;border-collapse:collapse">${rows.map(([k, v]) => `<tr><td style="padding:0 18px 0 0;color:var(--muted)">${k}</td><td>${fmt(v)}</td></tr>`).join('')}</table>${r.attestStatus ? `<p style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;margin:10px 0 0">Attestation: ${htmlEscape(r.attestStatus)}</p>` : ''}${r.missing ? `<p style="font-size:14px;margin:8px 0 0;color:#B3261E">${htmlEscape(r.missing)}</p>` : ''}${r.apDecision ? `<p style="font-size:14px;margin:8px 0 0"><b>Accountability Partner:</b> ${htmlEscape(r.apDecision)}</p>` : ''}${r.corrections ? `<p style="font-size:14px;margin:8px 0 0"><b>Corrections:</b> ${htmlEscape(r.corrections)}</p>` : ''}<p style="font:11px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted);margin:10px 0 0;word-break:break-all">Sealed ${htmlEscape(r.sealedAt)} · ${htmlEscape(r.seal.slice(0, 32))}…</p></div></section>`;
+} // set by main(): { rows, violations, supervision, agreementActive, agreementEffectiveDate }
 function cardStatus(c) {
   if (!c.obligationActive) return c.complete ? 'FILES PRESENT' : c.anyFiled ? 'PARTIAL RECORD' : 'NO RECORD';
   if (c.violation) return c.violation.state === 'open' ? 'VIOLATION' : c.violation.state === 'resolved' ? 'VIOLATION · RESOLVED' : 'VIOLATION · CORRECTED';
@@ -1076,7 +1087,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
   const figures = Object.entries(photos).map(([angle, p]) => {
     const srcset = p.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
     const alt = `Micheal Ray Berry, Day ${day} daily inspection, ${imageLabel(angle)}, ${longDate(date)}, ${weight.toFixed(1)} lb, project uniform`;
-    return `<figure id="${angle}-photo">
+    return `${receiptBlock(date)}
+    <figure id="${angle}-photo">
       <picture>
         <source type="image/webp" srcset="${htmlEscape(srcset)}" sizes="(max-width: 720px) 100vw, 50vw">
         <img src="${htmlEscape(p.sourceUrl)}" width="${p.width}" height="${p.height}" alt="${htmlEscape(alt)}" loading="${angle === 'front' ? 'eager' : 'lazy'}" decoding="async">
@@ -3916,6 +3928,23 @@ async function main() {
     } else throw new Error(`Confirmations schema mismatch; expected ${requiredColumns.join(', ')}.`);
   }
   confirmations.sort((a, b) => a.date.localeCompare(b.date));
+  /* Signed daily receipts (Receipts tab): server-stamped arrival of each
+     component, verdict at 22:00 ET, AP decision, corrections, HMAC seal.
+     Optional feed; when present each day page shows its receipt. */
+  const receipts = new Map();
+  if (RECEIPTS_CSV) {
+    try {
+      const rrows = parseCSV(await fetchText(RECEIPTS_CSV), 'Receipts');
+      const rh = (rrows[0] || []).map(normalizedHeader);
+      const col = (n) => rh.indexOf(n);
+      for (const r of rrows.slice(1)) {
+        const d = normalizeDate(r[col('date')]); if (!isRealIsoDate(d)) continue;
+        const g = (n) => String(r[col(n)] ?? '').trim();
+        receipts.set(d, { date: d, day: Number(g('day')) || null, weightAt: g('weight_at'), frontAt: g('front_at'), leftAt: g('left_at'), rearAt: g('rear_at'), rightAt: g('right_at'), videoAt: g('video_at'), attestAt: g('attest_at'), attestStatus: g('attest_status'), videoSha: g('video_sha256'), verdict: g('verdict'), missing: g('missing'), apDecision: g('ap_decision'), corrections: g('corrections'), sealedAt: g('sealed_at'), seal: g('seal') });
+      }
+    } catch (e) { console.warn('Receipts feed skipped: ' + (e && e.message || e)); }
+  }
+  CARD_CTX_RECEIPTS = receipts;
   /* agreement_edition asserts activation and therefore requires a complete,
      exact tuple; only a deliberately cleared edition may publish inactive. */
   const agreementGate = agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
@@ -4087,6 +4116,7 @@ async function main() {
         weight_lb: record.weight,
         note: record.note,
         video_url: record.video ? new URL(record.video, SITE_ORIGIN).href : '',
+        receipt: CARD_CTX_RECEIPTS.get(record.date) || null,
         evidence: { original_r2_key: record.r2Key || null, stream_uid: record.streamUid || null, stream_playback: record.streamUid ? streamHls(record.streamUid) : null, youtube_mirror: record.video && !isSelfHosted(record.video) ? record.video : null },
         canonical_url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
         attestation: attestMap.get(record.date) || null,

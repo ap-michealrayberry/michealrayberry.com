@@ -1,3 +1,14 @@
+## Packet validator + signed receipts (Sept 20)
+- nightlyComplianceCheck is fail-closed: weight, FOUR distinct photos, video,
+  and a VALID sealed attestation (seal re-derived) — each must have reached
+  the record before 22:00 ET by server time (hidden 'Received' tab stamps
+  first arrival per component). Any read error = not compliant.
+- Receipts tab: one sealed row per day (component times, verdict, missing,
+  AP decision, corrections, HMAC seal). verifyReceipt(date) re-derives it.
+  Console Accept/Reject/Waive append to the receipt.
+- Publisher: optional RECEIPTS_CSV env (published view of the Receipts tab)
+  renders a "Packet receipt" block on each day page and adds it to the manifest.
+
 ## Photos: originals → R2, public copies → repo
 - The assistant PUTs the four angle JPEGs to the private bucket (keys minted by
   /api/media-init alongside the video); Weigh-ins D–G receive 'originals/…'

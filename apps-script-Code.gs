@@ -89,6 +89,12 @@ var TABS = {
   'AP Actions':     ['logged_at', 'actor', 'ip', 'user_agent', 'op', 'args', 'result'],
   /* Where each historical photo original landed in R2 (backfillPhotosToR2). */
   'R2 Photo Keys':  ['date', 'angle', 'r2_key', 'status', 'logged_at'],
+  /* Signed daily packet receipt, written once by the 22:00 check and never
+     rewritten (corrections append to 'corrections'). Component times are the
+     server-stamped moments each part reached the record. 'seal' = HMAC over
+     every field, keyed by SEAL_SECRET — the receipt proves timeliness rather
+     than inferring it from file presence. */
+  'Receipts':       ['date', 'day', 'deadline_et', 'weight_at', 'front_at', 'left_at', 'rear_at', 'right_at', 'video_at', 'attest_at', 'attest_status', 'video_sha256', 'photo_sha256s', 'verdict', 'missing', 'ap_decision', 'corrections', 'sealed_at', 'seal'],
 };
 
 /* §3.4 Evening Supervision — 18:00–22:00 ET. UNTIL FURTHER NOTICE (AP ruling,
@@ -533,6 +539,18 @@ function setup() {
 
 var ANGLE_COLS = { front: 4, left: 5, rear: 6, right: 7 };
 
+/* Server-stamped arrival of each packet component. Written the first time a
+   component reaches the record (never overwritten), read by the nightly
+   receipt. Stored in Site State-like rows on a hidden 'Received' tab:
+   key = date|component, value = ISO server time. */
+function receivedSheet() { var s = ss(); var sh = s.getSheetByName('Received'); if (!sh) { sh = s.insertSheet('Received'); sh.getRange(1, 1, 1, 2).setValues([['key', 'received_at']]).setFontWeight('bold'); sh.hideSheet(); } return sh; }
+var RECEIVED_CACHE = null;
+function receivedAll() { if (RECEIVED_CACHE) return RECEIVED_CACHE; var v = receivedSheet().getDataRange().getValues(); var o = {}; for (var i = 1; i < v.length; i++) if (v[i][0]) o[String(v[i][0])] = v[i][1] instanceof Date ? v[i][1].toISOString() : String(v[i][1] || ''); RECEIVED_CACHE = o; return o; }
+function markReceived(dateIso, component) {
+  var key = dateIso + '|' + component; var all = receivedAll(); if (all[key]) return all[key];
+  var iso = new Date().toISOString(); receivedSheet().appendRow([key, iso]); all[key] = iso; return iso;
+}
+
 /* Named subfolder of the public photos folder (created on first use). */
 function publicSubfolder(name) {
   var root = photosFolder();
@@ -605,6 +623,7 @@ function importPhotos() {
     var cell = sh.getRange(rec.row, col);
     if (String(cell.getValue() || '').trim()) return; // first file per slot is final
     cell.setValue(url);
+    try { markReceived(dateStr, isVid ? 'video' : angle); } catch (e) {}
   });
 }
 
@@ -888,6 +907,7 @@ function handlePacket(obj) {
     for (var v = 1; v < vv.length; v++) if (apDateStr(vv[v][0]) === today) { vrow = v + 1; break; }
     if (!vrow) { vs.appendRow([today]); vrow = vs.getLastRow(); }
     vs.getRange(vrow, 8).setValue(videoUrl); // column H — inspection video
+    try { markReceived(today, 'video'); } catch (e) {}
     var dur = Math.round(Number(obj.duration_sec) || 0);
     if (dur > 0) vs.getRange(vrow, 9).setValue(dur); // column I — recording length in seconds (VideoObject duration)
     handlePacketMediaFields(vs, vrow, obj);
@@ -941,7 +961,7 @@ function handlePacketMediaFields(sh, row, obj) {
   var cols = { front: 4, left: 5, rear: 6, right: 7 };
   Object.keys(cols).forEach(function (a) {
     var k = String(pk[a] || '').trim();
-    if (k && /^originals\//.test(k) && !String(sh.getRange(row, cols[a]).getValue() || '').trim()) sh.getRange(row, cols[a]).setValue(k);
+    if (k && /^originals\//.test(k) && !String(sh.getRange(row, cols[a]).getValue() || '').trim()) { sh.getRange(row, cols[a]).setValue(k); try { markReceived(apDateStr(sh.getRange(row, 1).getValue()), a); } catch (e) {} }
   });
   if (/^[a-f0-9]{32}$/i.test(uid) && !String(sh.getRange(row, 10).getValue() || '').trim()) sh.getRange(row, 10).setValue(uid.toLowerCase());
   if (key && /^originals\//.test(key) && !String(sh.getRange(row, 11).getValue() || '').trim()) sh.getRange(row, 11).setValue(key.slice(0, 200));
@@ -1219,64 +1239,125 @@ function verifySeal(code, videoSha, photoShas, chain, stampedAt, expectedSeal) {
    after the fact and can resolve it with a note under §9. */
 
 function nightlyComplianceCheck() {
-  // Environment follows the record: end-of-day state drives the home.
   importPhotos(); // final scan so a 9:58 PM upload still counts
-  try { withingsSync(); } catch (ew) {} // final weight pull so tonight's reading is on the record
+  try { withingsSync(); } catch (ew) {}
   triggerDeploy(); // the ONE production deploy of the day — photo commits are [skip ci]
 
   var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   if (today < PROJECT_START) return;
+  correctiveDeadlineCheck(today);
 
-  correctiveDeadlineCheck(today); // escalate any 72-hour corrective deadline that lapsed (§8.3)
+  var v = validatePacket(today); // fail-closed: any doubt → not compliant
+  var receipt = writeReceipt(today, v);
+  if (v.ok) return;
 
-  var vals = weighinsSheet().getDataRange().getValues();
-  var row = null;
-  for (var i = 1; i < vals.length; i++) {
-    var d = vals[i][0];
-    var ds = d instanceof Date ? Utilities.formatDate(d, 'America/New_York', 'yyyy-MM-dd') : String(d).trim();
-    if (ds === today) { row = vals[i]; break; }
-  }
-
-  var missing = [];
-  if (!row) missing.push('entire daily row (no weight, no photos)');
-  else {
-    if (!parseFloat(row[1])) missing.push('scale-synced weight (no Withings reading reached the record — step on the scale and let it sync)');
-    if (!String(row[3] || '').trim()) missing.push('front daily photo (column D)');
-  }
-  // Capture attestation: was a daily session attested today (challenge + hashes)?
-  var attested = false;
-  try {
-    var av = attestationSheet().getDataRange().getValues();
-    for (var a = av.length - 1; a >= 1; a--) {
-      var ad = av[a][1];
-      var ads = ad instanceof Date ? Utilities.formatDate(ad, 'America/New_York', 'yyyy-MM-dd') : String(ad).trim();
-      if (ads === today && String(av[a][3]) === 'capture-attested' && String(av[a][5]).indexOf('daily') === 0) { attested = true; break; }
-    }
-  } catch (aerr) { attested = true; }
-  if (!attested) missing.push('capture attestation (no challenge code / file fingerprints logged today)');
-  if (!missing.length) return;
-  var autoDeclared = autoDeclareViolation(today, missing);
-  if (autoDeclared) triggerDeploy(); // violation mode goes live tonight, not tomorrow
-
-  var dayNum = Math.floor((new Date(today) - new Date(PROJECT_START)) / 864e5) + 1;
+  var autoDeclared = autoDeclareViolation(today, v.missing);
+  if (autoDeclared) triggerDeploy();
+  var dayNum = dayOf(today);
   MailApp.sendEmail({
     to: AP_EMAIL,
     subject: 'MRB Day ' + dayNum + ' - 10 PM deadline check: packet incomplete' + (autoDeclared ? ' - VIOLATION V-AUTO DECLARED' : ''),
     body: 'Automated 10 PM ET compliance check for ' + today + ' (Day ' + dayNum + ').\n\n' +
-      'Missing at deadline:\n- ' + missing.join('\n- ') + '\n\n' +
+      'Missing or invalid at deadline:\n- ' + v.missing.join('\n- ') + '\n\n' +
+      'Receipt sealed: ' + receipt.seal.slice(0, 16) + '… (Receipts tab)\n\n' +
       (autoDeclared
-        ? 'AUTO-DECLARATION (AP amendment A2): the system has logged a Violation Event for ' + today + ' on the public record and fired the violation consequence. ' +
-          'The site enters violation mode on tonight\'s deploy. No action is required to uphold it.\n' +
-          'If a documented medical event or verified platform failure (\u00a79) applies, resolve the entry from the record sheet (MRB menu) with a note; the reversal is itself logged.\n\n'
+        ? 'AUTO-DECLARATION: a Violation Event for ' + today + ' is on the log pending your confirmation. If a documented §9 exception applies, waive it from the console with a reason; the waiver is itself logged.\n\n'
         : 'A violation for today is already on the log; no duplicate was added.\n\n') +
-      'All times in this check are Google server time (America/New_York) - the device clock plays no part.\n' +
-      'Cross-check file authenticity against the Attestation tab: hash the received file (shasum -a 256) and compare.\n\n' +
-      'Tracker: https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '\n' +
-      'Console: the MRB menu in the record sheet.\n' +
-      'This is an automated message from the site Apps Script.',
+      'All times are Google server time (America/New_York); the device clock plays no part.\n' +
+      'Console: https://ap.michealrayberry.com/',
   });
-  // He should not learn of the declaration from the website in the morning.
-  try { mrbViolationNotice(today, missing, autoDeclared); } catch (e) {}
+  try { mrbViolationNotice(today, v.missing, autoDeclared); } catch (e) {}
+}
+
+/* Fail-closed packet validation. Every component must be present AND have
+   reached the record before the 22:00 ET deadline by server time, and the
+   day's sealed attestation must be VALID (a stale/unknown code or a sheet
+   error is a failure, never a pass). Returns { ok, missing[], parts }. */
+function validatePacket(today) {
+  var missing = [], parts = { deadline: today + 'T22:00:00', weight_at: '', front_at: '', left_at: '', rear_at: '', right_at: '', video_at: '', attest_at: '', attest_status: '', video_sha256: '', photo_sha256s: '' };
+  var deadlineMs = etToMs(today, 22, 0);
+  var rec = {}; try { rec = receivedAll(); } catch (e) { missing.push('arrival log unreadable (' + e + ')'); }
+  var onTime = function (iso) { var t = iso ? Date.parse(iso) : NaN; return !isNaN(t) && t <= deadlineMs; };
+  var row = null;
+  try {
+    var vals = weighinsSheet().getDataRange().getValues();
+    for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === today) { row = vals[i]; break; }
+  } catch (e) { missing.push('Weigh-ins unreadable (' + e + ')'); }
+  if (!row) missing.push('entire daily row (no weight, no photos, no video)');
+  else {
+    if (!parseFloat(row[1])) missing.push('scale-synced weight (no Withings reading reached the record)');
+    else { parts.weight_at = rec[today + '|weight'] || ''; if (parts.weight_at && !onTime(parts.weight_at)) missing.push('weight arrived after the 10:00 PM deadline (' + parts.weight_at + ')'); }
+    var angles = ['front', 'left', 'rear', 'right'];
+    var seen = {};
+    angles.forEach(function (a, k) {
+      var cell = String(row[3 + k] || '').trim();
+      if (!cell) { missing.push(a + ' photograph (column ' + 'DEFG'[k] + ')'); return; }
+      if (seen[cell]) missing.push(a + ' photograph duplicates another angle'); seen[cell] = true;
+      parts[a + '_at'] = rec[today + '|' + a] || '';
+      if (parts[a + '_at'] && !onTime(parts[a + '_at'])) missing.push(a + ' photograph arrived after the deadline (' + parts[a + '_at'] + ')');
+    });
+    if (!String(row[7] || '').trim()) missing.push('inspection video (column H)');
+    else { parts.video_at = rec[today + '|video'] || ''; if (parts.video_at && !onTime(parts.video_at)) missing.push('inspection video arrived after the deadline (' + parts.video_at + ')'); }
+  }
+  // Sealed attestation: a daily capture-attested row for today whose status begins VALID and whose seal re-derives.
+  try {
+    var av = attestationSheet().getDataRange().getValues(); var found = null;
+    for (var a = av.length - 1; a >= 1; a--) {
+      if (apDateStr(av[a][1]) !== today || String(av[a][3]) !== 'capture-attested' || String(av[a][5]).indexOf('daily') !== 0) continue;
+      found = av[a]; break;
+    }
+    if (!found) missing.push('sealed capture attestation (no daily attestation row for today)');
+    else {
+      parts.attest_at = found[0] instanceof Date ? found[0].toISOString() : String(found[0]);
+      parts.attest_status = String(found[9] || ''); parts.video_sha256 = String(found[6] || ''); parts.photo_sha256s = String(found[7] || '');
+      if (!/^VALID/.test(parts.attest_status)) missing.push('capture attestation not VALID (' + parts.attest_status + ')');
+      var seal = String(found[12] || ''), stamped = String(found[13] || '');
+      var derived = seal && stamped ? sealFor([String(found[4] || ''), parts.video_sha256, parts.photo_sha256s, String(found[10] || ''), stamped].join('|')) : '';
+      if (!seal || derived !== seal) missing.push('attestation seal does not re-derive (row altered or unsealed)');
+      if (!onTime(parts.attest_at)) missing.push('attestation logged after the deadline (' + parts.attest_at + ')');
+    }
+  } catch (e) { missing.push('Attestation tab unreadable (' + e + ') — treated as failed'); }
+  return { ok: missing.length === 0, missing: missing, parts: parts };
+}
+
+function etToMs(dateIso, h, m) {
+  // ET offset for that date via Utilities (handles DST)
+  var probe = new Date(dateIso + 'T12:00:00Z');
+  var etStr = Utilities.formatDate(probe, 'America/New_York', 'Z'); // e.g. -0400
+  var sign = etStr[0] === '-' ? -1 : 1, oh = Number(etStr.slice(1, 3)), om = Number(etStr.slice(3, 5));
+  var offsetMin = sign * (oh * 60 + om);
+  return Date.UTC(Number(dateIso.slice(0, 4)), Number(dateIso.slice(5, 7)) - 1, Number(dateIso.slice(8, 10)), h, m) - offsetMin * 60000;
+}
+
+/* One receipt per day, written by the 22:00 check and never rewritten. AP
+   decisions and later corrections append to their columns. */
+function writeReceipt(today, v) {
+  var sh = tab('Receipts'); var vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === today) return { row: i + 1, seal: String(vals[i][18] || ''), existing: true };
+  var p = v.parts, verdict = v.ok ? 'COMPLIANT' : (p.video_at || p.front_at || p.weight_at ? 'INCOMPLETE' : 'NOT FILED');
+  var sealedAt = new Date().toISOString();
+  var fields = [today, dayOf(today), '22:00 ET', p.weight_at, p.front_at, p.left_at, p.rear_at, p.right_at, p.video_at, p.attest_at, p.attest_status, p.video_sha256, p.photo_sha256s, verdict, v.missing.join('; '), '', '', sealedAt];
+  var seal = sealFor(fields.map(String).join('|'));
+  sh.appendRow(fields.concat([seal]));
+  return { row: sh.getLastRow(), seal: seal, existing: false };
+}
+/* Append an AP decision / correction to a day's receipt (never overwrites). */
+function receiptNote(dateIso, col, text) {
+  var sh = tab('Receipts'); var vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === dateIso) { var c = col === 'ap_decision' ? 16 : 17; var prev = String(vals[i][c - 1] || ''); sh.getRange(i + 1, c).setValue((prev ? prev + '; ' : '') + menuToday() + ': ' + text); return true; }
+  return false;
+}
+/* Re-derive a receipt's seal from its own fields; logs VALID or MISMATCH. */
+function verifyReceipt(dateIso) {
+  var vals = tab('Receipts').getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === dateIso) {
+    var f = vals[i].slice(0, 18).map(function (x, k) { return k === 0 ? apDateStr(x) : (x instanceof Date ? x.toISOString() : String(x)); });
+    f[15] = ''; f[16] = ''; // ap_decision / corrections are appended after sealing and excluded from the seal
+    var got = sealFor(f.join('|'));
+    Logger.log(got === String(vals[i][18]) ? 'RECEIPT VALID for ' + dateIso : 'RECEIPT MISMATCH for ' + dateIso + '\nderived ' + got + '\nstored  ' + vals[i][18]);
+    return got === String(vals[i][18]);
+  }
+  Logger.log('No receipt for ' + dateIso); return false;
 }
 
 /* ═════ 10:20 PM SUPERVISION CHECK (§3.4) ═════
@@ -2223,6 +2304,7 @@ function handleApConsoleInner(obj) {
       var noteR = String(wv2[r2][2] || '');
       ws2.getRange(r2 + 1, 3).setValue((noteR ? noteR + ' ' : '') + '[AP:' + dec + ' ' + today + ']');
       if (dec === 'reject') violationLogSheet().appendRow([rd, String(obj.reason || 'Daily packet rejected on review'), 'Unresolved', '', '', '', 'AP review ' + today, '', '', '']);
+      try { receiptNote(rd, 'ap_decision', dec === 'reject' ? 'REJECTED — ' + String(obj.reason || '') : 'ACCEPTED'); } catch (e) {}
       triggerDeploy();
       return jsonOut({ ok: true });
     }
@@ -2243,6 +2325,7 @@ function handleApConsoleInner(obj) {
     vs3.getRange(rowW, 3).setValue('not enforced');
     var corrW = String(vs3.getRange(rowW, 7).getValue() || '');
     vs3.getRange(rowW, 7).setValue((corrW ? corrW + '; ' : '') + 'Waived under §9: ' + wr + ' (' + today + ')');
+    try { receiptNote(vlRowDate(vs3.getRange(rowW, 1).getValue()), 'corrections', 'Waived under §9: ' + wr); } catch (e) {}
     triggerDeploy();
     return jsonOut({ ok: true });
   }
@@ -2667,7 +2750,7 @@ function autoWeighIn(ds, lb, label) {
     var d0 = vals[i][0];
     var ds0 = d0 instanceof Date ? Utilities.formatDate(d0, 'America/New_York', 'yyyy-MM-dd') : String(d0).trim();
     if (ds0 === ds) {
-      if (Number(vals[i][1]) !== Number(lb)) sh.getRange(i + 1, 2).setValue(lb);
+      if (Number(vals[i][1]) !== Number(lb)) sh.getRange(i + 1, 2).setValue(lb); try { markReceived(ds, 'weight'); } catch (eW) {}
       if (String(vals[i][2] || '').indexOf('scale-synced') === -1) sh.getRange(i + 1, 3).setValue(('' + (vals[i][2] || '')).trim() ? vals[i][2] + ' · ' + label : label);
       return;
     }
