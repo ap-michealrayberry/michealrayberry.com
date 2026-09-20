@@ -57,6 +57,7 @@
   /* ── render ── */
   function render(s) {
     state = s;
+    if ($("banner-mode-now")) $("banner-mode-now").textContent = "now: " + (s.banner_mode || "auto");
     var t = todayEt();
     $("asof").textContent = "Day " + s.day + " · " + longDate(s.today) + " · read " + t.h.toString().padStart(2, "0") + ":" + t.m.toString().padStart(2, "0") + " ET";
     $("today-title").textContent = "Day " + s.day + " · " + longDate(s.today);
@@ -134,7 +135,9 @@
     $("endpoint-label").textContent = "Endpoint " + exec().replace(/^https:\/\/script\.google\.com\/macros\/s\/(.{8}).*$/, "…$1…");
   }
 
+  fetch("/api/ap").then(function (r) { return r.json(); }).then(function (j) { window.STREAM_CUSTOMER_CODE = j.stream_customer_code || ""; }).catch(function () {});
   async function load() {
+    try { setTimeout(loadReview, 0); } catch (e) {}
     try { var s = await api("status"); render(s); $("lock").hidden = true; $("app").hidden = false; $("mast-right").hidden = false; }
     catch (e) { if (/unauthorized|refused/i.test(e.message)) { $("lock").hidden = false; $("app").hidden = true; $("mast-right").hidden = true; $("lock-error").hidden = false; $("lock-error").textContent = "Key not accepted."; } else toast(e.message, true); }
   }
@@ -177,4 +180,75 @@
 
   var t0 = todayEt().iso; $("declare-date").value = t0; $("exception-date").value = t0; $("assign-date").value = t0;
   if (key()) load(); else { $("lock").hidden = false; }
+
+  /* ── Rework: project control, review queue, record, ops ── */
+  function promptReason(label) { var r = prompt(label, ""); return r === null ? null : r.trim(); }
+  function esc2(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function streamEmbed(uid) { var code = (window.STREAM_CUSTOMER_CODE || ""); return code && /^[a-f0-9]{32}$/i.test(uid || "") ? '<iframe src="https://' + code + '.cloudflarestream.com/' + uid + '/iframe?preload=metadata" allow="accelerometer; gyroscope; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" style="width:100%;aspect-ratio:9/16;max-width:240px;border:0;background:#000"></iframe>' : ""; }
+
+  if ($("btn-start-project")) $("btn-start-project").addEventListener("click", async function () {
+    var reason = promptReason("Reason line for the Updates entry (published):"); if (reason === null) return;
+    await act("start_project", { reason: reason || undefined }, { eyebrow: "Agreement", title: "Start the project", danger: true, body: "Marks both signatures and the consent recording as verified by you, sets the effective date to today, and begins enforcement tonight. Flagged misses from before activation are kept on the log as \"not enforced under §9\" — you may confirm any of them individually afterwards.", checks: ["I hold the counter-signed agreement", "I have reviewed the consent recording", "I understand enforcement begins at 10:00 PM ET today"], confirmLabel: "Start project", done: "Project started" });
+  });
+  if ($("btn-resume")) $("btn-resume").addEventListener("click", async function () {
+    var reason = promptReason("Reason (published to Updates):"); if (reason === null) return;
+    await act("resume", { reason: reason }, { eyebrow: "Agreement", title: "Resume enforcement", body: "Restores active status from today.", checks: ["This is a deliberate decision"], confirmLabel: "Resume", done: "Enforcement resumed" });
+  });
+  document.querySelectorAll("[data-banner]").forEach(function (b) {
+    b.addEventListener("click", async function () {
+      var mode = b.getAttribute("data-banner");
+      var reason = mode === "auto" ? "" : promptReason("Reason (logged, not published):"); if (reason === null) return;
+      await act("banner_mode", { mode: mode, reason: reason }, { eyebrow: "Violation banner", title: mode === "auto" ? "Banner follows the record" : mode === "on" ? "Force the banner ON" : "Force the banner OFF", body: mode === "off" ? "Suppresses the red banner and pink hero even while entries are open. Use while reviewing a contested entry. The entries themselves stay on the log." : mode === "on" ? "Shows the banner regardless of the log." : "Banner shows only when the agreement is active and an entry is open.", checks: ["Logged to AP Actions"], confirmLabel: "Set", done: "Banner mode set" });
+    });
+  });
+
+  async function loadReview() {
+    var out = $("review-list"); if (!out) return;
+    out.innerHTML = '<p class="hint">Loading…</p>';
+    try {
+      var r = await api("review_queue");
+      var items = r.items || [];
+      if ($("review-count")) $("review-count").textContent = items.length ? items.length + " pending" : "nothing pending";
+      out.innerHTML = items.length ? items.map(function (it, i) {
+        var head = it.kind === "daily" ? "Day " + it.day + " · " + it.date + " · " + (it.weight || "—") + " lb · " + it.photos + "/4 photos" : it.kind === "corrective" ? "Corrective · " + it.date + " · " + esc2(it.violation) + " · " + esc2(it.status) : "Declared miss · " + it.date + " · " + esc2(it.violation);
+        var media = it.stream_uid ? streamEmbed(it.stream_uid) : (it.video || it.recording) ? '<a href="' + esc2(it.video || it.recording) + '" target="_blank" rel="noopener">Open recording</a>' : '<span class="hint">no video</span>';
+        var actions = it.kind === "daily" ? '<button class="btn" data-rv="accept" data-i="' + i + '">Accept</button><button class="btn ghost danger" data-rv="reject" data-i="' + i + '">Reject → violation</button>' : it.kind === "corrective" ? '<button class="btn" data-rv="resolve" data-i="' + i + '">Accept · resolve</button><button class="btn ghost danger" data-rv="overrule" data-i="' + i + '">Reject · overrule</button>' : '<button class="btn" data-rv="confirm" data-i="' + i + '">Confirm</button><button class="btn ghost" data-rv="waive" data-i="' + i + '">Waive (§9)</button>';
+        return '<div class="item"><div class="item-head">' + head + '</div><div class="item-media">' + media + '</div><div class="row wrap">' + actions + '</div></div>';
+      }).join("") : '<p class="hint">Nothing awaiting review.</p>';
+      out.querySelectorAll("[data-rv]").forEach(function (b) {
+        b.addEventListener("click", async function () {
+          var it = items[Number(b.getAttribute("data-i"))], rv = b.getAttribute("data-rv");
+          if (rv === "accept") await act("review_daily", { date: it.date, decision: "accept" }, null);
+          if (rv === "reject") { var why = promptReason("Reason (becomes the violation text):"); if (why === null) return; await act("review_daily", { date: it.date, decision: "reject", reason: why }, { eyebrow: "Daily packet", title: "Reject and declare a violation", danger: true, body: "Adds an Unresolved entry for " + it.date + ". Enforcement follows automatically.", checks: ["Reviewed against the written standard"], confirmLabel: "Declare", done: "Violation declared" }); }
+          if (rv === "resolve") await act("verify_resolution", { row: it.row }, { eyebrow: "Corrective session", title: "Accept and resolve", body: "Marks the entry Resolved.", checks: ["Identity, uniform, elapsed time, unbroken take all meet the standard"], confirmLabel: "Resolve", done: "Resolved" });
+          if (rv === "overrule") { var w2 = promptReason("Written reason (which standard failed):"); if (w2 === null) return; await act("overrule", { row: it.row, reason: w2 }, { eyebrow: "Corrective session", title: "Overrule", danger: true, body: "Reopens the entry; a replacement session is required.", checks: ["Reason names a written verification standard"], confirmLabel: "Overrule", done: "Overruled" }); }
+          if (rv === "confirm") await act("verify_violation", { row: it.row }, { eyebrow: "Declared miss", title: "Confirm violation", danger: true, body: "Publishes the entry and starts the 72 h corrective window.", checks: ["Evidence reviewed"], confirmLabel: "Confirm", done: "Confirmed" });
+          if (rv === "waive") { var w3 = promptReason("§9 reason (published on the entry):"); if (w3 === null) return; await act("waive", { row: it.row, reason: w3 }, { eyebrow: "Declared miss", title: "Waive under §9", body: "Marks the entry not enforced with the stated reason.", checks: ["A documented §9 exception applies"], confirmLabel: "Waive", done: "Waived" }); }
+          loadReview();
+        });
+      });
+    } catch (e) { out.innerHTML = '<p class="hint">' + esc2(e.message) + '</p>'; }
+  }
+
+  if ($("btn-add-violation")) $("btn-add-violation").addEventListener("click", async function () {
+    var d = prompt("Date (YYYY-MM-DD):", todayEt()); if (!d) return; var what = promptReason("Requirement missed (published text):"); if (!what) return;
+    await act("add_violation", { date: d, violation: what }, { eyebrow: "Violation log", title: "Add a violation", danger: true, body: "Adds an Unresolved entry for " + d + ".", checks: ["Grounded in a written requirement"], confirmLabel: "Add", done: "Added" });
+  });
+  if ($("btn-edit-weighin")) $("btn-edit-weighin").addEventListener("click", async function () {
+    var d = prompt("Date (YYYY-MM-DD):", ""); if (!d) return; var w = prompt("New weight (blank = keep):", ""); if (w === null) return; var n = prompt("Note (blank = keep):", ""); if (n === null) return; var why = promptReason("Reason (logged on the row):"); if (!why) return;
+    await act("edit_weighin", { date: d, weight: w || "", note: n || undefined, reason: why }, { eyebrow: "Weigh-ins", title: "Edit a row", body: "Edits are appended to the note with your reason.", checks: ["Correcting a factual error, not softening the record"], confirmLabel: "Save", done: "Saved" });
+  });
+  if ($("btn-post-update")) $("btn-post-update").addEventListener("click", async function () {
+    var t = prompt("Title:", ""); if (t === null) return; var b = prompt("Body:", ""); if (b === null) return; var l = prompt("Link (optional):", ""); if (l === null) return;
+    await act("post_update", { title: t, body: b, link: l }, { eyebrow: "Updates", title: "Publish an update", body: "Appears on /updates/ and the homepage feed.", checks: ["Text reviewed"], confirmLabel: "Publish", done: "Published" });
+  });
+  if ($("btn-set-uid")) $("btn-set-uid").addEventListener("click", async function () {
+    var d = prompt("Date (YYYY-MM-DD):", ""); if (!d) return; var u = prompt("Stream uid (32 hex):", ""); if (!u) return; var tgt = prompt("daily or corrective?", "daily"); if (!tgt) return;
+    await act("set_stream_uid", { date: d, uid: u, target: tgt }, null);
+  });
+  async function showOps(op, render) { var out = $("ops-out"); out.innerHTML = '<p class="hint">Loading…</p>'; try { var r = await api(op); out.innerHTML = render(r); } catch (e) { out.innerHTML = '<p class="hint">' + esc2(e.message) + '</p>'; } }
+  if ($("btn-actions-log")) $("btn-actions-log").addEventListener("click", function () { showOps("actions_log", function (r) { return (r.rows || []).map(function (x) { return '<div class="item"><div class="item-head">' + esc2(x.at) + ' · ' + esc2(x.op) + ' · ' + esc2(x.actor) + '</div><div class="hint">' + esc2(x.args) + ' → ' + esc2(x.result) + '</div></div>'; }).join("") || '<p class="hint">No actions yet.</p>'; }); });
+  if ($("btn-observer")) $("btn-observer").addEventListener("click", function () { showOps("observer_inbox", function (r) { var rows = r.rows || []; setTimeout(function () { document.querySelectorAll("[data-ob]").forEach(function (b) { b.addEventListener("click", async function () { await api("observer_review", { n: Number(b.getAttribute("data-n")), review: b.getAttribute("data-ob") }); toast("Marked " + b.getAttribute("data-ob")); $("btn-observer").click(); }); }); }, 0); return rows.map(function (x) { return '<div class="item"><div class="item-head">#' + x.n + ' · ' + esc2(x.at) + ' · ' + esc2(x.type) + (x.ref ? ' · ' + esc2(x.ref) : '') + ' · <em>' + esc2(x.review) + '</em></div><p>' + esc2(x.message) + '</p><div class="hint">' + esc2(x.name) + ' ' + esc2(x.email) + ' ' + esc2(x.link) + '</div><div class="row wrap"><button class="btn ghost" data-ob="dismissed" data-n="' + x.n + '">Dismiss</button><button class="btn ghost" data-ob="verified" data-n="' + x.n + '">Verified</button><button class="btn ghost" data-ob="actioned" data-n="' + x.n + '">Actioned</button></div></div>'; }).join("") || '<p class="hint">Inbox empty.</p>'; }); });
+  if ($("btn-media-status")) $("btn-media-status").addEventListener("click", function () { showOps("media_backfill_status", function (r) { return '<div class="item"><div class="item-head">' + r.rows + ' rows with video · ' + r.missing_stream + ' missing Stream uid · ' + r.missing_r2 + ' missing R2 key</div><div class="hint">Run backfillStreamFromDrive() / backfillR2FromDrive() in the script editor until both reach 0.</div></div>'; }); });
+
 })();

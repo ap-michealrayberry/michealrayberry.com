@@ -1,3 +1,12 @@
+## Photos: originals → R2, public copies → repo
+- The assistant PUTs the four angle JPEGs to the private bucket (keys minted by
+  /api/media-init alongside the video); Weigh-ins D–G receive 'originals/…'
+  keys. githubMirrorPhotos (hourly, Code.gs) fetches those from R2 via
+  r2Get_ (needs setCloudflareMedia + setR2Keys) — Drive URLs still work for
+  older rows — and commits the copies to photos/YYYY/MM/DD/ as before, then
+  repoints the cell to the public URL. The build reads repo files only.
+  Drive relay stays as a redundant backup for now.
+
 ## AP console → ap.michealrayberry.com (Cloudflare Access)
 The console left the public site. It lives in ap-site/ as a SEPARATE Pages
 project (root directory ap-site), whole-host behind Cloudflare Access (one

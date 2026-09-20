@@ -50,6 +50,13 @@ export async function onRequestPost({ request, env }) {
   const ext = mime === 'video/webm' ? 'webm' : 'mp4';
   const r2Key = `originals/${date.slice(0, 4)}/${date.slice(5, 7)}/micheal-ray-berry-day-${String(day).padStart(3, '0')}-${stem}-${date}.${ext}`;
   const out = { ok: true, r2_key: r2Key, r2_put_url: await presignPut(env, r2Key, mime) };
+  if (kind === 'daily') {
+    out.photos = {};
+    for (const angle of ['front', 'left', 'rear', 'right']) {
+      const pk = `originals/${date.slice(0, 4)}/${date.slice(5, 7)}/micheal-ray-berry-day-${String(day).padStart(3, '0')}-photo-${angle}-${date}.jpg`;
+      out.photos[angle] = { r2_key: pk, r2_put_url: await presignPut(env, pk, 'image/jpeg') };
+    }
+  }
   if (kind !== 'corrective' || body.publish === true) {
     const meta = { name: `Micheal Ray Berry — Day ${day} ${stem} — ${date}`, date, day: String(day), kind };
     const su = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/stream/direct_upload`, {

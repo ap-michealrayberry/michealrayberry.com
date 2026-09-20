@@ -3906,7 +3906,10 @@ async function main() {
      exact tuple; only a deliberately cleared edition may publish inactive. */
   const agreementGate = agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
   const agreementExecutionActive = agreementGate.active;
-  VIOLATION_MODE = (agreementExecutionActive && violations.some((v) => v.state === 'open')) ? cornerSummaryForShell(violations) : null;
+  const bannerMode = String((siteState && siteState.banner_mode) || 'auto').toLowerCase();
+  const violationAuto = !!((agreementExecutionActive && violations.some((v) => v.state === 'open')));
+  VIOLATION_MODE = bannerMode === 'off' ? null : (bannerMode === 'on' || violationAuto) ? cornerSummaryForShell(violations) : null;
+  if (siteState) siteState.violation_mode_effective = VIOLATION_MODE ? 'true' : 'false';
   const agreementEffectiveDate = agreementGate.effectiveDate;
   const reviewedConfirmationFingerprint = agreementGate.reviewedConfirmationFingerprint;
   siteState.agreement_execution_active = agreementExecutionActive ? 'true' : 'false';

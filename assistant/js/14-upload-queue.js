@@ -283,6 +283,16 @@
       if (!r2.ok) throw new Error("R2 PUT " + r2.status);
       item.r2Key = init.r2_key; await putSession(item);
     }
+    if (init.photos && Array.isArray(item.photos)) {
+      for (var pi = 0; pi < item.photos.length; pi++) {
+        var ph = item.photos[pi]; var slot = init.photos[ph.id];
+        if (!slot || ph.r2Key || !ph.blob) continue;
+        if (statusWriter) statusWriter("Archiving photograph " + (pi + 1) + "/" + item.photos.length);
+        var pr = await fetch(slot.r2_put_url, { method: "PUT", body: ph.blob, headers: { "content-type": "image/jpeg" } });
+        if (!pr.ok) throw new Error("R2 photo PUT " + pr.status);
+        ph.r2Key = slot.r2_key; await putSession(item);
+      }
+    }
     if (!item.streamUid && init.stream_url) {
       if (statusWriter) statusWriter("Uploading playback copy — " + formatBytes(blob.size));
       var fd = new FormData(); fd.append("file", blob, driveName(item, blob));
@@ -501,6 +511,7 @@
         duration_sec: item.durationSec,
         stream_uid: item.streamUid || "",
         r2_key: item.r2Key || "",
+        photo_keys: (item.photos || []).reduce(function (o, ph) { if (ph.r2Key) o[ph.id] = ph.r2Key; return o; }, {}),
         attestation_seal: item.seal,
         finalize: true,
       });

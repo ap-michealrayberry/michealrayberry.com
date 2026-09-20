@@ -29,7 +29,7 @@ async function verifyAccess(request, env) {
   const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64u(s), new TextEncoder().encode(`${h}.${p}`));
   return ok ? payload : null;
 }
-const CONFIRM_REQUIRED = new Set(['activate', 'deactivate', 'declare', 'verify_violation', 'verify_resolution', 'overrule', 'complete', 'abandon_presume', 'abandon_confirm', 'abandon_clear', 'supervision_rule']);
+const CONFIRM_REQUIRED = new Set(['activate', 'deactivate', 'start_project', 'resume', 'banner_mode', 'add_violation', 'waive', 'edit_weighin', 'post_update', 'review_daily', 'declare', 'verify_violation', 'verify_resolution', 'overrule', 'complete', 'abandon_presume', 'abandon_confirm', 'abandon_clear', 'supervision_rule']);
 export async function onRequestPost({ request, env }) {
   const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
   const id = await verifyAccess(request, env);
@@ -44,5 +44,5 @@ export async function onRequestPost({ request, env }) {
 }
 export async function onRequestGet({ request, env }) {
   const id = await verifyAccess(request, env);
-  return new Response(JSON.stringify({ ok: !!id, email: id ? id.email : null }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+  return new Response(JSON.stringify({ ok: !!id, email: id ? id.email : null, stream_customer_code: id ? (env.STREAM_CUSTOMER_CODE || '') : null }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 }

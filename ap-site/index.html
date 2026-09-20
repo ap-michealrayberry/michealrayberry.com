@@ -129,6 +129,47 @@
     <button type="button" class="link" id="btn-signout">Sign out</button>
     <a href="/">Public record</a>
   </footer>
+
+    <section class="panel" id="panel-control">
+      <h2>Project control</h2>
+      <div class="row wrap">
+        <button type="button" class="btn" id="btn-start-project">Start project</button>
+        <button type="button" class="btn ghost" id="btn-resume">Resume enforcement</button>
+        <button type="button" class="btn ghost danger" id="btn-deactivate">Suspend enforcement</button>
+      </div>
+      <div class="row wrap" style="margin-top:14px">
+        <span class="label">Violation banner</span>
+        <button type="button" class="btn ghost" data-banner="auto">Auto</button>
+        <button type="button" class="btn ghost" data-banner="on">Force on</button>
+        <button type="button" class="btn ghost" data-banner="off">Force off</button>
+        <span class="hint" id="banner-mode-now"></span>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-review">
+      <h2>Review queue <span class="hint" id="review-count"></span></h2>
+      <div id="review-list" class="list"></div>
+    </section>
+
+    <section class="panel" id="panel-manage">
+      <h2>Record</h2>
+      <div class="row wrap">
+        <button type="button" class="btn ghost" id="btn-add-violation">Add violation</button>
+        <button type="button" class="btn ghost" id="btn-edit-weighin">Edit a weigh-in</button>
+        <button type="button" class="btn ghost" id="btn-post-update">Post update</button>
+        <button type="button" class="btn ghost" id="btn-set-uid">File a Stream uid</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-ops">
+      <h2>Operations</h2>
+      <div class="row wrap">
+        <button type="button" class="btn ghost" id="btn-actions-log">AP actions log</button>
+        <button type="button" class="btn ghost" id="btn-observer">Observer inbox</button>
+        <button type="button" class="btn ghost" id="btn-media-status">Media backfill status</button>
+      </div>
+      <div id="ops-out" class="list"></div>
+    </section>
 </main>
 
 <div class="sheet-back" id="sheet" hidden>

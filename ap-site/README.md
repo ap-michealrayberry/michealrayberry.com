@@ -23,3 +23,6 @@ identity token and stamps actor/IP/UA into the sheet's **AP Actions** tab.
 Guarded ops (activate, deactivate, declare, verify, overrule, complete,
 abandon, supervision rulings) require the console's confirmation sheet.
 Sign out = /cdn-cgi/access/logout.
+
+## Rework (Sept 20)
+Panels: Project control (Start project / Resume / Suspend; banner Auto·On·Off), Review queue (daily packets → Accept / Reject→violation; corrective → Resolve / Overrule; declared misses → Confirm / Waive §9; inline Stream player), Record (Add violation, Edit weigh-in, Post update, File Stream uid), Operations (AP actions log, Observer inbox with review states, media backfill status). Add STREAM_CUSTOMER_CODE to this project's variables for inline video. Start project marks pre-activation misses "not enforced under §9".

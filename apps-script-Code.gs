@@ -87,6 +87,8 @@ var TABS = {
   /* Every console action, stamped by the Access relay: who (verified email),
      from where, what, and the result. Append-only. */
   'AP Actions':     ['logged_at', 'actor', 'ip', 'user_agent', 'op', 'args', 'result'],
+  /* Where each historical photo original landed in R2 (backfillPhotosToR2). */
+  'R2 Photo Keys':  ['date', 'angle', 'r2_key', 'status', 'logged_at'],
 };
 
 /* §3.4 Evening Supervision — 18:00–22:00 ET. UNTIL FURTHER NOTICE (AP ruling,
@@ -933,6 +935,14 @@ function setR2Keys(accessKeyId, secret) {
 /* Idempotent: never overwrites a filled cell. */
 function handlePacketMediaFields(sh, row, obj) {
   var uid = String(obj.stream_uid || '').trim(), key = String(obj.r2_key || '').trim();
+  // Photo originals in R2: the publisher mirrors any 'originals/…' value in D–G
+  // from the bucket instead of Drive. First value per slot is final.
+  var pk = obj.photo_keys && typeof obj.photo_keys === 'object' ? obj.photo_keys : {};
+  var cols = { front: 4, left: 5, rear: 6, right: 7 };
+  Object.keys(cols).forEach(function (a) {
+    var k = String(pk[a] || '').trim();
+    if (k && /^originals\//.test(k) && !String(sh.getRange(row, cols[a]).getValue() || '').trim()) sh.getRange(row, cols[a]).setValue(k);
+  });
   if (/^[a-f0-9]{32}$/i.test(uid) && !String(sh.getRange(row, 10).getValue() || '').trim()) sh.getRange(row, 10).setValue(uid.toLowerCase());
   if (key && /^originals\//.test(key) && !String(sh.getRange(row, 11).getValue() || '').trim()) sh.getRange(row, 11).setValue(key.slice(0, 200));
 }
@@ -1007,6 +1017,48 @@ function backfillR2FromDrive() {
   }
   Logger.log('R2 backfill: nothing left.');
 }
+/* Historical photo originals → private R2 bucket, one day (4 angles) per run.
+   Source order per angle: the Drive file the sheet cell points at (or pointed
+   at before the mirror repointed it — matched by filename in the photos
+   folder), else the committed repo copy fetched over HTTPS. Records the key in
+   a 'R2 Photo Keys' tab so the sheet's public URLs stay untouched. Re-run
+   until "nothing left". */
+function backfillPhotosToR2() {
+  var p = PropertiesService.getScriptProperties();
+  if (!p.getProperty('R2_ACCOUNT_ID') || !p.getProperty('R2_ACCESS_KEY_ID')) { Logger.log('Run setCloudflareMedia + setR2Keys first.'); return; }
+  var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence', ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
+  var log = tab('R2 Photo Keys'); var doneRows = log.getDataRange().getValues().slice(1); var done = {};
+  doneRows.forEach(function (r) { done[String(r[0]) + '|' + String(r[1])] = true; });
+  var vals = weighinsSheet().getDataRange().getValues(); var angles = ['front', 'left', 'rear', 'right'];
+  for (var r = 1; r < vals.length; r++) {
+    var dateIso = apDateStr(vals[r][0]); if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) continue;
+    var pending = angles.filter(function (a) { return !done[dateIso + '|' + a] && String(vals[r][3 + angles.indexOf(a)] || '').trim(); });
+    if (!pending.length) continue;
+    var day = dayOf(dateIso), okCount = 0;
+    for (var i = 0; i < pending.length; i++) {
+      var a = pending[i], cell = String(vals[r][3 + angles.indexOf(a)] || '').trim();
+      var name = 'micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-' + a + '-' + dateIso + '.jpg';
+      var blob = null;
+      try {
+        if (/^originals\//.test(cell)) { log.appendRow([dateIso, a, cell, 'already-r2', new Date()]); okCount++; continue; }
+        var id = driveIdFromUrl(cell);
+        if (id) blob = DriveApp.getFileById(id).getBlob();
+        else { var f = findDriveBackup_(dateIso, a); if (f) blob = f.getBlob(); }
+        if (!blob && /^https?:/i.test(cell)) { var resp = UrlFetchApp.fetch(cell, { muteHttpExceptions: true, followRedirects: true }); if (resp.getResponseCode() === 200) blob = resp.getBlob(); }
+        if (!blob) { Logger.log(dateIso + ' ' + a + ': no source found'); log.appendRow([dateIso, a, '', 'no-source', new Date()]); continue; }
+        blob.setContentType('image/jpeg');
+        var key = 'originals/' + dateIso.slice(0, 4) + '/' + dateIso.slice(5, 7) + '/micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-photo-' + a + '-' + dateIso + '.jpg';
+        var res = r2Put_(acct, bucket, ak, sk, key, blob);
+        if (res.getResponseCode() >= 300) { Logger.log(dateIso + ' ' + a + ': R2 PUT ' + res.getResponseCode()); return; }
+        log.appendRow([dateIso, a, key, 'archived', new Date()]); okCount++;
+      } catch (e) { Logger.log(dateIso + ' ' + a + ': ' + e); return; }
+    }
+    Logger.log(dateIso + ': ' + okCount + '/' + pending.length + ' photo originals archived. Re-run for the next day.');
+    return;
+  }
+  Logger.log('Photo backfill: nothing left.');
+}
+
 function findDriveBackup_(dateIso, stem) {
   var root = photosFolder(), q = "title contains '" + stem + "-" + dateIso + "'";
   var it = root.searchFiles(q); if (it.hasNext()) return it.next();
@@ -1026,6 +1078,24 @@ function r2Put_(acct, bucket, ak, sk, key, blob) {
   var sig = hex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(sts).getBytes(), k));
   return UrlFetchApp.fetch('https://' + host + uri, { method: 'put', contentType: ct, payload: blob, muteHttpExceptions: true,
     headers: { 'x-amz-date': amz, 'x-amz-content-sha256': ph, Authorization: 'AWS4-HMAC-SHA256 Credential=' + ak + '/' + scope + ', SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=' + sig } });
+}
+/* SigV4 GET from the private R2 bucket; returns a Blob. Used by the photo
+   mirror for 'originals/…' keys filed by the assistant. */
+function r2Get_(key) {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence', ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
+  if (!acct || !ak || !sk) throw new Error('R2 keys not set (setCloudflareMedia + setR2Keys)');
+  var host = acct + '.r2.cloudflarestorage.com';
+  var amz = Utilities.formatDate(new Date(), 'UTC', "yyyyMMdd'T'HHmmss'Z'"), date = amz.slice(0, 8), scope = date + '/auto/s3/aws4_request';
+  var uri = '/' + bucket + '/' + key.split('/').map(encodeURIComponent).join('/');
+  var ph = 'UNSIGNED-PAYLOAD';
+  var canonical = ['GET', uri, '', 'host:' + host, 'x-amz-content-sha256:' + ph, 'x-amz-date:' + amz, '', 'host;x-amz-content-sha256;x-amz-date', ph].join('\n');
+  var sts = ['AWS4-HMAC-SHA256', amz, scope, hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, canonical, Utilities.Charset.UTF_8))].join('\n');
+  var k = hmac_('AWS4' + sk, date); k = hmac_(k, 'auto'); k = hmac_(k, 's3'); k = hmac_(k, 'aws4_request');
+  var sig = hex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(sts).getBytes(), k));
+  var res = UrlFetchApp.fetch('https://' + host + uri, { method: 'get', muteHttpExceptions: true, headers: { 'x-amz-date': amz, 'x-amz-content-sha256': ph, Authorization: 'AWS4-HMAC-SHA256 Credential=' + ak + '/' + scope + ', SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=' + sig } });
+  if (res.getResponseCode() >= 300) throw new Error('R2 GET ' + res.getResponseCode());
+  var b = res.getBlob(); b.setName(key.split('/').pop()); return b;
 }
 function hmac_(key, data) { return Utilities.computeHmacSha256Signature(Utilities.newBlob(data).getBytes(), typeof key === 'string' ? Utilities.newBlob(key).getBytes() : key); }
 function hex_(bytes) { return bytes.map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join(''); }
@@ -2014,6 +2084,132 @@ function handleApConsoleInner(obj) {
     return jsonOut({ ok: true });
   }
 
+  /* ── Project control ── */
+  if (op === 'start_project') {
+    var startWhy = String(obj.reason || 'Agreement counter-signed; enforcement begins today.').trim();
+    var vsP = violationLogSheet(), vvP = vsP.getDataRange().getValues(), marked = 0;
+    for (var pi = 1; pi < vvP.length; pi++) {
+      var stP = String(vvP[pi][2] || '').toLowerCase();
+      if (stP === 'unresolved' || stP === 'open' || stP === 'declared') {
+        vsP.getRange(pi + 1, 3).setValue('not enforced');
+        var corrP = String(vvP[pi][6] || '');
+        vsP.getRange(pi + 1, 7).setValue((corrP ? corrP + '; ' : '') + 'Before activation — not enforced under §9 (' + today + ')');
+        marked++;
+      }
+    }
+    var nowIsoP = new Date().toISOString();
+    ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoP); });
+    stateSet('agreement_effective_date', today);
+    stateSet('banner_mode', 'auto');
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { tab('Updates').appendRow([today, 'official', 'Agreement activated', startWhy + (marked ? ' ' + marked + ' pre-activation entr' + (marked === 1 ? 'y was' : 'ies were') + ' recorded as not enforced under §9.' : ''), '']); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true, marked: marked });
+  }
+  if (op === 'resume') {
+    if (stateGet('agreement_confirmation_verified_at')) return jsonOut({ ok: false, error: 'Already active.' });
+    var nowIsoR = new Date().toISOString();
+    ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoR); });
+    try { tab('Updates').appendRow([today, 'official', 'Enforcement resumed', String(obj.reason || '').trim(), '']); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'banner_mode') {
+    var mode = String(obj.mode || 'auto').toLowerCase();
+    if (['auto', 'on', 'off'].indexOf(mode) === -1) return jsonOut({ ok: false, error: 'mode must be auto|on|off' });
+    stateSet('banner_mode', mode);
+    stateSet('banner_mode_reason', String(obj.reason || '').trim().slice(0, 300));
+    triggerDeploy();
+    return jsonOut({ ok: true, mode: mode });
+  }
+
+  /* ── Review queue ── */
+  if (op === 'review_queue') {
+    var wsQ = weighinsSheet(), wvQ = wsQ.getDataRange().getValues();
+    var vlogQ = violationLogSheet().getDataRange().getValues();
+    var items = [];
+    for (var rq = 1; rq < wvQ.length; rq++) {
+      var dq = apDateStr(wvQ[rq][0]); if (!dq) continue;
+      if (String(wvQ[rq][2] || '').indexOf('[AP:') !== -1) continue;
+      items.push({ kind: 'daily', date: dq, day: dayOf(dq), weight: wvQ[rq][1], video: wvQ[rq][7] || '', stream_uid: wvQ[rq][9] || '', photos: [wvQ[rq][3], wvQ[rq][4], wvQ[rq][5], wvQ[rq][6]].filter(Boolean).length, note: wvQ[rq][2] || '' });
+    }
+    for (var qq = 1; qq < vlogQ.length; qq++) {
+      var vdq = vlRowDate(vlogQ[qq][0]); var vstq = String(vlogQ[qq][2] || '').toLowerCase();
+      var evq = String(vlogQ[qq][8] || ''), resq = String(vlogQ[qq][5] || '');
+      if (vlogQ[qq][7] && !/^APR1\|/.test(resq)) items.push({ kind: 'corrective', row: qq + 1, date: vdq, violation: vlogQ[qq][1], status: vstq, recording: vlogQ[qq][7] || '', stream_uid: vlogQ[qq][9] || '', submitted: vlRowDate(vlogQ[qq][3]) });
+      else if (!/^APV1\|/.test(evq) && vstq !== 'not enforced' && vstq !== 'resolved') items.push({ kind: 'declared', row: qq + 1, date: vdq, violation: vlogQ[qq][1], status: vstq });
+    }
+    items.sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    return jsonOut({ ok: true, items: items.slice(0, 60) });
+  }
+  if (op === 'review_daily') {
+    var rd = String(obj.date || ''), dec = String(obj.decision || '');
+    var ws2 = weighinsSheet(), wv2 = ws2.getDataRange().getValues();
+    for (var r2 = 1; r2 < wv2.length; r2++) if (apDateStr(wv2[r2][0]) === rd) {
+      var noteR = String(wv2[r2][2] || '');
+      ws2.getRange(r2 + 1, 3).setValue((noteR ? noteR + ' ' : '') + '[AP:' + dec + ' ' + today + ']');
+      if (dec === 'reject') violationLogSheet().appendRow([rd, String(obj.reason || 'Daily packet rejected on review'), 'Unresolved', '', '', '', 'AP review ' + today, '', '', '']);
+      triggerDeploy();
+      return jsonOut({ ok: true });
+    }
+    return jsonOut({ ok: false, error: 'No weigh-in row for ' + rd });
+  }
+  if (op === 'add_violation') {
+    var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(obj.date || '')) ? String(obj.date) : today, what = String(obj.violation || '').trim();
+    if (!what) return jsonOut({ ok: false, error: 'violation text required' });
+    violationLogSheet().appendRow([ad, what, 'Unresolved', '', '', '', 'Added by AP ' + today + (obj.reason ? ': ' + String(obj.reason) : ''), '', '', '']);
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'waive') {
+    var wr = String(obj.reason || '').trim(); if (!wr) return jsonOut({ ok: false, error: 'A written §9 reason is required.' });
+    var vs3 = violationLogSheet(), rowW = Number(obj.row) || 0;
+    if (!rowW) { var vv3 = vs3.getDataRange().getValues(); for (var w = 1; w < vv3.length; w++) if (vlRowDate(vv3[w][0]) === String(obj.date || '')) { rowW = w + 1; break; } }
+    if (!(rowW >= 2 && rowW <= vs3.getLastRow())) return jsonOut({ ok: false, error: 'No entry.' });
+    vs3.getRange(rowW, 3).setValue('not enforced');
+    var corrW = String(vs3.getRange(rowW, 7).getValue() || '');
+    vs3.getRange(rowW, 7).setValue((corrW ? corrW + '; ' : '') + 'Waived under §9: ' + wr + ' (' + today + ')');
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'set_stream_uid') {
+    var su = String(obj.uid || '').trim().toLowerCase(), sd = String(obj.date || ''), target = String(obj.target || 'daily');
+    if (!/^[a-f0-9]{32}$/.test(su)) return jsonOut({ ok: false, error: 'bad uid' });
+    var sh4 = target === 'corrective' ? violationLogSheet() : weighinsSheet(); var v4 = sh4.getDataRange().getValues();
+    for (var x = 1; x < v4.length; x++) if ((target === 'corrective' ? vlRowDate(v4[x][0]) : apDateStr(v4[x][0])) === sd) { sh4.getRange(x + 1, 10).setValue(su); triggerDeploy(); return jsonOut({ ok: true }); }
+    return jsonOut({ ok: false, error: 'No row for ' + sd });
+  }
+
+  /* ── Record editing, guarded ── */
+  if (op === 'edit_weighin') {
+    var ed = String(obj.date || ''), er = String(obj.reason || '').trim();
+    if (!er) return jsonOut({ ok: false, error: 'A written reason is required.' });
+    var ws5 = weighinsSheet(), wv5 = ws5.getDataRange().getValues();
+    for (var y = 1; y < wv5.length; y++) if (apDateStr(wv5[y][0]) === ed) {
+      if (obj.weight != null && obj.weight !== '' && !isNaN(Number(obj.weight))) ws5.getRange(y + 1, 2).setValue(Number(obj.weight));
+      if (typeof obj.note === 'string') ws5.getRange(y + 1, 3).setValue(obj.note + ' [AP edit ' + today + ': ' + er + ']');
+      else ws5.getRange(y + 1, 3).setValue(String(wv5[y][2] || '') + ' [AP edit ' + today + ': ' + er + ']');
+      if (obj.clear_photo) { var colC = { front: 4, left: 5, rear: 6, right: 7 }[String(obj.clear_photo)]; if (colC) ws5.getRange(y + 1, colC).setValue(''); }
+      triggerDeploy();
+      return jsonOut({ ok: true });
+    }
+    return jsonOut({ ok: false, error: 'No row for ' + ed });
+  }
+
+  /* ── Ops ── */
+  if (op === 'actions_log') {
+    var al = tab('AP Actions').getDataRange().getValues().slice(1).slice(-50).reverse();
+    return jsonOut({ ok: true, rows: al.map(function (r) { return { at: r[0], actor: r[1], ip: r[2], op: r[4], args: String(r[5] || '').slice(0, 200), result: String(r[6] || '').slice(0, 120) }; }) });
+  }
+  if (op === 'observer_inbox') {
+    var all = tab('Observer').getDataRange().getValues().slice(1);
+    var ob = all.slice(-50).reverse(); var base = all.length;
+    return jsonOut({ ok: true, rows: ob.map(function (r, k) { return { n: base - k, at: r[0], type: r[1], ref: r[2], message: String(r[3] || '').slice(0, 600), name: r[4], email: r[5], link: r[6], review: r[7] }; }) });
+  }
+  if (op === 'media_backfill_status') {
+    var wv6 = weighinsSheet().getDataRange().getValues().slice(1);
+    return jsonOut({ ok: true, rows: wv6.filter(function (r) { return r[7]; }).length, missing_stream: wv6.filter(function (r) { return r[7] && !r[9]; }).length, missing_r2: wv6.filter(function (r) { return r[7] && !r[10]; }).length });
+  }
   return jsonOut({ ok: false, error: 'unknown op' });
 }
 
@@ -2069,6 +2265,7 @@ function apConsoleStatus(today) {
   for (var u = uv.length - 1; u >= 1 && updates.length < 6; u--) updates.push({ date: apDateStr(uv[u][0]), type: String(uv[u][1] || ''), title: String(uv[u][2] || ''), body: String(uv[u][3] || ''), link: String(uv[u][4] || '') });
   var c = latestEdition2Confirmation();
   return {
+    banner_mode: stateGet('banner_mode') || 'auto',
     ok: true, today: today, day: dayOf(today), nowEt: nowEt, start: PROJECT_START,
     packet: { complete: ps.complete, missing: ps.missing },
     weighins: weighins,
@@ -2478,15 +2675,16 @@ function githubMirrorPhotos() {
     for (var a = 0; a < angles.length && pushed < 20; a++) {
       var url = String(vals[r][3 + a] || '').trim();
       if (!url) { missing++; continue; }
-      if (!/^https?:/i.test(url)) { missing++; continue; }
+      var fromR2 = /^originals\//.test(url); // R2 key filed by the assistant
+      if (!fromR2 && !/^https?:/i.test(url)) { missing++; continue; }
 
       var name = 'micheal-ray-berry-day-' + String(day).padStart(3, '0') + '-' + angles[a] + '-' + date + '.jpg';
       var repoPath = 'photos/' + date.slice(0, 4) + '/' + date.slice(5, 7) + '/' + date.slice(8, 10) + '/' + name;
       var publicUrl = 'https://michealrayberry.com/' + repoPath;
       if (done[repoPath]) {
-        // Already in the repo. If the cell still points at Drive, repoint it —
-        // otherwise the sheet keeps a private URL the site cannot serve.
-        if (driveIdFromUrl(url)) {
+        // Already in the repo. If the cell still points at Drive or R2, repoint it —
+        // otherwise the sheet keeps a private reference the site cannot serve.
+        if (fromR2 || driveIdFromUrl(url)) {
           weighinsSheet().getRange(r + 1, 4 + a).setValue(publicUrl);
           repointed++;
         }
@@ -2498,9 +2696,11 @@ function githubMirrorPhotos() {
         // Drive links are read through DriveApp (works on private files);
         // anything else — e.g. an already-public michealrayberry.com URL from
         // the retired mirror — is fetched over HTTP.
-        var id = driveIdFromUrl(url);
+        var id = fromR2 ? null : driveIdFromUrl(url);
         var blob;
-        if (id) {
+        if (fromR2) {
+          blob = r2Get_(url);
+        } else if (id) {
           blob = DriveApp.getFileById(id).getBlob();
         } else {
           var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
@@ -2535,7 +2735,7 @@ function githubMirrorPreview() {
     var day = Math.floor((new Date(date) - new Date(PROJECT_START)) / 864e5) + 1;
     if (day < 1) continue;
     var have = 0;
-    for (var a = 0; a < 4; a++) if (/^https?:/i.test(String(vals[r][3 + a] || '').trim())) have++;
+    for (var a = 0; a < 4; a++) if (/^(https?:|originals\/)/i.test(String(vals[r][3 + a] || '').trim())) have++;
     if (have) out.push('Day ' + day + ' · ' + date + ' · ' + have + '/4 photos' + (have === 4 ? '' : '  ← incomplete, will not publish'));
   }
   Logger.log(out.length ? out.join('\n') : 'No photo URLs found in the Weigh-ins tab.');
