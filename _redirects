@@ -14,8 +14,7 @@
 /annex / 301
 /fagspose/* / 301
 /fagspose / 301
-/protocol/* / 301
-/protocol / 301
+
 
 # The capture instrument is /assistant/ — one tool, five sessions. Every old
 # tool path and the retired portal funnel there.
@@ -65,3 +64,8 @@
 /sw.js /404.html 404!
 /verify/support.js /404.html 404!
 /photos/official/maid-ray-berry-portrait.jpg /404.html 404!
+
+# Observer → Report a Record Issue (Sept 20)
+/observer            /report/            301
+/observer/           /report/            301
+/observer/received/  /report/received/   301

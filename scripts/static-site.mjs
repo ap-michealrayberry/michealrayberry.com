@@ -336,6 +336,8 @@ export async function buildStaticSite(ctx) {
     const scope = Object.assign({}, vals, {
       isHome: v.page === 'home', isDashboard: v.page === 'dashboard', isMilestones: v.page === 'milestones',
       isUniform: v.page === 'uniform', isUpdates: v.page === 'updates', isAbout: v.page === 'about', isAgreement: v.page === 'agreement',
+      isRecordSection: ['milestones', 'updates'].includes(v.page),
+      isProtocolSection: ['uniform', 'agreement'].includes(v.page),
     });
     for (const p of VIEWS) scope['is' + p.page[0].toUpperCase() + p.page.slice(1) + 'Nav'] = v.page === p.page ? 'page' : undefined;
     let body = expand(bodyTpl, scope);

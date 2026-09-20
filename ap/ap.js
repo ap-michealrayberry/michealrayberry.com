@@ -101,7 +101,7 @@
     // observers
     $("observer-list").innerHTML = s.observers.length ? s.observers.map(function (o) {
       var opts = ["received", "dismissed", "verified", "published", "actioned"].map(function (x) { return '<option' + (o.review === x ? " selected" : "") + ">" + x + "</option>"; }).join("");
-      return '<div class="obs"><div class="meta"><span>' + esc(o.received_at) + "</span><span>" + esc(o.type) + "</span>" + (o.name ? "<span>" + esc(o.name) + "</span>" : "") + (o.email ? "<span>" + esc(o.email) + "</span>" : "") + (o.quotable === "yes" ? "<span>quotable</span>" : "") + "</div><p>" + esc(o.message) + "</p>" + (o.source_url ? '<a href="' + esc(o.source_url) + '" target="_blank" rel="noopener">' + esc(o.source_url) + "</a>" : "") +
+      return '<div class="obs"><div class="meta"><span>' + esc(o.received_at) + "</span><span>" + esc(o.type) + (o.record_ref ? " · " + esc(o.record_ref) : "") + "</span>" + (o.name ? "<span>" + esc(o.name) + "</span>" : "") + (o.email ? "<span>" + esc(o.email) + "</span>" : "") + (o.quotable === "yes" ? "<span>quotable</span>" : "") + "</div><p>" + esc(o.message) + "</p>" + (o.source_url ? '<a href="' + esc(o.source_url) + '" target="_blank" rel="noopener">' + esc(o.source_url) + "</a>" : "") +
         '<div class="review"><label>Review <select data-obs-review="' + o.row + '">' + opts + '</select></label><label>Note <input type="text" data-obs-note="' + o.row + '" value="' + esc(o.note) + '"></label><button type="button" class="btn small" data-act="observer_review" data-row="' + o.row + '">Save</button></div></div>';
     }).join("") : '<p class="note">No submissions.</p>';
 

@@ -25,7 +25,7 @@ Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
    **OBSERVER_SECRET** (secret — same value as `setObserverSecret()` in
    Code.gs) · **APPS_SCRIPT_URL** (the /exec URL).
 5. **Deploy** → green → check the `*.pages.dev` URL: home, /daily/, one day,
-   /observer/ (Turnstile widget renders), /assistant/ opens in demo mode.
+   /report/ (Turnstile widget renders), /assistant/ opens in demo mode.
 6. **Custom domains**: Pages → Custom domains → add michealrayberry.com and
    www.michealrayberry.com (Cloudflare writes the DNS records itself;
    remove any leftover Netlify A/CNAME).
@@ -36,9 +36,9 @@ Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
    `concat("https://michealrayberry.com", http.request.uri.path)`.
 9. **Verify**, then delete the Netlify site.
 
-## Observer submissions
-`functions/observer.js` (Pages Function, POST /observer) → honeypot →
-Turnstile siteverify → JSON to Apps Script action `observer` with
+## Report a Record Issue (/report/, formerly /observer/)
+`functions/report.js` → `functions/observer.js` (Pages Function, POST /report) → honeypot →
+Turnstile siteverify → JSON (type, record_ref, message, source_url, name, email) to Apps Script action `observer` with
 OBSERVER_SECRET → Observer tab + mail to ap@. Nothing publishes from it.
 The form falls back to Cloudflare's always-pass Turnstile test key until
 TURNSTILE_SITE_KEY is set.

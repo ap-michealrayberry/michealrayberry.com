@@ -195,7 +195,7 @@
     var tail =
       "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
       "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
-      "The record: " + BASE + "/\nThe agreement: " + BASE + "/agreement\nQuestions or reports: " + BASE + "/observer/ · ap@michealrayberry.com";
+      "The record: " + BASE + "/\nThe agreement: " + BASE + "/agreement\nRecord issues: " + BASE + "/report/ · ap@michealrayberry.com";
     if (type === "supervision") {
       return {
         title: "Evening Supervision — Day " + dayN + " · " + ctx.date + brand,

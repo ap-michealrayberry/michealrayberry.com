@@ -82,7 +82,7 @@
        carries today's status without needing a second element. */
     .rec-lamp { width: 8px; height: 8px; border-radius: 50%; background: #B3261E; flex-shrink: 0; animation: recPulse 2s ease-out infinite; }
     [data-live-nav].is-live { color: #B3261E !important; }
-    [data-live-nav].is-live [data-live-dot] { background: #B3261E; border-color: #B3261E; animation: livepulse 1.6s ease-in-out infinite; }
+    [data-live-nav].is-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block; margin-right: 7px; vertical-align: middle; animation: livepulse 1.6s ease-in-out infinite; }
     @keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
     @keyframes recPulse {
       0%   { box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.55); }
@@ -157,27 +157,36 @@
         <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1;">Micheal Ray Berry</span>
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6B6A64;">Under public accountability</span>
       </a>
-      <nav style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+      <nav aria-label="Site navigation" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
           <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
           <a href="/penalties" onClick="{{ goPenalties }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; padding: 9px 12px; cursor: pointer; color: #FFFFFF; margin-right: 6px; text-decoration: none; display: inline-block;" style-hover="background: #8E1E18;">Active Violation</a>
           </sc-if>
           <a href="/" onClick="{{ goHome }}" aria-current="{{ isHomeNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Home</a>
-          <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">The Record</a>
           <a href="/dashboard" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Dashboard</a>
-          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;"><span data-live-dot style="width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block;"></span><span data-live-label>Supervision</span></a>
+          <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">The Record</a>
+          <a href="/protocol/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Protocol</a>
           <a href="/penalties" onClick="{{ goPenalties }}" aria-current="{{ isPenaltiesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
+          <a href="/about" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; padding: 8px 9px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
+          <a href="/share/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid #141412; padding: 7px 12px; margin-left: 6px; cursor: pointer; color: #141412; text-decoration: none; display: inline-block;" style-hover="background: #141412; color: #FAFAF7;">Share</a>
         </div>
+        <sc-if value="{{ isRecordSection }}" hint-placeholder-val="{{ false }}">
         <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
-          <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection</a>
-          <a href="/uniform" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
-          <a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Corrections</a>
-          <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
-          <a href="/share/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Share</a>
-          <a href="/agreement" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
-          <a href="/about" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
-          <a href="/updates" onClick="{{ goUpdates }}" aria-current="{{ isUpdatesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #6B6A64; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Updates</a>
+          <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Daily record</a>
+          <a href="/weeks/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Weeks</a>
+          <a href="/milestones" onClick="{{ goMilestones }}" aria-current="{{ isMilestonesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Milestones</a>
+          <a href="/updates" onClick="{{ goUpdates }}" aria-current="{{ isUpdatesNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Updates</a>
         </div>
+        </sc-if>
+        <sc-if value="{{ isProtocolSection }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Supervision</a>
+          <a href="/positions/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Inspection</a>
+          <a href="/uniform" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
+          <a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Corrections</a>
+          <a href="/agreement" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; padding: 5px 9px; cursor: pointer; color: #3A3935; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
+        </div>
+        </sc-if>
       </nav>
     </div>
   </header>
@@ -372,7 +381,7 @@
           </div>
           <div style="padding: 28px 0 28px 24px; border-bottom: 1px solid #D8D6CF; border-left: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8983;">03</span>
-            <span style="font-size: 18px; font-weight: 600;">Report broken links or discrepancies through the <a href="/observer/">Observer Submission</a> page or to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</span>
+            <span style="font-size: 18px; font-weight: 600;">Report broken links or discrepancies through the <a href="/report/">Observer Submission</a> page or to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</span>
           </div>
         </div>
       </div>
@@ -634,13 +643,11 @@
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 32px;">Micheal Ray Berry is under public accountability</h1>
         <div style="max-width: 680px; display: flex; flex-direction: column; gap: 16px; font-size: 18px; line-height: 1.65;">
                     <p style="margin: 0;">This record documents an accountability system Micheal Ray Berry voluntarily established by written agreement and deliberately placed outside his day-to-day discretion.</p>
-          <p style="margin: 0;">The Accountability Partner administers the official record and the requirements, and determines whether documented requirements have been satisfied.</p>
+          <p style="margin: 0;">Once the agreement is counter-signed, the Accountability Partner administers the official record and the requirements, and determines whether documented requirements have been satisfied.</p>
           <p style="margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; color: #6B6A64;">What follows is Micheal Ray Berry in the first person. It is his account. He does not administer the record.</p>
           <p style="margin: 0;">My name is Micheal Ray Berry. This website documents a voluntary accountability arrangement between adults I asked for in writing: a weight-loss commitment from a declared 340 pounds, kept under inspection, corrective requirements, and a public record retained for the life of the project. The goal is 200 pounds, held 28 days. The record began on August 31, 2026; the agreement is pending the Accountability Partner’s counter-signature, so its requirements are proposed until that verification is complete. I file the packet daily anyway.</p>
           <p style="margin: 0;">I want structure in real life that I do not get to pick up and put down. Someone else holds the rules, the record, and the consequences. I asked for that because private promises kept failing.</p>
-          <p style="margin: 0;">Once active, the packet is due every day by 10:00 PM Eastern: inspection video, four photographs, weight, tracker update, in the uniform.</p>
-          <p style="margin: 0;">What you see here is still documentation. Weight, packet, uniform, misses. Nothing else. The structure is the point. The photographs are the evidence. The exposure of a public failure record is not an accident of the design — it is part of what I asked for, in writing, within limits I set. I wanted accountability I could not casually take back when compliance became uncomfortable.</p>
-          <p style="margin: 0;">In private I could delay, renegotiate, restart, or stop recording when the results became uncomfortable. This project removes those exits: every day produces a public entry, successful or not, so progress is judged on documented action rather than intention. Up, down, or flat — it gets posted.</p>
+          <p style="margin: 0;">What you see here is documentation. Weight, packet, uniform, misses. Nothing else. The structure is the point; the photographs are the evidence. Up, down, or flat — it gets posted.</p>
         </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 24px;">
@@ -656,20 +663,21 @@
       </div>
     </section>
 
-    <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="The structure I need">
+    <section style="border-bottom: 1px solid #141412; padding: 56px 32px; background: #141412; color: #FAFAF7;" data-screen-label="How the record is administered">
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">Full disclosure</span>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">The Structure Behind This Record</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A8983;">In his own words</span>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 28px; margin: 0;">How the Record Is Administered</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.7;">
-          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. The Accountability Partner administers the official record. I do not.</p>
-          <p style="margin: 0; color: #D8D6CF;">I built this project and this website, and control of the official record sits with the Accountability Partner. That was the point. Previous attempts had the same weakness: I set the rules, which meant I could also move them. An earlier agreement, TF060, failed — <a href="/tf060/" style="color: #FAFAF7; font-weight: 600;">that record is here</a>. Under this project, the daily inspections, uniform, documentation standards, corrective requirements, and public record of failure operate under an agreement that I do not get to renegotiate on a bad day.</p>
-          <p style="margin: 0; color: #D8D6CF;">What I gave up is discretion over whether the results are documented and how compliance is judged.</p>
-          <p style="margin: 0; color: #D8D6CF;">The Accountability Partner administers the requirements, reviews the record, and determines whether a documented requirement has been satisfied. When a violation occurs, it remains part of the record. Every entry on this site is me presenting the required evidence for review by someone who is not me, because a record that I alone could revise whenever it became uncomfortable would defeat the purpose.</p>
-          <p style="margin: 0; color: #D8D6CF;">The uniform is part of that documentation standard: a plain black unitard and the same four recorded angles, so records from different days are directly comparable and presentation cannot make a result look better or worse. The neck ring is different in kind: a plain steel or titanium ring, worn continuously, that I asked for as a standing physical reminder that I am under the agreement — on camera and off. It has no comparison purpose. It is there because I wanted one thing I could not take off when compliance became inconvenient. Its absence from an official recording is a Violation Event (§4.1).</p>
-          <p style="margin: 0; color: #D8D6CF;">This is published under my real name because the accountability is intended to be real and attributable. I participate in the project; I do not unilaterally control its official record. That separation is the mechanism.</p>
-          <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; color: #8A8983;">Voluntarily established and governed by the written agreement below. The arrangement ends only by completion or its terms (§11, §13).</p>
+          <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is not self-directed. Once the agreement is counter-signed, the Accountability Partner administers the official record. I do not.</p>
+          <p style="margin: 0; color: #D8D6CF;">I built this project and this website; control of the official record sits with the Accountability Partner. Previous attempts had the same weakness: I set the rules, which meant I could also move them. An earlier agreement, TF060, failed — <a href="/tf060/" style="color: #FAFAF7; font-weight: 600;">that record is here</a>. Under this one, nothing binds until it is written into the agreement or logged as an amendment I have co-signed, and once it binds I do not get to renegotiate it on a bad day.</p>
+          <p style="margin: 0; color: #D8D6CF;"><strong style="color: #FAFAF7;">Real name.</strong> The record is attached to my legal name because anonymity would weaken it. In the past it was too easy to restart privately, hide a failure, or abandon the process without a lasting record. The point is not branding; it is consequence.</p>
+          <p style="margin: 0; color: #D8D6CF;"><strong style="color: #FAFAF7;">Uniform and ring.</strong> Every official recording is made in a plain black unitard from the same four angles, so records from different days are directly comparable and presentation cannot make a result look better or worse. The neck ring is different in kind: a plain steel or titanium ring, worn continuously, that I asked for as a standing physical reminder that I am under the agreement — on camera and off. It has no comparison purpose. It is the one thing I cannot take off when compliance becomes inconvenient. Its absence from an official recording is a Violation Event (§4.1).</p>
+          <p style="margin: 0; color: #D8D6CF;"><strong style="color: #FAFAF7;">Daily documentation.</strong> Once active, the packet is due every day by 10:00 PM Eastern: a four-angle inspection video, four photographs, the scale-synced weight, and the tracker update. Daily, because long gaps create room for avoidance. It is either completed or it is not.</p>
+          <p style="margin: 0; color: #D8D6CF;"><strong style="color: #FAFAF7;">Misses and corrections.</strong> The record system flags a missed requirement; the Accountability Partner reviews the evidence and any documented exception; the confirmed outcome is published to the <a href="/penalties" onClick="{{ goPenalties }}" style="color: #FAFAF7; font-weight: 600;">Violation Log</a>; a corrective session — corner time, 10 / 20 / 30 minutes by level, recorded in one take — becomes due within 72 hours and is published beside the entry. Entries are retained for the life of the record; the only exceptions are the documented safety/privacy takedown (§8.6) and logged factual corrections.</p>
+          <p style="margin: 0; color: #D8D6CF;"><strong style="color: #FAFAF7;">Progress and scope.</strong> Daily weigh-ins and documented thresholds at 320, 300, 275, 250, 225, and 200 pounds show whether the project is working. Weight fluctuation is progress information, never a violation; only missing or false documentation is. The project enforces documentation, not medicine — medical decisions are made with a physician and sit outside the record (§6.4, §9). Evening Supervision (§3.4) is a proposed requirement, not active, described on the <a href="/protocol/" style="color: #FAFAF7; font-weight: 600;">Protocol</a> page.</p>
+          <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; color: #8A8983;">Voluntarily established and governed by the written agreement. The arrangement ends only by completion or its terms (§11, §13).</p>
         </div>
       </div>
     </section>
@@ -677,132 +685,47 @@
       <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(300px, 2.2fr); gap: 40px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Statement — in his own words</p>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; line-height: 1; margin: 0;">Why Public Exposure Is Part of the System</h2>
+          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 36px; line-height: 1; margin: 0;">Why It Is Public</h2>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.7; max-width: 680px;">
           <p style="margin: 0; font-size: 20px; font-weight: 600;">This project is public on purpose.</p>
-          <p style="margin: 0;">Private promises were too easy for me to renegotiate, postpone, excuse, or quietly abandon. Public accountability removes that comfort. My real name, face, starting point, daily record, missed requirements, and final outcome are attached to the commitment I made.</p>
-          <p style="margin: 0;">That exposure is meant to be uncomfortable.</p>
-          <p style="margin: 0;">I know that coworkers, friends, acquaintances, strangers, and people I may meet years from now can discover this record. I know they may see my weight, my progress photographs, my inspections, my violations, and whether I ultimately kept my word.</p>
-          <p style="margin: 0;">I accepted that deliberately.</p>
-          <p style="margin: 0;">The embarrassment of being visibly out of compliance is part of the pressure that makes the system useful. A missed requirement cannot simply disappear because I would rather forget it. If I fail an inspection requirement, miss documentation, or receive a corrective consequence, the record says so. If I repeatedly fail, the pattern remains visible.</p>
-          <p style="margin: 0;">The same principle applies to abandonment.</p>
-          <p style="margin: 0;">I am free to stop participating. This project does not make withdrawal impossible. But I did not design an easy way to quietly erase the commitment afterward. If I abandon the project before satisfying its completion standard, the public record is intended to say exactly that.</p>
-          <p style="margin: 0; font-size: 20px; font-weight: 600;">ABANDONED is not another word for completed.</p>
-          <p style="margin: 0;">I chose a system in which quitting has an observable consequence because, without one, quitting would always remain the easiest option.</p>
-          <h3 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; margin: 20px 0 0;">Recognition is intentional</h3>
-          <p style="margin: 0;">Someone recognizing me from this project is not a security failure or an accidental side effect. Within the boundaries of the information I have deliberately chosen to publish, recognition is part of the accountability mechanism: there is supposed to be a difference between telling myself privately that I will change and attaching Micheal Ray Berry to a public commitment other people can verify.</p>
-          
-          <h3 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; margin: 20px 0 0;">Exposure has boundaries</h3>
-          <p style="margin: 0;">There is real discomfort in publicly documenting something I would ordinarily prefer to handle privately. I am displaying my starting condition, submitting to inspection requirements, recording failures, and accepting that other people may see them.</p>
-          <p style="margin: 0;">That does not mean anything goes.</p>
-          <p style="margin: 0;">The public project does not authorize harassment, threats, stalking, interference with employment, publication of private information, or unrelated intrusion into my life.</p>
-          <p style="margin: 0;">The discomfort comes from being seen clearly and being held to the standard I chose, not from surrendering basic safety or dignity.</p>
-          <h3 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; margin: 20px 0 0;">Being seen is part of the design</h3>
-          <p style="margin: 0;">I chose to do this under my real name, with my face and my daily record in the open. Wide visibility isn't a side effect I'm tolerating; it's one of the things I asked for. The more people who can see whether I keep my word, the harder it is to quietly stop keeping it — including on the days I fall short.</p>
-          <p style="margin: 0;">Anyone may link to this record, quote it unaltered, or repost its public material in context. The <a href="/share/" style="color: #141412; font-weight: 600;">Share page</a> has what an outside party needs. My published limits still apply.</p>
+          <p style="margin: 0;">Private promises were too easy for me to renegotiate, postpone, excuse, or quietly abandon. Public accountability removes that comfort. My real name, face, starting point, daily record, missed requirements, and final outcome are attached to the commitment I made, and that exposure is meant to be uncomfortable.</p>
+          <p style="margin: 0;">I know that coworkers, friends, acquaintances, strangers, and people I may meet years from now can find this record and see my weight, my photographs, my inspections, my violations, and whether I kept my word. I accepted that deliberately. Being recognized from it is not an accident of the design; it is part of the mechanism, because there is supposed to be a difference between telling myself privately that I will change and attaching my name to a commitment other people can verify.</p>
+          <p style="margin: 0;">I am free to stop. The project does not make withdrawal impossible. But I did not build an easy way to erase the commitment afterward: if I abandon it before the completion standard is met, the record is designed to say exactly that. Abandoned is not another word for completed. I chose a system in which quitting has an observable consequence, because without one quitting would always be the easiest option.</p>
+          <p style="margin: 0;">That does not mean anything goes. The public project does not authorize harassment, threats, stalking, interference with my employment, publication of private information, or intrusion into my life. The discomfort comes from being seen clearly and held to the standard I chose — not from surrendering basic safety or dignity.</p>
+          <p style="margin: 0;">Anyone may link to this record, quote it unaltered, or repost its public material in context; the <a href="/share/" style="color: #141412; font-weight: 600;">Share page</a> has what an outside party needs. If I complete this, nobody will be able to dismiss the result as another promise or another restart. The same retention that makes failure uncomfortable is what gives completion meaning.</p>
         </div>
       </div>
     </section>
-
-
-    <section style="border-bottom: 1px solid #141412; padding: 64px 32px 72px; background: #F1F0EA;">
-      <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
-        <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;">
-          <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Position open — Savannah, Georgia</p>
-          <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Local Accountability Partner</h2>
-          <p style="margin: 0; font-size: 16px; line-height: 1.65;">The record is administered remotely. The agreement provides (§3.2) for a second, local Accountability Partner — engaged by signed amendment — to verify in person what the camera can only attest. Scope and requirements are set in writing under the agreement; nothing binds until written, logged publicly, and co-signed. Identity stays private (§12.2).</p>
-        </div>
-        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">Apply to the Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a></p>
-      </div>
-    </section>
-
-    <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr)); gap: 0 72px;">
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">01</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Why My Real Name Is Used</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">This project is attached to my real legal name because anonymity would weaken the accountability. In the past, it has been too easy to restart privately, hide failure, change direction, or abandon the process without a lasting public record.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The point is not branding. The point is consequence.</p>
-          </div>
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">02</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Why the Attire Is Standardized</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Required photos and videos are recorded in the project uniform so that changes are visible, comparisons are consistent, and the record cannot be softened by flattering clothing, angles, or presentation. Its purpose is documentation.</p>
-            
-          </div>
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">03</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Daily Documentation</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Every day by 10:00 PM Eastern: a four-angle inspection video published to the official record and posted publicly to YouTube, four daily photos, a weight entry, and a tracker update. Daily documentation exists because long gaps create room for avoidance.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The required update is either completed or it is not.</p>
-          </div>
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">04</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Evening Supervision</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Evening Supervision is a proposed requirement (§3.4). It is not active: public supervision video is disabled pending the Accountability Partner’s consent, privacy, and physical-safety review, and no night has been assigned. What follows is the proposed standard as written.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">The standard session runs from 6:00 PM through 10:00 PM Eastern. A fixed camera observes the monitored living areas while normal evening activity continues. The purpose is not entertainment or performance. The purpose is to make the period in which private decisions are easiest to renegotiate publicly observable.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">During Evening Supervision, the prescribed project uniform is required in monitored areas. Published food, beverage, household-order, and documentation requirements remain in force.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Necessary private activity remains private. Bathrooms, changing, confidential work material, private communications, visitors who have not consented to appearing, and other legitimately sensitive matters are not part of the public record.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Once active, a required session ends as COMPLETED, EXCEPTION, or MISSED, and a missed session is handled under the violation and corrective requirements. <a href="/live/" style="color: #141412; font-weight: 600;">Current status on the supervision page &rarr;</a></p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The camera does not make the decision. It makes the decision observable.</p>
-          </div>
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">05</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Progress and Milestones</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Daily weigh-ins in the public tracker and documented milestone weigh-ins at 320, 300, 275, 250, 225, and 200 pounds track whether the project is actually working. Weight fluctuation is recorded as progress information — only missing or false documentation is a violation.</p>
-                        <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The record is based on visible documentation and measurable results — not motivation, explanations, or intentions.</p>
-          </div>
-          <div style="padding: 56px 0; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 14px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">06</span>
-            <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; margin: 0;">Missed Requirements and Consequences</h2>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65;">Missed requirements are documented publicly. If I fail to meet a requirement, the miss is recorded in the public Violation Log and retained — the date, the requirement missed, the status, when the correction was submitted, when it was resolved, and the Accountability Partner's verification result. The correction is public too: corner time, recorded in one unbroken take, posted to the official channel, and published beside the entry that caused it — and it stays there after it is served. A consequence nobody can see is one I would eventually learn to discount, and I have discounted enough already.</p>
-            <p style="margin: 0; font-size: 16px; line-height: 1.65; font-weight: 600;">The purpose is not drama. The purpose is enforcement.</p>
-          </div>
-          
-        </div>
-      </div>
-    </section>
-
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px 80px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;">
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Questions, answered plainly</h2>
+        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 36px; margin: 0;">Questions, answered plainly</h2>
         <div style="display: flex; flex-direction: column; gap: 0; border: 1px solid #141412; max-width: 860px;">
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this real?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Real name, real face, documented daily from August 31, 2026, under an agreement I signed that is pending the Accountability Partner’s counter-signature. Every claim on this site is verifiable against the public tracker, the photo archive, and the video archive.</p>
-          </div>
-          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
-            <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this really is the Micheal Ray Berry you know, and the results are under his real name.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">You are welcome to mention that you found the project. In fact, knowing that someone from his ordinary life may casually say, “I saw your accountability site,” is part of the pressure Micheal deliberately chose.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">You do not need to pretend you never saw it just to spare him the embarrassment. Recognition is part of how the accountability works.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice a possible missed requirement, inconsistency, or something the public record should address, do not argue with Micheal about it. Use the <a href="/observer/" style="color: #B3261E; font-weight: 600;">Observer Submission</a> page (no name or email required) or write to <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>. The Accountability Partner reviews compliance; Micheal does not grade himself.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">A friendly mention is welcome. Harassment, workplace interference, unwanted confrontation, or intrusion into private life is not.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Yes. Real name, real face, documented daily from August 31, 2026, under an agreement I signed that is pending the Accountability Partner’s counter-signature. Every figure on this site traces to the public tracker, the photo archive, and the video archive.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this voluntary?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Entirely. I designed this system, asked for it in writing, and signed it — precisely because voluntary private promises kept failing. The Accountability Partner will administer the structure once it is counter-signed; he did not impose it.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Entirely. I designed the system, asked for it in writing, and signed it — precisely because voluntary private promises kept failing. The Accountability Partner will administer the structure once it is counter-signed; he did not impose it, and no new requirement binds unless I co-sign the amendment.</p>
+          </div>
+          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this is the Micheal Ray Berry you know, and the results are under his real name. You are welcome to mention that you found it; knowing that someone from his ordinary life may say “I saw your accountability site” is part of the pressure he chose. You do not need to pretend you never saw it.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice a possible missed requirement or an error in the record, do not argue with Micheal about it. Use <a href="/report/" style="color: #141412; font-weight: 600;">Report a Record Issue</a> or write to <a href="mailto:ap@michealrayberry.com" style="color: #141412; font-weight: 600;">ap@michealrayberry.com</a>; the Accountability Partner reviews compliance. A friendly mention is welcome. Harassment, workplace interference, or intrusion into private life is not.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Can he delete this site or quietly quit?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Not unilaterally. The Accountability Partner administers the live site, the domain, and the sheet. Published versions are archived and timestamped — changing the live page does not erase them. That makes an attempt harder to hide, not impossible. Thirty days of silence or an attempt to take the record down is supposed to convert the site to an abandonment record, under the agreement.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Not unilaterally. The Accountability Partner administers the live site, the domain, and the record sheet. Published versions are archived and timestamped, so changing the live page does not erase them — it makes an attempt harder to hide, not impossible. Under the agreement, thirty days of silence or an attempt to take the record down converts the site to an abandonment record.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is the weight loss medically supervised?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">The project enforces documentation, not medicine; medical decisions are made with a physician and sit outside the record (§6.4, §9). Violations are documentation failures; ordinary weight fluctuation is never a violation.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">The project enforces documentation, not medicine; medical decisions are made with a physician and sit outside the record (§6.4, §9). Violations are documentation failures. Ordinary weight fluctuation is never a violation.</p>
           </div>
-          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
+          <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">When does it end?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">One way: 200 pounds, held for 28 consecutive days under the verification standard. Then the site converts to a permanent completion record. There is no other ending that isn't public.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">One way: 200 pounds, held for 28 consecutive days under the verification standard. Then the site converts to a completion record. Any other ending — abandonment or termination — is also recorded, publicly, under the agreement’s terms (§11).</p>
           </div>
-          <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
-            <span style="font-size: 17px; font-weight: 600;">What does the record show?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Weigh-ins, four-angle inspection photographs and video, the violation log, and corrective recordings — every photograph and recording in the full project uniform. Verification photographs stay private.</p>
-          <p style="margin: 0; font-size: 16px; line-height: 1.65;">To write to me directly — not about compliance: <a href="mailto:mrb@michealrayberry.com" style="color: #141412; font-weight: 600;">mrb@michealrayberry.com</a>. Anything about the record goes to the Accountability Partner.</p>
-          </div>
-          
         </div>
       </div>
     </section>
@@ -1140,7 +1063,7 @@
       <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">A voluntary accountability arrangement between adults, documented with written consent and defined limits. <a href="/agreement" style="color: #FAFAF7;" style-hover="color: #B3261E;">Consent &amp; boundaries</a></p>
       <div style="border-top: 1px solid #3A3935; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">
         <span style="display: flex; gap: 6px 20px; flex-wrap: wrap;"><span style="white-space: nowrap;">Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">ap@michealrayberry.com</a></span><span style="white-space: nowrap;">Participant: <a href="mailto:mrb@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">mrb@michealrayberry.com</a></span></span>
-        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/share/" style="color: #FAFAF7; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Share</a> <a href="/observer/" style="color: #FAFAF7; text-decoration: none; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Observer →</a><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
+        <span style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/share/" style="color: #FAFAF7; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Share</a> <a href="/report/" style="color: #FAFAF7; text-decoration: none; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Report an issue →</a><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
       </div>
     </div>
   </footer>

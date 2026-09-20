@@ -5146,7 +5146,7 @@
     var tail =
       "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
       "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
-      "The record: " + base + "/\nThe agreement: " + base + "/agreement\nQuestions or reports: " + base + "/observer/ · ap@michealrayberry.com";
+      "The record: " + base + "/\nThe agreement: " + base + "/agreement\nRecord issues: " + base + "/report/ · ap@michealrayberry.com";
     if (type === "corrective") {
       var ref = String(ctx.vRef || "").trim().toUpperCase();
       if (!/^V-[A-F0-9]{12}$/.test(ref)) {

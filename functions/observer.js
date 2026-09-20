@@ -1,4 +1,4 @@
-/* Cloudflare Pages Function — POST /observer
+/* Cloudflare Pages Function — POST /report (file kept as observer.js; routed via functions/report.js)
    Receives the Observer Submission form, verifies Turnstile, relays the
    fields server-side to the record's Apps Script (action 'observer') with a
    shared secret, then redirects. Nothing is stored here.
@@ -8,7 +8,7 @@
      APPS_SCRIPT_URL    the record script's /exec URL */
 export async function onRequestPost({ request, env }) {
   const origin = new URL(request.url).origin;
-  const back = (q) => Response.redirect(origin + '/observer/' + (q ? '?' + q : ''), 303);
+  const back = (q) => Response.redirect(origin + '/report/' + (q ? '?' + q : ''), 303);
   let form;
   try { form = await request.formData(); } catch { return back('error=form'); }
   if (String(form.get('website') || '').trim()) return back('error=spam');
@@ -24,7 +24,8 @@ export async function onRequestPost({ request, env }) {
   if (!tv.success) return back('error=verify');
   const payload = {
     action: 'observer', secret: env.OBSERVER_SECRET,
-    type: String(form.get('type') || 'Other').slice(0, 60),
+    type: String(form.get('type') || 'Question for the Accountability Partner').slice(0, 60),
+    record_ref: String(form.get('record_ref') || '').slice(0, 40),
     message: message.slice(0, 4000),
     name: String(form.get('name') || '').slice(0, 120),
     email: String(form.get('email') || '').slice(0, 200),
@@ -33,7 +34,7 @@ export async function onRequestPost({ request, env }) {
   };
   const res = await fetch(env.APPS_SCRIPT_URL, { method: 'POST', redirect: 'follow', headers: { 'content-type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
     .then((r) => r.json()).catch(() => ({ ok: false }));
-  return res && res.ok ? Response.redirect(origin + '/observer/received/', 303) : back('error=relay');
+  return res && res.ok ? Response.redirect(origin + '/report/received/', 303) : back('error=relay');
 }
 /* No onRequestGet: Pages treats /observer and /observer/ as the same route,
    so a GET redirect here loops against the static /observer/index.html. GET

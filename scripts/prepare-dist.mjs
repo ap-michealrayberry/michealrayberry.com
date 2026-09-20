@@ -35,7 +35,7 @@ const FILES = [
 const DIRECTORIES = [
   'about', 'agreement', 'ap', 'assistant', 'cards', 'consent', 'corrections',
   'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
-  'observer', 'photos', 'positions', 'schemas', 'share', 'tf060',
+  'report', 'photos', 'positions', 'protocol', 'schemas', 'share', 'tf060',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ];
 
@@ -48,8 +48,8 @@ const REVIEWED_DIRECTORY_FILES = new Set([
   'assistant/file/index.html', 'assistant/file/file.js', 'assistant/file/file.css',
   'consent/index.html', 'corrections/index.html', 'daily/index.html',
   'dashboard/index.html', 'live/index.html', 'milestones/index.html',
-  'observer/index.html', 'observer/received/index.html', 'positions/index.html',
-  'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html',
+  'report/index.html', 'report/received/index.html', 'report.js', 'positions/index.html',
+  'protocol/index.html', 'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html',
   'uniform/index.html', 'updates/index.html',
   'verify/index.html', 'verify/verify.js', 'violations/index.html', 'weeks/index.html',
   'photos/official/micheal-ray-berry-correction-uniform.png',
