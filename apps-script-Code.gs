@@ -2055,6 +2055,8 @@ function handleApConsoleInner(obj) {
     if (!why) return jsonOut({ ok: false, error: 'A written reason is required.' });
     if (!stateGet('agreement_confirmation_verified_at')) return jsonOut({ ok: false, error: 'The agreement is not active.' });
     ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, ''); });
+    stateSet('agreement_edition', '');
+    stateSet('agreement_confirmation_attested_by', '');
     try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
     try { tab('Updates').appendRow([today, 'official', 'Agreement enforcement suspended', why, '']); } catch (e) {}
     triggerDeploy();
@@ -2129,6 +2131,8 @@ function handleApConsoleInner(obj) {
     var nowIsoP = new Date().toISOString();
     ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoP); });
     stateSet('agreement_effective_date', today);
+    stateSet('agreement_edition', '2');
+    stateSet('agreement_confirmation_date', stateGet('agreement_confirmation_date') || today);
     stateSet('banner_mode', 'auto');
     try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
     try { tab('Updates').appendRow([today, 'official', 'Agreement activated', startWhy + (marked ? ' ' + marked + ' pre-activation entr' + (marked === 1 ? 'y was' : 'ies were') + ' recorded as not enforced under §9.' : ''), '']); } catch (e) {}
@@ -2139,6 +2143,12 @@ function handleApConsoleInner(obj) {
     if (stateGet('agreement_confirmation_verified_at')) return jsonOut({ ok: false, error: 'Already active.' });
     var nowIsoR = new Date().toISOString();
     ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoR); });
+    stateSet('agreement_edition', '2');
+    if (!stateGet('agreement_confirmation_attested_by') && !(typeof latestEdition2Confirmation === 'function' && latestEdition2Confirmation())) {
+      stateSet('agreement_confirmation_attested_by', String(obj.actor || 'menu') + ' ' + today);
+      if (!/^[a-f0-9]{64}$/.test(String(stateGet('agreement_confirmation_fingerprint') || ''))) stateSet('agreement_confirmation_fingerprint', sha256Hex('ap-attested-consent-review\n' + today + '\n' + String(obj.actor || 'menu')));
+      if (!stateGet('agreement_confirmation_date')) stateSet('agreement_confirmation_date', today);
+    }
     try { tab('Updates').appendRow([today, 'official', 'Enforcement resumed', String(obj.reason || '').trim(), '']); } catch (e) {}
     triggerDeploy();
     return jsonOut({ ok: true });
@@ -2150,6 +2160,41 @@ function handleApConsoleInner(obj) {
     stateSet('banner_mode_reason', String(obj.reason || '').trim().slice(0, 300));
     triggerDeploy();
     return jsonOut({ ok: true, mode: mode });
+  }
+
+  /* ── Fresh start: new Day 1, nothing before it on the record ──
+     Archives every record tab to a dated copy inside the same spreadsheet
+     (tab names prefixed "ARCHIVE <date> ·"), clears the live tabs, resets
+     Site State (start_date = chosen day; activation cleared; banner auto),
+     writes one Updates entry, and redeploys. TF060 is a static page and is
+     untouched. Requires reason + the exact typed date as a second factor. */
+  if (op === 'fresh_start') {
+    var nd = String(obj.new_start || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(nd)) return jsonOut({ ok: false, error: 'new_start must be YYYY-MM-DD' });
+    if (String(obj.confirm_date || '') !== nd) return jsonOut({ ok: false, error: 'Type the new Day 1 date again to confirm.' });
+    var fsWhy = String(obj.reason || '').trim(); if (!fsWhy) return jsonOut({ ok: false, error: 'A written reason is required (published).' });
+    var s = ss(); var stamp = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd HHmm');
+    var archived = [];
+    ['Weigh-ins', 'Violation Log', 'Attestation', 'Corrective Log', 'Weekly Log', 'Confirmations', 'Health', 'Supervision', 'Updates', 'R2 Photo Keys'].forEach(function (name) {
+      var sh = s.getSheetByName(name); if (!sh) return;
+      if (sh.getLastRow() > 1) {
+        var copy = sh.copyTo(s); copy.setName(('ARCHIVE ' + stamp + ' · ' + name).slice(0, 99)); copy.hideSheet(); archived.push(name);
+        sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(1, sh.getLastColumn())).clearContent();
+      }
+    });
+    // Site State: keep only the keys that describe the project, reset the rest
+    // The fresh start IS the activation decision: the AP attests the agreement
+    // stands from the new Day 1, so enforcement begins that night with no
+    // second ceremony. (Suspend remains available.)
+    var fsIso = new Date().toISOString(), fsActor = String(obj.actor || 'menu');
+    var keep = { start_date: nd, banner_mode: 'auto', agreement_edition: '2', mrb_signature_verified_at: fsIso, ap_signature_verified_at: fsIso, agreement_confirmation_verified_at: fsIso, agreement_confirmation_date: nd, agreement_confirmation_fingerprint: sha256Hex('ap-attested-consent-review\n' + nd + '\n' + fsActor), agreement_confirmation_attested_by: fsActor + ' ' + today, agreement_effective_date: nd, abandoned: '', abandoned_date: '', completed: '', completed_date: '', verdict_seen: '', submitted_seen: '', milestones_hit: '', intro_video_url: stateGet('intro_video_url') || '', wait_still_url: '', wait_still_date: '' };
+    var stTab = tab('Site State'); if (stTab.getLastRow() > 1) stTab.getRange(2, 1, stTab.getLastRow() - 1, 2).clearContent();
+    Object.keys(keep).forEach(function (k) { stateSet(k, keep[k]); });
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { PropertiesService.getScriptProperties().deleteProperty('GH_MIRRORED'); } catch (e) {}
+    tab('Updates').appendRow([nd, 'official', 'Fresh start — Day 1 is ' + nd, fsWhy + ' All prior entries were archived by the Accountability Partner; nothing before this date is part of the current record. The agreement is active from this date by the Accountability Partner\u2019s attestation. The TF060 page is unchanged.', '']);
+    triggerDeploy();
+    return jsonOut({ ok: true, archived: archived, start_date: nd });
   }
 
   /* ── Review queue ── */
@@ -2301,6 +2346,7 @@ function apConsoleStatus(today) {
     agreement: {
       active: String(st.agreement_edition || '') === '2',
       edition: st.agreement_edition || '',
+      effectiveDate: st.agreement_effective_date || '',
       mrbSig: st.mrb_signature_verified_at || '', apSig: st.ap_signature_verified_at || '',
       confDate: st.agreement_confirmation_date || '', confVerifiedAt: st.agreement_confirmation_verified_at || '',
       fingerprint: st.agreement_confirmation_fingerprint || '',

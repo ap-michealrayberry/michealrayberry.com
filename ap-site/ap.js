@@ -57,6 +57,11 @@
   /* ── render ── */
   function render(s) {
     state = s;
+    var ag = s.agreement || {}; var isActive = !!ag.active;
+    if ($("project-status")) $("project-status").textContent = isActive ? "active" + (ag.effectiveDate ? " · effective " + ag.effectiveDate : "") : "not started — enforcement inactive";
+    if ($("btn-start-project")) $("btn-start-project").hidden = isActive;
+    if ($("btn-resume")) $("btn-resume").hidden = isActive;
+    if ($("btn-deactivate")) $("btn-deactivate").hidden = !isActive;
     if ($("banner-mode-now")) $("banner-mode-now").textContent = "now: " + (s.banner_mode || "auto");
     var t = todayEt();
     $("asof").textContent = "Day " + s.day + " · " + longDate(s.today) + " · read " + t.h.toString().padStart(2, "0") + ":" + t.m.toString().padStart(2, "0") + " ET";
@@ -83,9 +88,9 @@
       ["Fingerprint bound to the record", !!(conf && conf.matches), conf && a.fingerprint ? (conf.matches ? "matches" : "MISMATCH — re-activate") : "—"],
       ["Activation flag", a.active, a.active ? "set" : "not set"],
     ];
-    $("agreement-checklist").innerHTML = items.map(function (it) { return '<li class="' + (it[1] ? "ok" : "") + '"><span class="dot"></span><span>' + esc(it[0]) + '</span><span class="v">' + esc(it[2]) + "</span></li>"; }).join("");
+    if ($("agreement-checklist")) $("agreement-checklist").innerHTML = items.map(function (it) { return '<li class="' + (it[1] ? "ok" : "") + '"><span class="dot"></span><span>' + esc(it[0]) + '</span><span class="v">' + esc(it[2]) + "</span></li>"; }).join("");
     $("btn-activate").hidden = a.active; $("btn-activate").disabled = !conf;
-    $("btn-deactivate").hidden = !a.active;
+    if ($("btn-deactivate")) $("btn-deactivate").hidden = !a.active;
 
     // violations
     $("violations-table").querySelector("tbody").innerHTML = s.violations.length ? s.violations.slice().reverse().map(function (v) {
@@ -149,7 +154,7 @@
   $("btn-signout").addEventListener("click", function () { location.href = "/cdn-cgi/access/logout"; });
   if ($("btn-endpoint")) $("btn-endpoint").hidden = true;
 
-  $("btn-activate").addEventListener("click", async function () {
+  if ($("btn-activate")) $("btn-activate").addEventListener("click", async function () {
     var c = state && state.agreement.confirmation; if (!c) return;
     var ok = await confirmSheet({ eyebrow: "Agreement", title: "Activate enforcement", body: "Consent recording on record:\n" + c.date + "\n" + c.url + "\n\nActivation publishes verified violations, supervision status, and starts the nightly checks. Effective date is the latest of Day 1, both signature dates, the confirmation date, and today.\n\nAttest to each item you have personally verified:", checks: ["I verified Micheal Ray Berry's signature on the agreement.", "I counter-signed the agreement and verified my signature.", "I watched the consent recording and saw a clear, deliberate nod inside the CONFIRMATION WINDOW. Stillness is not consent."], confirmLabel: "Activate the agreement" });
     if (!ok) return;
@@ -189,6 +194,12 @@
   if ($("btn-start-project")) $("btn-start-project").addEventListener("click", async function () {
     var reason = promptReason("Reason line for the Updates entry (published):"); if (reason === null) return;
     await act("start_project", { reason: reason || undefined }, { eyebrow: "Agreement", title: "Start the project", danger: true, body: "Marks both signatures and the consent recording as verified by you, sets the effective date to today, and begins enforcement tonight. Flagged misses from before activation are kept on the log as \"not enforced under §9\" — you may confirm any of them individually afterwards.", checks: ["I hold the counter-signed agreement", "I have reviewed the consent recording", "I understand enforcement begins at 10:00 PM ET today"], confirmLabel: "Start project", done: "Project started" });
+  });
+  if ($("btn-fresh-start")) $("btn-fresh-start").addEventListener("click", async function () {
+    var nd = ($("fresh-date") && $("fresh-date").value) || ""; if (!/^\d{4}-\d{2}-\d{2}$/.test(nd)) { toast("Pick the new Day 1 date first."); return; }
+    var why = promptReason("Reason (published on Updates as the first entry of the new record):"); if (!why) return;
+    var again = prompt("Type the new Day 1 date again (YYYY-MM-DD) to confirm:", ""); if (again !== nd) { toast("Dates did not match — nothing changed."); return; }
+    await act("fresh_start", { new_start: nd, confirm_date: again, reason: why }, { eyebrow: "Fresh start", title: "Reset the record to Day 1 = " + nd, danger: true, body: "Archives and clears Weigh-ins, Violation Log, Attestation, Corrective Log, Weekly Log, Confirmations, Health, Supervision, Updates and R2 Photo Keys; resets Site State (enforcement inactive, banner auto); activates the agreement from the new Day 1; redeploys. Photos and videos already committed to the repo remain on the host but are no longer referenced. TF060 is unchanged.", checks: ["I understand every prior entry leaves the public record", "The archived tabs are the only copy of the prior record", "The agreement is active from the new Day 1 by my attestation"], confirmLabel: "Fresh start", done: "Record reset — Day 1 is " + nd });
   });
   if ($("btn-resume")) $("btn-resume").addEventListener("click", async function () {
     var reason = promptReason("Reason (published to Updates):"); if (reason === null) return;

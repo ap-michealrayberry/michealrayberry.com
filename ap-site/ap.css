@@ -85,3 +85,5 @@ input[type=checkbox]{width:18px;height:18px;padding:0}
 .item-media iframe,.item-media a{display:block}
 .label{font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-right:6px}
 .row.wrap{flex-wrap:wrap;gap:8px}
+
+.input{font:14px 'IBM Plex Mono',ui-monospace,monospace;padding:10px 12px;border:1px solid var(--ink,#141412);background:#fff}

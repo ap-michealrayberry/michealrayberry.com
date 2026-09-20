@@ -40,15 +40,7 @@
     </div>
   </section>
 
-  <section class="card" id="sec-agreement">
-    <div class="card-head"><p class="eyebrow">Agreement</p><h2>Activation</h2></div>
-    <p class="note">Enforcement publishes only when every item below is satisfied. The console derives the record values itself; you attest only to what you personally verified.</p>
-    <ol class="checklist" id="agreement-checklist"></ol>
-    <div class="actions">
-      <button type="button" class="btn" id="btn-activate">Activate the agreement</button>
-      <button type="button" class="btn ghost danger" id="btn-deactivate" hidden>Deactivate</button>
-    </div>
-  </section>
+  
 
   <section class="card" id="sec-violations">
     <div class="card-head"><p class="eyebrow">Violation Log</p><h2>Entries</h2></div>
@@ -131,12 +123,16 @@
   </footer>
 
     <section class="panel" id="panel-control">
-      <h2>Project control</h2>
+      <h2>Project control <span class="hint" id="project-status"></span></h2>
       <div class="row wrap">
         <button type="button" class="btn" id="btn-start-project">Start project</button>
         <button type="button" class="btn ghost" id="btn-resume">Resume enforcement</button>
         <button type="button" class="btn ghost danger" id="btn-deactivate">Suspend enforcement</button>
       </div>
+      <details style="margin-top:18px"><summary class="hint" style="cursor:pointer">Fresh start (danger)</summary>
+        <p class="hint" style="margin:10px 0">Sets a new Day 1 chosen by you. Every record tab is archived (hidden, dated) and cleared; the site rebuilds with nothing before the new Day 1. TF060 is untouched. Requires a published reason and typing the date twice.</p>
+        <div class="row wrap"><input type="date" id="fresh-date" class="input"><button type="button" class="btn ghost danger" id="btn-fresh-start">Fresh start from this date</button></div>
+      </details>
       <div class="row wrap" style="margin-top:14px">
         <span class="label">Violation banner</span>
         <button type="button" class="btn ghost" data-banner="auto">Auto</button>

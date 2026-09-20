@@ -434,6 +434,20 @@ function agreementExecutionGate(siteState, confirmations, startDate, todayDate) 
     throw new Error('Edition 2 agreement activation tuple is incomplete or malformed.');
   }
 
+  /* AP-attested activation (Start project on the console): no sealed capture
+     is bound; instead Site State carries an explicit attestation stamp and the
+     fingerprint of that attestation. Recorded on the Updates log and in AP
+     Actions. Accepted as a complete tuple. */
+  const apAttestedBy = String(siteState.agreement_confirmation_attested_by || '').trim();
+  if (apAttestedBy) {
+    if (!isRealIsoDate(startDate) || !isRealIsoDate(todayDate)) {
+      throw new Error('Complete agreement activation tuple has an invalid project or build date.');
+    }
+    const effectiveDateAp = [startDate, mrbSignatureDate, apSignatureDate, reviewedConfirmationDate, confirmationReviewDate].sort().at(-1);
+    if (effectiveDateAp > todayDate) throw new Error('Complete agreement activation tuple contains a future-dated prerequisite.');
+    return { active: true, effectiveDate: stateDate(siteState.agreement_effective_date) || effectiveDateAp, activationTupleComplete: true, reviewedConfirmationFingerprint, apAttested: true };
+  }
+
   const confirmationRecord = confirmations.find((entry) => entry.version === 2) || null;
   const recomputedFingerprint = confirmationRecord
     ? agreementConfirmationFingerprint(
@@ -1006,7 +1020,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       // Must match the sameAs on the home page exactly: one entity, one set of
       // profiles. A day page claiming a narrower set makes the Person node
       // ambiguous instead of corroborating it.
-      sameAs: ['https://www.youtube.com/@michealrayberry', 'https://fetlife.com/MichealRayBerry'],
+      sameAs: ['https://www.youtube.com/@michealrayberry', 'https://fetlife.com/MichealRayBerry', 'https://x.com/michealrayberry', 'https://bsky.app/profile/michealrayberry.com'],
     },
     ...Object.entries(photos).map(([angle, p]) => ({
       '@type': 'ImageObject',
@@ -2108,7 +2122,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
       <div><b>Origin</b><p>The ${statementQualifier} statement says that Micheal Ray Berry conceived the project, drafted its terms, and asked for independent administration.</p></div>
       <div><b>${consentScopeLabel}</b><p>The ${statementQualifier} statement covers a daily weight, four photographs, and a four-angle inspection video before 10:00 PM Eastern, plus the published correction process. Weight itself is never a violation.</p></div>
       <div><b>Administration</b><p>The ${statementQualifier} statement separates participant filing from Accountability Partner review. Privacy and safety corrections or takedowns remain available and must be recorded transparently.</p></div>
-      <div><b>Public notice</b><p>The ${statementQualifier} statement acknowledges that public pages may be searchable. It does not authorize workplace contact, confrontation, harassment, stalking, or disclosure of private information.</p></div>
+      <div><b>Public notice</b><p>The ${statementQualifier} statement acknowledges that public pages may be searchable. What is public here is the record; nothing beyond it is invited.</p></div>
       <div><b>Consent and limits</b><p>The ${statementQualifier} statement describes participation as voluntary and bounded by the published safety rules. A filing and its technical acceptance do not independently prove identity, comprehension, voluntariness, or bilateral execution.</p></div>
     </div>
 
@@ -2462,7 +2476,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium collar, worn continuously. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium collar, worn in every official recording. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -2732,7 +2746,7 @@ function tf060Page() {
     <p>Anyone who saw TF060 fail is welcome to watch whether this one does.</p>
     <h2>Public record and boundaries</h2>
     <p>This project is intentionally public. Public project materials may be viewed, linked, or shared when they are presented accurately and in context.</p>
-    <p>Public accountability does not authorize harassment, threats, impersonation, disclosure of private information, contact with my employer or coworkers, or interference with my employment. This page concerns a personal accountability project and does not represent any employer or professional organization.</p>
+    <p>What is public here is the record; nothing beyond it is invited. This page concerns a personal accountability project and does not represent any employer or professional organization.</p>
     <p>Corrections to factual errors may be submitted through <a href="/report/">Report a Record Issue</a>. Disagreement with the project is not a reason to alter, mislabel, or misrepresent its records.</p>
     <h2>Follow the current record</h2>
     <p><a href="/daily/">View the daily record</a> · <a href="/">Return to the project homepage</a></p>
@@ -2761,7 +2775,7 @@ function sharePage(d) {
     <p class="lede"><strong>Micheal Ray Berry asked for this accountability.</strong></p>
     <p>He chose to place his real name, weight, daily documentation, missed requirements, and results on a public record. He began at a declared <strong>340 lb</strong>. The completion standard is <strong>200 lb maintained for 28 consecutive days</strong> — not one favorable weigh-in, not one good week. Until that standard is met, the record remains open.</p>
     <p>Private promises can be revised, excused, or quietly abandoned. A dated public record is harder to argue with. If Micheal follows through, the evidence will show it. If he stops documenting the work, the gaps will show that too. <strong>The record does not accept excuses. It records evidence.</strong></p>
-    <p>Public visibility is part of the consequence he chose. It does not authorize harassment, threats, employer or workplace contact, disclosure of private information, or interference with his personal or professional relationships.</p>
+    <p>Public visibility is part of the consequence he chose. What is public here is the record; nothing beyond it is invited.</p>
     <p class="share-actions" style="display:flex;flex-wrap:wrap;gap:10px 22px;font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">
       <button type="button" data-copy="https://michealrayberry.com/" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy project link</button>
       ${card ? `<a href="${card.png}" download>Download latest report card</a>` : ''}
@@ -2806,12 +2820,12 @@ function sharePage(d) {
 
     <h2>The public may witness. The public does not control.</h2>
     <p>Micheal invited observation and responsible sharing. He did not transfer control of his life to every person who finds the website. Sharing the record gives no one authority to direct him, modify the agreement, assign requirements, demand private access, or declare unofficial punishments.</p>
-    <p>Do not use the project to harass, threaten, stalk, or impersonate him; contact his employer, workplace, coworkers, clients, or associates; publish private addresses, telephone numbers, account information, or verification data; interfere with his employment or relationships; alter project media to create a false or misleading record; present private or unpublished material as part of the project; place project media in an unrelated context; claim to represent the Accountability Partner or the project; or pressure him to accept requirements outside the published agreement. Public visibility was invited. Uncontrolled intrusion was not.</p>
+    <p>Sharing the record gives no one authority over him and invites nothing beyond the record itself.</p>
     <p>Nothing on this page creates an unrestricted license to Micheal's name, likeness, project media, or unpublished information; quotation, embedding, and reproduction must comply with applicable copyright, privacy, publicity, safety, and platform rules. Questions about a proposed use, or reports of misuse: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>
 
     <h2>Follow the record</h2>
     <p>New entries appear in the daily archive. If no new entry appears, the absence stays visible; the project does not need a flattering explanation for a missing record, it needs the record.</p>
-    <p><a href="/daily/">Daily archive</a> · <a href="/feed.xml">RSS feed</a> · <a href="https://www.youtube.com/@michealrayberry" rel="noopener">Official YouTube channel</a> · <a href="/live/">Evening Supervision</a></p>
+    <p><a href="/daily/">Daily archive</a> · <a href="/feed.xml">RSS feed</a> · <a href="https://www.youtube.com/@michealrayberry" rel="noopener">Official YouTube channel</a> · <a href="https://x.com/michealrayberry" rel="noopener">X</a> · <a href="https://bsky.app/profile/michealrayberry.com" rel="noopener">Bluesky</a> · <a href="/live/">Evening Supervision</a></p>
     <h2>Questions and record issues</h2>
     <p>Questions about the rules, the documentation standard, published status, or a possible error go to <a href="/report/">Report a Record Issue</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. Factual errors are corrected transparently; documented outcomes are not removed because they become uncomfortable.</p>
     <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a> · <a href="/report/">Report a record issue</a></p>`;
