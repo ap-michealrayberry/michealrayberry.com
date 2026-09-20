@@ -2634,6 +2634,69 @@ function violationsIndexPage(violations) {
    notified. Nothing
    submitted is published automatically. (Cloudflare Pages variant with
    Turnstile + Apps Script relay is parked — see README.) */
+/* /tf060/ — the earlier agreement, owned. Static, linked from About only.
+   Numbers here must match the record (Day 1 Aug 31 2026, 340 → 200). */
+function tf060Page() {
+  const canonical = `${SITE_ORIGIN}/tf060/`;
+  const title = 'TF060: A Documented Failure | Micheal Ray Berry';
+  const description = 'Micheal Ray Berry acknowledges the failed TF060 agreement and explains how it informed the structure and standards of his current public accountability project.';
+  const img = `${SITE_ORIGIN}/photos/official/micheal-ray-berry-tf060-continues.png`;
+  const body = `
+    <p class="crumb"><a href="/">Record</a> · <a href="/about/">About</a> · TF060</p>
+    <h1>TF060: A Documented Failure — and What Comes Next</h1>
+    <figure style="margin:24px 0 32px;max-width:520px">
+      <img src="/photos/official/micheal-ray-berry-tf060-continues.png" alt="Micheal Ray Berry standing in the black project uniform, holding a sign that reads “TF060 failed. Micheal Ray Berry continues.”" width="1303" height="2048" style="width:100%;height:auto;display:block;border:1px solid var(--ink)" loading="eager" decoding="async">
+      <figcaption style="font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted);margin-top:8px">TF060 failed. Micheal Ray Berry continues.</figcaption>
+    </figure>
+    <p class="lede"><strong>On October 5, 2025, I signed a personal accountability agreement under the identifier TF060. I did not complete it.</strong></p>
+    <p>I also did not respond appropriately when I was contacted afterward. The agreement included authorization for the failure and portions of the record to be published. Publication followed.</p>
+    <p>This page does not dispute that outcome, minimize it, or attempt to erase it. It records the failure plainly and explains why it matters to the accountability project I operate today.</p>
+    <h2>What TF060 established</h2>
+    <p>TF060 demonstrated a simple problem: writing detailed rules is not the same as following them.</p>
+    <p>I created a commitment, signed it, and then failed to carry it through. When accountability required a response, silence became another failure. Removing old pages or moving on to a new project would not change that record.</p>
+    <p>The lesson is not that public commitments automatically create discipline. They do not. A public commitment only becomes meaningful when it is supported by measurable requirements, reliable documentation, outside review, and consistent follow-through.</p>
+    <p>TF060 had the promise. It did not have the sustained execution.</p>
+    <h2>Why this page exists</h2>
+    <p>The current Micheal Ray Berry Public Accountability Project is not a clean slate. It is a continuation built with the knowledge that motivation, private intentions, and elaborate plans are not enough.</p>
+    <p>The photograph at the top of this page states the position accurately: <strong>TF060 failed. Micheal Ray Berry continues.</strong></p>
+    <p>“Continues” does not mean “succeeded.” It means I am still responsible for what I agreed to do, still accountable for the record I created, and still required to prove progress through actions rather than declarations.</p>
+    <h2>What changed</h2>
+    <p>The current project began on <strong>August 31, 2026</strong>, at a declared starting weight of <strong>340 pounds</strong>. The goal is <strong>200 pounds</strong>. Completion requires 28 consecutive days at or below 200.</p>
+    <p>The project uses defined requirements rather than relying on memory or self-reporting alone:</p>
+    <ul>
+      <li>A daily deadline of 10:00 PM Eastern</li>
+      <li>A scale-synced weigh-in</li>
+      <li>A four-angle Daily Inspection video</li>
+      <li>Four daily photographs in the project uniform</li>
+      <li>An updated public tracker</li>
+      <li>A weekly review read to camera from the record</li>
+      <li>Documented violations when requirements are missed</li>
+      <li>Predefined corrective sessions that escalate by level: 10, 20, and 30 minutes</li>
+    </ul>
+    <p>These controls do not guarantee success. They make performance — or the absence of it — visible.</p>
+    <h2>The standard now</h2>
+    <p>The current project is judged by the published record.</p>
+    <p>A written plan is not progress. A new page is not progress. A photograph is not progress. A promise to restart is not progress.</p>
+    <p>Progress requires complete, timely documentation and sustained movement toward the stated goal. A missed requirement must be recorded as missed. A late filing does not become timely because it was eventually uploaded. An explanation does not replace required evidence.</p>
+    <p>The standard is intentionally uncomplicated: <strong>complete the requirement, document it by the deadline, and maintain an accurate public record.</strong></p>
+    <h2>What continuation means</h2>
+    <p>TF060 remains part of my history because I failed it. The current project will not rewrite that fact.</p>
+    <p>What the current project can establish is whether I learned from it.</p>
+    <p>If I complete the present requirements, TF060 will remain a documented failure followed by a documented recovery. If I abandon the project, weaken the rules when they become uncomfortable, or stop reporting, TF060 will instead be evidence of a pattern.</p>
+    <p>That distinction will not be decided by the language on this page. It will be decided by the record that follows it.</p>
+    <p>Anyone who saw TF060 fail is welcome to watch whether this one does.</p>
+    <h2>Public record and boundaries</h2>
+    <p>This project is intentionally public. Public project materials may be viewed, linked, or shared when they are presented accurately and in context.</p>
+    <p>Public accountability does not authorize harassment, threats, impersonation, disclosure of private information, contact with my employer or coworkers, or interference with my employment. This page concerns a personal accountability project and does not represent any employer or professional organization.</p>
+    <p>Corrections to factual errors may be submitted through the <a href="/observer/">Observer Submission page</a>. Disagreement with the project is not a reason to alter, mislabel, or misrepresent its records.</p>
+    <h2>Follow the current record</h2>
+    <p><a href="/daily/">View the daily record</a> · <a href="/">Return to the project homepage</a></p>
+    <p style="font:600 13px/1.6 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;margin-top:32px">TF060 failed. The current record is still being written.</p>
+    <p style="font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">— Micheal Ray Berry</p>`;
+  return synPage({ title, desc: description, canonical, body })
+    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${img}"><meta property="og:image:alt" content="Micheal Ray Berry holding a sign: TF060 failed. Micheal Ray Berry continues."><meta property="og:title" content="TF060 Failed. Micheal Ray Berry Continues.">`);
+}
+
 const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || '1x00000000000000000000AA'; // Cloudflare always-passes test key until the real one is set
 function observerPage() {
   const canonical = `${SITE_ORIGIN}/observer/`;
@@ -4019,6 +4082,8 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/live/`);
 
+  if (await writeIfChanged(path.join(ROOT, 'tf060', 'index.html'), tf060Page())) changedUrls.add(`${SITE_ORIGIN}/tf060/`);
+  extraUrls.push(`${SITE_ORIGIN}/tf060/`);
   if (await writeIfChanged(path.join(ROOT, 'observer', 'index.html'), observerPage())) {
     changedUrls.add(`${SITE_ORIGIN}/observer/`);
   }

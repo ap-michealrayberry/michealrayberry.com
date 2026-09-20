@@ -35,7 +35,7 @@ const FILES = [
 const DIRECTORIES = [
   'about', 'agreement', 'ap', 'assistant', 'cards', 'consent', 'corrections',
   'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
-  'observer', 'photos', 'positions', 'schemas', 'share',
+  'observer', 'photos', 'positions', 'schemas', 'share', 'tf060',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ];
 
@@ -49,10 +49,11 @@ const REVIEWED_DIRECTORY_FILES = new Set([
   'consent/index.html', 'corrections/index.html', 'daily/index.html',
   'dashboard/index.html', 'live/index.html', 'milestones/index.html',
   'observer/index.html', 'observer/received/index.html', 'positions/index.html',
-  'schemas/daily-record-manifest-v1.json', 'share/index.html',
+  'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html',
   'uniform/index.html', 'updates/index.html',
   'verify/index.html', 'verify/verify.js', 'violations/index.html', 'weeks/index.html',
   'photos/official/micheal-ray-berry-correction-uniform.png',
+  'photos/official/micheal-ray-berry-tf060-continues.png',
   'photos/official/micheal-ray-berry-official-front-v2.jpg',
   'photos/official/micheal-ray-berry-official-front-480.webp',
   'photos/official/micheal-ray-berry-official-front-800.webp',
