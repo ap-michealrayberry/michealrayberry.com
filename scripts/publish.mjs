@@ -1732,7 +1732,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
 </header>
 <main id="main-content">
   <div class="viewsw"><a href="/daily/" aria-current="page">Days</a><a href="/weeks/">Weeks</a><a href="/dashboard/">Dashboard</a></div>
-  <p class="intro">Every published project date appears here, newest first. A day labeled <strong>Files present</strong> has the currently published weight, photographs, video, and manifest, but current presence alone does not prove when each component was filed. <strong>Partial record</strong> and <strong>No record</strong> describe only current public file presence. ${agreementActive && effectiveDate ? `Only dates on or after ${htmlEscape(longDate(effectiveDate))} can carry an active due or violation state.` : 'Agreement execution is not verified, so no date carries an active filing obligation or violation state.'}</p>
+  <p class="intro">Every published project date appears here, newest first. A day labeled <strong>Files present</strong> has the currently published weight, photographs, video, and manifest, but current presence alone does not prove when each component was filed. <strong>Partial record</strong> and <strong>No record</strong> describe only current public file presence. While the agreement is pending counter-signature, days without records are not yet published as violations; the violation log staying empty does not mean every day was documented. ${agreementActive && effectiveDate ? `Only dates on or after ${htmlEscape(longDate(effectiveDate))} can carry an active due or violation state.` : 'Agreement execution is not verified, so no date carries an active filing obligation or violation state.'}</p>
   <p class="count"><strong>${filesPresent}</strong> ${filesPresent === 1 ? 'day with files present' : 'days with files present'}${partial ? ` · <strong>${partial}</strong> partial ${partial === 1 ? 'record' : 'records'}` : ''}${gaps ? ` · <strong>${gaps}</strong> ${gaps === 1 ? 'day' : 'days'} without a record` : ''}${pending ? ` · <strong>${pending}</strong> active filing ${pending === 1 ? 'window' : 'windows'} open` : ''}</p>
   <p><a href="/">Return to michealrayberry.com</a> · <a href="/weeks/">Weekly record</a> · <a href="/milestones/">Milestones</a> · <a href="/dashboard/">Weigh-in log and progress grid</a></p>
   <h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:28px 0 0">Today\u2019s report card</h2>
@@ -2749,13 +2749,13 @@ function sharePage(d) {
   const description = "Share Micheal Ray Berry's public accountability project. Find official photographs, daily report cards, current facts, and conditions for accurate reuse.";
   const na = (v, alt) => (v == null || v === '' ? alt : v);
   const card = d.latest;
-  const desc = 'Micheal Ray Berry is documenting a public accountability project under his real name. The dated record shows currently published weights and media files. File presence does not establish filing timeliness; any adverse outcome must come from the governed public record. Read the agreement status and source pages at https://michealrayberry.com/.';
+  const desc = `Micheal Ray Berry is documenting a public weight-loss commitment under his real name: 340 to 200 pounds, recorded daily since August 31, 2026, with inspection video and photographs published to the record.${d.weight ? ` Latest published weight: ${d.weight} lb (${d.weightDate}).` : ''} Follow the dated record at https://michealrayberry.com/daily/.`;
   const body = `
     <p class="crumb"><a href="/">Record</a> · Share</p>
     <h1>Share the Project</h1>
-    <p class="lede"><strong>Source material for accurately describing the public record.</strong></p>
-    <p>Micheal Ray Berry has chosen to publish an accountability record under his real name. The record may include recorded weights and public media files; current file presence does not establish filing timeliness or a compliance outcome.</p>
-    <p>Public visibility is a stated project goal. The official photograph, dated report cards, and source links are provided so the project can be described accurately. Share only public material, preserve its context, and link to the relevant record page.</p>
+    <p class="lede"><strong>Micheal Ray Berry is documenting a weight-loss commitment — 340 to 200 pounds — under his real name, daily, on this public record.</strong></p>
+    <p>The record began August 31, 2026. The goal is 200 pounds held for 28 consecutive days. Every day’s weigh-in, inspection video, and photographs are published here; missed requirements will be published here too once the agreement is counter-signed and active. Follow the <a href="/daily/">daily archive</a>, the <a href="/feed.xml">RSS feed</a>, or the <a href="https://www.youtube.com/@michealrayberry" rel="noopener">official channel</a>.</p>
+    <p>Public visibility is a stated project goal. The official photograph, dated report cards, and source links below are provided so the project can be described accurately. Share only public material, preserve its context, and link to the relevant record page.</p>
     <p><strong>Public availability does not invite harassment, confrontation, workplace or employer contact, disclosure of private information, or unrelated intrusion.</strong></p>
     <p class="share-actions" style="display:flex;flex-wrap:wrap;gap:10px 22px;font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">
       <button type="button" class="copy-button" data-copy="https://michealrayberry.com/">Copy website link</button>
@@ -2763,6 +2763,7 @@ function sharePage(d) {
       <a href="/daily/">View daily record</a>
     </p>
     <h2>The current record</h2>
+    <p style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">How to read these figures: a weight is the latest published measurement, dated — not today’s weight. “Files present” means the day’s media is published; it does not by itself establish that the filing was on time. Compliance outcomes come only from the governed violation log.</p>
     <div class="standard">
       <div><b>Current project day</b><p>Day ${na(d.today, '—')}</p></div>
       <div><b>Latest day with files present</b><p>${card ? `Day ${card.day} · ${card.dateLong}` : 'Not recorded'}</p></div>

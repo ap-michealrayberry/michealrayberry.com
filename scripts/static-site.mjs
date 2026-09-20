@@ -262,7 +262,7 @@ function computeValues(ctx) {
     dayNumber, dayCounterLabel: rawDay < 1 ? '—' : String(dayNumber),
     startDateLong: esc(longDate(START_DATE)),
     startLabel: fmt(startWeight), goalLabel: fmt(goalWeight),
-    currentLabel: last ? fmt(current) : '—', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
+    currentLabel: last ? fmt(current) : '—', currentDateLabel: last ? esc(longDate(last.date)) : 'no measurement yet', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
     pctLabel: last ? pct.toFixed(1) + '%' : '—', pctWidth: last ? Math.max(0.5, pct) + '%' : '0%',
     cleanDays: agreementExecuted ? String(cleanDays) : '—',
     cleanDaysHeading: agreementExecuted ? 'Days without violation' : 'Requirements inactive',
