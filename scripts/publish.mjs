@@ -3404,6 +3404,29 @@ function sectionRow(canonical) {
   if (starts(PROTOCOL_SECTION)) return `<span class="nav-secondary"><a href="/live/" data-live-nav${cur('/live/')}>Supervision</a><a href="/positions/"${cur('/positions/')}>Inspection</a><a href="/uniform/"${cur('/uniform/')}>Uniform</a><a href="/corrections/"${cur('/corrections/')}>Corrections</a><a href="/agreement/"${cur('/agreement/')}>Agreement</a></span>`;
   return '';
 }
+/* /faq/ — the About FAQ as an indexable page with FAQPage schema. The
+   template stays the source of truth; items are re-extracted at build. */
+async function faqPage() {
+  const tpl = await fs.readFile(path.join(ROOT, 'site.template.html'), 'utf8');
+  const f = tpl.indexOf('Questions, answered plainly');
+  const sec = tpl.slice(tpl.lastIndexOf('<section', f), tpl.indexOf('</section>', f));
+  const items = [...sec.matchAll(/<span style="font-size: 17px; font-weight: 600;">([^<]+)<\/span>\s*((?:<p[^>]*>[\s\S]*?<\/p>\s*)+)/g)]
+    .map((m) => ({ q: m[1].trim(), html: m[2].replace(/ style="[^"]*"/g, '').replace(/ onClick="\{\{[^}]*\}\}"/g, '').trim() }))
+    .map((i) => ({ ...i, text: i.html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() }));
+  const canonical = `${SITE_ORIGIN}/faq/`;
+  const title = 'Questions about the record — Micheal Ray Berry Public Accountability Project';
+  const description = 'Plain answers: is this real, is it voluntary, what if I know him, can he delete it, is it medically supervised, when does it end.';
+  const body = `
+    <p class="crumb"><a href="/">Record</a> · <a href="/about/">About</a> · Questions</p>
+    <h1>Questions, answered plainly</h1>
+    <div class="standard">
+      ${items.map((i) => `<div><b>${htmlEscape(i.q)}</b>${i.html}</div>`).join('\n      ')}
+    </div>
+    <p>Something not covered? <a href="/report/">Report a record issue</a> or write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>`;
+  const schema = jsonLd({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${canonical}#faq`, url: canonical, mainEntity: items.map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: i.text } })) });
+  return synPage({ title, desc: description, canonical, body }).replace('</head>', `<script type="application/ld+json">${schema}</script>\n</head>`);
+}
+
 function synPage({ title, desc, canonical, body, wide = false }) {
   const schema = jsonLd({ '@context': 'https://schema.org', '@graph': [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description: desc, about: { '@id': `${SITE_ORIGIN}/#micheal-ray-berry` }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },

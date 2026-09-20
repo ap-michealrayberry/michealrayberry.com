@@ -1469,14 +1469,31 @@
      phones → 1080×1920). Without an explicit request most devices hand back
      640×480 or 720p, which the 1080×1920 canvas then upscales. 'ideal' never
      fails the request; the device gives the closest it can. */
+  /* Sensor's best feed: 4K-class where the device has it (2160 short side),
+     never below 1080. Downsampling a larger source into the 1080×1920 canvas
+     is markedly sharper than recording a 1080p feed 1:1. 'ideal' never fails
+     the request. */
   function videoConstraints() {
     return {
       facingMode: { ideal: facing },
-      width: { ideal: 1920 },
-      height: { ideal: 1080 },
+      width: { ideal: 3840 },
+      height: { ideal: 2160 },
       frameRate: { ideal: 30, max: 30 },
       resizeMode: "none",
     };
+  }
+  /* Continuous focus / exposure / white balance where the platform exposes
+     them; digital zoom pinned to its minimum so framing is the lens, not a crop. */
+  async function tuneTrack(track) {
+    try {
+      var caps = track && track.getCapabilities ? track.getCapabilities() : {};
+      var adv = {};
+      if (Array.isArray(caps.focusMode) && caps.focusMode.indexOf("continuous") !== -1) adv.focusMode = "continuous";
+      if (Array.isArray(caps.exposureMode) && caps.exposureMode.indexOf("continuous") !== -1) adv.exposureMode = "continuous";
+      if (Array.isArray(caps.whiteBalanceMode) && caps.whiteBalanceMode.indexOf("continuous") !== -1) adv.whiteBalanceMode = "continuous";
+      if (caps.zoom && typeof caps.zoom.min === "number") adv.zoom = caps.zoom.min;
+      if (Object.keys(adv).length) await track.applyConstraints({ advanced: [adv] });
+    } catch (e) { /* best effort */ }
   }
 
   async function start(targetVideo) {
@@ -1505,6 +1522,7 @@
       }
     }
 
+    await tuneTrack(stream.getVideoTracks()[0]);
     videoEl.srcObject = stream;
     videoEl.muted = true;
     videoEl.playsInline = true;
@@ -1796,11 +1814,16 @@
     if (canvas && canvas.width >= canvas.height) {
       throw new Error("Capture canvas must be portrait. Landscape recording is not available.");
     }
+    // H.264 High + AAC first: hardware-encoded on every phone, plays everywhere,
+    // ingests into Cloudflare Stream without re-mux quirks. VP9/VP8 as fallback.
     var mimePrefer = options.mimePrefer || [
+      "video/mp4;codecs=avc1.640033,mp4a.40.2",
+      "video/mp4;codecs=avc1.640028,mp4a.40.2",
+      "video/mp4;codecs=avc1,mp4a.40.2",
+      "video/mp4",
       "video/webm;codecs=vp9,opus",
       "video/webm;codecs=vp8,opus",
       "video/webm",
-      "video/mp4",
     ];
 
     var recorder = null;
@@ -1856,7 +1879,11 @@
       var track = captureStream.getVideoTracks()[0] || null;
       mixAudioTracks(captureStream);
 
-      var recOpts = mime ? { mimeType: mime, videoBitsPerSecond: 8_000_000 } : { videoBitsPerSecond: 8_000_000 };
+      // 16 Mbps video / 128 kbps audio at 1080×1920@30: survives Stream's
+      // re-encode cleanly (~120 MB per minute; the R2 original keeps it all).
+      var recOpts = mime
+        ? { mimeType: mime, videoBitsPerSecond: 16_000_000, audioBitsPerSecond: 128_000 }
+        : { videoBitsPerSecond: 16_000_000, audioBitsPerSecond: 128_000 };
       try {
         recorder = new MediaRecorder(mixedStream, recOpts);
       } catch (e) {
@@ -1903,7 +1930,7 @@
           });
           // Recompute chain synchronously from all chunks for accuracy
           var finalChain = await recomputeChain();
-          var blob = new Blob(chunks, { type: mime || "video/webm" });
+          var blob = new Blob(chunks, { type: mime || (chunks[0] && chunks[0].type) || "video/mp4" });
           var durationSec = (stoppedAt - startedAt) / 1000;
           var frames = frameLoop ? frameLoop.getFrameCount() : 0;
           resolve({
@@ -4452,7 +4479,7 @@
     var W0 = MRB.config.CANVAS_W || 1080, H0 = MRB.config.CANVAS_H || 1920;
     // output width = the camera's shorter side (portrait width), floor 1080, cap 2160
     var nativeShort = Math.min(vw, vh) || W0;
-    var outW = Math.min(2160, Math.max(W0, nativeShort));
+    var outW = Math.min(3840, Math.max(W0, nativeShort));
     var outH = Math.round(outW * H0 / W0);
     var full = document.createElement("canvas");
     full.width = outW; full.height = outH;
