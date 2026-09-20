@@ -4,7 +4,6 @@ Static public record, built from the Google Sheet by `scripts/publish.mjs`
 into `dist/`, hosted on **Cloudflare Pages**. DNS at Cloudflare; registrar
 Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
 
-
 ## Cloudflare Pages — one-time setup (AP account)
 
 1. **Add the domain**: Cloudflare → Add a domain → michealrayberry.com → Free.
@@ -15,8 +14,9 @@ Porkbun; email via Porkbun; the record brain is the Google Sheet + Apps Script.
    michealrayberry.com, Managed → copy Site key + Secret key.
 3. **Pages project**: Workers & Pages → Create → Pages → Connect to Git →
    this repo, branch `main`. Build command `npm run build`. Build output
-   directory `dist`. Root directory blank. (`wrangler.toml` also declares
-   `pages_build_output_dir = "dist"`.)
+   directory `dist`. Root directory blank. Do NOT add a
+   `wrangler.toml` — when present, Pages reads build config from it and
+   drops the dashboard environment variables (feed URLs), failing the build.
 4. **Variables & Secrets (Production)** — same names as on Netlify plus four:
    NODE_VERSION=24 · SITE_ORIGIN=https://michealrayberry.com ·
    WEIGHINS_CSV, VIOLATION_CSV, ATTESTATION_CSV, CONFIRMATIONS_CSV,

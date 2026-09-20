@@ -35,4 +35,6 @@ export async function onRequestPost({ request, env }) {
     .then((r) => r.json()).catch(() => ({ ok: false }));
   return res && res.ok ? Response.redirect(origin + '/observer/received/', 303) : back('error=relay');
 }
-export function onRequestGet({ request }) { return Response.redirect(new URL(request.url).origin + '/observer/', 301); }
+/* No onRequestGet: Pages treats /observer and /observer/ as the same route,
+   so a GET redirect here loops against the static /observer/index.html. GET
+   falls through to the static page automatically. */
