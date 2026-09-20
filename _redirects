@@ -53,18 +53,17 @@
 /reference/*  /share/  301
 
 # Public assets are built in dist; old sources remain in Git history only.
-/penalties /violations/ 301!
-/penalties/ /violations/ 301!
-/log /violations/ 301!
-/apps-script/* /404.html 404!
-/README.md /404.html 404!
-/package-lock.json /404.html 404!
-/support.js /404.html 404!
-/boot.js /404.html 404!
-/sw.js /404.html 404!
-/verify/support.js /404.html 404!
-/photos/official/maid-ray-berry-portrait.jpg /404.html 404!
-
+/penalties  /violations/  301
+/penalties/  /violations/  301
+/log  /violations/  301
+/apps-script/*  /404.html  404
+/README.md  /404.html  404
+/package-lock.json  /404.html  404
+/support.js  /404.html  404
+/boot.js  /404.html  404
+/sw.js  /404.html  404
+/verify/support.js  /404.html  404
+/photos/official/maid-ray-berry-portrait.jpg  /404.html  404
 # Observer → Report a Record Issue (Sept 20)
 /observer            /report/            301
 /observer/           /report/            301

@@ -953,6 +953,24 @@ function setCorrectiveStreamUid(date, uid) {
   for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === String(date)) { sh.getRange(i + 1, 10).setValue(String(uid).toLowerCase()); Logger.log('Filed.'); return; }
   Logger.log('No violation row for ' + date);
 }
+/* One-off: re-apply allowedOrigins to every Stream uid already filed
+   (Weigh-ins col J + Violation Log col J). Fixes "not configured to be
+   allowed on this domain" on the AP console. Safe to re-run. */
+function streamFixOrigins() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('CF_ACCOUNT_ID'), tok = p.getProperty('STREAM_API_TOKEN');
+  if (!acct || !tok) { Logger.log('Run setCloudflareMedia first.'); return; }
+  var uids = [];
+  [weighinsSheet(), violationLogSheet()].forEach(function (sh) { sh.getDataRange().getValues().slice(1).forEach(function (r) { var u = String(r[9] || '').trim().toLowerCase(); if (/^[a-f0-9]{32}$/.test(u)) uids.push(u); }); });
+  var ok = 0, bad = 0;
+  uids.forEach(function (uid) {
+    var res = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + uid, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+      payload: JSON.stringify({ allowedOrigins: ['michealrayberry.com', 'www.michealrayberry.com', 'ap.michealrayberry.com', '*.michealrayberry.com', '*.pages.dev'], requireSignedURLs: false }) });
+    if (res.getResponseCode() < 300) ok++; else { bad++; Logger.log(uid + ': ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); }
+  });
+  Logger.log('Stream origins fixed on ' + ok + ' video(s); ' + bad + ' failed.');
+}
+
 /* BACKFILL Days 1–N → Stream by upload-from-URL, one row per run (6-min limit).
    Re-run until it logs "nothing left". Toggles link-sharing on the Drive file
    only for the duration of the copy. */
@@ -982,7 +1000,7 @@ function backfillStreamFromDrive() {
     if (body.success && body.result && body.result.uid) {
       // name + origins + thumbnail via a follow-up PATCH (cheap; no memory cost)
       try { UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + body.result.uid, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
-        payload: JSON.stringify({ meta: { name: 'Micheal Ray Berry — Day ' + dayOf(dateIso) + ' inspection — ' + dateIso, date: dateIso, kind: 'daily' }, allowedOrigins: ['michealrayberry.com', '*.michealrayberry.com'], thumbnailTimestampPct: 0.05 }) }); } catch (err) {}
+        payload: JSON.stringify({ meta: { name: 'Micheal Ray Berry — Day ' + dayOf(dateIso) + ' inspection — ' + dateIso, date: dateIso, kind: 'daily' }, allowedOrigins: ['michealrayberry.com', 'www.michealrayberry.com', 'ap.michealrayberry.com', '*.michealrayberry.com', '*.pages.dev'], thumbnailTimestampPct: 0.05 }) }); } catch (err) {}
     }
     if (!body.success) { Logger.log(dateIso + ': Stream copy failed — ' + res.getContentText().slice(0, 300)); return; }
     sh.getRange(i + 1, 10).setValue(body.result.uid);
@@ -1028,7 +1046,7 @@ function backfillPhotosToR2() {
   if (!p.getProperty('R2_ACCOUNT_ID') || !p.getProperty('R2_ACCESS_KEY_ID')) { Logger.log('Run setCloudflareMedia + setR2Keys first.'); return; }
   var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence', ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
   var log = tab('R2 Photo Keys'); var doneRows = log.getDataRange().getValues().slice(1); var done = {};
-  doneRows.forEach(function (r) { done[String(r[0]) + '|' + String(r[1])] = true; });
+  doneRows.forEach(function (r) { done[apDateStr(r[0]) + '|' + String(r[1]).trim()] = true; });
   var vals = weighinsSheet().getDataRange().getValues(); var angles = ['front', 'left', 'rear', 'right'];
   for (var r = 1; r < vals.length; r++) {
     var dateIso = apDateStr(vals[r][0]); if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) continue;
@@ -1040,23 +1058,34 @@ function backfillPhotosToR2() {
       var name = 'micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-' + a + '-' + dateIso + '.jpg';
       var blob = null;
       try {
-        if (/^originals\//.test(cell)) { log.appendRow([dateIso, a, cell, 'already-r2', new Date()]); okCount++; continue; }
+        if (/^originals\//.test(cell)) { log.appendRow(["'" + dateIso, a, cell, 'already-r2', new Date()]); okCount++; continue; }
         var id = driveIdFromUrl(cell);
         if (id) blob = DriveApp.getFileById(id).getBlob();
         else { var f = findDriveBackup_(dateIso, a); if (f) blob = f.getBlob(); }
         if (!blob && /^https?:/i.test(cell)) { var resp = UrlFetchApp.fetch(cell, { muteHttpExceptions: true, followRedirects: true }); if (resp.getResponseCode() === 200) blob = resp.getBlob(); }
-        if (!blob) { Logger.log(dateIso + ' ' + a + ': no source found'); log.appendRow([dateIso, a, '', 'no-source', new Date()]); continue; }
+        if (!blob) { Logger.log(dateIso + ' ' + a + ': no source found'); log.appendRow(["'" + dateIso, a, '', 'no-source', new Date()]); continue; }
         blob.setContentType('image/jpeg');
         var key = 'originals/' + dateIso.slice(0, 4) + '/' + dateIso.slice(5, 7) + '/micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-photo-' + a + '-' + dateIso + '.jpg';
         var res = r2Put_(acct, bucket, ak, sk, key, blob);
         if (res.getResponseCode() >= 300) { Logger.log(dateIso + ' ' + a + ': R2 PUT ' + res.getResponseCode()); return; }
-        log.appendRow([dateIso, a, key, 'archived', new Date()]); okCount++;
+        log.appendRow(["'" + dateIso, a, key, 'archived', new Date()]); okCount++;
       } catch (e) { Logger.log(dateIso + ' ' + a + ': ' + e); return; }
     }
     Logger.log(dateIso + ': ' + okCount + '/' + pending.length + ' photo originals archived. Re-run for the next day.');
     return;
   }
   Logger.log('Photo backfill: nothing left.');
+}
+
+/* Loops backfillPhotosToR2 inside a 5-minute budget. Run until it logs "nothing left". */
+function backfillPhotosToR2All() {
+  var t0 = Date.now();
+  while (Date.now() - t0 < 300000) {
+    var before = tab('R2 Photo Keys').getLastRow();
+    backfillPhotosToR2();
+    if (tab('R2 Photo Keys').getLastRow() === before) return;
+  }
+  Logger.log('Time budget reached — run again.');
 }
 
 function findDriveBackup_(dateIso, stem) {

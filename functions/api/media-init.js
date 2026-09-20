@@ -61,7 +61,7 @@ export async function onRequestPost({ request, env }) {
     const meta = { name: `Micheal Ray Berry — Day ${day} ${stem} — ${date}`, date, day: String(day), kind };
     const su = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/stream/direct_upload`, {
       method: 'POST', headers: { authorization: `Bearer ${env.STREAM_API_TOKEN}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ maxDurationSeconds: 3600, requireSignedURLs: false, allowedOrigins: ['michealrayberry.com', '*.michealrayberry.com'], meta, thumbnailTimestampPct: 0.05 }),
+      body: JSON.stringify({ maxDurationSeconds: 3600, requireSignedURLs: false, allowedOrigins: ['michealrayberry.com', 'www.michealrayberry.com', 'ap.michealrayberry.com', '*.michealrayberry.com', '*.pages.dev'], meta, thumbnailTimestampPct: 0.05 }),
     }).then((r) => r.json()).catch(() => null);
     if (su && su.success) { out.stream_url = su.result.uploadURL; out.stream_uid = su.result.uid; }
     else out.stream_error = (su && su.errors && su.errors[0] && su.errors[0].message) || 'stream unavailable';
