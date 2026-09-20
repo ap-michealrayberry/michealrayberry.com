@@ -69,3 +69,7 @@
 /observer            /report/            301
 /observer/           /report/            301
 /observer/received/  /report/received/   301
+
+# AP console moved to its own Access-protected host (Sept 20)
+/ap           https://ap.michealrayberry.com/  301
+/ap/*         https://ap.michealrayberry.com/  301

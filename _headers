@@ -60,9 +60,6 @@
 /report/received/*
   X-Robots-Tag: noindex, nofollow
 
-/ap/*
-  Cache-Control: no-store
-  X-Robots-Tag: noindex, nofollow
 
 /report/*
   X-Robots-Tag: noindex, follow

@@ -1,3 +1,13 @@
+## AP console → ap.michealrayberry.com (Cloudflare Access)
+The console left the public site. It lives in ap-site/ as a SEPARATE Pages
+project (root directory ap-site), whole-host behind Cloudflare Access (one
+allowed email, Google sign-in w/ MFA or email OTP). The console stores no
+key: ap-site/functions/api/ap.js verifies the Access identity JWT and relays
+to Apps Script with AP_KEY from encrypted secrets. Every action is stamped
+(actor / IP / UA / op / args / result) on the sheet's AP Actions tab; guarded
+ops need the confirmation sheet (relay enforces confirmed:true). /ap on the
+public site 301s to the new host. Setup steps: ap-site/README.md.
+
 ## Video: Cloudflare Stream (player) + R2 (originals) + YouTube (mirror)
 - Stream is the site's player wherever a row has stream_uid; the YouTube URL
   becomes an "Also on YouTube" link. R2 (private bucket mrb-evidence) holds the
