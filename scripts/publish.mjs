@@ -422,7 +422,7 @@ function agreementExecutionGate(siteState, confirmations, startDate, todayDate) 
     reviewedConfirmationFingerprint,
   };
   /* agreement_edition is the commit flag. A deliberately cleared flag is the
-     only inactive state; once Edition 2 is asserted, every bound field must be
+     only inactive state; once The agreement is asserted, every bound field must be
      present and valid or the release fails closed. This prevents a malformed
      active tuple from overwriting the last known-good active deploy. */
   if (rawEdition === '') return inactive;
@@ -431,7 +431,7 @@ function agreementExecutionGate(siteState, confirmations, startDate, todayDate) 
   }
   if (!mrbSignatureDate || !apSignatureDate || !reviewedConfirmationDate
     || !confirmationReviewDate || !/^[a-f0-9]{64}$/.test(reviewedConfirmationFingerprint)) {
-    throw new Error('Edition 2 agreement activation tuple is incomplete or malformed.');
+    throw new Error('agreement activation tuple is incomplete or malformed.');
   }
 
   /* AP-attested activation (Start project on the console): no sealed capture
