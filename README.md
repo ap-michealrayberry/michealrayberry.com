@@ -8,7 +8,6 @@ to Apps Script with AP_KEY from encrypted secrets. Every action is stamped
 ops need the confirmation sheet (relay enforces confirmed:true). /ap on the
 public site 301s to the new host. Setup steps: ap-site/README.md.
 
-
 ## Video: Cloudflare Stream (player) + R2 (originals) + YouTube (mirror)
 - Stream is the site's player wherever a row has stream_uid; the YouTube URL
   becomes an "Also on YouTube" link. R2 (private bucket mrb-evidence) holds the

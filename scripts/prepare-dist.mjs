@@ -34,7 +34,7 @@ const FILES = [
 
 const DIRECTORIES = [
   'about', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
-  'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
+  'daily', 'faq', 'dashboard', 'live', 'manifests', 'media', 'milestones',
   'report', 'photos', 'positions', 'protocol', 'schemas', 'share', 'tf060',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ];
@@ -48,7 +48,7 @@ const REVIEWED_DIRECTORY_FILES = new Set([
   'consent/index.html', 'corrections/index.html', 'daily/index.html',
   'dashboard/index.html', 'live/index.html', 'milestones/index.html',
   'report/index.html', 'report/received/index.html', 'positions/index.html',
-  'protocol/index.html', 'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html',
+  'protocol/index.html', 'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html', 'faq/index.html',
   'uniform/index.html', 'updates/index.html',
   'verify/index.html', 'verify/verify.js', 'violations/index.html', 'weeks/index.html',
   'photos/official/micheal-ray-berry-correction-uniform.png',

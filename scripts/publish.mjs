@@ -1338,8 +1338,14 @@ function milestonePage(target, entries) {
       { name: `${target} lb`, url: canonical },
     ]),
   ];
+  const day1 = entries[0] || null;
+  const pair = reached && day1 && day1.photos?.front && reached.photos?.front && day1.record.date !== reached.record.date ? `
+    <div class="pair" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:720px;margin:20px 0 28px">
+      <figure style="margin:0"><img src="${htmlEscape(day1.photos.front.sourceUrl)}" width="${day1.photos.front.width}" height="${day1.photos.front.height}" alt="${htmlEscape(`Micheal Ray Berry, Day ${day1.record.day} front, ${day1.record.weight.toFixed(1)} pounds — the starting record`)}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block"><figcaption>Day ${day1.record.day} · ${htmlEscape(longDate(day1.record.date))} · ${day1.record.weight.toFixed(1)} lb</figcaption></figure>
+      <figure style="margin:0"><img src="${htmlEscape(reached.photos.front.sourceUrl)}" width="${reached.photos.front.width}" height="${reached.photos.front.height}" alt="${htmlEscape(`Micheal Ray Berry, Day ${reached.record.day} front, ${reached.record.weight.toFixed(1)} pounds — first record at or below ${target}`)}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block"><figcaption>Day ${reached.record.day} · ${htmlEscape(longDate(reached.record.date))} · ${reached.record.weight.toFixed(1)} lb</figcaption></figure>
+    </div>` : '';
   const body = reached
-    ? `<p class="intro">A weight at or below the <strong>${target}-pound threshold</strong> was recorded on <strong>${htmlEscape(longDate(reached.record.date))}</strong>, Day ${reached.record.day} of the Public Accountability Project: ${reached.record.weight.toFixed(1)} pounds — ${(start - reached.record.weight).toFixed(1)} pounds below the declared starting weight of ${start.toFixed(1)}.</p>
+    ? `${pair}<p class="intro">A weight at or below the <strong>${target}-pound threshold</strong> was recorded on <strong>${htmlEscape(longDate(reached.record.date))}</strong>, Day ${reached.record.day} of the Public Accountability Project: ${reached.record.weight.toFixed(1)} pounds — ${(start - reached.record.weight).toFixed(1)} pounds below the declared starting weight of ${start.toFixed(1)}.</p>
     <div class="gallery">${Object.entries(reached.photos).map(([angle, ph]) => `<figure>
       <picture><source type="image/webp" srcset="${htmlEscape(ph.variants.map((v) => `${v.url} ${v.width}w`).join(', '))}" sizes="(max-width:720px) 50vw, 25vw">
       <img src="${htmlEscape(ph.sourceUrl)}" width="${ph.width}" height="${ph.height}" alt="${htmlEscape(`Micheal Ray Berry ${imageLabel(angle)} accountability photograph on ${longDate(reached.record.date)}, Day ${reached.record.day}, recorded weight ${reached.record.weight.toFixed(1)} pounds—the first public record at or below the ${target}-pound threshold`)}" loading="lazy" decoding="async"></picture>
@@ -1437,6 +1443,13 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     weekCards.push(reportCard(cardCtx(d, { date, complete: !!e, photoCount: e ? 4 : 0, photo: e ? { url: e.photos.front.variants?.[0]?.url || e.photos.front.sourceUrl } : null }), { compact: true, link: `/daily/${date}-day-${String(d).padStart(3, '0')}/` }));
   }
   const filesPresent = weekEntries.length;
+  const wkFirst = weights[0], wkLast = weights.at(-1);
+  const recapDays = Math.min(7, Math.max(0, todayDay - firstDay + 1));
+  const recap = [
+    `Week ${week} of the Micheal Ray Berry Public Accountability Project covers Days ${firstDay}–${firstDay + 6}${dates.length ? ` (${span})` : ''}.`,
+    weights.length >= 2 ? `The recorded weight moved from ${wkFirst.toFixed(1)} to ${wkLast.toFixed(1)} pounds, a ${net < 0 ? 'loss' : net > 0 ? 'gain' : 'change'} of ${Math.abs(net).toFixed(1)} pounds, and stood ${Math.abs(START_WEIGHT - wkLast).toFixed(1)} pounds ${wkLast <= START_WEIGHT ? 'below' : 'above'} the declared ${START_WEIGHT}-pound start.` : weights.length === 1 ? `One weight was recorded, ${wkFirst.toFixed(1)} pounds.` : 'No complete daily record was published this week.',
+    recapDays > 0 ? `${filesPresent} of ${recapDays} days so far have all required files present${recapDays - filesPresent > 0 ? `; ${recapDays - filesPresent} ${recapDays - filesPresent === 1 ? 'day does' : 'days do'} not` : ''}. File presence does not by itself establish that a filing was on time; compliance outcomes come from the violation log.` : '',
+  ].filter(Boolean).join(' ');
   const nav = [
     week > 1 ? `<a rel="prev" href="/weeks/week-${String(week - 1).padStart(2, '0')}/">← Week ${week - 1}</a>` : '',
     week < maxWeek ? `<a rel="next" href="/weeks/week-${String(week + 1).padStart(2, '0')}/">Week ${week + 1} →</a>` : '',
@@ -1480,6 +1493,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Micheal Ray Berry</a> / <a href="/weeks/">Weeks</a> / Week ${week}</nav>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
   <h1>Week ${week}</h1>
+  <p class="intro" style="max-width:720px">${htmlEscape(recap)}</p>
   <div class="stats"><span>DAYS ${firstDay}–${firstDay + 6}</span><span>${htmlEscape(span)}</span>${weights.length > 1 ? `<span>${net <= 0 ? '−' : '+'}${Math.abs(net).toFixed(1)} LB</span>` : ''}</div>
 </header>
 <main id="main-content">
@@ -2733,84 +2747,83 @@ function tf060Page() {
     .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${img}"><meta property="og:image:alt" content="Micheal Ray Berry holding a sign: TF060 failed. Micheal Ray Berry continues."><meta property="og:title" content="TF060 Failed. Micheal Ray Berry Continues.">`);
 }
 
-/* /share/ — "Share the Project". Third person; one attributed first-person
-   statement of intent; dry teasing confined to "Be careful what you ask
-   for". Facts come from the record object; nothing is inferred from files.
-   No share-kit or email module until those paths exist. */
+/* /share/ — "Share the Record". Third person; the record speaks. Facts come
+   from the shareData object computed in main(); nothing here is hard-coded
+   about the current state. No sign-photograph section until the photograph
+   exists on the record. */
 function sharePage(d) {
   const canonical = `${SITE_ORIGIN}/share/`;
-  const title = 'Share the Project | Micheal Ray Berry';
-  const description = "Share Micheal Ray Berry's public accountability project. Find official photographs, daily report cards, current facts, and conditions for accurate reuse.";
-  const na = (v, alt) => (v == null || v === '' ? alt : v);
+  const title = 'Share the Record | Micheal Ray Berry';
+  const description = "Micheal Ray Berry asked to be held publicly accountable: 340 to 200 pounds, documented daily under his real name. Source material, current facts, and the conditions for accurate sharing.";
   const card = d.latest;
-  const desc = `Micheal Ray Berry is documenting a public weight-loss commitment under his real name: 340 to 200 pounds, recorded daily since August 31, 2026, with inspection video and photographs published to the record.${d.weight ? ` Latest published weight: ${d.weight} lb (${d.weightDate}).` : ''} Follow the dated record at https://michealrayberry.com/daily/.`;
+  const gap = d.today != null && card ? Math.max(0, d.today - card.day) : null;
+  const delta = d.weight ? (Number(d.weight) - 340) : null;
+  const deltaTxt = delta == null ? '' : `${delta > 0 ? '+' : delta < 0 ? '−' : ''}${Math.abs(delta).toFixed(1)} lb`;
+  const desc = `Micheal Ray Berry asked to be held publicly accountable for reducing his weight from a declared 340 lb to 200 lb. The public record began August 31, 2026, and does not end until he maintains 200 lb for 28 consecutive days. He chose real-name, searchable, shareable documentation because more visibility creates more accountability. The archive holds dated weigh-ins, standardized inspection videos, photographs, report cards, and a public tracker, so progress, missing documentation, and unfavorable outcomes cannot be quietly rewritten.${d.weight ? ` Latest published weight: ${d.weight} lb, recorded ${d.weightDate}${deltaTxt ? ` (${deltaTxt} from the declared start)` : ''}.` : ''} Follow the source record at https://michealrayberry.com/daily/.`;
   const body = `
     <p class="crumb"><a href="/">Record</a> · Share</p>
-    <h1>Share the Project</h1>
-    <p class="lede"><strong>Micheal Ray Berry is documenting a weight-loss commitment — 340 to 200 pounds — under his real name, daily, on this public record.</strong></p>
-    <p>The record began August 31, 2026. The goal is 200 pounds held for 28 consecutive days. Every day’s weigh-in, inspection video, and photographs are published here; missed requirements will be published here too once the agreement is counter-signed and active. Follow the <a href="/daily/">daily archive</a>, the <a href="/feed.xml">RSS feed</a>, or the <a href="https://www.youtube.com/@michealrayberry" rel="noopener">official channel</a>.</p>
-    <p>Public visibility is a stated project goal. The official photograph, dated report cards, and source links below are provided so the project can be described accurately. Share only public material, preserve its context, and link to the relevant record page.</p>
-    <p><strong>Public availability does not invite harassment, confrontation, workplace or employer contact, disclosure of private information, or unrelated intrusion.</strong></p>
+    <h1>Share the Record</h1>
+    <p class="lede"><strong>Micheal Ray Berry asked for this accountability.</strong></p>
+    <p>He chose to place his real name, weight, daily documentation, missed requirements, and results on a public record. He began at a declared <strong>340 lb</strong>. The completion standard is <strong>200 lb maintained for 28 consecutive days</strong> — not one favorable weigh-in, not one good week. Until that standard is met, the record remains open.</p>
+    <p>Private promises can be revised, excused, or quietly abandoned. A dated public record is harder to argue with. If Micheal follows through, the evidence will show it. If he stops documenting the work, the gaps will show that too. <strong>The record does not accept excuses. It records evidence.</strong></p>
+    <p>Public visibility is part of the consequence he chose. It does not authorize harassment, threats, employer or workplace contact, disclosure of private information, or interference with his personal or professional relationships.</p>
     <p class="share-actions" style="display:flex;flex-wrap:wrap;gap:10px 22px;font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">
-      <button type="button" class="copy-button" data-copy="https://michealrayberry.com/">Copy website link</button>
+      <button type="button" data-copy="https://michealrayberry.com/" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy project link</button>
       ${card ? `<a href="${card.png}" download>Download latest report card</a>` : ''}
-      <a href="/daily/">View daily record</a>
+      <a href="/daily/">View daily archive</a>
     </p>
+
     <h2>The current record</h2>
-    <p style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">How to read these figures: a weight is the latest published measurement, dated — not today’s weight. “Files present” means the day’s media is published; it does not by itself establish that the filing was on time. Compliance outcomes come only from the governed violation log.</p>
+    <p style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">The latest published facts — not promises, estimates, or assumptions.</p>
     <div class="standard">
-      <div><b>Current project day</b><p>Day ${na(d.today, '—')}</p></div>
-      <div><b>Latest day with files present</b><p>${card ? `Day ${card.day} · ${card.dateLong}` : 'Not recorded'}</p></div>
-      <div><b>Latest recorded weight</b><p>${d.weight ? `${d.weight} lb · recorded ${d.weightDate}` : 'Not recorded'}</p></div>
+      <div><b>Current project day</b><p>Day ${d.today ?? '—'}</p></div>
+      <div><b>Latest day with files present</b><p>${card ? `Day ${card.day} · ${card.dateLong}` : 'None published'}</p></div>
+      ${gap != null ? `<div><b>Public file gap</b><p>${gap} project ${gap === 1 ? 'day' : 'days'}</p></div>` : ''}
+      <div><b>Latest published weight</b><p>${d.weight ? `${d.weight} lb · recorded ${d.weightDate}` : 'Not recorded'}</p></div>
+      ${deltaTxt ? `<div><b>Change from declared start</b><p>${deltaTxt}</p></div>` : ''}
       <div><b>Published open violations</b><p>${d.open} · as of ${d.asOf}</p></div>
-      <div><b>Completion goal</b><p>200 lb held for 28 consecutive days</p></div>
-      <div><b>Record updated</b><p>${d.published}</p></div>
+      <div><b>Agreement status</b><p>${d.agreementActive ? 'Active' : 'Pending counter-signature'}</p></div>
+      <div><b>Completion standard</b><p>200 lb maintained for 28 consecutive days</p></div>
     </div>
+    ${delta != null && delta >= 0 ? `<p>The latest published weight is ${Math.abs(delta).toFixed(1)} lb ${delta > 0 ? 'above' : 'at'} the declared starting weight. The record will not describe that as progress.</p>` : ''}
+    ${gap ? `<p>The public file record is ${gap} project ${gap === 1 ? 'day' : 'days'} behind the current day. Those figures are shown separately on purpose: an older entry is not presented as current because it is the latest available.</p>` : ''}
+    <p>A published weight is the most recent documented measurement, not automatically today's weight. "Files present" means files are publicly available for that day; it does not establish when they were submitted or whether every requirement was met. Official compliance outcomes appear only in the <a href="/violations/">violation log</a>.</p>
     ${card ? `<p style="margin:26px 0 8px"><a href="${card.page}"><img src="${card.png}" alt="Report card, Day ${card.day}, ${card.dateLong}" style="max-width:360px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small>Day ${card.day} · ${card.dateLong} · <a href="${card.page}">the supporting entry</a></small></p>` : ''}
-    <p>The daily archive distinguishes days with all listed files present, partial file records, and days with no public file record. These labels do not infer submission timing. Each report card identifies its Project Day and links to the supporting entry.</p>
-    <p><a href="/daily/">View the daily archive</a> · <a href="/violations/">View unresolved violations and corrective requirements</a></p>
-    <h2>What the project is</h2>
-    <p>Micheal Ray Berry documents a public accountability project under his real name and published Edition 2 terms. The current project began on <strong>${htmlEscape(longDate(START_DATE))}</strong>, with a <strong>declared starting weight of 340 lb</strong>. The completion goal is <strong>200 lb held for 28 consecutive days</strong>.</p>
-    <p>${d.agreementActive
-      ? `For dates on or after <strong>${htmlEscape(d.agreementEffectiveDateLong)}</strong>, the active terms set a <strong>10:00 PM Eastern</strong> deadline for the Daily Compliance Packet. Current file presence alone does not establish whether that deadline was met.`
-      : 'Edition 2 describes a 10:00 PM Eastern Daily Compliance Packet deadline, but agreement execution is not verified and no filing requirement is represented as active.'} The packet described by the terms includes a recorded weigh-in, a four-angle inspection video, four photographs, and the updated public tracker.</p>
-    <p>The Accountability Partner administers the record and answers official questions about compliance. Micheal does not grade his own submissions. The published standards describe review, corrections, publication, and the limits of participation; the agreement page shows whether execution has been verified.</p>
+
+    <h2>More visibility means more accountability</h2>
+    <p>The more people who can see the dated record, follow the numbers, and notice missing entries, the harder it becomes to minimize a failure, rely on private excuses, or disappear into another quiet restart. That is why Micheal asked for this project to be public, searchable, shareable, published under his real name, and preserved in order. He knows the visibility may be uncomfortable. That discomfort is not a side effect; it is the pressure he chose.</p>
+    <p>He did not ask the public to pretend he was succeeding. He asked the public to see what the record shows. If the numbers improve, the record will show it. If they move the wrong way, the record will show that. If the documentation stops, the empty space stays visible. <strong>He asked to be seen. This is the record he asked people to see.</strong></p>
+
+    <h2>What the project documents</h2>
+    <p>A voluntary, structured weight-loss record published under Micheal's real name. The current record began <strong>August 31, 2026</strong> at a declared <strong>340 lb</strong>; completion requires <strong>200 lb held for 28 consecutive days</strong>. The agreement describes a Daily Compliance Packet — a recorded weigh-in, a four-angle inspection video, four photographs, the updated public tracker, and the day's verification information — due by <strong>10:00 PM Eastern</strong>.</p>
+    <p>${d.agreementActive ? 'The agreement is active. The Accountability Partner — not Micheal — reviews submissions and issues official outcomes.' : 'The agreement is pending counter-signature. Until it is confirmed, this site does not present the filing deadline, violation process, or corrective requirements as active; the archive documents available files, dates, and measurements, but does not invent an obligation or a violation that has not taken effect. Once active, the Accountability Partner — not Micheal — reviews submissions and issues official outcomes.'} Micheal does not grade his own work, excuse his own misses, close his own violations, or rewrite an unfavorable outcome. The published <a href="/agreement/">agreement</a> and <a href="/violations/">violation log</a> control if any summary, caption, or third-party description differs.</p>
+
     <h2>Materials for sharing</h2>
     <div class="standard">
-      <div><b>Official photograph</b><p><a href="/photos/official/micheal-ray-berry-official-front-v2.jpg"><img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w" sizes="220px" width="3189" height="4933" alt="Micheal Ray Berry in the Inspection position, wearing the black standard uniform. Official project photograph." style="max-width:220px;width:100%;height:auto;display:block;border:1px solid var(--ink)" loading="lazy" decoding="async"></a><small><a href="/photos/official/micheal-ray-berry-official-front-v2.jpg" download>Full resolution</a></small></p><p><strong>Caption:</strong> Micheal Ray Berry in the Inspection position, wearing the black standard uniform. Official project photograph.</p><p>Use this photograph for a general introduction to the project. Use the photograph from the relevant dated entry when describing a particular day's record.</p></div>
-      <div><b>Daily report cards</b><p>Each published daily page carries its report card. Share the complete card with a link to that day's record so readers can inspect its photographs, documentation, and recorded outcome.</p><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">${card ? `<a href="${card.page}">View latest report</a> · <a href="${card.png}" download>Download latest card</a> · ` : ''}<a href="/daily/">Browse previous days</a></p></div>
-      <div><b>Copy-ready description</b><blockquote id="share-desc" style="margin:8px 0 12px;padding:12px 18px;border-left:3px solid var(--ink);font-size:15px;line-height:1.55">${desc}</blockquote><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase"><button type="button" class="copy-button" data-copy-from="share-desc">Copy description</button></p></div>
+      <div><b>Official photograph</b><p><a href="/photos/official/micheal-ray-berry-official-front-v2.jpg"><img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w" sizes="220px" alt="Micheal Ray Berry in the Inspection position, wearing the project uniform. Official project photograph." style="max-width:220px;width:100%;display:block;border:1px solid var(--ink)" loading="lazy"></a><small><a href="/photos/official/micheal-ray-berry-official-front-v2.jpg" download>Full resolution</a></small></p><p><strong>Caption:</strong> Micheal Ray Berry in the Inspection position, wearing the project uniform. Official project photograph.</p><p>Documentation, not a portrait. Use it to introduce the project; for a specific day, use that day's photograph and report card.</p></div>
+      <div><b>Daily report cards</b><p>Each card identifies its project day, date, documented status, and supporting entry. Share the complete card with its source link. Do not crop away the date, status, or source to make the record look better — or worse — than it is.</p><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase">${card ? `<a href="${card.page}">View latest report</a> · <a href="${card.png}" download>Download latest card</a> · ` : ''}<a href="/daily/">Browse previous days</a></p></div>
+      <div><b>Copy-ready description</b><blockquote id="share-desc" style="margin:8px 0 12px;padding:12px 18px;border-left:3px solid var(--ink);font-size:15px;line-height:1.55">${desc}</blockquote><p class="share-actions" style="font:600 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase"><button type="button" data-copy-from="share-desc" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:4px">Copy description</button></p></div>
     </div>
-    <h2>Ways to share</h2>
-    <ul>
-      <li>Send the website link to someone who may be interested in following the project.</li>
-      <li>Share an original project post or an unaltered daily report card with its source link.</li>
-      <li>Refer to the factual description above when discussing the project elsewhere.</li>
-    </ul>
-    <p>This page invites visitors to link to the public record and to share original project posts with their source context. It does not give a viewer authority to direct Micheal's conduct or impose additional requirements.</p>
-    <h2>Sharing conditions</h2>
-    <p>Link to the original public page whenever possible. Any quotation, embedding, or reproduction must follow applicable law and platform rules, preserve context, and must not be presented as a broader license or endorsement by the participant.</p>
-    <ul>
-      <li>Keep names, dates, figures, status labels, and verdicts intact.</li>
-      <li>Do not crop or alter a report card in a way that changes its verdict or context.</li>
-      <li>Keep demonstrations labeled. Do not present them as completed inspections, actual results, or served corrective sessions.</li>
-      <li>Use the recorded facts when describing compliance. A viewer's opinion is not an official ruling.</li>
-      <li>Do not use the project to harass, impersonate, sexualize, expose private information, or interfere with work or personal relationships.</li>
-    </ul>
-    <p>The project publishes clothed, non-explicit material. Nothing on this page grants rights in unpublished material or private verification information, or overrides privacy, safety, platform, copyright, publicity, or other legal restrictions.</p>
-    <p>Questions about a proposed reuse, or reports of suspected misuse, may be sent to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>
+
+    <h2>Share the facts</h2>
+    <p>Welcome: the project link; a dated daily entry; an original project post; a complete, unaltered report card with its source link; the description above; discussion of progress using documented dates, measurements, and outcomes; pointing out a visible publication gap accurately; submitting a possible record issue for review.</p>
+    <p>When sharing: link to the original public page; preserve names, dates, measurements, status labels, and recorded outcomes; distinguish files being present from files being filed on time; keep demonstrations labeled as demonstrations; do not present an opinion as an official compliance decision; correct an outdated statement when the record changes. The purpose is to make the record visible, not to replace it with exaggeration, invention, or rumor.</p>
+
+    <h2>The public may witness. The public does not control.</h2>
+    <p>Micheal invited observation and responsible sharing. He did not transfer control of his life to every person who finds the website. Sharing the record gives no one authority to direct him, modify the agreement, assign requirements, demand private access, or declare unofficial punishments.</p>
+    <p>Do not use the project to harass, threaten, stalk, or impersonate him; contact his employer, workplace, coworkers, clients, or associates; publish private addresses, telephone numbers, account information, or verification data; interfere with his employment or relationships; alter project media to create a false or misleading record; present private or unpublished material as part of the project; place project media in an unrelated context; claim to represent the Accountability Partner or the project; or pressure him to accept requirements outside the published agreement. Public visibility was invited. Uncontrolled intrusion was not.</p>
+    <p>Nothing on this page creates an unrestricted license to Micheal's name, likeness, project media, or unpublished information; quotation, embedding, and reproduction must comply with applicable copyright, privacy, publicity, safety, and platform rules. Questions about a proposed use, or reports of misuse: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>
+
     <h2>Follow the record</h2>
-    <p>New entries appear in the daily archive. Visitors can follow the record through RSS or the official YouTube channel, and consult the Evening Supervision page for the current published status.</p>
+    <p>New entries appear in the daily archive. If no new entry appears, the absence stays visible; the project does not need a flattering explanation for a missing record, it needs the record.</p>
     <p><a href="/daily/">Daily archive</a> · <a href="/feed.xml">RSS feed</a> · <a href="https://www.youtube.com/@michealrayberry" rel="noopener">Official YouTube channel</a> · <a href="/live/">Evening Supervision</a></p>
-    <h2>Questions and governing documents</h2>
-    <p>Questions about the record, its rules, or a possible compliance issue should go to the <a href="/report/">Report a Record Issue page</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner answers for the official record.</p>
-    <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a></p>`;
+    <h2>Questions and record issues</h2>
+    <p>Questions about the rules, the documentation standard, published status, or a possible error go to <a href="/report/">Report a Record Issue</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. Factual errors are corrected transparently; documented outcomes are not removed because they become uncomfortable.</p>
+    <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a> · <a href="/report/">Report a record issue</a></p>`;
   return synPage({ title, desc: description, canonical, body })
     .replace('</head>', '<script src="/share.js" defer></script>\n</head>')
     .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${SITE_ORIGIN}${card ? card.png : '/og-image.png'}">`);
 }
-
-/* /protocol/ — hub for the operating standards. One paragraph each, linking out. */
 function protocolPage() {
   const canonical = `${SITE_ORIGIN}/protocol/`;
   const title = 'Protocol — Micheal Ray Berry Public Accountability Project';
@@ -3235,6 +3248,10 @@ function imageSitemap(entries) {
   const official = `  <url>
     <loc>${SITE_ORIGIN}/</loc>
     <image:image><image:loc>${SITE_ORIGIN}/photos/official/micheal-ray-berry-official-front-v2.jpg</image:loc><image:title>Micheal Ray Berry — official photograph, project uniform</image:title><image:caption>Official photograph of Micheal Ray Berry in the Inspection position, project uniform. Public Accountability Project: declared start 340 lb, goal 200 lb, documented daily under his real name.</image:caption></image:image>
+  </url>
+  <url>
+    <loc>${SITE_ORIGIN}/tf060/</loc>
+    <image:image><image:loc>${SITE_ORIGIN}/photos/official/micheal-ray-berry-tf060-continues.png</image:loc><image:title>TF060 failed. Micheal Ray Berry continues.</image:title><image:caption>Micheal Ray Berry in the project uniform holding a sign that reads: TF060 failed. Micheal Ray Berry continues.</image:caption></image:image>
   </url>`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
@@ -4169,6 +4186,8 @@ async function main() {
   if (await writeIfChanged(path.join(ROOT, 'protocol', 'index.html'), protocolPage())) changedUrls.add(`${SITE_ORIGIN}/protocol/`);
   extraUrls.push(`${SITE_ORIGIN}/protocol/`);
   if (await writeIfChanged(path.join(ROOT, 'tf060', 'index.html'), tf060Page())) changedUrls.add(`${SITE_ORIGIN}/tf060/`);
+  if (await writeIfChanged(path.join(ROOT, 'faq', 'index.html'), await faqPage())) changedUrls.add(`${SITE_ORIGIN}/faq/`);
+  extraUrls.push(`${SITE_ORIGIN}/faq/`);
   extraUrls.push(`${SITE_ORIGIN}/tf060/`);
   if (await writeIfChanged(path.join(ROOT, 'report', 'index.html'), observerPage())) {
     changedUrls.add(`${SITE_ORIGIN}/report/`);
