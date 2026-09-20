@@ -194,16 +194,19 @@ function normalizedHeader(value) {
   return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
 
-function validateTable(rows, expected, label) {
+function validateTable(rows, expected, label, { optional = [] } = {}) {
   const actual = (rows[0] || []).map(normalizedHeader);
-  const ok = actual.length === expected.length && expected.every((name, index) => {
+  const okRequired = actual.length >= expected.length && expected.every((name, index) => {
     const choices = Array.isArray(name) ? name : [name];
     return choices.map(normalizedHeader).includes(actual[index]);
   });
-  if (!ok) throw new Error(`${label} schema mismatch; expected ${expected.map((v) => Array.isArray(v) ? v.join('|') : v).join(', ')}`);
+  const extra = actual.slice(expected.length);
+  const okOptional = extra.length <= optional.length && extra.every((h, i) => h === normalizedHeader(optional[i]));
+  if (!okRequired || !okOptional) throw new Error(`${label} schema mismatch; expected ${expected.map((v) => Array.isArray(v) ? v.join('|') : v).join(', ')}${optional.length ? ` [+ optional: ${optional.join(', ')}]` : ''}`);
+  const width = actual.length;
   for (let index = 1; index < rows.length; index++) {
-    if (rows[index].length !== expected.length) {
-      throw new Error(`${label} row ${index + 1} has ${rows[index].length} columns; expected exactly ${expected.length}.`);
+    if (rows[index].length !== width) {
+      throw new Error(`${label} row ${index + 1} has ${rows[index].length} columns; expected exactly ${width}.`);
     }
   }
   return rows;
@@ -473,6 +476,29 @@ function agreementExecutionGate(siteState, confirmations, startDate, todayDate) 
 
 /* Reject operational storage, alternate YouTube surfaces, and arbitrary
    hosts before any URL reaches HTML, JSON-LD, CSV, or a sitemap. */
+/* Cloudflare Stream is the primary player; YouTube is the public mirror.
+   STREAM_CUSTOMER_CODE = the "customer-xxxx" subdomain (Stream → Settings).
+   stream_uid on a row embeds Stream; the YouTube URL becomes "Also on
+   YouTube". R2 holds the untouched original (r2_key) — recorded in the
+   manifest beside its SHA-256, never used as a player. */
+const STREAM_CUSTOMER_CODE = String(process.env.STREAM_CUSTOMER_CODE || '').trim();
+function streamUid(value = '') { const v = String(value || '').trim(); return /^[a-f0-9]{32}$/i.test(v) ? v.toLowerCase() : ''; }
+function streamBase(uid) { return STREAM_CUSTOMER_CODE && uid ? `https://${STREAM_CUSTOMER_CODE}.cloudflarestream.com/${uid}` : ''; }
+function streamThumb(uid) { const b = streamBase(uid); return b ? `${b}/thumbnails/thumbnail.jpg?time=2s&height=1280` : ''; }
+function streamEmbedUrl(uid) { const b = streamBase(uid); return b ? `${b}/iframe?preload=metadata&poster=${encodeURIComponent(streamThumb(uid))}` : ''; }
+function streamHls(uid) { const b = streamBase(uid); return b ? `${b}/manifest/video.m3u8` : ''; }
+function streamTranscriptUrl(uid) { const b = streamBase(uid); return b ? `${b}/captions/en` : ''; }
+function streamPlayer(uid, title, eager = false) {
+  const src = streamEmbedUrl(uid); if (!src) return '';
+  return `<div class="video" style="position:relative;width:100%;max-width:540px;aspect-ratio:9/16;background:#000;margin:0 auto"><iframe src="${htmlEscape(src)}" title="${htmlEscape(title)}" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="${eager ? 'eager' : 'lazy'}" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`;
+}
+function mirrorLink(video, label) { const safe = publicVideoUrl(video); return safe && !isSelfHosted(safe) ? `<p class="video-link" style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Also on YouTube: <a href="${htmlEscape(safe)}" rel="noopener">${htmlEscape(label)}</a></p>` : ''; }
+function vttToText(vtt = '') {
+  return String(vtt).split(/\r?\n/).filter((l) => l && !/^WEBVTT/.test(l) && !/^\d+$/.test(l) && !/-->/.test(l) && !/^NOTE/.test(l))
+    .map((l) => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean)
+    .filter((l, i, a) => l !== a[i - 1]).join(' ').replace(/\s+/g, ' ').trim().slice(0, 20000);
+}
+
 function publicVideoUrl(value = '') {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -932,14 +958,16 @@ function watchPage({ record, photos, previous, next }) {
   const graph = [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, datePublished: date, dateModified: date, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` }, primaryImageOfPage: front,
       mainEntity: { '@id': `${canonical}#video` } },
-    { '@type': 'VideoObject', '@id': `${canonical}#video`, name: `Micheal Ray Berry — Day ${day} daily inspection, ${longDate(date)}`, description, uploadDate: date, thumbnailUrl: [front], contentUrl: isSelfHosted(video) ? video : undefined, embedUrl: embed || undefined, ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}), creator: { '@id': PERSON_ID }, isFamilyFriendly: true },
+    { '@type': 'VideoObject', '@id': `${canonical}#video`, name: `Micheal Ray Berry — Day ${day} daily inspection, ${longDate(date)}`, description, uploadDate: date, thumbnailUrl: record.streamUid && streamThumb(record.streamUid) ? [streamThumb(record.streamUid), front] : [front], contentUrl: record.streamUid && streamHls(record.streamUid) ? streamHls(record.streamUid) : (isSelfHosted(video) ? video : undefined), embedUrl: record.streamUid && streamEmbedUrl(record.streamUid) ? streamEmbedUrl(record.streamUid) : (embed || undefined), ...(record.transcript ? { transcript: record.transcript } : {}), ...(video && !isSelfHosted(video) && record.streamUid ? { sameAs: video } : {}), ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}), creator: { '@id': PERSON_ID }, isFamilyFriendly: true },
     { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumbs`, itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
       { '@type': 'ListItem', position: 2, name: 'Daily Record', item: `${SITE_ORIGIN}/daily/` },
       { '@type': 'ListItem', position: 3, name: `Day ${day}`, item: `${SITE_ORIGIN}${dayPath}` },
       { '@type': 'ListItem', position: 4, name: 'Inspection video', item: canonical } ] },
   ];
-  const player = isSelfHosted(video)
+  const su = record.streamUid && streamEmbedUrl(record.streamUid) ? record.streamUid : '';
+  const transcriptBlock = su && record.transcript ? `<section style="max-width:540px;margin:24px auto 0"><h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px">Transcript</h2><p style="font-size:15px;line-height:1.6;margin:0">${htmlEscape(record.transcript)}</p></section>` : '';
+  const player = su ? streamPlayer(su, title, true) + mirrorLink(video, `Day ${day} inspection`) : isSelfHosted(video)
     ? `<video controls preload="metadata" playsinline poster="${htmlEscape(front)}" width="720" height="1280" title="${htmlEscape(title)}" style="width:100%;max-width:540px;aspect-ratio:9/16;background:#000;display:block;margin:0 auto"><source src="${htmlEscape(video)}" type="${/\.webm(\?|$)/i.test(video) ? 'video/webm' : 'video/mp4'}"></video>`
     : `<div style="position:relative;width:100%;max-width:540px;aspect-ratio:9/16;background:#000;margin:0 auto"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(title)}" allow="encrypted-media; picture-in-picture" allowfullscreen loading="eager" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`;
   const strip = Object.entries(photos).map(([angle, ph]) => `<a href="${dayPath}#${angle}-photo"><img src="${htmlEscape(ph.variants?.[0]?.url || ph.sourceUrl)}" width="${ph.width}" height="${ph.height}" alt="${htmlEscape(`Micheal Ray Berry, Day ${day} daily inspection, ${imageLabel(angle)}, ${longDate(date)}`)}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;border:1px solid var(--rule)"></a>`).join('');
@@ -947,7 +975,7 @@ function watchPage({ record, photos, previous, next }) {
     <p class="crumb"><a href="/">Record</a> · <a href="/daily/">The Record</a> · <a href="${dayPath}">Day ${day}</a> · Video</p>
     <h1 style="font-size:clamp(2rem,5vw,3.4rem)">Day ${day} — Daily Inspection</h1>
     <p class="lede"><strong>${htmlEscape(longDate(date))} · recorded weight ${weight.toFixed(1)} lb · project uniform.</strong> One continuous take: Wait, Inspection, Left, Rear, Right. The burned-in stamp carries the day, weight, verification code and date.</p>
-    ${player}
+    ${player}${transcriptBlock}
     <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:760px;margin:24px auto 0">${strip}</div>
     <p style="text-align:center;margin-top:18px"><a href="${dayPath}">Full record for Day ${day} →</a>${previous ? ` · <a href="/daily/${previous.date}-day-${String(previous.day).padStart(3, '0')}/video/">← Day ${previous.day}</a>` : ''}${next ? ` · <a href="/daily/${next.date}-day-${String(next.day).padStart(3, '0')}/video/">Day ${next.day} →</a>` : ''}</p>`;
   return synPage({ title, desc: description, canonical, body })
@@ -1052,6 +1080,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
         <source src="${htmlEscape(video)}" type="${/\.webm(?:\?|$)/i.test(video) ? 'video/webm' : 'video/mp4'}">
         <a href="${htmlEscape(video)}">Download the Day ${day} inspection video</a>
       </video></div>`
+    : record.streamUid && streamEmbedUrl(record.streamUid)
+      ? streamPlayer(record.streamUid, `Micheal Ray Berry Day ${day} inspection video`) + mirrorLink(video, `Day ${day} inspection`)
     : (embed
       ? `<div class="video"><iframe src="${htmlEscape(embed)}" title="${htmlEscape(`Micheal Ray Berry Day ${day} inspection video`)}" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
       : `<p class="video-link"><a href="${htmlEscape(video)}" rel="noopener">Watch the Day ${day} inspection video</a></p>`);
@@ -2302,7 +2332,8 @@ function violationPage(v, prev, next) {
       ${rows.map(([k, val]) => `<div><b>${k}</b><p>${htmlEscape(String(val))}</p></div>`).join('')}
     </div>
 
-    ${v.recording ? `<h2>Corrective recording</h2>
+    ${v.recordingStreamUid && streamEmbedUrl(v.recordingStreamUid) ? `<h2>Corrective recording</h2><p>The corrective session recorded against this entry, published in full beside it (§8).</p>${streamPlayer(v.recordingStreamUid, `Corrective session — ${v.id}`)}${mirrorLink(v.recording, 'corrective session')}` : ''}
+    ${v.recording && !v.recordingStreamUid ? `<h2>Corrective recording</h2>
     <p>The corrective session recorded against this entry, published in full beside it (§8).
     Completing the requirement closes the obligation. The record normally remains documented,
     unless redaction or removal is required for privacy, safety, consent, or applicable law.</p>
@@ -3151,7 +3182,9 @@ ${entries.map(({ record, photos }) => {
       <video:thumbnail_loc>${xmlEscape(photos.front.sourceUrl)}</video:thumbnail_loc>
       <video:title>${xmlEscape(`Micheal Ray Berry Day ${record.day} daily inspection video`)}</video:title>
       <video:description>${xmlEscape(`Four-angle daily inspection video for Day ${record.day} of the Micheal Ray Berry Public Accountability Project at ${record.weight.toFixed(1)} pounds.`)}</video:description>
-      ${isSelfHosted(record.video) || !embed
+      ${record.streamUid && streamEmbedUrl(record.streamUid)
+        ? `<video:content_loc>${xmlEscape(streamHls(record.streamUid))}</video:content_loc><video:player_loc allow_embed="yes">${xmlEscape(streamEmbedUrl(record.streamUid))}</video:player_loc>`
+        : isSelfHosted(record.video) || !embed
         ? `<video:content_loc>${xmlEscape(record.video)}</video:content_loc>`
         : `<video:player_loc allow_embed="yes">${xmlEscape(embed)}</video:player_loc>`}
       ${record.videoSec > 0 ? `<video:duration>${record.videoSec}</video:duration>` : ''}
@@ -3395,11 +3428,11 @@ async function main() {
     rows = validateTable(parseCSV(csv, 'Weigh-ins'), [
       'date', ['weight_lb', 'weight'], 'note', 'photo_front', 'photo_left',
       'photo_rear', 'photo_right', 'video', 'video_sec',
-    ], 'Weigh-ins');
+    ], 'Weigh-ins', { optional: ['stream_uid', 'r2_key'] });
     violationRows = validateTable(parseCSV(violationCsv || '', 'Violation Log'), [
       'date', 'violation', 'status', 'submitted', 'resolved',
       'ap_verification', 'corrections', 'recording', 'event_verification',
-    ], 'Violation Log');
+    ], 'Violation Log', { optional: ['stream_uid'] });
   } catch (error) {
     console.error('Required sheet validation failed:', error.message);
     process.exitCode = 1;
@@ -3504,6 +3537,7 @@ async function main() {
         verification: resolution ? `AP-verified resolution ${resolution.date}` : '',
         corrections: String(r[6] || '').split(';').map((x) => x.trim()).filter(Boolean),
         recording,
+        recordingStreamUid: streamUid(String(r[9] || '')),
         eventVerifiedAt: approval?.verifiedAt || '',
       };
     })
@@ -3517,10 +3551,19 @@ async function main() {
     note: String(r[2] || '').trim(),
     video: publicVideoUrl(r[7]),
     videoSec: Math.round(Number.parseFloat(r[8]) || 0),
+    streamUid: streamUid(r[9]),
+    r2Key: String(r[10] || '').trim().slice(0, 200),
+    transcript: '',
   })).filter((r) => isRealIsoDate(r.date) && r.date <= todayEtIso() && Number.isFinite(r.weight))
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
     .filter((r) => r.day >= 1)
     .sort((a, b) => a.date.localeCompare(b.date));
+  if (STREAM_CUSTOMER_CODE) {
+    await Promise.all(records.filter((r) => r.streamUid).map(async (r) => {
+      const vtt = await fetchText(streamTranscriptUrl(r.streamUid), true);
+      r.transcript = vtt && /WEBVTT/.test(vtt) ? vttToText(vtt) : '';
+    }));
+  }
   const recordDates = new Set();
   for (const record of records) {
     if (recordDates.has(record.date)) throw new Error(`Weigh-ins contains duplicate date: ${record.date}`);
@@ -3892,7 +3935,8 @@ async function main() {
         day: record.day,
         weight_lb: record.weight,
         note: record.note,
-        video_url: new URL(record.video, SITE_ORIGIN).href,
+        video_url: record.video ? new URL(record.video, SITE_ORIGIN).href : '',
+        evidence: { original_r2_key: record.r2Key || null, stream_uid: record.streamUid || null, stream_playback: record.streamUid ? streamHls(record.streamUid) : null, youtube_mirror: record.video && !isSelfHosted(record.video) ? record.video : null },
         canonical_url: `${SITE_ORIGIN}/daily/${record.date}-day-${String(record.day).padStart(3, '0')}/`,
         attestation: attestMap.get(record.date) || null,
       },

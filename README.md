@@ -1,3 +1,24 @@
+## Video: Cloudflare Stream (player) + R2 (originals) + YouTube (mirror)
+- Stream is the site's player wherever a row has stream_uid; the YouTube URL
+  becomes an "Also on YouTube" link. R2 (private bucket mrb-evidence) holds the
+  untouched original under r2_key; it is never served as a player.
+- Pages env (Production): STREAM_CUSTOMER_CODE (customer-xxxx from Stream →
+  Settings; the publisher needs it to build embed/HLS/thumbnail URLs),
+  CF_ACCOUNT_ID, STREAM_API_TOKEN (Stream:Edit), R2_ACCOUNT_ID, R2_BUCKET,
+  R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (object write on mrb-evidence only).
+- Assistant → POST /api/media-init (functions/api/media-init.js; device key
+  verified via Apps Script action keycheck) → presigned R2 PUT + Stream
+  direct-upload URL → both PUT from the phone → stream_uid/r2_key ride the
+  packet finalize into Weigh-ins J/K. Drive backup continues as a third copy.
+- Sheet columns: Weigh-ins J stream_uid, K r2_key; Violation Log J stream_uid.
+  Code.gs patch: apps-script-patch-stream-r2.gs (keycheck route,
+  handlePacketMediaFields, setCloudflareMedia/setR2Keys, backfill functions).
+- Backfill Days 1–N: run backfillStreamFromDrive() repeatedly (one row per
+  run), then backfillR2FromDrive() likewise. Turn on Stream auto-captions
+  (Stream → Settings → Captions: English) — the build fetches /captions/en
+  and publishes the transcript on each /video/ page + VideoObject.transcript.
+- Cost: ~$5/mo Stream at current volume; R2 < $1.
+
 # Micheal Ray Berry — michealrayberry.com
 
 Static public record, built from the Google Sheet by `scripts/publish.mjs`
