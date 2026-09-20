@@ -1,7 +1,9 @@
 /* ap.michealrayberry.com — POST /api/ap
-   Verifies the Cloudflare Access identity JWT, then relays to Apps Script
-   with the AP key from encrypted secrets. Env: ACCESS_TEAM_DOMAIN,
-   ACCESS_AUD, ACCESS_ALLOWED_EMAIL, AP_KEY, APPS_SCRIPT_URL */
+   The whole hostname sits behind Cloudflare Access (one allowed email).
+   This Function is the only thing that may hold the AP key: it verifies the
+   Access identity JWT (signature, issuer, audience, expiry, email) and then
+   relays the console's request to Apps Script with the key from secrets.
+   Env: ACCESS_TEAM_DOMAIN, ACCESS_AUD, ACCESS_ALLOWED_EMAIL, AP_KEY, APPS_SCRIPT_URL */
 let jwksCache = { at: 0, keys: [] };
 const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
 async function jwks(team) {

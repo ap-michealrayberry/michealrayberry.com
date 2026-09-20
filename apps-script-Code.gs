@@ -956,15 +956,24 @@ function backfillStreamFromDrive() {
     var dateIso = apDateStr(vals[i][0]);
     var file = findDriveBackup_(dateIso, 'inspection');
     if (!file) { Logger.log(dateIso + ': no Drive backup found — skipped'); continue; }
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    var res = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/copy', {
-      method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
-      payload: JSON.stringify({ url: 'https://drive.google.com/uc?export=download&id=' + file.getId(),
-        meta: { name: 'Micheal Ray Berry — Day ' + dayOf(dateIso) + ' inspection — ' + dateIso, date: dateIso, kind: 'daily' },
-        requireSignedURLs: false, allowedOrigins: ['michealrayberry.com', '*.michealrayberry.com'], thumbnailTimestampPct: 0.05 }),
+    // The backups were uploaded by the participant's account, so this script
+    // (running as the AP) cannot change their sharing; Stream's copy-from-URL
+    // needs a public link. Upload the bytes directly instead (basic upload,
+    // multipart). Apps Script caps outbound payloads at 50 MB; bigger files
+    // are logged and uploaded by hand.
+    var blob = file.getBlob();
+    var size = file.getSize();
+    if (size > 45 * 1024 * 1024) { Logger.log(dateIso + ': ' + Math.round(size / 1048576) + ' MB — over the Apps Script payload cap; upload to Stream by hand and paste the uid into column J.'); continue; }
+    var res = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream', {
+      method: 'post', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+      payload: { file: blob.setName('micheal-ray-berry-day-' + ('00' + dayOf(dateIso)).slice(-3) + '-inspection-' + dateIso + (/webm/i.test(blob.getContentType()) ? '.webm' : '.mp4')) },
     });
-    var body = {}; try { body = JSON.parse(res.getContentText()); } catch (e) {}
-    file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
+    var body = {}; try { body = JSON.parse(res.getContentText()); } catch (err) {}
+    if (body.success && body.result && body.result.uid) {
+      // name + origins + thumbnail via a follow-up PATCH (cheap; no memory cost)
+      try { UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + body.result.uid, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+        payload: JSON.stringify({ meta: { name: 'Micheal Ray Berry — Day ' + dayOf(dateIso) + ' inspection — ' + dateIso, date: dateIso, kind: 'daily' }, allowedOrigins: ['michealrayberry.com', '*.michealrayberry.com'], thumbnailTimestampPct: 0.05 }) }); } catch (err) {}
+    }
     if (!body.success) { Logger.log(dateIso + ': Stream copy failed — ' + res.getContentText().slice(0, 300)); return; }
     sh.getRange(i + 1, 10).setValue(body.result.uid);
     Logger.log(dateIso + ': Stream uid ' + body.result.uid + ' filed. Re-run for the next row.');
@@ -985,8 +994,9 @@ function backfillR2FromDrive() {
     var dateIso = apDateStr(vals[i][0]);
     var file = findDriveBackup_(dateIso, 'inspection');
     if (!file) { Logger.log(dateIso + ': no Drive backup — skipped'); continue; }
+    var size = file.getSize();
+    if (size > 45 * 1024 * 1024) { Logger.log(dateIso + ': ' + Math.round(size / 1048576) + ' MB — over the Apps Script payload cap; upload to R2 by hand as originals/… and paste the key into column K.'); continue; }
     var blob = file.getBlob();
-    if (blob.getBytes().length > 45 * 1024 * 1024) { Logger.log(dateIso + ': >45 MB — copy to R2 manually as originals/…'); continue; }
     var ext = /webm/i.test(blob.getContentType()) ? 'webm' : 'mp4';
     var key = 'originals/' + dateIso.slice(0, 4) + '/' + dateIso.slice(5, 7) + '/micheal-ray-berry-day-' + ('00' + dayOf(dateIso)).slice(-3) + '-inspection-' + dateIso + '.' + ext;
     var res = r2Put_(acct, bucket, ak, sk, key, blob);
@@ -1014,7 +1024,7 @@ function r2Put_(acct, bucket, ak, sk, key, blob) {
   var sts = ['AWS4-HMAC-SHA256', amz, scope, hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, canonical, Utilities.Charset.UTF_8))].join('\n');
   var k = hmac_('AWS4' + sk, date); k = hmac_(k, 'auto'); k = hmac_(k, 's3'); k = hmac_(k, 'aws4_request');
   var sig = hex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(sts).getBytes(), k));
-  return UrlFetchApp.fetch('https://' + host + uri, { method: 'put', contentType: ct, payload: blob.getBytes(), muteHttpExceptions: true,
+  return UrlFetchApp.fetch('https://' + host + uri, { method: 'put', contentType: ct, payload: blob, muteHttpExceptions: true,
     headers: { 'x-amz-date': amz, 'x-amz-content-sha256': ph, Authorization: 'AWS4-HMAC-SHA256 Credential=' + ak + '/' + scope + ', SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=' + sig } });
 }
 function hmac_(key, data) { return Utilities.computeHmacSha256Signature(Utilities.newBlob(data).getBytes(), typeof key === 'string' ? Utilities.newBlob(key).getBytes() : key); }

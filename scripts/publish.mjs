@@ -1011,7 +1011,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       // Must match the sameAs on the home page exactly: one entity, one set of
       // profiles. A day page claiming a narrower set makes the Person node
       // ambiguous instead of corroborating it.
-      sameAs: ['https://www.youtube.com/@michealrayberry'],
+      sameAs: ['https://www.youtube.com/@michealrayberry', 'https://fetlife.com/MichealRayBerry'],
     },
     ...Object.entries(photos).map(([angle, p]) => ({
       '@type': 'ImageObject',
@@ -2453,7 +2453,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium neck ring, worn continuously. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium collar, worn continuously. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -2822,7 +2822,7 @@ function protocolPage() {
     <div class="standard">
       <div><b><a href="/agreement/">Agreement</a></b><p>The governing document: daily requirements, documentation standard, weight-loss schedule, consequences, and the limits of participation. Pending the Accountability Partner’s counter-signature.</p></div>
       <div><b><a href="/positions/">Inspection</a></b><p>The four fixed positions and the recording standard for the Daily Inspection video and photographs — the same framing every day so records are comparable.</p></div>
-      <div><b><a href="/uniform/">Uniform</a></b><p>What is worn in every official recording, and why: a plain black unitard, a plain steel or titanium neck ring, and a designated correction uniform for corrective sessions.</p></div>
+      <div><b><a href="/uniform/">Uniform</a></b><p>What is worn in every official recording, and why: a plain black unitard, a plain steel or titanium collar, and a designated correction uniform for corrective sessions.</p></div>
       <div><b><a href="/corrections/">Corrections</a></b><p>What happens after a confirmed missed requirement: corner time by level (10 / 20 / 30 minutes), recorded in one take, filed within 72 hours, published beside the entry.</p></div>
       <div><b><a href="/live/">Supervision</a></b><p>Evening Supervision (§3.4), a proposed fixed-camera session on assigned nights. Not active; public supervision video is disabled pending the Accountability Partner’s safety review.</p></div>
     </div>
