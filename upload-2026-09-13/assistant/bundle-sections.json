@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "algorithm": "sha256-normalized-v1",
+  "preamble": {
+    "sha256": "2e1ac482cc3ed5edaabba6bf00ce1bfdbe907aa4f2d386b3e476c010535814a5"
+  },
+  "sections": [
+    {
+      "name": "00-namespace.js",
+      "sha256": "0685f03ba4a6cd20ead2ff8a6c6c8144e64dfdd8df128bb94eb6d298e416efe4"
+    },
+    {
+      "name": "01-config.js",
+      "sha256": "7978a2def2bd950a5dc5d857ecd8390699529ce7f4932ae6d6a4c53ea4835e32"
+    },
+    {
+      "name": "02-crypto.js",
+      "sha256": "3e06fdbe1dbbacbc9ca47193010993d3459f913ea308aa2c4d41e6a5ef74ebac"
+    },
+    {
+      "name": "03-dates.js",
+      "sha256": "717926ce9f710f41de32257b8f8a1796487bd3360f5e65b7990f96ddae72ef78"
+    },
+    {
+      "name": "04-csv.js",
+      "sha256": "1eb6ad1cd3fb92eb6233c174741a4731bc94923db17ba2ff417c8ccc7d1a7046"
+    },
+    {
+      "name": "05-api.js",
+      "sha256": "06d00b8c514b4a23bac6c3f7cd982adec851ef33f627d743c5268921350cf980"
+    },
+    {
+      "name": "06-overlay.js",
+      "sha256": "3ecde8ff734ecc1f3a87a7d33e187c97465b3f6f7da2eefbf6e45c12845c4e17"
+    },
+    {
+      "name": "07-audio.js",
+      "sha256": "19349d57f6511ba44e4e48f4934cf47b1854c122b875aad2dad934dbc7ab7de5"
+    },
+    {
+      "name": "08-camera.js",
+      "sha256": "0939374ae0be15ae349b0e437111dba07d4b682efaa76e6450bb2379beb0700c"
+    },
+    {
+      "name": "09-frame-loop.js",
+      "sha256": "b0da88aa749b8c7553fbb536d82c260674400bb1e4cbf3d87dd156e3b8669d92"
+    },
+    {
+      "name": "10-pose.js",
+      "sha256": "83f63b37297a81c3ba078a3f9f4999e0b8d76d2b5f9291e7ffc9ced8d3e35764"
+    },
+    {
+      "name": "11-recorder.js",
+      "sha256": "57ce161262ded548fd27b4b4f40d4bceb6788b36a81877065f5a0efe606c72d5"
+    },
+    {
+      "name": "12-scripts.js",
+      "sha256": "4d601d6cf6f0409abade116c76ab5d47aaa84f9a3fa9e697d400498c8c767e29"
+    },
+    {
+      "name": "13-state-machine.js",
+      "sha256": "5e3c2cd27d6b8e45ec2af5b4a2bd075da91258dc62194ca013f8b545228508be"
+    },
+    {
+      "name": "14-upload-queue.js",
+      "sha256": "718c272007e8621599b938498c6e450333e49c3686c7e6dd44e1635427162d1c"
+    },
+    {
+      "name": "15-preflight.js",
+      "sha256": "72f839e7993732ca057c9ebcf32d1ea5fac0b08c032388fb7f954f1518859772"
+    },
+    {
+      "name": "16-ui.js",
+      "sha256": "b28fa2c6ffc495cf2eafb2b13c134ae2c44805aaaec0d21e1e5611f11cd6bb6a"
+    },
+    {
+      "name": "17-session.js",
+      "sha256": "e12e20861011bdf0d61063bfaad64cb139fcc0cb5131b836f38facb71e58a91e"
+    },
+    {
+      "name": "18-app.js",
+      "sha256": "869d02fb59be3ce729b20dd873386aaa34689815b14bc56309dc691910ca8207"
+    },
+    {
+      "name": "19-wake.js",
+      "sha256": "3014cd5f7af1ecfe6c7b440c05ced9c88ca80dc8199a6b4a723a8a0ced72b020"
+    },
+    {
+      "name": "20-download.js",
+      "sha256": "636b7b8da4cc86c999baeb645fbdffad8e75a3eae2de4addb2a6155973ea9301"
+    }
+  ]
+}

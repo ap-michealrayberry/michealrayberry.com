@@ -1,0 +1,18 @@
+/* Shared presentation fixes for generated record pages. */
+* { box-sizing: border-box; }
+img, video, iframe { max-width: 100%; }
+img { height: auto; }
+:focus-visible { outline: 3px solid #B3261E; outline-offset: 4px; }
+.skip-link { position: fixed; top: 12px; left: 12px; transform: translateY(-180%); z-index: 10000; background: #FAFAF7; color: #141412; padding: 10px 14px; border: 2px solid #141412; }
+.skip-link:focus { transform: translateY(0); }
+footer a:hover, footer a:focus-visible { color: #FF9189 !important; }
+main, .rc-body { min-width: 0; }
+@media (max-width: 600px) {
+  footer { overflow-wrap: anywhere; }
+  footer > div, footer span { min-width: 0; max-width: 100%; flex-wrap: wrap; white-space: normal !important; }
+  .mrb-footer-actions { flex-wrap: wrap !important; }
+  .mrb-footer-contacts a { overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

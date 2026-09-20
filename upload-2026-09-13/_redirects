@@ -1,0 +1,75 @@
+# Cloudflare Pages serves dist/. The typo domain (michaelrayberry.com) is
+# redirected at the Cloudflare edge (Rules → Redirect Rules), not here.
+
+/home        /            301
+# Every public page is a static file generated at build time from
+# site.template.html — no client-side rendering, no SPA rewrites.
+/accountability-partner  /  301
+/personal    /  301
+/personal/*  /  301
+/partner     /  301
+/partner/*   /  301
+/log         /violations/   301
+/annex/* / 301
+/annex / 301
+/fagspose/* / 301
+/fagspose / 301
+
+
+# The capture instrument is /assistant/ — one tool, five sessions. Every old
+# tool path and the retired portal funnel there.
+/corrective    /assistant/   301
+/weekly        /assistant/   301
+/confirmation  /assistant/   301
+/record        /assistant/   301
+/record/*      /assistant/   301
+/mrb           /assistant/   301
+/mrb/*         /assistant/   301
+/inspection    /assistant/   301
+/portal        /assistant/   301
+/resolution    /assistant/   301
+/Corner%20Time.dc.html               /assistant/  301
+/Violation%20Acknowledgment.dc.html  /assistant/  301
+
+# Build-only inputs live in the repo but are not part of the served record.
+# (The build runs before publishing, so 404-ing them here does not affect it.)
+/violations/v-000/ /violations/ 301
+/violations/v-000 /violations/ 301
+
+/scripts/*     /404.html   404
+/site.template.html /404.html 404
+/package.json  /404.html   404
+/voice-pack.json /404.html 404
+/eslint.config.mjs /404.html 404
+
+/maid         /  301
+/maid/*       /  301
+/corner-time  /corrections/  301
+/corner-time/*  /corrections/:splat  301
+
+
+# Reference became Share (Sept 13)
+/reference    /share/  301
+/reference/*  /share/  301
+
+# Public assets are built in dist; old sources remain in Git history only.
+/penalties /violations/ 301!
+/penalties/ /violations/ 301!
+/log /violations/ 301!
+/apps-script/* /404.html 404!
+/README.md /404.html 404!
+/package-lock.json /404.html 404!
+/support.js /404.html 404!
+/boot.js /404.html 404!
+/sw.js /404.html 404!
+/verify/support.js /404.html 404!
+/photos/official/maid-ray-berry-portrait.jpg /404.html 404!
+
+# Observer → Report a Record Issue (Sept 20)
+/observer            /report/            301
+/observer/           /report/            301
+/observer/received/  /report/received/   301
+
+# AP console moved to its own Access-protected host (Sept 20)
+/ap           https://ap.michealrayberry.com/  301
+/ap/*         https://ap.michealrayberry.com/  301

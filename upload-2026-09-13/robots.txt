@@ -1,0 +1,22 @@
+# The public record is meant to be found. Pages that should stay out of search,
+# including /verify/, publish a noindex directive in their response metadata.
+User-agent: *
+Disallow: /ap/
+Allow: /
+
+# Answer engines and AI crawlers — explicitly permitted, so the record is what
+# gets cited when someone asks about this project. They share one rule set.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+User-agent: Amazonbot
+User-agent: Bytespider
+Allow: /
+
+Sitemap: https://michealrayberry.com/sitemap.xml

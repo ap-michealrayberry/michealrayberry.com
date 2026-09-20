@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Compare a file with the public log — Micheal Ray Berry</title>
+  <meta name="description" content="Compute a file's SHA-256 fingerprint locally and compare it with fingerprints listed in the public accountability log.">
+  <link rel="canonical" href="https://michealrayberry.com/verify/">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #FAFAF7; color: #141412; font-family: 'IBM Plex Sans', sans-serif; }
+    a { color: #B3261E; }
+    a:hover, a:focus-visible { color: #8F1E18; }
+    .skip-link { position: fixed; left: 16px; top: 12px; z-index: 10000; transform: translateY(-160%); background: #FAFAF7; color: #141412; border: 2px solid #141412; padding: 10px 14px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+    .skip-link:focus { transform: translateY(0); }
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    header { border-bottom: 1px solid #141412; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .brand { display: flex; flex-direction: column; gap: 3px; }
+    .eyebrow, .mono-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+    .eyebrow { color: #B3261E; }
+    .brand-name { font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; }
+    .back { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border: 1px solid #141412; padding: 9px 14px; color: #141412; }
+    main { flex: 1; max-width: 880px; margin: 0 auto; padding: 56px 32px 80px; display: flex; flex-direction: column; gap: 44px; width: 100%; }
+    h1 { margin: 0; font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(34px, 5vw, 52px); text-transform: uppercase; line-height: 1; }
+    p { margin: 0; }
+    .lede { font-size: 17px; line-height: 1.7; max-width: 680px; color: #3A3935; }
+    .intro { display: flex; flex-direction: column; gap: 16px; }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .fact { border: 1px solid #141412; padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+    .fact p, .detail { font-size: 14px; line-height: 1.65; color: #3A3935; }
+    .checker { border: 2px solid #141412; padding: 28px; display: flex; flex-direction: column; gap: 16px; background: #F1F0EA; }
+    .checker label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+    input { max-width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+    .status, .hash { font-family: 'IBM Plex Mono', monospace; }
+    .status { font-size: 13px; color: #6B6A64; }
+    .result { border-left: 4px solid #6B6A64; background: #FAFAF7; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+    .result-title { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: #6B6A64; }
+    .hash { font-size: 11px; color: #6B6A64; overflow-wrap: anywhere; }
+    .fine { font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.7; color: #6B6A64; }
+    .feed { display: flex; flex-direction: column; gap: 10px; }
+    footer { border-top: 1px solid #141412; padding: 18px 32px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6B6A64; }
+    [hidden] { display: none !important; }
+    @media (max-width: 600px) { header, main, footer { padding-left: 16px; padding-right: 16px; } main { padding-top: 40px; } .checker { padding: 20px; } }
+  </style>
+  <script src="/verify/verify.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <span class="eyebrow">Public Accountability Project</span>
+        <span class="brand-name">Verify a file</span>
+      </div>
+      <a class="back" href="/">← The record</a>
+    </header>
+
+    <main id="main-content">
+      <div class="intro">
+        <h1>Compare a file with the public log.</h1>
+        <p class="lede">This page computes a file's SHA-256 fingerprint in your browser and looks for the same value in the public attestation log. A match shows that identical bytes were listed in a log row. It does not independently prove when or how the file was captured, who submitted it, or that the log is append-only.</p>
+      </div>
+
+      <div class="facts">
+        <section class="fact">
+          <span class="eyebrow">Server receipt time</span>
+          <p>Each accepted row records a server-side receipt time. That timestamp describes when the service received the submission, not necessarily when the file was captured.</p>
+        </section>
+        <section class="fact">
+          <span class="eyebrow">Challenge field</span>
+          <p>The log can include a session challenge code. This page does not inspect media content or independently confirm that the code appears in the recording.</p>
+        </section>
+        <section class="fact">
+          <span class="eyebrow">Content fingerprints</span>
+          <p>The checker recomputes the selected file's hash locally and searches the public log. It does not upload the file.</p>
+        </section>
+      </div>
+
+      <section class="checker" aria-labelledby="checker-heading">
+        <label id="checker-heading" for="file-checker">Check a file against the log</label>
+        <p class="detail">Pick a photo or video downloaded from this record. The hash is computed locally—the file never leaves your device.</p>
+        <input id="file-checker" type="file">
+        <span id="checking-status" class="status" role="status" aria-live="polite" hidden></span>
+        <div id="check-result" class="result" role="status" aria-live="polite" hidden>
+          <span id="result-title" class="result-title"></span>
+          <span id="result-detail" class="detail"></span>
+          <span id="result-hash" class="hash"></span>
+        </div>
+        <p class="fine">NOT FOUND can result from any byte-level change, including recompression, screenshots, and re-saving. A listed hash is a comparison result, not a cryptographic signature or independent authenticity finding. For discrepancies: ap@michealrayberry.com.</p>
+      </section>
+
+      <section class="feed">
+        <span class="mono-label">Inspect the public feed yourself</span>
+        <p class="detail">The site publishes a sanitized, machine-readable <a href="/data/attestations.json">attestation feed</a> containing only accepted capture-attested rows and their file hashes. A listed value remains a claim recorded by the current system rather than an independent verification.</p>
+      </section>
+    </main>
+
+    <footer>Administered by the Accountability Partner · ap@michealrayberry.com</footer>
+  </div>
+</body>
+</html>
