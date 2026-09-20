@@ -492,7 +492,9 @@ function streamPlayer(uid, title, eager = false) {
   const src = streamEmbedUrl(uid); if (!src) return '';
   return `<div class="video" style="position:relative;width:100%;max-width:540px;aspect-ratio:9/16;background:#000;margin:0 auto"><iframe src="${htmlEscape(src)}" title="${htmlEscape(title)}" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="${eager ? 'eager' : 'lazy'}" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`;
 }
-function mirrorLink(video, label) { const safe = publicVideoUrl(video); return safe && !isSelfHosted(safe) ? `<p class="video-link" style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Also on YouTube: <a href="${htmlEscape(safe)}" rel="noopener">${htmlEscape(label)}</a></p>` : ''; }
+function mirrorLink(video, label) { const safe = publicVideoUrl(video); return safe && !isSelfHosted(safe) ? `<p class="video-link" style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Also on YouTube: <a href="${htmlEscape(safe)}" rel="noopener">${htmlEscape(label)}</a></p>
+    ${(() => { const base = v.eventVerifiedAt ? new Date(v.eventVerifiedAt) : new Date(`${v.date}T22:00:00-04:00`); const due = new Date(base.getTime() + 72 * 3600e3); if (Number.isNaN(due.getTime())) return ''; const lbl = due.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }); const ms = due - Date.now(), a = Math.abs(ms), h = Math.floor(a / 3600e3), mm = Math.floor((a % 3600e3) / 60e3); const txt = h >= 24 ? `${h} h` : h > 0 ? `${h} h ${mm} m` : `${mm} m`; return `<p style="font:600 14px/1.5 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em;color:#B3261E;border:2px solid #B3261E;padding:12px 16px;display:inline-block">CORRECTIVE SESSION DUE · <span data-due-iso="${due.toISOString()}">${ms < 0 ? 'overdue by ' + txt : txt + ' remaining'}</span> · by ${htmlEscape(lbl)} · pink correction uniform required</p>`; })()}
+    <figure style="margin:18px 0;max-width:300px"><img src="/photos/official/micheal-ray-berry-correction-uniform.png" alt="Micheal Ray Berry in the designated pink correction uniform — the attire required for the corrective session owed against this entry." loading="lazy" decoding="async" style="width:100%;height:auto;display:block;border:3px solid #B3261E"><figcaption style="font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted);margin-top:6px">Required for the corrective session: the pink correction uniform. The black uniform documents the standard; the pink uniform documents a failure to meet it.</figcaption></figure>` : ''; }
 function vttToText(vtt = '') {
   return String(vtt).split(/\r?\n/).filter((l) => l && !/^WEBVTT/.test(l) && !/^\d+$/.test(l) && !/-->/.test(l) && !/^NOTE/.test(l))
     .map((l) => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean)
@@ -3427,6 +3429,27 @@ async function faqPage() {
   return synPage({ title, desc: description, canonical, body }).replace('</head>', `<script type="application/ld+json">${schema}</script>\n</head>`);
 }
 
+/* Set in main() once the gate and violations are known. When the agreement is
+   active and an entry is open, every generated page carries the red banner. */
+let VIOLATION_MODE = null;
+function violationBannerHtml() {
+  const v = VIOLATION_MODE; if (!v) return '';
+  return `<div class="violation-banner" style="background:#B3261E;color:#FAFAF7;border-bottom:3px solid #141412"><div style="max-width:1160px;margin:0 auto;padding:16px 24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 32px;align-items:center">
+    <div style="display:flex;flex-direction:column;gap:5px"><span style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.24em;text-transform:uppercase">Open violation · corrective session due</span>
+    <span style="font:700 24px/1.05 'IBM Plex Sans Condensed',sans-serif;text-transform:uppercase">Micheal Ray Berry: ${v.open} unresolved · ${v.owed} min owed${v.overdueSuffix}</span>
+    <span style="font:13px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em"><span data-due-iso="${htmlEscape(v.dueIso)}">${htmlEscape(v.dueRelative)}</span> · ${v.dueWord} ${htmlEscape(v.dueLabel)} · pink correction uniform required · served to date: ${v.served} min</span>${v.allOverdue ? `<a href="/tf060/" style="font:12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#FAFAF7;text-decoration:underline;text-underline-offset:4px;margin-top:4px">Prior record: TF060 ended without completion →</a>` : ''}</div>
+    <a href="/violations/" style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#B3261E;background:#FAFAF7;padding:12px 18px;text-decoration:none;white-space:nowrap">View the entry →</a></div></div>`;
+}
+function cornerSummaryForShell(violations) {
+  const minutesFor = (i) => [10, 20, 30][Math.min(2, i)];
+  const confirmed = violations.filter((v) => v.state === 'open' || v.state === 'resolved').sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  let owed = 0, served = 0, soonest = null, openN = 0, overdueN = 0; const now = Date.now();
+  confirmed.forEach((v, i) => { const m = minutesFor(i); if (v.state === 'resolved') { served += m; return; } owed += m; openN += 1; const base = v.eventVerifiedAt ? new Date(v.eventVerifiedAt) : new Date(`${v.date}T22:00:00-04:00`); const due = new Date(base.getTime() + 72 * 3600e3); if (Number.isNaN(due.getTime())) return; if (due.getTime() < now) overdueN += 1; if (!soonest || due < soonest) soonest = due; });
+  const fmt = (d) => d.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const rel = (d) => { const ms = d - Date.now(), a = Math.abs(ms), h = Math.floor(a / 3600e3), m = Math.floor((a % 3600e3) / 60e3); const txt = h >= 24 ? `${h} h` : h > 0 ? `${h} h ${m} m` : `${m} m`; return ms < 0 ? `overdue by ${txt}` : `${txt} remaining`; };
+  return { owed, served, open: openN, dueIso: soonest ? soonest.toISOString() : '', dueLabel: soonest ? fmt(soonest) : '', dueRelative: soonest ? rel(soonest) : '', overdueSuffix: !openN ? '' : overdueN === openN ? ' · ALL OVERDUE' : overdueN > 0 ? ` · ${overdueN} OVERDUE` : '', dueWord: overdueN > 0 ? 'earliest due' : 'due', allOverdue: !!(openN && overdueN === openN) };
+}
+
 function synPage({ title, desc, canonical, body, wide = false }) {
   const schema = jsonLd({ '@context': 'https://schema.org', '@graph': [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description: desc, about: { '@id': `${SITE_ORIGIN}/#micheal-ray-berry` }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
@@ -3463,7 +3486,7 @@ function synPage({ title, desc, canonical, body, wide = false }) {
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
-${synHeader(canonical)}
+${synHeader(canonical)}${violationBannerHtml()}
 <main id="main-content"${wide ? '' : ' class="content-page"'}>
 ${body}
 </main>
@@ -3890,6 +3913,7 @@ async function main() {
      exact tuple; only a deliberately cleared edition may publish inactive. */
   const agreementGate = agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
   const agreementExecutionActive = agreementGate.active;
+  VIOLATION_MODE = (agreementExecutionActive && violations.some((v) => v.state === 'open')) ? cornerSummaryForShell(violations) : null;
   const agreementEffectiveDate = agreementGate.effectiveDate;
   const reviewedConfirmationFingerprint = agreementGate.reviewedConfirmationFingerprint;
   siteState.agreement_execution_active = agreementExecutionActive ? 'true' : 'false';
@@ -4141,6 +4165,7 @@ async function main() {
     new Map(violations.map((v) => [v.date, v.state])),
     agreementExecutionActive,
     agreementEffectiveDate,
+    violations,
   ))) {
     changedUrls.add(`${SITE_ORIGIN}/daily/`);
   }

@@ -257,6 +257,7 @@ function computeValues(ctx) {
   const todayRow = byDate[todayIso];
   const packetDone = !!(todayRow && !Number.isNaN(todayRow.weight) && hasPublishedPhotos(todayRow) && todayRow.video);
   const openCount = openList.length;
+  const corner = cornerSummary(violations, agreementExecuted);
   const ms = MILESTONES.filter((m) => m < current);
   return {
     dayNumber, dayCounterLabel: rawDay < 1 ? '—' : String(dayNumber),
@@ -288,6 +289,17 @@ function computeValues(ctx) {
     agreementConsentScopeLabel: agreementExecuted ? 'Recorded consent scope' : 'Proposed consent scope',
     footerTermsLabel: agreementExecuted ? 'published terms' : 'published pending terms',
     inViolation: agreementExecuted && openCount > 0,
+    owedMinutes: String(corner.owed),
+    servedMinutes: String(corner.served),
+    openCountNum: String(openCount),
+    dueAtIso: corner.soonestDueIso,
+    dueAtLabel: corner.soonestDueLabel,
+    dueRelative: corner.soonestDueRelative,
+    overdueSuffix: corner.overdueSuffix,
+    dueWord: corner.dueWord,
+    allOverdue: corner.allOverdue,
+    heroPhoto: agreementExecuted && openCount > 0 ? '/photos/official/micheal-ray-berry-correction-uniform.png' : '/photos/official/micheal-ray-berry-official-front-v2.jpg',
+    heroPhotoAlt: agreementExecuted && openCount > 0 ? 'Micheal Ray Berry in the designated pink correction uniform. A documented requirement was missed and a corrective obligation is open.' : 'Micheal Ray Berry, official photograph — black unitard, steel or titanium collar, hands behind head. Declared start 340.',
     openCountHeading: agreementExecuted ? 'Unresolved violations' : 'Operative violations',
     openCountLabel: agreementExecuted ? String(openCount) : '—',
     agreementStatus: agreementExecuted
@@ -318,6 +330,40 @@ async function renderLlmsStartDate(ctx, startDateLong) {
 }
 
 /* ── assembly ─────────────────────────────────────────────────────── */
+/* Corner time owed / served and the soonest corrective deadline, from the
+   Violation Log only. Level follows confirmed-count order (10/20/30, capped);
+   the 72 h clock runs from the entry's declaration (eventVerifiedAt when
+   present, else the violation date at 22:00 ET). Served = resolved entries. */
+function cornerSummary(violations, active) {
+  const minutesFor = (i) => [10, 20, 30][Math.min(2, i)];
+  const confirmed = (violations || []).filter((v) => v.state === 'open' || v.state === 'resolved')
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  let owed = 0, served = 0, soonest = null, openN = 0, overdueN = 0;
+  const now = Date.now();
+  confirmed.forEach((v, i) => {
+    const mins = minutesFor(i);
+    if (v.state === 'resolved') { served += mins; return; }
+    owed += mins; openN += 1;
+    const base = v.eventVerifiedAt ? new Date(v.eventVerifiedAt) : new Date(`${v.date}T22:00:00-04:00`);
+    const due = new Date(base.getTime() + 72 * 3600e3);
+    if (Number.isNaN(due.getTime())) return;
+    if (due.getTime() < now) overdueN += 1;
+    if (!soonest || due < soonest) soonest = due;
+  });
+  const fmt = (d) => d.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const rel = (d) => { const ms = d - Date.now(); const a = Math.abs(ms); const h = Math.floor(a / 3600e3), m = Math.floor((a % 3600e3) / 60e3); const txt = h >= 24 ? `${h} h` : h > 0 ? `${h} h ${m} m` : `${m} m`; return ms < 0 ? `overdue by ${txt}` : `${txt} remaining`; };
+  return {
+    owed: active ? owed : 0, served,
+    soonestDueIso: active && soonest ? soonest.toISOString() : '',
+    soonestDueLabel: active && soonest ? fmt(soonest) : '',
+    soonestDueRelative: active && soonest ? rel(soonest) : '',
+    overdueSuffix: !active || !openN ? '' : overdueN === openN ? ' · ALL OVERDUE' : overdueN > 0 ? ` · ${overdueN} OVERDUE` : '',
+    dueWord: overdueN > 0 ? 'earliest due' : 'due',
+    allOverdue: !!(active && openN && overdueN === openN),
+    overdue: !!(active && soonest && soonest < new Date()),
+  };
+}
+
 export async function buildStaticSite(ctx) {
   const src = await fs.readFile(path.join(ctx.ROOT, 'site.template.html'), 'utf8');
   const headStart = src.indexOf('<head>') + 6, headEnd = src.indexOf('</head>');

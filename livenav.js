@@ -51,4 +51,16 @@
       var t = a.textContent; a.textContent = 'Copied'; setTimeout(function () { a.textContent = t; }, 1400);
     }).catch(function () { location.href = a.href; });
   });
+  /* Corrective-deadline countdown: relative label recomputed from the
+     PUBLISHED due time in data-due-iso, never a client-side deadline. */
+  function tickDue() {
+    document.querySelectorAll('[data-due-iso]').forEach(function (el) {
+      var iso = el.getAttribute('data-due-iso'); if (!iso) return;
+      var ms = new Date(iso) - Date.now(), a = Math.abs(ms);
+      var h = Math.floor(a / 3600e3), m = Math.floor((a % 3600e3) / 60e3);
+      var txt = h >= 24 ? h + ' h' : h > 0 ? h + ' h ' + m + ' m' : m + ' m';
+      el.textContent = ms < 0 ? 'overdue by ' + txt : txt + ' remaining';
+    });
+  }
+  tickDue(); setInterval(tickDue, 30 * 1000);
 })();
