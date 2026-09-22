@@ -88,16 +88,13 @@
 
   function applyAuthoritativeAvailability() {
     var config = MRB.config.get();
-    var active = !!(recordCache && recordCache.agreementActive && participantStateCache && participantStateCache.agreementActive);
     var daily = MRB.ui.byId("card-daily");
     var corrective = MRB.ui.byId("card-corrective");
     var weekly = MRB.ui.byId("card-weekly");
-    if (daily) daily.disabled = !active;
+    if (daily) { daily.disabled = false; daily.title = ""; }
     if (corrective) {
-      corrective.disabled = !active || correctiveEntries().length === 0;
-      corrective.title = corrective.disabled
-        ? (!active ? "Unavailable until the agreement is active" : "No eligible AP corrective assignment")
-        : "";
+      corrective.disabled = correctiveEntries().length === 0;
+      corrective.title = corrective.disabled ? "No corrective session is assigned" : "";
     }
     if (weekly) {
       var weeklyState = participantStateCache && participantStateCache.weekly;
@@ -105,10 +102,8 @@
         /^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) &&
         Number(weeklyState.day) >= 8 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
-      weekly.disabled = !active || !weeklyComplete;
-      weekly.title = weekly.disabled
-        ? (!active ? "Unavailable until the agreement is active" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
-        : "";
+      weekly.disabled = !weeklyComplete;
+      weekly.title = weekly.disabled ? String(weeklyState && weeklyState.reason || "Weekly review is due on Mondays") : "";
     }
     if (config.demoMode) {
       ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement"].forEach(function (id) {
@@ -127,7 +122,6 @@
     }
     if (type === "corrective" || type === "weekly") {
       participantStateCache = await MRB.api.myState();
-      if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
     }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
@@ -353,7 +347,6 @@
     if (type === "corrective" || type === "weekly") {
       try {
         participantStateCache = await MRB.api.myState();
-        if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
         if (type === "corrective") {
           var selectedId = String(entry && entry.id || "");
           var selectedAssignmentId = String(entry && entry.assignmentId || "");
@@ -890,6 +883,10 @@
       MRB.config.save({ demoMode: false });
       var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
       var expires = Number(r && r.expires);
+      if (r && r.ok && r.token && !isFinite(expires)) {
+        var issuedMs = Date.parse(r.issued || "");
+        expires = (isFinite(issuedMs) ? issuedMs : Date.now()) + 14 * 24 * 3600 * 1000;
+      }
       if (!r || !r.ok || !r.token || !isFinite(expires) || expires <= Date.now()) {
         throw new Error((r && r.error) || "Server returned an invalid unlock grant");
       }

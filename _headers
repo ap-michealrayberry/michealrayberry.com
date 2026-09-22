@@ -32,6 +32,7 @@
   Cache-Control: public, max-age=3600
 
 /assistant/*
+  X-Robots-Tag: noindex, follow
   Cache-Control: public, max-age=0, must-revalidate
 
 /verify/*

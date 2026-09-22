@@ -509,6 +509,36 @@ function streamPlayer(uid, title, eager = false) {
 }
 function mirrorLink(video, label) { const safe = publicVideoUrl(video); return safe && !isSelfHosted(safe) ? `<p class="video-link" style="font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)">Also on YouTube: <a href="${htmlEscape(safe)}" rel="noopener">${htmlEscape(label)}</a></p>` : ''; }
 
+/* One VideoObject builder for the day page and the watch page. uploadDate is
+   the moment the video was first published to the record — the receipt's
+   server-stamped video_at, else Cloudflare Stream's own upload timestamp —
+   never the recording's calendar date. With no true timestamp, no
+   VideoObject is emitted (a manufactured date is worse than none). */
+function videoPublishedAt(record) {
+  const rc = CARD_CTX_RECEIPTS.get(record.date);
+  if (rc && rc.videoAt && !Number.isNaN(Date.parse(rc.videoAt))) return new Date(rc.videoAt).toISOString();
+  return record.videoPublishedAt || '';
+}
+function inspectionVideoObject({ record, id, name, description, front, embed, video }) {
+  const uploadDate = videoPublishedAt(record);
+  if (!uploadDate) return null;
+  const su = record.streamUid && streamEmbedUrl(record.streamUid) ? record.streamUid : '';
+  return {
+    '@type': 'VideoObject',
+    '@id': id,
+    name,
+    description,
+    uploadDate,
+    thumbnailUrl: su && streamThumb(su) ? [streamThumb(su), front] : [front],
+    ...(su ? { contentUrl: streamHls(su), embedUrl: streamEmbedUrl(su) } : isSelfHosted(video) ? { contentUrl: video } : { ...(embed ? { embedUrl: embed } : {}), url: video }),
+    ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}),
+    ...(record.transcript ? { transcript: record.transcript } : {}),
+    ...(su && video && !isSelfHosted(video) ? { sameAs: video } : {}),
+    creator: { '@id': PERSON_ID },
+    isFamilyFriendly: true,
+  };
+}
+
 function publicVideoUrl(value = '') {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -977,14 +1007,14 @@ function watchPage({ record, photos, previous, next }) {
   const description = `Micheal Ray Berry's Day ${day} daily inspection video, ${longDate(date)}: four positions in the project uniform, recorded weight ${weight.toFixed(1)} lb. Public Accountability Project.`;
   const graph = [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, datePublished: date, dateModified: date, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` }, primaryImageOfPage: front,
-      mainEntity: { '@id': `${canonical}#video` } },
-    { '@type': 'VideoObject', '@id': `${canonical}#video`, name: `Micheal Ray Berry — Day ${day} daily inspection, ${longDate(date)}`, description, uploadDate: date, thumbnailUrl: record.streamUid && streamThumb(record.streamUid) ? [streamThumb(record.streamUid), front] : [front], contentUrl: record.streamUid && streamHls(record.streamUid) ? streamHls(record.streamUid) : (isSelfHosted(video) ? video : undefined), embedUrl: record.streamUid && streamEmbedUrl(record.streamUid) ? streamEmbedUrl(record.streamUid) : (embed || undefined), ...(record.transcript ? { transcript: record.transcript } : {}), ...(video && !isSelfHosted(video) && record.streamUid ? { sameAs: video } : {}), ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}), creator: { '@id': PERSON_ID }, isFamilyFriendly: true },
+      ...(videoPublishedAt(record) ? { mainEntity: { '@id': `${canonical}#video` } } : {}) },
+    inspectionVideoObject({ record, id: `${canonical}#video`, name: `Micheal Ray Berry — Day ${day} daily inspection, ${longDate(date)}`, description, front, embed, video }),
     { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumbs`, itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Micheal Ray Berry', item: `${SITE_ORIGIN}/` },
       { '@type': 'ListItem', position: 2, name: 'Daily Record', item: `${SITE_ORIGIN}/daily/` },
       { '@type': 'ListItem', position: 3, name: `Day ${day}`, item: `${SITE_ORIGIN}${dayPath}` },
       { '@type': 'ListItem', position: 4, name: 'Inspection video', item: canonical } ] },
-  ];
+  ].filter(Boolean);
   const su = record.streamUid && streamEmbedUrl(record.streamUid) ? record.streamUid : '';
   const transcriptBlock = su && record.transcript ? `<section style="max-width:540px;margin:24px auto 0"><h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px">Transcript</h2><p style="font-size:15px;line-height:1.6;margin:0">${htmlEscape(record.transcript)}</p></section>` : '';
   const player = su ? streamPlayer(su, title, true) + mirrorLink(video, `Day ${day} inspection`) : isSelfHosted(video)
@@ -1056,7 +1086,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
       publisher: { '@id': PERSON_ID },
       mainEntityOfPage: { '@id': canonical },
       image: Object.keys(photos).map((a) => ({ '@id': `${canonical}#${a}-photo` })),
-      video: { '@id': `${canonical}#inspection-video` },
+      ...(videoPublishedAt(record) ? { video: { '@id': `${canonical}#inspection-video` } } : {}),
       about: { '@id': PERSON_ID },
       isAccessibleForFree: true,
     },
@@ -1069,21 +1099,8 @@ function dailyPage({ record, photos, previous, next, attestation }) {
         { '@type': 'ListItem', position: 3, name: `Day ${day} — ${longDate(date)}`, item: canonical },
       ],
     },
-    {
-      '@type': 'VideoObject',
-      '@id': `${canonical}#inspection-video`,
-      name: `Micheal Ray Berry Day ${day} daily inspection video — ${date}`,
-      description: `Four-angle daily inspection video for Day ${day} of the Micheal Ray Berry Public Accountability Project, recorded at ${weight.toFixed(1)} pounds.`,
-      thumbnailUrl: front,
-      ...(isSelfHosted(video) ? { contentUrl: video } : { url: video }),
-      ...(record.videoSec > 0 ? { duration: isoDuration(record.videoSec) } : {}),
-      ...(embed ? { embedUrl: embed } : {}),
-      ...(isSelfHosted(video)
-        ? { encodingFormat: /\.webm(\?|$)/i.test(video) ? 'video/webm' : 'video/mp4' }
-        : {}),
-      creator: { '@id': PERSON_ID },
-    },
-  ];
+    inspectionVideoObject({ record, id: `${canonical}#inspection-video`, name: `Micheal Ray Berry Day ${day} daily inspection video — ${date}`, description: `Four-angle daily inspection video for Day ${day} of the Micheal Ray Berry Public Accountability Project, recorded at ${weight.toFixed(1)} pounds.`, front, embed, video }),
+  ].filter(Boolean);
   const figures = Object.entries(photos).map(([angle, p]) => {
     const srcset = p.variants.map((v) => `${v.url} ${v.width}w`).join(', ');
     const alt = `Micheal Ray Berry, Day ${day} daily inspection, ${imageLabel(angle)}, ${longDate(date)}, ${weight.toFixed(1)} lb, project uniform`;
@@ -1382,7 +1399,7 @@ function milestonePage(target, entries) {
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${htmlEscape(title)}</title>
   <meta name="description" content="${htmlEscape(description)}">
-  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="robots" content="${reached ? 'index,follow,max-image-preview:large' : 'noindex,follow'}">
   <link rel="canonical" href="${canonical}">
   <link rel="alternate" type="application/rss+xml" title="Micheal Ray Berry — Daily Record" href="${SITE_ORIGIN}/feed.xml">
   <meta property="og:type" content="article"><meta property="og:title" content="${htmlEscape(title)}">
@@ -1855,10 +1872,25 @@ ${items}
 `;
 }
 
+/* lastmod reflects a real change: data-driven pages move with the record;
+   authored pages move with their source files' last commit. changefreq and
+   priority are omitted (ignored by Google). */
+const DATA_PAGES = new Set(['', 'daily/', 'dashboard/', 'violations/', 'updates/', 'live/', 'weeks/', 'milestones/']);
+let SOURCE_LASTMOD = '';
+async function sourceLastmod() {
+  if (SOURCE_LASTMOD) return SOURCE_LASTMOD;
+  try {
+    const { execFileSync } = await import('node:child_process');
+    const iso = execFileSync('git', ['log', '-1', '--format=%cI', '--', 'site.template.html', 'scripts/publish.mjs', 'scripts/static-site.mjs'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    if (iso && !Number.isNaN(Date.parse(iso))) SOURCE_LASTMOD = iso.slice(0, 10);
+  } catch {}
+  return SOURCE_LASTMOD;
+}
 function staticSitemap(latestDate) {
+  const authored = SOURCE_LASTMOD || latestDate;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${STATIC_PAGES.map(([slug, freq]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><lastmod>${latestDate}</lastmod><changefreq>${freq}</changefreq><priority>${slug ? '0.7' : '1.0'}</priority></url>`).join('\n')}
+${STATIC_PAGES.map(([slug]) => `  <url><loc>${SITE_ORIGIN}/${slug}</loc><lastmod>${DATA_PAGES.has(slug) ? latestDate : authored}</lastmod></url>`).join('\n')}
 </urlset>
 `;
 }
@@ -3314,9 +3346,11 @@ ${entries.map(({ record, photos }) => {
 }
 
 function extraSitemap(urls, latestDate) {
+  const authored = SOURCE_LASTMOD || latestDate;
+  const isData = (u) => /\/(milestones|weeks)\//.test(u);
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...new Set(urls)].map((u) => `  <url><loc>${xmlEscape(u)}</loc><lastmod>${latestDate}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`).join('\n')}
+${[...new Set(urls)].map((u) => `  <url><loc>${xmlEscape(u)}</loc><lastmod>${isData(u) ? latestDate : authored}</lastmod></url>`).join('\n')}
 </urlset>
 `;
 }
@@ -3448,7 +3482,8 @@ async function faqPage() {
     </div>
     <p>Something not covered? <a href="/report/">Report a record issue</a> or write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p>`;
   const schema = jsonLd({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${canonical}#faq`, url: canonical, mainEntity: items.map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: i.text } })) });
-  return synPage({ title, desc: description, canonical, body }).replace('</head>', `<script type="application/ld+json">${schema}</script>\n</head>`);
+  void schema; // FAQ rich results discontinued (May 2026): questions stay on the page, no FAQPage markup
+  return synPage({ title, desc: description, canonical, body });
 }
 
 /* Set in main() once the gate and violations are known. When the agreement is
@@ -3720,6 +3755,21 @@ async function main() {
     .map((r) => ({ ...r, day: dayNumber(r.date) }))
     .filter((r) => r.day >= 1)
     .sort((a, b) => a.date.localeCompare(b.date));
+  // Video first-publication time: receipt video_at (server-stamped), else Stream's upload time.
+  {
+    const CF_ACCT = String(process.env.CF_ACCOUNT_ID || '').trim(), CF_TOK = String(process.env.STREAM_API_TOKEN || '').trim();
+    await Promise.all(records.map(async (r) => {
+      if (r.streamUid && CF_ACCT && CF_TOK) {
+        try {
+          const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CF_ACCT}/stream/${r.streamUid}`, { headers: { Authorization: `Bearer ${CF_TOK}` } });
+          const j = await res.json();
+          const up = j && j.success && j.result && (j.result.uploaded || j.result.created);
+          if (up && !Number.isNaN(Date.parse(up))) r.videoPublishedAt = new Date(up).toISOString();
+          if (!r.videoSec && j && j.result && j.result.duration > 0) r.videoSec = Math.round(j.result.duration);
+        } catch {}
+      }
+    }));
+  }
   if (STREAM_CUSTOMER_CODE) {
     await Promise.all(records.filter((r) => r.streamUid).map(async (r) => {
       const vtt = await fetchText(streamTranscriptUrl(r.streamUid), true);
@@ -3948,6 +3998,7 @@ async function main() {
     } catch (e) { console.warn('Receipts feed skipped: ' + (e && e.message || e)); }
   }
   CARD_CTX_RECEIPTS = receipts;
+  await sourceLastmod();
   /* agreement_edition asserts activation and therefore requires a complete,
      exact tuple; only a deliberately cleared edition may publish inactive. */
   const agreementGate = agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
@@ -4217,7 +4268,8 @@ async function main() {
   for (const target of MILESTONES) {
     const file = path.join(ROOT, 'milestones', `${target}-lb`, 'index.html');
     if (await writeIfChanged(file, milestonePage(target, generated))) changedUrls.add(`${SITE_ORIGIN}/milestones/${target}-lb/`);
-    extraUrls.push(`${SITE_ORIGIN}/milestones/${target}-lb/`);
+    // Unreached thresholds are placeholder pages: noindex, and not listed in the sitemap.
+    if (generated.some(({ record }) => record.weight <= target)) extraUrls.push(`${SITE_ORIGIN}/milestones/${target}-lb/`);
   }
   const maxWeek = Math.ceil(lastDay / 7);
   for (let w = 1; w <= maxWeek; w++) {

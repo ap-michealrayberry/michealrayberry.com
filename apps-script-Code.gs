@@ -277,8 +277,9 @@ function handleUnlock(obj) {
     return jsonOut({ ok: false, error: 'keys not accepted' });
   }
   cache.remove('unlock_misses');
-  var stamped = new Date().toISOString();
-  return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
+  var now = new Date(), stamped = now.toISOString();
+  var expires = now.getTime() + 14 * 24 * 3600 * 1000; // 14-day device grant
+  return jsonOut({ ok: true, token: sealFor(['unlock', stamped, String(expires)].join('|')), issued: stamped, expires: expires });
 }
 /* ═════ OBSERVER SUBMISSIONS ═════
    A relay (functions/observer.js when hosted on Cloudflare Pages) verifies
@@ -989,6 +990,28 @@ function streamFixOrigins() {
     if (res.getResponseCode() < 300) ok++; else { bad++; Logger.log(uid + ': ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); }
   });
   Logger.log('Stream origins fixed on ' + ok + ' video(s); ' + bad + ' failed.');
+}
+
+/* Auto-captions for every filed Stream video that lacks English captions.
+   Stream generates them only for uploads made after captions were enabled,
+   so the backfilled days need this once. Safe to re-run (skips existing).
+   The publisher prints the generated transcript on each watch page. */
+function streamGenerateCaptions() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('CF_ACCOUNT_ID'), tok = p.getProperty('STREAM_API_TOKEN');
+  if (!acct || !tok) { Logger.log('Run setCloudflareMedia first.'); return; }
+  var uids = [];
+  [weighinsSheet(), violationLogSheet()].forEach(function (sh) { sh.getDataRange().getValues().slice(1).forEach(function (r) { var u = String(r[9] || '').trim().toLowerCase(); if (/^[a-f0-9]{32}$/.test(u)) uids.push(u); }); });
+  var made = 0, had = 0, bad = 0;
+  uids.forEach(function (uid) {
+    var base = 'https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + uid + '/captions';
+    var list = UrlFetchApp.fetch(base, { muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok } });
+    var j = {}; try { j = JSON.parse(list.getContentText()); } catch (e) {}
+    if (j.success && (j.result || []).some(function (c) { return c.language === 'en'; })) { had++; return; }
+    var res = UrlFetchApp.fetch(base + '/en/generate', { method: 'post', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok } });
+    if (res.getResponseCode() < 300) made++; else { bad++; Logger.log(uid + ': ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); }
+  });
+  Logger.log('Captions: ' + made + ' requested, ' + had + ' already present, ' + bad + ' failed. Generation takes a few minutes per video; rebuild the site afterwards.');
 }
 
 /* BACKFILL Days 1–N → Stream by upload-from-URL, one row per run (6-min limit).
@@ -2966,6 +2989,33 @@ function handleMyState() {
   }
 
   out.siteState = siteStateAll();
+
+  /* Fields the assistant validates (myState): projectStart, agreementActive,
+     weekly {eligible,reason,date,day,week}, corrective [assignment entries]. */
+  var st = out.siteState;
+  out.projectStart = PROJECT_START;
+  out.agreementActive = !!(String(st.agreement_edition || '') && st.agreement_confirmation_verified_at && st.mrb_signature_verified_at && st.ap_signature_verified_at);
+  var dow = Utilities.formatDate(new Date(), 'America/New_York', 'u'); // 1 = Monday
+  var week = Math.floor((day - 1) / 7);
+  var reviewedToday = false;
+  try { var wl = tab('Weekly Log').getDataRange().getValues(); for (var q = 1; q < wl.length; q++) if (apDateStr(wl[q][1]) === today) reviewedToday = true; } catch (e) {}
+  out.weekly = dow === '1' && day >= 8 && !reviewedToday
+    ? { eligible: true, reason: '', date: today, day: day, week: week }
+    : { eligible: false, reason: reviewedToday ? 'This week\'s review is already filed' : (day < 8 ? 'The first weekly review is due on the first Monday after Day 7' : 'Weekly review is due on Mondays'), date: today, day: day, week: Math.max(1, week) };
+  // Corrective assignments: open, not waived / not enforced, no recording filed yet.
+  var hex = function (s, n) { return sha256Hex(s).slice(0, n).toUpperCase(); };
+  var seq = 0; out.corrective = [];
+  for (var cv = 1; cv < pv.length; cv++) {
+    var cd = apDateStr(pv[cv][0]); if (!/^\d{4}-\d{2}-\d{2}$/.test(cd)) continue;
+    var cst = String(pv[cv][2] || '').toLowerCase();
+    if (/not enforced|waived/.test(cst)) continue;
+    seq++;
+    if (!/^(unresolved|open|declared)/.test(cst) || String(pv[cv][7] || '').trim()) continue;
+    var lvl = Math.min(3, seq), txt = String(pv[cv][1] || '');
+    var due = Utilities.formatDate(new Date(new Date(cd + 'T12:00:00Z').getTime() + 3 * 864e5), 'America/New_York', 'yyyy-MM-dd');
+    out.corrective.push({ id: 'V-' + hex('v|' + cd + '|' + txt, 12), assignmentId: 'C-' + hex('c|' + cd + '|' + txt, 24), attemptId: 'A-' + hex('a|' + cd + '|' + txt + '|' + today, 24),
+      violationDate: cd, violation: txt, assignment: 'Corner time — Level ' + lvl, due: due, level: lvl, minutes: lvl * 10 });
+  }
   return jsonOut(out);
 }
 

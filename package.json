@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "generate": "node scripts/publish.mjs",
-    "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/check-site.mjs dist",
+    "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/check-site.mjs dist && node scripts/check-seo.mjs dist",
     "check-syntax": "node scripts/check-syntax.mjs",
     "test": "node scripts/test-compatible.mjs",
     "indexnow": "node scripts/submit-indexnow.mjs"
