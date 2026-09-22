@@ -20,67 +20,19 @@
     var n = ctx.day;
     var date = fmtDateLong(ctx.date);
     var w = ctx.weight;
+    // Published sequence: WAIT → FRONT → LEFT → REAR → RIGHT → WAIT (/positions/).
     return [
-      {
-        id: "wait_open",
-        label: "Opening — Wait",
-        sec: 12,
-        pose: "WAIT POSITION",
-        text:
-          "This is the official Daily Inspection for Micheal Ray Berry, Day " +
-          n +
-          ". Today is " +
-          date +
-          ". Documented weight: " +
-          w +
-          " pounds. Remain in Wait position. Full project uniform clearly visible. " +
-          "This is one continuous take. Verification code is displayed on screen.",
-      },
-      {
-        id: "inspection",
-        label: "Front — Inspection",
-        sec: 8,
-        pose: "INSPECTION · HANDS BEHIND HEAD",
-        text:
-          "Inspection position. Feet shoulder-width apart. Hands behind the head. Eyes forward. Hold.",
-      },
-      {
-        id: "left",
-        label: "Left",
-        sec: 5,
-        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
-        text: "Left profile. Turn left. Hold.",
-      },
-      {
-        id: "rear",
-        label: "Rear",
-        sec: 5,
-        pose: "REAR · HANDS BEHIND HEAD",
-        text: "Rear view. Turn to the rear. Hold.",
-      },
-      {
-        id: "right",
-        label: "Right",
-        sec: 5,
-        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
-        text: "Right profile. Turn right. Hold.",
-      },
-      {
-        id: "front_close",
-        label: "Front — Closing View",
-        sec: 6,
-        pose: "FRONT · HANDS BEHIND HEAD",
-        text: "Front. Return to the front. Hold. Four required views complete.",
-      },
-      {
-        id: "wait_close",
-        label: "Return to Wait — Completion",
-        sec: 10,
-        pose: "WAIT POSITION",
-        text:
-          "Wait position. Hold. The remaining Daily Compliance Packet requirements " +
-          "are due by ten PM Eastern. Up, down, or flat, it gets posted. Daily Inspection complete. Release.",
-      },
+      { id: "wait_open", label: "Opening — Wait", sec: 12, pose: "WAIT POSITION",
+        text: "Micheal Ray Berry. Daily Inspection. Day " + n + ". " + date + ". Documented weight: " + w + " pounds. " +
+          "Full project uniform visible. One continuous take. Verification code on screen. " +
+          "This inspection is part of your chosen submission. Follow the agreed protocol and present yourself for review. " +
+          "Present Wait. Hold." },
+      { id: "inspection", label: "Front", sec: 8, pose: "FRONT · HANDS BEHIND HEAD", text: "Present Front. Hold." },
+      { id: "left", label: "Left", sec: 5, pose: "LEFT PROFILE · HANDS BEHIND HEAD", text: "Present Left. Hold." },
+      { id: "rear", label: "Rear", sec: 5, pose: "REAR · HANDS BEHIND HEAD", text: "Present Rear. Hold." },
+      { id: "right", label: "Right", sec: 5, pose: "RIGHT PROFILE · HANDS BEHIND HEAD", text: "Present Right. Hold." },
+      { id: "wait_close", label: "Closing — Wait", sec: 10, pose: "WAIT POSITION",
+        text: "Present Wait. Hold. Inspection sequence complete. Submit the full Daily Compliance Packet by ten PM Eastern. Accountability Partner review pending. Release." },
     ];
   }
 
@@ -130,17 +82,10 @@
         sec: 16,
         pose: "WAIT POSITION",
         text:
-          "This is a Corrective Session for Micheal Ray Berry under the Public Accountability Project. " +
-          "The entry being corrected is " +
-          violation +
-          ", dated " +
-          date +
-          ". This is Level " +
-          level +
-          ", with an assigned duration of " +
-          minutes +
-          " minutes. Remain in Wait position. Full project uniform clearly visible. " +
-          "This is one continuous take. Verification code is displayed on screen.",
+          "Micheal Ray Berry. Corrective Session. Confirmed violation: " + violation + ". Violation date: " + date + ". " +
+          "Assigned correction: Level " + level + ", " + minutes + " minutes. " +
+          "You chose submission within this accountability arrangement. That includes completing the agreed correction when a requirement is missed. " +
+          "Remain in Wait position. Full project uniform visible. One continuous take. Verification code on screen.",
       },
       {
         id: "to_corner",
@@ -180,7 +125,7 @@
         {
           atSec: 5 * 60,
           text:
-            "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+            "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
         },
         {
           atSec: 60,
@@ -194,7 +139,7 @@
         {
           atSec: 10 * 60,
           text:
-            "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+            "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
         },
         {
           atSec: 5 * 60,
@@ -218,7 +163,7 @@
       {
         atSec: 15 * 60,
         text:
-          "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+          "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
       },
       {
         atSec: 10 * 60,
@@ -240,7 +185,7 @@
   /** @deprecated generic interval — prefer cornerHoldMarks */
   function cornerInterval(minutesLeft, isHalf) {
     if (isHalf) {
-      return "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.";
+      return "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.";
     }
     var m = Math.round(minutesLeft);
     if (m <= 1) {
@@ -255,20 +200,16 @@
   function cornerTimerComplete(ctx) {
     var v = (ctx && ctx.violation) || "the documented compliance failure";
     var d = ctx && (ctx.violationDate || ctx.date);
-    return (
-      "Time complete. Before release, the record states the failure in full. " +
-      "Micheal Ray Berry failed " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
-      "The compliance entry remains documented. This completed capture still requires sealing, public filing, and Accountability Partner verification; it does not itself close or erase the entry. " +
-      "Wait position."
-    );
+    return "Assigned time complete. Return to Wait position.";
   }
 
   function cornerClosing(ctx) {
+    var v = (ctx && ctx.violation) || "the confirmed violation";
+    var d = ctx && (ctx.violationDate || ctx.date);
     return (
-      "Remain in Wait position. Hands behind the back. Head upright. Eyes forward. Hold. " +
-      "Level " +
-      (ctx.level || 1) +
-      " Corrective Session capture is complete. It is ready to be sealed and backed up; public filing and Accountability Partner verification remain pending. Session complete. Release."
+      "This recording documents the corrective session for " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
+      "It does not erase the original entry. Public filing and Accountability Partner verification remain pending. " +
+      "Session complete. Release."
     );
   }
 
@@ -421,6 +362,7 @@
           "I understand that an accurate record may distinguish between the original entry and a later correction. A correction should preserve the integrity of the record while clearly identifying what was inaccurate and what information replaced it. " +
           "I understand that my participation does not eliminate my personal safety, privacy, legal rights, or ability to withdraw consent. Withdrawal may end future participation and future obligations, subject to the agreement's stated procedure. The treatment of accurate material published before withdrawal is governed by the agreement's record-retention, privacy, and safety provisions. " +
           "I understand that emergency intervention and safety-takedown procedures remain available when their stated conditions are met. Nothing in the agreement requires me to continue an activity that presents an immediate and genuine threat to health or safety. Nothing authorizes illegal conduct, medical neglect, financial consequences of any kind, workplace interference, or the disclosure of information excluded by the agreement. " +
+          "I understand that this project includes a consensual submissive role. I am choosing to follow the Accountability Partner's direction within the written agreement. I understand the difference between following instructions during an agreed session and deciding whether I consent to participate. My consent is not established merely by following a command. " +
           "I understand that the Accountability Partner's authority exists only within the defined scope of the agreement. The Accountability Partner may review evidence, determine compliance, document violations, require agreed corrective actions, and administer the record as authorized by the agreement. That authority does not extend beyond the agreement or override its safety, privacy, legal, and withdrawal provisions. " +
           "I affirm that I requested this accountability arrangement voluntarily. I have not been threatened, forced, blackmailed, deceived, or improperly pressured into accepting it. I understand that declining to confirm this recording would prevent the agreement from taking effect and would not authorize anyone to represent that I consented. " +
           "I approved the language used in this recording before it began. I understand that a synthetic voice is presenting the statement while I appear on camera. My deliberate actions on camera are intended to document my identity, attention, and voluntary response. " +

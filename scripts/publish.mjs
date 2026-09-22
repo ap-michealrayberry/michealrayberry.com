@@ -2442,11 +2442,11 @@ function positionsPage(entries, siteState = {}) {
       'Every session opens and closes here. At the opening it is held while the day, date, recorded weight, and verification information are established on the record; after the four views are complete the participant returns to it while the session is closed. It files no progress photograph — it gives every recording a defined beginning and end, and a stationary identifiable frame before and after the sequence.'],
     ['front', 'Front', 'Squared to the camera, feet at the established inspection width, hands behind the head, head level, face fully visible.',
       'The primary front reference frame. Hands behind the head keep the torso unobstructed and prevent the arms being used to materially alter the silhouette.'],
-    ['left', 'Left', 'A turn to the left from Front. Same stance, posture, camera distance, and hand position.',
+    ['left', 'Left', 'Left profile: the left side of the body faces the camera, as in the reference photograph. Same stance, posture, camera distance, and hand position as Front.',
       'The camera does not move. The side profile records changes in body depth and shape that cannot be evaluated as clearly from the front view alone.'],
     ['rear', 'Rear', 'Turned to face directly away. Established stance, hands behind the head, framing unchanged.',
       'The complete body remains visible from head to feet.'],
-    ['right', 'Right', 'A turn to the right, presenting the opposite profile with the posture and framing required for Left.',
+    ['right', 'Right', 'Right profile: the right side of the body faces the camera, as in the reference photograph. Posture and framing as required for Left.',
       'Both profiles are required. Recording each side makes differences in stance or body shape visible rather than allowing one preferred profile to substitute for the other.'],
   ];
 
@@ -2488,7 +2488,7 @@ function positionsPage(entries, siteState = {}) {
     ['Wait posture', 'Separate from the four photographic positions. Feet together, hands behind the back, body upright and squared to the camera, head level, eyes forward. Performed at both the opening and closing of every inspection recording. No progress photograph is filed from Wait.'],
     ['Head and identity', 'The head remains level. During the Front view and both Wait positions the face must be completely visible — identity must be apparent from the recorded image itself rather than from a filename, caption, or accompanying text. Hair, clothing, hands, or other objects may not materially obscure the face.'],
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
-    ['Attire', 'The designated project uniform, worn for every inspection: a plain black full-body unitard and a plain steel or titanium collar, worn in every official recording. Intentionally simple and standardized so clothing cannot materially alter the appearance of the body between records. See <a href="/uniform/">the uniform standard</a>.'],
+    ['Attire', 'The designated project uniform: a plain black full-body unitard and a plain steel or titanium collar, worn in every official recording. The unitard standardizes the visual record. The collar symbolizes Micheal’s chosen submission within the written agreement. See <a href="/uniform/">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
     ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
@@ -2580,9 +2580,12 @@ function positionsPage(entries, siteState = {}) {
     <p>A photograph or recorded view does not meet the standard when the comparison or the
     verification has been materially compromised. For example:</p>
     <ul class="invalid">${INVALIDATES.map((x) => `<li>${x}</li>`).join('')}</ul>
-    <p><strong>A view that fails the standard is recorded again rather than filed.</strong> The
-    objective is not to produce the most favourable photograph. It is to produce the required
-    photograph.</p>
+    <p><strong>A view that fails the standard is recorded again rather than filed.</strong> Within an
+    unbroken take, only the failed view is repeated: the assistant returns to that view and the
+    sequence continues from there. If the take itself is broken — the recording stops, the camera
+    moves, or the participant leaves the frame — the recording is void and the complete sequence is
+    recorded again from the opening Wait. The objective is not to produce the most favourable
+    photograph. It is to produce the required photograph.</p>
 
     <h2>Why it is specified</h2>
     <p>Longitudinal photography is useful only when the method that produced it stays reasonably
@@ -2601,11 +2604,14 @@ function positionsPage(entries, siteState = {}) {
     corrective positions address a documented failure.</p>
 
     <h2>Command vocabulary</h2>
-    <p>Every session uses the same four commands, spoken by the synthetic voice and answered without
-    words: <strong>Present</strong> — assume the named position; <strong>Hold</strong> — maintain it
-    to the standard until the next command; <strong>Correct your posture</strong> — fix the stated
-    defect without leaving the position; <strong>Release</strong> — the session is over. The
-    vocabulary never varies, so the response is trained, not interpreted.</p>
+    <p>Every session uses a controlled vocabulary. Routine commands are answered through the required movement rather than a spoken acknowledgment.</p>
+    <ul>
+      <li><strong>Present [position]</strong> — assume the named position to the published standard.</li>
+      <li><strong>Hold</strong> — maintain the position until the next instruction or until the session is stopped.</li>
+      <li><strong>Correct your posture [specific defect]</strong> — correct the identified issue. Used only when a correction is required, and only when a person or the assistant's pose check has identified the defect; otherwise the narration uses a neutral reminder such as “Maintain the required hand position.”</li>
+      <li><strong>Release</strong> — the instructed session has ended. Acceptance of the submitted record remains subject to Accountability Partner review.</li>
+    </ul>
+    <p>The vocabulary is standardized so each command has a defined, practiced response. Necessary clarification, discomfort, and requests to pause or stop may be voiced at any time.</p>
 
   </main>
   <div class="sitefoot"><div class="sitefoot-in">
