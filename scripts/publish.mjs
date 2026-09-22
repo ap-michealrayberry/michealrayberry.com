@@ -546,6 +546,12 @@ function inspectionVideoObject({ record, id, name, description, front, embed, vi
   };
 }
 
+function vttToText(vtt = '') {
+  return String(vtt).split(/\r?\n/).filter((l) => l && !/^WEBVTT/.test(l) && !/^\d+$/.test(l) && !/-->/.test(l) && !/^NOTE/.test(l))
+    .map((l) => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean)
+    .filter((l, i, a) => l !== a[i - 1]).join(' ').replace(/\s+/g, ' ').trim().slice(0, 20000);
+}
+
 function publicVideoUrl(value = '') {
   const raw = String(value || '').trim();
   if (!raw) return '';
