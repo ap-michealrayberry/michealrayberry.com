@@ -1880,10 +1880,10 @@
       mixAudioTracks(captureStream);
 
       // 16 Mbps video / 128 kbps audio at 1080×1920@30: survives Stream's
-      // re-encode cleanly (~120 MB per minute; the R2 original keeps it all).
+      // re-encode cleanly (~60 MB per minute at 8 Mbps — YouTube's 1080p rate; 16 Mbps doubled upload time for no visible gain).
       var recOpts = mime
-        ? { mimeType: mime, videoBitsPerSecond: 16_000_000, audioBitsPerSecond: 128_000 }
-        : { videoBitsPerSecond: 16_000_000, audioBitsPerSecond: 128_000 };
+        ? { mimeType: mime, videoBitsPerSecond: 8_000_000, audioBitsPerSecond: 128_000 }
+        : { videoBitsPerSecond: 8_000_000, audioBitsPerSecond: 128_000 };
       try {
         recorder = new MediaRecorder(mixedStream, recOpts);
       } catch (e) {
