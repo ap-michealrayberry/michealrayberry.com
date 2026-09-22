@@ -3727,12 +3727,9 @@
     document.documentElement.dataset.agreementActive = agreementActive ? "true" : "false";
     var agreement = byId("agreement-status");
     if (agreement) agreement.textContent = agreementActive ? "Agreement active" : "Agreement pending · requirements inactive";
-    ["card-daily", "card-corrective", "card-weekly"].forEach(function (id) {
-      var card = byId(id);
-      if (!card) return;
-      card.disabled = !agreementActive;
-      card.title = agreementActive ? "" : "Unavailable until the agreement is active";
-    });
+    // Sessions run before activation too: filings are voluntary until the
+    // agreement is counter-signed, then enforced. Availability is set by
+    // applyAuthoritativeAvailability (assignment / Monday rules), not here.
     var voice = byId("voice-status");
     if (voice) {
       var mode = MRB.audio.voiceMode();
@@ -3749,8 +3746,8 @@
     }
 
     var packet = byId("packet-status");
-    if (packet && !agreementActive) {
-      packet.textContent = "Proposed · not currently due";
+    if (packet && !agreementActive && !record) {
+      packet.textContent = "Voluntary until the agreement is active";
     } else if (packet && record) {
       var todayEt = formatTodayET();
       var row = (record.weighIns || []).find(function (w) {
@@ -3804,7 +3801,7 @@
       if (!el) return;
       el.textContent = document.documentElement.dataset.agreementActive === "true"
         ? MRB.dates.formatCountdown(MRB.dates.msUntil10pmET()) + " to 10 PM ET"
-        : "Proposed · not currently due";
+        : MRB.dates.formatCountdown(MRB.dates.msUntil10pmET()) + " to 10 PM ET · voluntary until activation";
     }
     tick();
     return setInterval(tick, 1000);
@@ -4741,16 +4738,13 @@
 
   function applyAuthoritativeAvailability() {
     var config = MRB.config.get();
-    var active = !!(recordCache && recordCache.agreementActive && participantStateCache && participantStateCache.agreementActive);
     var daily = MRB.ui.byId("card-daily");
     var corrective = MRB.ui.byId("card-corrective");
     var weekly = MRB.ui.byId("card-weekly");
-    if (daily) daily.disabled = !active;
+    if (daily) { daily.disabled = false; daily.title = ""; }
     if (corrective) {
-      corrective.disabled = !active || correctiveEntries().length === 0;
-      corrective.title = corrective.disabled
-        ? (!active ? "Unavailable until the agreement is active" : "No eligible AP corrective assignment")
-        : "";
+      corrective.disabled = correctiveEntries().length === 0;
+      corrective.title = corrective.disabled ? "No corrective session is assigned" : "";
     }
     if (weekly) {
       var weeklyState = participantStateCache && participantStateCache.weekly;
@@ -4758,10 +4752,8 @@
         /^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) &&
         Number(weeklyState.day) >= 8 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
-      weekly.disabled = !active || !weeklyComplete;
-      weekly.title = weekly.disabled
-        ? (!active ? "Unavailable until the agreement is active" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
-        : "";
+      weekly.disabled = !weeklyComplete;
+      weekly.title = weekly.disabled ? String(weeklyState && weeklyState.reason || "Weekly review is due on Mondays") : "";
     }
     if (config.demoMode) {
       ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement"].forEach(function (id) {
@@ -4780,7 +4772,6 @@
     }
     if (type === "corrective" || type === "weekly") {
       participantStateCache = await MRB.api.myState();
-      if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
     }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
@@ -5006,7 +4997,6 @@
     if (type === "corrective" || type === "weekly") {
       try {
         participantStateCache = await MRB.api.myState();
-        if (!participantStateCache.agreementActive) throw new Error("The agreement is not active.");
         if (type === "corrective") {
           var selectedId = String(entry && entry.id || "");
           var selectedAssignmentId = String(entry && entry.assignmentId || "");
