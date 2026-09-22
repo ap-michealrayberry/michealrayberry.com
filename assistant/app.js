@@ -5543,6 +5543,10 @@
       MRB.config.save({ demoMode: false });
       var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
       var expires = Number(r && r.expires);
+      if (r && r.ok && r.token && !isFinite(expires)) {
+        var issuedMs = Date.parse(r.issued || "");
+        expires = (isFinite(issuedMs) ? issuedMs : Date.now()) + 14 * 24 * 3600 * 1000;
+      }
       if (!r || !r.ok || !r.token || !isFinite(expires) || expires <= Date.now()) {
         throw new Error((r && r.error) || "Server returned an invalid unlock grant");
       }
