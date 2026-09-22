@@ -1244,7 +1244,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1424,7 +1424,7 @@ function milestonePage(target, entries) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1533,7 +1533,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1597,7 +1597,7 @@ function weeksIndexPage(entries, lastDay) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -1816,7 +1816,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2015,7 +2015,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2164,7 +2164,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2409,7 +2409,7 @@ function violationPage(v, prev, next) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2428,7 +2428,7 @@ function isoDuration(sec) {
 
 function positionsPage(entries, siteState = {}) {
   const canonical = `${SITE_ORIGIN}/positions/`;
-  const title = 'Documentation Standard — Micheal Ray Berry Public Accountability Project';
+  const title = 'Daily Inspection Protocol — Micheal Ray Berry Public Accountability Project';
   const description =
     'The documentation standard for the Micheal Ray Berry Public Accountability Project: Wait, then ' +
     'four fixed views — front, left, rear, right — with the posture, framing, and visibility each requires.';
@@ -2541,20 +2541,17 @@ function positionsPage(entries, siteState = {}) {
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
-    <div class="eyebrow">The documentation standard</div>
-    <h1>Documentation Standard</h1>
+    <div class="eyebrow">Inspection</div>
+    <h1>Daily Inspection Protocol</h1>
     <p>Wait, then four fixed views, recorded the same way every day.</p>
   </header>
   <main id="main-content">
     <div class="viewsw"><a href="/positions/" aria-current="page">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a></div>
-    <p class="lede"><strong>The positions are fixed so that changes in posture, clothing, framing, or
-    concealment cannot materially alter the visual record from one day to the next.</strong></p>
+    <p class="lede"><strong>Daily Inspection has two purposes: to produce a consistent visual record and to document Micheal’s adherence to an agreed presentation protocol.</strong></p>
 
-    <p>A photograph taken from a different angle, at a different distance, or with a different posture
-    is not directly comparable to the one taken before it. This standard minimises those variables:
-    every daily record uses the same sequence, the same attire, the same camera position, and the
-    same four views. The purpose is to make the presentation as constant as possible, so that the
-    body is what changes.</p>
+    <p>Within this project, presenting for inspection is a practical expression of submission. The attire, positions, and sequence are specified in advance rather than chosen anew for each recording. Micheal’s role is to follow that protocol and submit the evidence for review. The Accountability Partner assesses whether the published standard has been met.</p>
+
+    <p>The inspection evaluates compliance with the recording requirements — not Micheal’s worth, attractiveness, or entitlement to respect.</p>
 
     <div class="seq">
       <b>WAIT → FRONT → LEFT → REAR → RIGHT → WAIT</b>
@@ -2619,7 +2616,7 @@ function positionsPage(entries, siteState = {}) {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2690,7 +2687,7 @@ function violationsIndexPage(violations) {
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -2840,7 +2837,7 @@ function sharePage(d) {
     <p><a href="/daily/">Daily archive</a> · <a href="/feed.xml">RSS feed</a> · <a href="https://www.youtube.com/@michealrayberry" rel="noopener">Official YouTube channel</a> · <a href="https://x.com/michealrayberry" rel="noopener">X</a> · <a href="https://bsky.app/profile/michealrayberry.com" rel="noopener">Bluesky</a> · <a href="/live/">Evening Supervision</a></p>
     <h2>Questions and record issues</h2>
     <p>Questions about the rules, the documentation standard, published status, or a possible error go to <a href="/report/">Report a Record Issue</a> or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. Factual errors are corrected transparently; documented outcomes are not removed because they become uncomfortable.</p>
-    <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Documentation standard</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a> · <a href="/report/">Report a record issue</a></p>`;
+    <p><a href="/agreement/">Agreement</a> · <a href="/positions/">Daily Inspection Protocol</a> · <a href="/uniform/">Uniform standard</a> · <a href="/corrections/">Corrective sessions</a> · <a href="/live/">Evening Supervision</a> · <a href="/violations/">Violation log</a> · <a href="/llms.txt">Machine-readable overview</a> · <a href="/report/">Report a record issue</a></p>`;
   return synPage({ title, desc: description, canonical, body })
     .replace('</head>', '<script src="/share.js" defer></script>\n</head>')
     .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${SITE_ORIGIN}${card ? card.png : '/og-image.png'}">`);
@@ -3232,7 +3229,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
         <span class="links"><a href="https://michealrayberry.com">Website</a></span>
       </div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
@@ -3392,7 +3389,7 @@ const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
       <div class="col"><b>Micheal Ray Berry</b><span class="sub">Public Accountability Project</span></div>
       <div class="col"><span class="colhead">Official record</span><span class="links"><a href="https://michealrayberry.com">Website</a></span></div>
     </div>
-    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A voluntary public accountability project with published terms and defined limits. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
+    <p class="footline" style="margin:0 0 14px;font:13px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:#8a8983">A consensual submission and public accountability arrangement between adults, governed by written terms, defined authority, and the right to withdraw. <a href="/agreement/" style="color:#fafaf7">Consent &amp; boundaries</a></p>
     <div class="sitefoot-bottom">
       <span class="pair"><span>Accountability Partner: <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a></span><span>Participant: <a href="mailto:mrb@michealrayberry.com">mrb@michealrayberry.com</a></span></span>
       <span><a href="/share/" style="letter-spacing:.08em;text-transform:uppercase">Share</a> <a href="/report/" style="font-weight:600;letter-spacing:.08em;text-transform:uppercase">Report an issue →</a> <a class="rec" href="/assistant/"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a></span>
