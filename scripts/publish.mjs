@@ -196,6 +196,13 @@ function normalizedHeader(value) {
 }
 
 function validateTable(rows, expected, label, { optional = [] } = {}) {
+  // Blank trailing header cells (an empty column C in a key/value tab) are not
+  // columns: drop them, and the matching trailing cells, before validating.
+  {
+    let w = (rows[0] || []).length;
+    while (w > expected.length && !String((rows[0] || [])[w - 1] ?? '').trim()) w--;
+    if (w < (rows[0] || []).length) for (let i = 0; i < rows.length; i++) rows[i] = rows[i].slice(0, w).concat(Array(Math.max(0, w - rows[i].length)).fill(''));
+  }
   const actual = (rows[0] || []).map(normalizedHeader);
   const okRequired = actual.length >= expected.length && expected.every((name, index) => {
     const choices = Array.isArray(name) ? name : [name];
