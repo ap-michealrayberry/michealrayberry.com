@@ -88,8 +88,8 @@
       ["Fingerprint bound to the record", !!(conf && conf.matches), conf && a.fingerprint ? (conf.matches ? "matches" : "MISMATCH — re-activate") : "—"],
       ["Activation flag", a.active, a.active ? "set" : "not set"],
     ];
-    if ($("agreement-checklist")) $("agreement-checklist").innerHTML = items.map(function (it) { return '<li class="' + (it[1] ? "ok" : "") + '"><span class="dot"></span><span>' + esc(it[0]) + '</span><span class="v">' + esc(it[2]) + "</span></li>"; }).join("");
-    $("btn-activate").hidden = a.active; $("btn-activate").disabled = !conf;
+    if ($("agreement-checklist")) if ($("agreement-checklist")) $("agreement-checklist").innerHTML = items.map(function (it) { return '<li class="' + (it[1] ? "ok" : "") + '"><span class="dot"></span><span>' + esc(it[0]) + '</span><span class="v">' + esc(it[2]) + "</span></li>"; }).join("");
+    if ($("btn-activate")) $("btn-activate").hidden = a.active; if ($("btn-activate")) $("btn-activate").disabled = !conf;
     if ($("btn-deactivate")) $("btn-deactivate").hidden = !a.active;
 
     // violations
