@@ -26,3 +26,6 @@ Sign out = /cdn-cgi/access/logout.
 
 ## Rework (Sept 20)
 Panels: Project control (Start project / Resume / Suspend; banner Auto·On·Off), Review queue (daily packets → Accept / Reject→violation; corrective → Resolve / Overrule; declared misses → Confirm / Waive §9; inline Stream player), Record (Add violation, Edit weigh-in, Post update, File Stream uid), Operations (AP actions log, Observer inbox with review states, media backfill status). Add STREAM_CUSTOMER_CODE to this project's variables for inline video. Start project marks pre-activation misses "not enforced under §9".
+
+## Voice preview (optional)
+Set ELEVENLABS_API_KEY (secret) — and ELEVENLABS_VOICE_ID if the assistant uses a voice other than the default — on this Pages project. The Voice scripts panel's Test button then plays lines in the assistant's real voice; without it, the browser's built-in voice is used.

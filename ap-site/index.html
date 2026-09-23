@@ -157,6 +157,15 @@
       </div>
     </section>
 
+    <section class="panel" id="panel-scripts">
+      <p class="eyebrow">Recording assistant</p>
+      <h2>Voice scripts</h2>
+      <p class="hint">The exact words the assistant speaks, session by session. Edit a line and save: the phone picks it up within ten minutes (or on its next start). Timing, poses and order do not change. Blank a line and save to return it to the built-in default. Placeholders in braces are filled in at recording time. <b>Test</b> plays a line with sample values — before or after saving.</p>
+      <p class="hint" id="scripts-legend"><code>{day}</code> <code>{date_long}</code> <code>{weight}</code> <code>{week}</code> <code>{level}</code> <code>{minutes}</code> <code>{violation}</code> <code>{violation_date}</code> <code>{code}</code> <code>{summary}</code></p>
+      <div class="row"><button type="button" class="btn" id="btn-scripts-load">Load scripts</button></div>
+      <div id="scripts-out"></div>
+    </section>
+
     <section class="panel" id="panel-ops">
       <h2>Operations</h2>
       <div class="row wrap">

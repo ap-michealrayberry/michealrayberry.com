@@ -36,6 +36,17 @@ export async function onRequestPost({ request, env }) {
   if (!id) return json({ ok: false, error: 'unauthorized' }, 401);
   let body; try { body = await request.json(); } catch { return json({ ok: false, error: 'bad json' }, 400); }
   const op = String(body.op || 'status');
+  if (op === 'tts') {
+    // Script preview in the assistant's real voice. Needs ELEVENLABS_API_KEY
+    // (secret) on this project; optional ELEVENLABS_VOICE_ID.
+    if (!env.ELEVENLABS_API_KEY) return json({ ok: false, error: 'no-voice-key' }, 501);
+    const text = String(body.text || '').slice(0, 2500);
+    if (!text.trim()) return json({ ok: false, error: 'empty' }, 400);
+    const voice = String(env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB');
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, { method: 'POST', headers: { 'xi-api-key': env.ELEVENLABS_API_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' }, body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2' }) });
+    if (!r.ok) return json({ ok: false, error: 'voice ' + r.status }, 502);
+    return new Response(r.body, { headers: { 'content-type': 'audio/mpeg', 'cache-control': 'no-store' } });
+  }
   if (CONFIRM_REQUIRED.has(op) && body.confirmed !== true) return json({ ok: false, error: 'confirmation required' }, 400);
   const payload = { ...body, action: 'apconsole', op, key: env.AP_KEY, actor: id.email, actor_ip: request.headers.get('CF-Connecting-IP') || '', actor_ua: (request.headers.get('User-Agent') || '').slice(0, 120) };
   const res = await fetch(env.APPS_SCRIPT_URL, { method: 'POST', redirect: 'follow', headers: { 'content-type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })

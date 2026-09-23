@@ -262,4 +262,112 @@
   if ($("btn-observer")) $("btn-observer").addEventListener("click", function () { showOps("observer_inbox", function (r) { var rows = r.rows || []; setTimeout(function () { document.querySelectorAll("[data-ob]").forEach(function (b) { b.addEventListener("click", async function () { await api("observer_review", { n: Number(b.getAttribute("data-n")), review: b.getAttribute("data-ob") }); toast("Marked " + b.getAttribute("data-ob")); $("btn-observer").click(); }); }); }, 0); return rows.map(function (x) { return '<div class="item"><div class="item-head">#' + x.n + ' · ' + esc2(x.at) + ' · ' + esc2(x.type) + (x.ref ? ' · ' + esc2(x.ref) : '') + ' · <em>' + esc2(x.review) + '</em></div><p>' + esc2(x.message) + '</p><div class="hint">' + esc2(x.name) + ' ' + esc2(x.email) + ' ' + esc2(x.link) + '</div><div class="row wrap"><button class="btn ghost" data-ob="dismissed" data-n="' + x.n + '">Dismiss</button><button class="btn ghost" data-ob="verified" data-n="' + x.n + '">Verified</button><button class="btn ghost" data-ob="actioned" data-n="' + x.n + '">Actioned</button></div></div>'; }).join("") || '<p class="hint">Inbox empty.</p>'; }); });
   if ($("btn-media-status")) $("btn-media-status").addEventListener("click", function () { showOps("media_backfill_status", function (r) { return '<div class="item"><div class="item-head">' + r.rows + ' rows with video · ' + r.missing_stream + ' missing Stream uid · ' + r.missing_r2 + ' missing R2 key</div><div class="hint">Run backfillStreamFromDrive() / backfillR2FromDrive() in the script editor until both reach 0.</div></div>'; }); });
 
+
+  /* ── Voice scripts ──
+     Defaults are rendered live from the deployed assistant module
+     (michealrayberry.com/assistant/js/12-scripts.js) with placeholder values,
+     so what is shown is exactly what the phone would say. Overrides live on
+     the Scripts tab. */
+  var SCRIPT_GROUPS = [
+    { title: "Daily inspection", fn: "dailySegments", kind: "segments" },
+    { title: "Photographs", fn: "photoPrompts", kind: "segments" },
+    { title: "Corrective session (corner time)", fn: "cornerSegments", kind: "segments", extra: [["cornerTimerComplete", "Timer complete"], ["cornerClosing", "Closing"]], computed: [["cornerHoldMarks", "Halfway / hold marks (Level 2 sample)", [2]], ["cornerInterval", "Interval call (5 min left sample)", [5, false]]] },
+    { title: "Weekly review", fn: null, kind: "lines", extra: [["weeklyOpening", "Opening"], ["weeklyClosing", "Closing"]], computed: [["weeklyAssessment", "Assessment (6 of 7 sample)", [6]], ["weeklyWeightMid", "Weight line (330.4 sample)", [330.4]]] },
+    { title: "Consent confirmation", fn: "confirmationSegments", kind: "segments" },
+    { title: "Announcement", fn: null, kind: "lines", extra: [["announcementScript", "Announcement"]] },
+    { title: "Demonstration", fn: null, kind: "lines", extra: [["demoScript", "Demonstration"]] },
+  ];
+  function loadScriptModule() {
+    return new Promise(function (resolve, reject) {
+      window.MRB = window.MRB || {};
+      window.MRB.dates = window.MRB.dates || { pad2: function (n) { return String(n).padStart(2, "0"); }, pad4: function (n) { return String(n).padStart(4, "0"); }, parseDate: function (iso) { var p = String(iso).split("-").map(Number); return new Date(p[0], p[1] - 1, p[2], 12); } };
+      if (window.MRB.scripts && window.MRB.scripts.dailySegments) return resolve(window.MRB.scripts);
+      var s = document.createElement("script");
+      s.src = "https://michealrayberry.com/assistant/js/12-scripts.js?v=" + Date.now();
+      s.onload = function () { window.MRB.scripts ? resolve(window.MRB.scripts) : reject(new Error("script module did not load")); };
+      s.onerror = function () { reject(new Error("could not load the assistant's script module")); };
+      document.head.appendChild(s);
+    });
+  }
+  function scriptCatalog(S) {
+    var ctx = { day: "{day}", date: "2099-01-02", weight: "{weight}", violationDate: "2099-03-04", violation: "{violation}", level: "{level}", minutes: "{minutes}", week: "{week}", summaryLine: "{summary}", code: "{code}", version: "{version}" };
+    var DL = S.fmtDateLong("2099-01-02"), VL = S.fmtDateLong("2099-03-04");
+    var ph = function (t) { return String(t).split(VL).join("{violation_date}").split(DL).join("{date_long}").split("2099-01-02").join("{date}"); };
+    return SCRIPT_GROUPS.map(function (g) {
+      var items = [];
+      if (g.fn) (S[g.fn](ctx) || []).forEach(function (s) { items.push({ key: g.fn + "." + s.id, label: s.label || s.id, pose: s.pose || "", sec: s.sec, def: ph(s.text) }); });
+      (g.extra || []).forEach(function (e) { items.push({ key: e[0], label: e[1], def: ph(S[e[0]](ctx)) }); });
+      var computed = (g.computed || []).map(function (c) { var r = S[c[0]].apply(null, c[2]); return { label: c[1], text: Array.isArray(r) ? r.map(function (x) { return x.text; }).join("\n") : String(r) }; });
+      return { title: g.title, items: items, computed: computed };
+    });
+  }
+  async function renderScripts() {
+    var out = $("scripts-out"); out.innerHTML = '<p class="hint">Loading…</p>';
+    try {
+      var S = await loadScriptModule();
+      var cat = scriptCatalog(S);
+      var r = await api("scripts_list");
+      var ov = (r && r.overrides) || {}, meta = (r && r.meta) || {};
+      out.innerHTML = cat.map(function (g) {
+        return '<details class="item" style="margin-top:14px"><summary class="item-head" style="cursor:pointer">' + esc(g.title) + ' · ' + g.items.length + ' line' + (g.items.length === 1 ? '' : 's') + (g.items.some(function (i) { return ov[i.key]; }) ? ' · <b>edited</b>' : '') + '</summary>' +
+          g.items.map(function (i) {
+            var edited = !!ov[i.key];
+            return '<div style="margin:14px 0 0;border-top:1px solid #D8D6CF;padding-top:12px">' +
+              '<div class="hint" style="margin:0 0 6px"><b>' + esc(i.label) + '</b>' + (i.pose ? ' · ' + esc(i.pose) : '') + (i.sec ? ' · ' + i.sec + ' s' : '') + (edited ? ' · <b style="color:#B3261E">edited</b>' + (meta[i.key] ? ' ' + esc(String(meta[i.key].updated_at).slice(0, 10)) : '') : ' · default') + '</div>' +
+              '<textarea class="input" data-script-key="' + esc(i.key) + '" rows="' + Math.min(10, Math.max(3, Math.ceil((ov[i.key] || i.def).length / 90))) + '" style="width:100%;font:14px/1.55 \'IBM Plex Mono\',ui-monospace,monospace">' + esc(ov[i.key] || i.def) + '</textarea>' +
+              '<div class="row" style="margin-top:6px"><button type="button" class="btn" data-script-save="' + esc(i.key) + '">Save</button><button type="button" class="btn ghost" data-script-test="' + esc(i.key) + '">Test</button>' + (edited ? '<button type="button" class="btn ghost" data-script-revert="' + esc(i.key) + '">Revert to default</button>' : '') + '</div>' +
+              '<p class="hint" data-script-preview="' + esc(i.key) + '" hidden style="margin:8px 0 0;padding:10px 12px;border-left:3px solid #141412;background:#F1F0EA"></p>' +
+              '<textarea hidden data-script-default="' + esc(i.key) + '">' + esc(i.def) + '</textarea></div>';
+          }).join('') +
+          (g.computed.length ? '<div style="margin:14px 0 0;border-top:1px solid #D8D6CF;padding-top:12px"><div class="hint"><b>Computed lines</b> — their wording depends on the numbers, so they are shown for reference and are not editable here.</div>' + g.computed.map(function (c) { return '<p class="hint" style="margin:8px 0 0"><b>' + esc(c.label) + ':</b> ' + esc(c.text) + '</p>'; }).join('') + '</div>' : '') +
+          '</details>';
+      }).join('');
+    } catch (e) { out.innerHTML = '<p class="hint">' + esc(e.message || String(e)) + '</p>'; }
+  }
+  if ($("btn-scripts-load")) $("btn-scripts-load").addEventListener("click", renderScripts);
+
+  /* Test: fills the placeholders with sample values and plays the line in the
+     assistant's voice (ElevenLabs via the relay), falling back to the
+     browser's voice. Uses the text as currently typed — test before saving. */
+  var SAMPLE = { day: "24", date: "2026-09-23", date_long: "September 23, 2026", weight: "338.2", week: "4", level: "1", minutes: "10", code: "4821", violation: "the Daily Compliance Packet was not filed by 10:00 PM ET", violation_date: "September 21, 2026", summary: "Six of seven days documented.", version: "" };
+  function fillSample(t) { return String(t).replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(SAMPLE, k) ? SAMPLE[k] : m; }); }
+  var testAudio = null;
+  async function speakTest(text, note) {
+    if (testAudio) { try { testAudio.pause(); } catch (e) {} testAudio = null; }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    try {
+      var r = await fetch("/api/ap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ op: "tts", text: text }) });
+      if (r.ok && /audio/.test(r.headers.get("content-type") || "")) {
+        var url = URL.createObjectURL(await r.blob());
+        testAudio = new Audio(url); testAudio.onended = function () { URL.revokeObjectURL(url); };
+        await testAudio.play(); note("Playing in the assistant's voice.");
+        return;
+      }
+    } catch (e) {}
+    if (window.speechSynthesis) {
+      var u = new SpeechSynthesisUtterance(text); u.rate = 0.95; window.speechSynthesis.speak(u);
+      note("Playing in the browser's voice — the assistant's voice needs ELEVENLABS_API_KEY on this console's Cloudflare project.");
+    } else note("This browser cannot play speech.");
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-script-test]"); if (!b) return;
+    var key = b.getAttribute("data-script-test");
+    var ta = document.querySelector('textarea[data-script-key="' + CSS.escape(key) + '"]');
+    var pv = document.querySelector('[data-script-preview="' + CSS.escape(key) + '"]');
+    var text = fillSample(ta ? ta.value : "");
+    if (pv) { pv.hidden = false; pv.innerHTML = '<b>As spoken (sample values):</b> ' + esc(text) + '<br><span class="hint" data-note></span>'; }
+    speakTest(text, function (msg) { var n = pv && pv.querySelector("[data-note]"); if (n) n.textContent = msg; });
+  });
+  document.addEventListener("click", async function (ev) {
+    var save = ev.target.closest && ev.target.closest("[data-script-save]");
+    var rev = ev.target.closest && ev.target.closest("[data-script-revert]");
+    if (!save && !rev) return;
+    var key = (save || rev).getAttribute(save ? "data-script-save" : "data-script-revert");
+    var ta = document.querySelector('textarea[data-script-key="' + CSS.escape(key) + '"]');
+    var def = document.querySelector('textarea[data-script-default="' + CSS.escape(key) + '"]');
+    var text = rev ? "" : (ta ? ta.value : "");
+    if (save && def && text.trim() === def.value.trim()) text = ""; // unchanged = keep the default
+    try { var r = await api("scripts_set", { key: key, template: text }); if (r && r.ok === false) throw new Error(r.error || "Not saved"); toast(rev || !text ? "Reverted to default" : "Saved — the phone picks it up within ten minutes"); renderScripts(); }
+    catch (e) { toast(e.message || String(e)); }
+  });
 })();

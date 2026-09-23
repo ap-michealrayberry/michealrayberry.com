@@ -89,6 +89,10 @@ var TABS = {
   'AP Actions':     ['logged_at', 'actor', 'ip', 'user_agent', 'op', 'args', 'result'],
   /* Where each historical photo original landed in R2 (backfillPhotosToR2). */
   'R2 Photo Keys':  ['date', 'angle', 'r2_key', 'status', 'logged_at'],
+  /* Voice-script overrides edited by the AP from the console. Blank template
+     = the assistant's built-in default. The assistant pulls these with the
+     device key (action 'scripts'); only the spoken text changes. */
+  'Scripts':        ['key', 'template', 'updated_at', 'updated_by'],
   /* Signed daily packet receipt, written once by the 22:00 check and never
      rewritten (corrections append to 'corrections'). Component times are the
      server-stamped moments each part reached the record. 'seal' = HMAC over
@@ -386,7 +390,8 @@ function doPost(e) {
       try { obj = JSON.parse(e.postData.contents); } catch (perr) {}
       if (obj && obj.action === 'attest') return keyOk(obj.key) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'packet') return keyOk(obj.key) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'keycheck') return jsonOut({ ok: keyOk(obj.key) }); // Pages Function /api/media-init asks before minting upload URLs
+      if (obj && obj.action === 'keycheck') return jsonOut({ ok: keyOk(obj.key) });
+      if (obj && obj.action === 'scripts') return keyOk(obj.key) ? jsonOut({ ok: true, overrides: scriptOverrides().map }) : jsonOut({ ok: false, error: 'unauthorized' }); // Pages Function /api/media-init asks before minting upload URLs
       if (obj && obj.action === 'correctivefiled') return keyOk(obj.key) ? handleCorrectiveFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'ytfiled') return keyOk(obj.key) ? handleYtFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'challenge') return keyOk(obj.key) ? issueChallenge(String(obj.kind || 'daily')) : jsonOut({ ok: false, error: 'unauthorized' });
@@ -2072,6 +2077,31 @@ function handleApState() {
    AP key. Each op returns { ok, ... } and the console re-reads 'status'.
    Writes are the same code paths the menu uses; nothing is hand-typed that
    the record can compute. */
+/* ═════ VOICE SCRIPT OVERRIDES ═════ */
+function scriptOverrides() {
+  var v = tab('Scripts').getDataRange().getValues(), map = {}, meta = {};
+  for (var i = 1; i < v.length; i++) {
+    var k = String(v[i][0] || '').trim(), t = String(v[i][1] || '');
+    if (!k || !t.trim()) continue;
+    map[k] = t;
+    meta[k] = { updated_at: v[i][2] instanceof Date ? v[i][2].toISOString() : String(v[i][2] || ''), updated_by: String(v[i][3] || '') };
+  }
+  return { map: map, meta: meta };
+}
+function scriptSet(key, template, actor) {
+  key = String(key || '').trim();
+  if (!/^[A-Za-z]+(\.[a-z_]+)?$/.test(key)) return { ok: false, error: 'Bad script key.' };
+  template = String(template == null ? '' : template).replace(/\r\n/g, '\n').slice(0, 4000);
+  var sh = tab('Scripts'), v = sh.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (String(v[i][0]).trim() === key) {
+    if (!template.trim()) { sh.deleteRow(i + 1); return { ok: true, reverted: true }; }
+    sh.getRange(i + 1, 2, 1, 3).setValues([[template, new Date(), actor || 'console']]); return { ok: true };
+  }
+  if (!template.trim()) return { ok: true, reverted: true };
+  sh.appendRow([key, template, new Date(), actor || 'console']);
+  return { ok: true };
+}
+
 function apAudit(obj, result) {
   try {
     var args = Object.assign({}, obj); delete args.key; delete args.action; delete args.actor; delete args.actor_ip; delete args.actor_ua;
@@ -2093,6 +2123,9 @@ function handleApConsoleInner(obj) {
   if (op === 'status') return jsonOut(apConsoleStatus(today));
 
   if (op === 'publish') { var rep = repairSiteState(); triggerDeploy(); return jsonOut({ ok: true, note: rep }); }
+
+  if (op === 'scripts_list') { var so = scriptOverrides(); return jsonOut({ ok: true, overrides: so.map, meta: so.meta }); }
+  if (op === 'scripts_set') return jsonOut(scriptSet(obj.key, obj.template, obj.actor));
 
   if (op === 'declare') {
     var dd = /^\d{4}-\d{2}-\d{2}$/.test(String(obj.date || '')) ? String(obj.date) : today;

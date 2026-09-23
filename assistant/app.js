@@ -2467,6 +2467,60 @@
   };
 })(window.MRB);
 
+/* AP-edited script overrides (Scripts tab, edited from ap.michealrayberry.com).
+   Keys: "<function>.<segment id>" for segment lists, "<function>" for single
+   lines. Placeholders: {day} {date} {date_long} {weight} {week} {level}
+   {minutes} {code} {violation} {violation_date} {summary} {version}.
+   Timing (sec), poses and order are never overridden — only the spoken text. */
+(function (MRB) {
+  "use strict";
+  var S = MRB.scripts; if (!S) return;
+  var OV = {};
+  try { OV = JSON.parse(localStorage.getItem("mrb_script_overrides") || "{}") || {}; } catch (e) { OV = {}; }
+  function vars(ctx) {
+    ctx = ctx || {};
+    var w = ctx.weight;
+    return {
+      day: ctx.day, date: ctx.date, date_long: ctx.date ? S.fmtDateLong(ctx.date) : "",
+      weight: w == null || w === "" ? "" : (typeof w === "number" ? w.toFixed(1) : w),
+      week: ctx.week, level: ctx.level || 1, minutes: ctx.minutes || 10, code: ctx.code || "",
+      violation: ctx.violation || "a confirmed violation",
+      violation_date: (ctx.violationDate || ctx.date) ? S.fmtDateLong(ctx.violationDate || ctx.date) : "",
+      summary: ctx.summaryLine || "", version: ctx.version || "",
+    };
+  }
+  function render(t, ctx) { var v = vars(ctx); return String(t).replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? String(v[k]) : m; }); }
+  function has(k) { return Object.prototype.hasOwnProperty.call(OV, k) && String(OV[k]).trim() !== ""; }
+  function wrapSegments(name) {
+    var f = S[name]; if (typeof f !== "function") return;
+    S[name] = function (ctx) {
+      var list = f.apply(this, arguments) || [];
+      return list.map(function (s) { var k = name + "." + s.id; return has(k) ? Object.assign({}, s, { text: render(OV[k], ctx) }) : s; });
+    };
+  }
+  function wrapLine(name) {
+    var f = S[name]; if (typeof f !== "function") return;
+    S[name] = function (ctx) { return has(name) ? render(OV[name], ctx) : f.apply(this, arguments); };
+  }
+  ["dailySegments", "photoPrompts", "cornerSegments", "confirmationSegments"].forEach(wrapSegments);
+  ["cornerTimerComplete", "cornerClosing", "weeklyOpening", "weeklyClosing", "demoScript", "announcementScript"].forEach(wrapLine);
+  S.setOverrides = function (o) { OV = o && typeof o === "object" ? o : {}; try { localStorage.setItem("mrb_script_overrides", JSON.stringify(OV)); } catch (e) {} };
+  S.getOverrides = function () { return OV; };
+  function refresh() {
+    try {
+      var c = MRB.config && MRB.config.get ? MRB.config.get() : {};
+      if (!c.execUrl || !c.deviceKey) return;
+      fetch(c.execUrl, { method: "POST", body: JSON.stringify({ action: "scripts", key: c.deviceKey }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j && j.ok && j.overrides) S.setOverrides(j.overrides); })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  setTimeout(refresh, 1500);
+  setInterval(refresh, 10 * 60 * 1000);
+  S.refreshOverrides = refresh;
+})(window.MRB);
+
 /* ==== 13-state-machine.js ==== */
 (function (MRB) {
   "use strict";
