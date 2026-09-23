@@ -283,7 +283,7 @@
       window.MRB.dates = window.MRB.dates || { pad2: function (n) { return String(n).padStart(2, "0"); }, pad4: function (n) { return String(n).padStart(4, "0"); }, parseDate: function (iso) { var p = String(iso).split("-").map(Number); return new Date(p[0], p[1] - 1, p[2], 12); } };
       if (window.MRB.scripts && window.MRB.scripts.dailySegments) return resolve(window.MRB.scripts);
       var s = document.createElement("script");
-      s.src = "https://michealrayberry.com/assistant/js/12-scripts.js?v=" + Date.now();
+      s.src = "/api/scripts-module?v=" + Date.now();
       s.onload = function () { window.MRB.scripts ? resolve(window.MRB.scripts) : reject(new Error("script module did not load")); };
       s.onerror = function () { reject(new Error("could not load the assistant's script module")); };
       document.head.appendChild(s);
