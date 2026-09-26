@@ -2535,7 +2535,7 @@ function positionsPage(entries, siteState = {}) {
     ['Camera', 'A consistent height and distance, portrait orientation, the complete body visible from head to feet. The camera remains stationary throughout: <strong>the participant turns, the camera does not.</strong> Zoom, height, framing, and distance stay substantially consistent from one daily record to the next.'],
     ['Attire', 'The designated project uniform: a plain black full-body unitard and a plain steel or titanium collar, worn in every official recording. The unitard standardizes the visual record. The collar symbolizes Micheal’s chosen submission within the written agreement. See <a href="/uniform/">the uniform standard</a>.'],
     ['Photographs', 'Four are produced from each compliant inspection — front, left, rear, and right. Wait is recorded on video but files no progress photograph. Each is taken from the required position rather than selected afterwards according to which image is most favourable.'],
-    ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. The Accountability Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
+    ['Verification', 'The verification code is issued immediately before the recording and appears as part of the recorded evidence. The required positions are checked while they are presented. Once an Accountability Partner is engaged, the Partner reviews the submitted record for identity, attire, framing, required views, and completeness before accepting it as compliant.'],
   ];
 
   return `<!DOCTYPE html>
@@ -2949,7 +2949,7 @@ function observerPage() {
     </form>
     <div class="standard" style="margin-top:44px">
       <div><b>What happens to a report</b><p>The Accountability Partner reads every report. A possible missed requirement or record error is checked against the evidence and the written rules. If substantiated, the outcome appears in <a href="/updates/">Updates</a> or the <a href="/violations/">Violation Log</a>, with the correction noted. Unsubstantiated reports are closed without publication.</p></div>
-      <div><b>What this form is not for</b><p>General comments, encouragement, or messages to Micheal. The record is administered by the Accountability Partner; questions about compliance belong here rather than in a conversation with the participant.</p></div>
+      <div><b>What this form is not for</b><p>General comments, encouragement, or messages to Micheal. Reports are held for the Accountability Partner (position currently open); questions about compliance belong here rather than in a conversation with the participant.</p></div>
       <div><b>If the form returns you here</b><p>A note in the address bar (<code>?error=…</code>) means the verification step failed or the relay was unavailable. Try once more, or write to <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>.</p></div>
     </div>`;
   return synPage({ title, desc: description, canonical, body })
@@ -3005,7 +3005,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       ? 'If an activated, scheduled session is not completed, the Accountability Partner may record an adverse outcome unless a documented exception applies.'
       : 'If execution is verified later, the Accountability Partner may record outcomes only for activated, post-effective sessions. Existing pre-effective rows remain neutral.'],
     ['The record controls', 'Completing a later session does not erase a missed one. The historical record remains intact.'],
-    ['Observers', 'Anyone watching may report a possible rule breach through the <a href="/report/">Observer Submission</a> page. The Accountability Partner reviews it; Micheal does not.'],
+    ['Observers', 'Anyone watching may report a possible rule breach through the <a href="/report/">Observer Submission</a> page. It is held for the Accountability Partner (position currently open); Micheal does not rule on it.'],
   ];
   const past = supervision.filter((s) => s.date >= SESSION_START && s.date <= today).slice().reverse();
   const recordRows = past.length

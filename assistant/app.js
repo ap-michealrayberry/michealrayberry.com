@@ -915,7 +915,8 @@
   // two inset cards so name / date / code / weight are never covered.
   var SIDE = 18;
   var SAFE_TOP = 118; // top card clears the app's top bar
-  var SAFE_BOT = 170; // stamp sits lower still — under the feet — while clearing the Shorts handle/description strip
+  var SAFE_BOT = 170; // Shorts handle/description strip (video UI zone)
+  var STAMP_BOT = 72; // the stamp sits in the floor band below the feet (framing guide keeps that band clear)
   var RAIL = 200; // right-side action rail (Like / Share / Remix)
 
   // Shrink the font until the text fits maxW (keeps long lines inside cards).
@@ -946,6 +947,7 @@
     if (code) smallParts.push("VERIFY " + code);
     if (date) smallParts.push(date);
     var small = smallParts.join(" \u00b7 ");
+    var context = state.contextLine || "";
     if (!big && !small) return;
     var cx = W / 2; // centered in the frame, like the filed Shorts
     var maxW = W - 150 - 58; // side margins + accent bar/padding
@@ -960,19 +962,23 @@
       }
       return px;
     }
-    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0;
+    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0, ctxPx = 0, ctxW = 0;
+    if (context) {
+      ctxPx = fitPx(context, 15, "600", MONO);
+      ctxW = ctx.measureText(context).width;
+    }
     if (small) {
-      smallPx = fitPx(small, 20, "600", COND);
+      smallPx = fitPx(small, 19, "600", COND);
       smallW = ctx.measureText(small).width;
     }
     if (big) {
-      bigPx = fitPx(big, 42, "700", COND);
+      bigPx = fitPx(big, 38, "700", COND);
       bigW = ctx.measureText(big).width;
     }
-    var chipW = Math.max(smallW, bigW) + 58;
-    var chipH = 12 + (small ? smallPx + 9 : 0) + (big ? bigPx + 5 : 0) + 12;
+    var chipW = Math.max(ctxW, smallW, bigW) + 58;
+    var chipH = 11 + (context ? ctxPx + 7 : 0) + (small ? smallPx + 7 : 0) + (big ? bigPx + 4 : 0) + 11;
     var x = cx - chipW / 2;
-    var y = H - SAFE_BOT - chipH;
+    var y = H - STAMP_BOT - chipH;
     state._stampTop = y; // drawMonitorChip stacks above this
     state._stampCx = cx;
     // 0.72 alpha: the record stays visible through its own stamp (§4.4).
@@ -984,13 +990,20 @@
     var tx = x + 5 + (chipW - 5) / 2;
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    var ty = y + 12;
+    var ty = y + 11;
+    if (context) {
+      ctx.font = "600 " + ctxPx + "px " + MONO;
+      ctx.fillStyle = "#8F8D86";
+      ty += ctxPx;
+      ctx.fillText(context, tx, ty);
+      ty += 7;
+    }
     if (small) {
       ctx.font = "600 " + smallPx + "px " + COND; // same face as the title card name
       ctx.fillStyle = "#B9B7B0";
       ty += smallPx;
       ctx.fillText(small, tx, ty);
-      ty += 9;
+      ty += 7;
     }
     if (big) {
       ctx.font = "700 " + bigPx + "px " + COND; // same face as the title card title
@@ -1015,7 +1028,7 @@
     var chipH = 32;
     var cx = state._stampCx || W / 2; // same center as the stamp
     var x = cx - chipW / 2;
-    var y = (state._stampTop || H - SAFE_BOT - 34) - chipH - 10; // stacked above the stamp
+    var y = SAFE_TOP; // top of frame, over the wall — never near the feet
     ctx.fillStyle = bg;
     roundRect(ctx, x, y, chipW, chipH, 8);
     ctx.fill();
@@ -1103,7 +1116,12 @@
       }
       return px;
     }
-    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0;
+    var context = "";
+    var smallPx = 0, smallW = 0, bigPx = 0, bigW = 0, ctxPx = 0, ctxW = 0;
+    if (context) {
+      ctxPx = fitPx(context, 15, "600", MONO);
+      ctxW = ctx.measureText(context).width;
+    }
     if (small) {
       smallPx = fitPx(small, 26, "600");
       smallW = ctx.measureText(small).width;
@@ -1170,9 +1188,8 @@
       ctx.beginPath();
       ctx.moveTo(W * 0.08, H * 0.12);
       ctx.lineTo(W * 0.92, H * 0.12);
-      ctx.moveTo(W * 0.08, H * 0.9);
-      ctx.lineTo(W * 0.92, H * 0.9);
-      ctx.stroke();
+      ctx.moveTo(W * 0.08, H * 0.82); ctx.lineTo(W * 0.92, H * 0.82);
+      ctx.stroke(); ctx.fillStyle = "rgba(255,107,97,0.95)"; ctx.font = "600 18px 'IBM Plex Mono', monospace"; ctx.textAlign = "center"; ctx.fillText("FEET ABOVE THIS LINE", W / 2, H * 0.82 + 26); ctx.textAlign = "left";
     }
   }
 
@@ -3930,6 +3947,8 @@
       sessionTag: tag,
       name: "MICHEAL RAY BERRY",
       projectLine: "PUBLIC ACCOUNTABILITY PROJECT",
+      // One line of context for a frame seen without its page.
+      contextLine: "PUBLIC ACCOUNTABILITY PROJECT \u00b7 " + ({ daily: "DAILY INSPECTION", corrective: "CORRECTIVE SESSION", weekly: "WEEKLY REVIEW", confirmation: "CONSENT CONFIRMATION", announcement: "ANNOUNCEMENT", demo: "DEMONSTRATION" }[session.type] || String(session.type || "").toUpperCase()),
       bottomPrimary: bottomPrimary,
       bottomSecondary: MRB.overlay.buildSecondary(session.date),
       // Burned-in pose line: tracks the CURRENT scripted position. Gray —
@@ -4055,7 +4074,7 @@
 
     await speakAndHold(
       session,
-      "Setup. This is not yet the recording. Get fully into frame in Wait position: feet together, hands behind the back. " +
+      "Setup. This is not yet the recording. Get fully into frame in Wait position: feet together, hands behind the back, with clear floor showing below your feet. " +
         "Full project uniform visible. When recording begins you will move to Inspection: " +
         "feet shoulder-width apart, hands behind the head. " +
         "When you are set, press Ready, or wait for the countdown.",

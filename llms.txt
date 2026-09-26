@@ -69,9 +69,10 @@ timestamped; changing the live page does not erase them. The uniform is a plain 
   missing data. The gap is part of the record.
 
 ## What this record is
-- The participant does not unilaterally edit the live site. Published
-  versions are archived. Corrections are dated and added alongside the
-  original.
+- The Accountability Partner position is currently open; until it is
+  filled the participant administers the site himself, held to its
+  published rules. Published versions are archived. Corrections are dated
+  and added alongside the original.
 - Weight itself is never a violation. Only a failure to document is. A week
   without weight loss has one fixed, non-escalating consequence: the weekly
   review ends with 15 minutes of corner time, on camera.
