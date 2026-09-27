@@ -435,7 +435,7 @@
     $("filing-day").textContent = date + " · Day " + pad3(dayNumber(date)) + " · sealed capture";
   }
 
-  async function postCorrectiveFiled(vId, assignmentId, attemptId, date, url, seal) {
+  async function postCorrectiveFiled(vId, assignmentId, attemptId, date, url, seal, reflection) {
     var endpoint = execUrl();
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured" };
@@ -443,7 +443,8 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "correctivefiled", key: key, unlock: unlockToken(), id: vId,
-        assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal }),
+        assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal,
+        reflection_chose: (reflection && reflection.chose) || "", reflection_will: (reflection && reflection.will) || "" }),
     });
     return res.json();
   }
@@ -675,6 +676,11 @@
         msg.textContent = "Enter the current attempt id from the recorded session, such as A-00112233445566778899AABB.";
         return;
       }
+      var reflection = { chose: (($("cv-chose") && $("cv-chose").value) || "").trim(), will: (($("cv-will") && $("cv-will").value) || "").trim() };
+      if (reflection.chose.length < 8 || reflection.will.length < 8) {
+        msg.textContent = "Write both sentences: what you chose instead, and what you will do differently.";
+        return;
+      }
       var captures = await loadCorrectiveCaptures();
       var capture = captures.find(function (candidate) { return candidate.seal === $("cv-capture").value; });
       var correctiveSeal = capture ? capture.seal : "";
@@ -691,8 +697,9 @@
       $("yt-file").disabled = true;
       msg.textContent = "Filing\u2026";
       try {
-        var rc = await postCorrectiveFiled(vId, assignmentId, attemptId, date, url, correctiveSeal);
+        var rc = await postCorrectiveFiled(vId, assignmentId, attemptId, date, url, correctiveSeal, reflection);
         var correctiveAccepted = !!(rc && rc.ok === true);
+        if (correctiveAccepted) { try { localStorage.setItem("mrb_last_reflection", reflection.will); } catch (e) {} }
         saveCorrectiveDraft(vId, assignmentId, attemptId, {
           url: url,
           date: date,

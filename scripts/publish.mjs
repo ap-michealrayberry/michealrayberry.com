@@ -2790,7 +2790,7 @@ function tf060Page() {
       <li>An updated public tracker</li>
       <li>A weekly review read to camera from the record</li>
       <li>Documented violations when requirements are missed</li>
-      <li>Predefined corrective sessions that escalate by level: 10, 20, and 30 minutes</li>
+      <li>Predefined corrective sessions that escalate by level: 10–20, 20–40, and 30–60 minutes, the length drawn by the server and not announced</li>
     </ul>
     <p>These controls do not guarantee success. They make performance — or the absence of it — visible.</p>
     <h2>The standard now</h2>
@@ -2905,7 +2905,7 @@ function protocolPage() {
       <div><b><a href="/agreement/">Agreement</a></b><p>The governing document: daily requirements, documentation standard, weight-loss schedule, consequences, and the limits of participation. Pending the Accountability Partner’s counter-signature.</p></div>
       <div><b><a href="/positions/">Inspection</a></b><p>The four fixed positions and the recording standard for the Daily Inspection video and photographs — the same framing every day so records are comparable.</p></div>
       <div><b><a href="/uniform/">Uniform</a></b><p>What is worn in every official recording, and why: a plain black unitard, a plain steel or titanium collar, and a designated correction uniform for corrective sessions.</p></div>
-      <div><b><a href="/corrections/">Corrections</a></b><p>What happens after a confirmed missed requirement: corner time by level (10 / 20 / 30 minutes), recorded in one take, filed within 72 hours, published beside the entry.</p></div>
+      <div><b><a href="/corrections/">Corrections</a></b><p>What happens after a confirmed missed requirement: corner time by level (10–20 / 20–40 / 30–60 minutes, drawn by the server), recorded in one take, filed within 72 hours, published beside the entry.</p></div>
       <div><b><a href="/live/">Supervision</a></b><p>Evening Supervision (§3.4), a proposed fixed-camera session on assigned nights. Not active; public supervision video is disabled pending the Accountability Partner’s safety review.</p></div>
     </div>
     <p>Missed requirements are recorded on the <a href="/violations/">Violation Log</a>. Issues with any entry can be <a href="/report/">reported for review</a>.</p>`;
@@ -3005,7 +3005,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       ? 'If an activated, scheduled session is not completed, the Accountability Partner may record an adverse outcome unless a documented exception applies.'
       : 'If execution is verified later, the Accountability Partner may record outcomes only for activated, post-effective sessions. Existing pre-effective rows remain neutral.'],
     ['The record controls', 'Completing a later session does not erase a missed one. The historical record remains intact.'],
-    ['Observers', 'Anyone watching may report a possible rule breach through the <a href="/report/">Observer Submission</a> page. It is held for the Accountability Partner (position currently open); Micheal does not rule on it.'],
+    ['Observers', 'Anyone watching may report a possible rule breach through <a href="/report/">Report a Record Issue</a>. It is held for the Accountability Partner (position currently open); Micheal does not rule on it.'],
   ];
   const past = supervision.filter((s) => s.date >= SESSION_START && s.date <= today).slice().reverse();
   const recordRows = past.length
@@ -3129,8 +3129,8 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   const title = 'Corrective Sessions — Micheal Ray Berry Public Accountability Project';
   const description =
     'The corrective session is the requirement that answers a documented failure in the ' +
-    'Micheal Ray Berry Public Accountability Project: 10, 20, or 30 minutes by level, recorded ' +
-    'in one unbroken take and published beside the entry that caused it.';
+    'Micheal Ray Berry Public Accountability Project: 10–20, 20–40, or 30–60 minutes by level, the length drawn by the ' +
+    'server and never announced, recorded in one unbroken take and published beside the entry that caused it.';
 
   const sessions = (violations || []).filter((v) => Boolean(v.recording));
   const demo = String(demoUrl || '').trim();
@@ -3171,9 +3171,9 @@ function cornerTimePage(entries, violations, demoUrl = '') {
   ];
 
   const levels = [
-    ['Level One', 'First confirmed Violation Event', '10 minutes'],
-    ['Level Two', 'Second confirmed Violation Event', '20 minutes'],
-    ['Level Three and after', 'Third and every later Violation Event', '30 minutes'],
+    ['Level One', 'First confirmed Violation Event', '10–20 minutes'],
+    ['Level Two', 'Second confirmed Violation Event', '20–40 minutes'],
+    ['Level Three and after', 'Third and every later Violation Event', '30–60 minutes'],
   ];
 
   return `<!DOCTYPE html>
@@ -3240,7 +3240,9 @@ function cornerTimePage(entries, violations, demoUrl = '') {
 
     <h2>The standard</h2>
     <div class="standard">
-      <div><b>Position</b><p>Facing the designated corner or wall, standing upright, hands behind the head, feet shoulder-width apart, substantially still for the whole period. No phone, entertainment, reading, or unrelated activity.</p></div>
+      <div><b>Position</b><p>Facing the designated corner or wall, standing upright, feet shoulder-width apart, knees soft and never locked, substantially still for the whole period. Hands behind the head or behind the back — either may be used and switched at any time, but the hands stay in one of the two. No leaning, no phone, entertainment, reading, or unrelated activity.</p></div>
+      <div><b>Length</b><p>Drawn by the record’s server when the session starts, within the level’s range, and sealed before the first instruction is spoken. It is never announced and no time remaining is given; the session ends when the server’s time is served. One hour is the maximum. The length actually served is published with the entry.</p></div>
+      <div><b>Medical stop</b><p>Dizziness, chest pain, or numbness stops the session immediately. That is logged as a medical stop, not a violation, and the remainder is served later.</p></div>
       <div><b>Uniform</b><p>The correction uniform (§4.2): the designated pink unitard. The black uniform documents the standard; the pink uniform documents a failure to meet it.</p></div>
       <div><b>Timer</b><p>Begins only once the required position is established — not when the recording starts. Time spent getting into position does not count toward the assigned period.</p></div>
       <div><b>Recording</b><p>One continuous take, fully AI-voiced. The participant does not speak. A session challenge code is displayed in the recording and logged with the submission; the current system does not independently prove capture time or rule out every form of replay or editing.</p></div>

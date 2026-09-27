@@ -23,16 +23,15 @@
     // Published sequence: WAIT → FRONT → LEFT → REAR → RIGHT → WAIT (/positions/).
     return [
       { id: "wait_open", label: "Opening — Wait", sec: 12, pose: "WAIT POSITION",
-        text: "Micheal Ray Berry. Daily Inspection. Day " + n + ". " + date + ". Documented weight: " + w + " pounds. " +
-          "Full project uniform visible. One continuous take. Verification code on screen. " +
-          "This inspection is part of your chosen submission. Follow the agreed protocol and present yourself for review. " +
-          "Present Wait. Hold." },
-      { id: "inspection", label: "Front", sec: 8, pose: "FRONT · HANDS BEHIND HEAD", text: "Present Front. Hold." },
-      { id: "left", label: "Left", sec: 5, pose: "LEFT PROFILE · HANDS BEHIND HEAD", text: "Present Left. Hold." },
-      { id: "rear", label: "Rear", sec: 5, pose: "REAR · HANDS BEHIND HEAD", text: "Present Rear. Hold." },
-      { id: "right", label: "Right", sec: 5, pose: "RIGHT PROFILE · HANDS BEHIND HEAD", text: "Present Right. Hold." },
+        text: "Micheal Ray Berry. Daily inspection. Day " + n + ". " + date + ". The scale says " + w + " pounds. " +
+          "You agreed to be seen like this every day, on good days and bad ones. Full uniform. One continuous take. The code is on screen. " +
+          "Wait. Hold." },
+      { id: "inspection", label: "Front", sec: 8, pose: "FRONT · HANDS BEHIND HEAD", text: "Front. Hands behind your head. Eyes forward. Hold." },
+      { id: "left", label: "Left", sec: 5, pose: "LEFT PROFILE · HANDS BEHIND HEAD", text: "Left. Hold." },
+      { id: "rear", label: "Rear", sec: 5, pose: "REAR · HANDS BEHIND HEAD", text: "Rear. Hold." },
+      { id: "right", label: "Right", sec: 5, pose: "RIGHT PROFILE · HANDS BEHIND HEAD", text: "Right. Hold." },
       { id: "wait_close", label: "Closing — Wait", sec: 10, pose: "WAIT POSITION",
-        text: "Present Wait. Hold. Inspection sequence complete. Submit the full Daily Compliance Packet by ten PM Eastern. Accountability Partner review pending. Release." },
+        text: "Wait. Hold. Inspection complete. The packet is due by ten PM Eastern. Not almost. Not later. Filed. Release." },
     ];
   }
 
@@ -41,25 +40,25 @@
       {
         id: "front",
         label: "Front",
-        text: "Front photograph. Inspection position. Feet shoulder-width apart. Hands behind the head. Hold.",
+        text: "Front photograph. Feet apart. Hands behind your head. Still.",
         pose: "FRONT · HANDS BEHIND HEAD",
       },
       {
         id: "left",
         label: "Left",
-        text: "Left profile photograph. Left profile. Hands behind the head. Hold.",
+        text: "Left. Still.",
         pose: "LEFT PROFILE · HANDS BEHIND HEAD",
       },
       {
         id: "rear",
         label: "Rear",
-        text: "Rear photograph. Rear view. Hands behind the head. Hold.",
+        text: "Rear. Still.",
         pose: "REAR · HANDS BEHIND HEAD",
       },
       {
         id: "right",
         label: "Right",
-        text: "Right profile photograph. Right profile. Hands behind the head. Hold.",
+        text: "Right. Still.",
         pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
       },
     ];
@@ -72,35 +71,31 @@
    */
   function cornerSegments(ctx) {
     var date = fmtDateLong(ctx.violationDate || ctx.date);
-    var violation = ctx.violation || "a confirmed violation";
+    var violation = ctx.violation || "complete a documented requirement";
     var level = ctx.level || 1;
-    var minutes = ctx.minutes || 10;
     return [
       {
         id: "wait_open",
         label: "Opening — Wait",
-        sec: 16,
+        sec: 30,
         pose: "WAIT POSITION",
         text:
-          "Micheal Ray Berry. Corrective Session. Confirmed violation: " + violation + ". Violation date: " + date + ". " +
-          "Assigned correction: Level " + level + ", " + minutes + " minutes. " +
-          "You chose submission within this accountability arrangement. That includes completing the agreed correction when a requirement is missed. " +
-          "Remain in Wait position. Full project uniform visible. One continuous take. Verification code on screen.",
+          "Micheal Ray Berry. Corrective session. You are in Wait because on " + date + " you failed: " + violation + ". " +
+          "You do not decide what happens next. The agreement does, and you gave it that authority. " +
+          "Level " + level + ". You will not be told the length. You will not ask. " +
+          "Full uniform. One continuous take. The code is on screen. " +
+          "Nod once to show you accept the correction.",
       },
       {
         id: "to_corner",
         label: "Assume Corner Position",
-        sec: 18,
-        pose: "CORNER POSITION · HANDS BEHIND HEAD",
+        sec: 24,
+        pose: "CORNER POSITION · HANDS BEHIND HEAD OR BACK",
         text:
-          "Corner position. Turn around and face the corner. Feet shoulder-width apart. Hands behind the head. " +
-          "Do not lean against either wall. Eyes toward the corner. Hold the position. " +
-          "This session was assigned because " +
-          violation +
-          " was not completed as required. The original entry remains part of the project record. " +
-          "The timer begins now. Duration: " +
-          minutes +
-          " minutes.",
+          "Turn. Face the corner. Feet apart. Knees soft. " +
+          "Hands behind your head, or behind your back, and they stay there. You may change between the two. You may not lower them. " +
+          "You may not lean. You may not turn around until you are told. " +
+          "You broke a rule you asked for. Now you obey this one. Begin.",
       },
     ];
   }
@@ -118,68 +113,30 @@
    * Timed-hold lines keyed by remaining seconds (exact script per level).
    * Returns { atSec, text }[] sorted descending by atSec.
    */
-  function cornerHoldMarks(level) {
-    var n = Math.max(1, Math.min(3, level | 0));
-    if (n === 1) {
-      return [
-        {
-          atSec: 5 * 60,
-          text:
-            "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
-        },
-        {
-          atSec: 60,
-          text:
-            "One minute remaining. Maintain the Corner Position until released by the timer.",
-        },
-      ];
-    }
-    if (n === 2) {
-      return [
-        {
-          atSec: 10 * 60,
-          text:
-            "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
-        },
-        {
-          atSec: 5 * 60,
-          text:
-            "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
-        },
-        {
-          atSec: 60,
-          text:
-            "One minute remaining. Maintain the Corner Position until released by the timer.",
-        },
-      ];
-    }
-    // Level 3 — 30 minutes
-    return [
-      {
-        atSec: 20 * 60,
-        text:
-          "Twenty minutes remaining. The original compliance entry remains documented in the current public record. Maintain the Corner Position.",
-      },
-      {
-        atSec: 15 * 60,
-        text:
-          "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.",
-      },
-      {
-        atSec: 10 * 60,
-        text: "Ten minutes remaining. Continue holding the required position.",
-      },
-      {
-        atSec: 5 * 60,
-        text:
-          "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
-      },
-      {
-        atSec: 60,
-        text:
-          "One minute remaining. Maintain the Corner Position until released by the timer.",
-      },
+  function cornerHoldMarks(level, totalSec, lastReflection) {
+    // Sixteen cues at seventeenths of the hidden length. None states time.
+    // The participant never speaks: "repeat silently" lines are internal only.
+    var T = Math.max(600, Number(totalSec) || 600);
+    var last = String(lastReflection || "").trim();
+    var lines = [
+      "Look at yourself. Standing in the correction uniform because private promises were not enough.",
+      "You needed something visible. Something you could not casually ignore.",
+      "You are not standing here because you did not understand the rule. You understood it perfectly.",
+      "You are standing here because understanding was not enough. You needed accountability attached to the choice.",
+      "All you had to do was follow the rule. You could have completed the requirement and gone on with your evening. Instead, you chose the option that brought you here.",
+      "Do not call this unfair. You wrote the standard before the violation happened.",
+      "You wanted a consequence that could compete with the temptation to ignore the rule. This is the consequence competing.",
+      "You do not get to demand stronger accountability and then complain that it is uncomfortable.",
+      "You are not supposed to enjoy being corrected. You are supposed to remember it.",
+      "The embarrassment is part of the memory. The memory is supposed to follow you back to the next decision.",
+      "Your pride does not outrank the agreement. Your discomfort does not rewrite the rules.",
+      "Repeat it silently. I asked for accountability stronger than my excuses.",
+      "Repeat it silently. I will not resent the structure I asked for.",
+      (last ? "Last time you said: " + last + ". " : "") + "Decide what you will do tomorrow. A time. An action.",
+      "You wanted consequences with enough weight to matter. This is what weight feels like.",
+      "Do not waste this by repeating the same choice tomorrow. Hold until you are released.",
     ];
+    return lines.map(function (text, k) { return { atSec: Math.round(T * (1 - (k + 1) / 17)), text: text }; });
   }
 
   /** @deprecated generic interval — prefer cornerHoldMarks */
@@ -200,16 +157,15 @@
   function cornerTimerComplete(ctx) {
     var v = (ctx && ctx.violation) || "the documented compliance failure";
     var d = ctx && (ctx.violationDate || ctx.date);
-    return "Assigned time complete. Return to Wait position.";
+    return "Time. You may turn around. Wait position. Face the camera. Hands behind your head. Nod once to show you have learned from this.";
   }
 
   function cornerClosing(ctx) {
-    var v = (ctx && ctx.violation) || "the confirmed violation";
     var d = ctx && (ctx.violationDate || ctx.date);
     return (
-      "This recording documents the corrective session for " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
-      "It does not erase the original entry. Public filing and Accountability Partner verification remain pending. " +
-      "Session complete. Release."
+      "The corrective session" + (d ? " for " + fmtDateLong(d) : "") + " is complete and filed for review. " +
+      "The violation remains on the record. This session answers for it. It does not erase it. " +
+      "Before you file, write what you chose instead and what you will do differently. Then you are dismissed."
     );
   }
 
@@ -300,20 +256,16 @@
 
   function weeklyOpening(ctx) {
     return (
-      "This is the Weekly Review for Micheal Ray Berry under the Public Accountability Project. " +
-      "Week " +
-      (ctx.week || "") +
-      ". " +
-      "Hands behind the head throughout. Everything stated in this session is taken from the record. Nothing is composed."
+      "Micheal Ray Berry. Weekly review. Week " + (ctx.week || "") + ". " +
+      "Face the camera. Hands behind your head, and they stay there. " +
+      "You do not summarise your week. The record does. Listen to it."
     );
   }
 
   function weeklyAssessment(documented) {
-    return (
-      "This week's documented days: " +
-      documented +
-      " of 7. Assessment is read from the record only."
-    );
+    var d = Math.max(0, Math.min(7, Number(documented) || 0)), m = 7 - d;
+    if (m === 0) return "Seven of seven days filed. That is the standard, not an achievement. Hold.";
+    return d + " of 7 days filed. " + (m === 1 ? "One day" : m + " times") + " you chose otherwise. The record noticed. Hold, and think about which days, and why.";
   }
 
   function weeklyWeightMid(endW) {
@@ -324,12 +276,11 @@
   }
 
   function weeklyClosing(ctx) {
+    var d = Math.max(0, Math.min(7, Number(ctx.documented) || 0));
     return (
-      "Weekly review for week " +
-      (ctx.week || "") +
-      " is complete. " +
-      (ctx.summaryLine || "") +
-      " The numbers stand as read. Session ends. Release."
+      "Week " + (ctx.week || "") + " is read. " +
+      (d === 7 ? "Keep it that way. " : "You know what next week requires. There is nothing to add to that. ") +
+      "The numbers stand. Release."
     );
   }
 

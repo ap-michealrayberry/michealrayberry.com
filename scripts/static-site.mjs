@@ -331,7 +331,10 @@ async function renderLlmsStartDate(ctx, startDateLong) {
 
 /* ── assembly ─────────────────────────────────────────────────────── */
 /* Corner time owed / served and the soonest corrective deadline, from the
-   Violation Log only. Level follows confirmed-count order (10/20/30, capped);
+   Violation Log only. Level follows confirmed-count order (capped at 3). Owed
+   counts each open entry at its level minimum (10/20/30 — the drawn length is
+   unknown until served); served uses the actual minutes from the entry's
+   "Corner time served: Level N · M min" note when present;
    the 72 h clock runs from the entry's declaration (eventVerifiedAt when
    present, else the violation date at 22:00 ET). Served = resolved entries. */
 function cornerSummary(violations, active) {
@@ -342,7 +345,7 @@ function cornerSummary(violations, active) {
   const now = Date.now();
   confirmed.forEach((v, i) => {
     const mins = minutesFor(i);
-    if (v.state === 'resolved') { served += mins; return; }
+    if (v.state === 'resolved') { const m = String(v.corrections || '').match(/Corner time served: Level \d · (\d+) min/); served += m ? Number(m[1]) : mins; return; }
     owed += mins; openN += 1;
     const base = v.eventVerifiedAt ? new Date(v.eventVerifiedAt) : new Date(`${v.date}T22:00:00-04:00`);
     const due = new Date(base.getTime() + 72 * 3600e3);

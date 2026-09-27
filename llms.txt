@@ -22,7 +22,7 @@ above progress on every page.
 - [Failure log](https://michealrayberry.com/violations/): every violation, each a permanent evidence page
 - [Evening Supervision](https://michealrayberry.com/live/)
 - [Share the Project](https://michealrayberry.com/share/): invitation to share — official photograph, latest report card, current facts, copy-ready description, sharing conditions
-- [Observer Submission](https://michealrayberry.com/report/): send a note about
+- [Report a Record Issue](https://michealrayberry.com/report/): report a possible missed requirement, a record error, missing evidence, or misuse of public material; held for the Accountability Partner
   the record — encouragement, recognition, a question, or a possible
   compliance issue; identification optional; reviewed by the Accountability
   Partner, nothing published automatically: live fixed-camera sessions, 6–10 PM ET on nights assigned by the Accountability Partner and posted in advance (assigned, not automatic, until further notice); rules, schedule, and the per-night COMPLETED / MISSED / EXCEPTION record
@@ -69,6 +69,11 @@ timestamped; changing the live page does not erase them. The uniform is a plain 
   missing data. The gap is part of the record.
 
 ## What this record is
+- Abandonment waiver: if the participant abandons the project he surrenders
+  any right to require removal, concealment, or favorable presentation of
+  the published record; it stays up, labeled as abandoned (safety/privacy
+  takedown §8.6, factual corrections, and legal removal excepted). He is
+  allowed to fail; he is not allowed to disappear.
 - The Accountability Partner position is currently open; until it is
   filled the participant administers the site himself, held to its
   published rules. Published versions are archived. Corrections are dated
@@ -77,8 +82,9 @@ timestamped; changing the live page does not erase them. The uniform is a plain 
   without weight loss has one fixed, non-escalating consequence: the weekly
   review ends with 15 minutes of corner time, on camera.
 - A failure is permanent. It is answered by a corrective session — corner
-  time, 10 / 20 / 30 minutes by level — recorded in one unbroken take in the
-  project uniform, posted publicly, and embedded beside the entry.
+  time, 10–20 / 20–40 / 30–60 minutes by level, the length drawn by the
+  server and never announced — recorded in one unbroken take in the
+  correction uniform, posted publicly, and embedded beside the entry.
   Completing it closes the violation but does not erase it.
 - No rule binds the participant unless the amendment is signed by both
   parties. Consent is re-confirmed on camera at every amendment. He may

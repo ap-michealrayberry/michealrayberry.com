@@ -89,6 +89,9 @@ var TABS = {
   'AP Actions':     ['logged_at', 'actor', 'ip', 'user_agent', 'op', 'args', 'result'],
   /* Where each historical photo original landed in R2 (backfillPhotosToR2). */
   'R2 Photo Keys':  ['date', 'angle', 'r2_key', 'status', 'logged_at'],
+  /* Corrective-session length, drawn by the server at session start and
+     sealed before the first word is spoken. L1 10–20, L2 20–40, L3 30–60 min. */
+  'Corner Draws':   ['drawn_at', 'ref', 'violation_date', 'level', 'minutes', 'seal'],
   /* Voice-script overrides edited by the AP from the console. Blank template
      = the assistant's built-in default. The assistant pulls these with the
      device key (action 'scripts'); only the spoken text changes. */
@@ -321,6 +324,34 @@ function handleObserver(obj) {
   return jsonOut({ ok: true, n: n });
 }
 
+/* ═════ CORNER TIME — server-drawn length ═════
+   Minimum per level is the published rule; the extra is random and unknown to
+   the participant. The draw is logged and HMAC-sealed before the session runs,
+   so the length cannot be chosen, shortened, or claimed afterwards. */
+var CORNER_RANGES = { 1: [10, 20], 2: [20, 40], 3: [30, 60] };
+function handleCornerDraw(obj) {
+  var level = Math.max(1, Math.min(3, Math.floor(Number(obj.level) || 1)));
+  var ref = String(obj.ref || '').trim().slice(0, 40), vdate = String(obj.violation_date || '').trim().slice(0, 10);
+  var sh = tab('Corner Draws'), vals = sh.getDataRange().getValues();
+  // One draw per assignment: a restarted session gets the same length, never a new roll.
+  for (var i = vals.length - 1; i >= 1; i--) {
+    if (ref && String(vals[i][1]) === ref && Number(vals[i][3]) === level) {
+      return jsonOut({ ok: true, minutes: Number(vals[i][4]), drawn_at: vals[i][0] instanceof Date ? vals[i][0].toISOString() : String(vals[i][0]), seal: String(vals[i][5]), reused: true });
+    }
+  }
+  var rg = CORNER_RANGES[level];
+  var minutes = rg[0] + Math.floor(Math.random() * (rg[1] - rg[0] + 1));
+  var at = new Date().toISOString();
+  var seal = sealFor(['corner-draw', at, ref, vdate, level, minutes].join('|'));
+  sh.appendRow([at, ref, vdate, level, minutes, seal]);
+  return jsonOut({ ok: true, minutes: minutes, drawn_at: at, seal: seal });
+}
+function cornerDrawFor(ref, vdate) {
+  var vals = tab('Corner Draws').getDataRange().getValues();
+  for (var i = vals.length - 1; i >= 1; i--) if ((ref && String(vals[i][1]) === ref) || (!ref && vdate && String(vals[i][2]) === vdate)) return { minutes: Number(vals[i][4]), seal: String(vals[i][5]), level: Number(vals[i][3]) };
+  return null;
+}
+
 function keyOk(k) {
   var stored = PropertiesService.getScriptProperties().getProperty('PACKET_KEY');
   return !!stored && String(k || '').trim() === stored;
@@ -398,6 +429,7 @@ function doPost(e) {
       if (obj && obj.action === 'ping') return keyOk(obj.key) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'mystate') return keyOk(obj.key) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'cornerdraw') return keyOk(obj.key) ? handleCornerDraw(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'observer') return observerOk(obj.secret) ? handleObserver(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidinit') return keyOk(obj.key) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidchunk') return keyOk(obj.key) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
@@ -740,6 +772,25 @@ function handleCorrectiveFiled(obj) {
   if (!String(sh.getRange(row, 4).getValue() || '').trim()) sh.getRange(row, 4).setValue(now);
   var url = String(obj.url || '').trim();
   if (url) sh.getRange(row, 8).setValue(url);
+  // Record the length actually served (from the sealed server draw).
+  try {
+    var draw = cornerDrawFor(String(obj.id || obj.ref || '').trim().toUpperCase(), vlRowDate(sh.getRange(row, 1).getValue()));
+    if (draw) {
+      var prevC = String(sh.getRange(row, 7).getValue() || '').trim();
+      var noteC = 'Corner time served: Level ' + draw.level + ' · ' + draw.minutes + ' min (server draw ' + draw.seal.slice(0, 12) + '…)';
+      if (prevC.indexOf(noteC) === -1) sh.getRange(row, 7).setValue(prevC ? prevC + '; ' + noteC : noteC);
+    }
+  } catch (e) {}
+  // Written reflection, required by the File tool: filed with the session, published on the entry.
+  try {
+    var clipR = function (v) { return String(v || '').replace(/[\u0000-\u001F]/g, ' ').replace(/;/g, ',').trim().slice(0, 200); };
+    var rc1 = clipR(obj.reflection_chose), rc2 = clipR(obj.reflection_will);
+    if (rc1 && rc2) {
+      var prevR = String(sh.getRange(row, 7).getValue() || '').trim();
+      var noteR = 'Reflection — chose instead: ' + rc1 + ' · will do differently: ' + rc2;
+      if (prevR.indexOf(noteR) === -1) sh.getRange(row, 7).setValue(prevR ? prevR + '; ' + noteR : noteR);
+    }
+  } catch (e) {}
   // Submission resolves the entry (§8 as amended). Overrule = AP edits the row.
   var todayIso = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   if (!/^\s*resolved/i.test(String(sh.getRange(row, 3).getValue() || ''))) {
