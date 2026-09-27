@@ -1,3 +1,14 @@
+## Canonical sources (Sept 27)
+- Apps Script: apps-script/Code.gs is the ONLY copy. Delete any other
+  Code.gs in the repo (the older one under apps-script/ is replaced by this
+  file; the root apps-script-Code.gs is gone). Paste this file into the
+  script editor.
+- Recording Assistant: assistant/app.js is canonical; assistant/js/* are
+  mirrors split from it.
+- After deploying this Code.gs every device must unlock again: the unlock
+  grant is now a signed, expiring token checked on every filing action, and
+  changing the unlock code revokes all grants.
+
 ## Packet validator + signed receipts (Sept 20)
 - nightlyComplianceCheck is fail-closed: weight, FOUR distinct photos, video,
   and a VALID sealed attestation (seal re-derived) — each must have reached

@@ -28,6 +28,7 @@ var CONFIG = {
 };
 
 var AP_EMAIL = 'ap@michealrayberry.com';
+var AGREEMENT_EDITION = 2; // Edition 2 (Aug 31, 2026) — version written to Confirmations
 var MRB_EMAIL = 'contact@michealrayberry.com';
 var PROJECT_START_FALLBACK = '2026-08-31';
 /* Day 1 of the CURRENT attempt. The Site State key `start_date` overrides the
@@ -52,14 +53,16 @@ var WEIGHT_AUTO_START = '2026-07-30'; // date the scale began writing weights
 /* Tabs, in creation order. The headers are the contract between this
    script and the website — never reorder columns, only append. */
 var TABS = {
-  'Weigh-ins':      ['date', 'weight_lb', 'note', 'photo_front', 'photo_left', 'photo_rear', 'photo_right', 'video', 'video_sec'],
+  /* J stream_uid = Cloudflare Stream video id (site player); K r2_key = the
+     untouched original in the private R2 bucket (evidence, never a player). */
+  'Weigh-ins':      ['date', 'weight_lb', 'note', 'photo_front', 'photo_left', 'photo_rear', 'photo_right', 'video', 'video_sec', 'stream_uid', 'r2_key'],
   /* The public record, exactly as the site renders it. Status is normalised
      on the site to open / corrected / resolved, so column C may hold the AP's
      own phrasing. 'corrections' is an append-only, semicolon-separated
      history — never rewrite an earlier note, add another. 'recording' holds
      the public URL of the corrective session filed against the entry; the
      site publishes it beside the entry (§8). */
-  'Violation Log':  ['date', 'violation', 'status', 'submitted', 'resolved', 'ap_verification', 'corrections', 'recording'],
+  'Violation Log':  ['date', 'violation', 'status', 'submitted', 'resolved', 'ap_verification', 'corrections', 'recording', 'event_verification', 'stream_uid'],
   'Attestation':    ['logged_at_server', 'date', 'day', 'event', 'code', 'kind', 'video_sha256', 'photo_sha256s', 'weight', 'status', 'chunk_chain', 'chunk_count', 'server_seal', 'sealed_at'],
   'Corrective Log': ['date', 'assignment', 'due', 'status', 'completed'],
   /* type: official (AP entry) | personal (Micheal's note) | amendment (\u00a712.1 — also
@@ -70,28 +73,63 @@ var TABS = {
      spacing kept so weight_lb stays column H for the site's readers. */
   'Health':         ['date', 'steps', 'zone_minutes', 'active_minutes', 'synced_at', 'distance_mi', 'calories', 'weight_lb'],
   'Weekly Log':     ['logged_at', 'date', 'week', 'documented', 'required', 'weight_lb', 'open_entries', 'url'],
-  'Confirmations':  ['logged_at', 'date', 'version', 'day', 'url'],
+  'Confirmations':  ['logged_at', 'date', 'version', 'day', 'url', 'attestation_seal'],
   /* §3.4 Evening Supervision — one row per scheduled night once ruled on.
      status: COMPLETED · MISSED · EXCEPTION · <reason>. Written by the
      nightly check (MISSED), the File tool (COMPLETED + stream_url), or the
      AP via the MRB menu (EXCEPTION). The site reads it on /live. */
   'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
-  /* Observer submissions relayed by action 'observer' (shared secret
-     OBSERVER_SECRET). On Netlify the /observer/ form posts to Netlify Forms
-     instead, so this tab fills only if a relay is wired. AP-only; never read
-     by the site. review = received | dismissed | verified | published | actioned. */
-  'Observer':       ['received_at', 'type', 'message', 'name', 'email', 'source_url', 'quotable', 'review', 'ap_note'],
+  /* "Report a Record Issue" (/report/) → Pages Function → action 'observer'
+     (shared secret OBSERVER_SECRET). record_ref = date or Project Day the
+     report concerns. AP-only; never read by the site.
+     review = received | dismissed | verified | published | actioned. */
+  'Observer':       ['received_at', 'type', 'record_ref', 'message', 'name', 'email', 'source_url', 'review', 'ap_note'],
+  /* Every console action, stamped by the Access relay: who (verified email),
+     from where, what, and the result. Append-only. */
+  'AP Actions':     ['logged_at', 'actor', 'ip', 'user_agent', 'op', 'args', 'result'],
+  /* Where each historical photo original landed in R2 (backfillPhotosToR2). */
+  'R2 Photo Keys':  ['date', 'angle', 'r2_key', 'status', 'logged_at'],
+  /* Corrective-session length, drawn by the server at session start and
+     sealed before the first word is spoken. L1 10–20, L2 20–40, L3 30–60 min. */
+  'Corner Draws':   ['drawn_at', 'ref', 'violation_date', 'level', 'minutes', 'seal'],
+  /* Voice-script overrides edited by the AP from the console. Blank template
+     = the assistant's built-in default. The assistant pulls these with the
+     device key (action 'scripts'); only the spoken text changes. */
+  'Scripts':        ['key', 'template', 'updated_at', 'updated_by'],
+  /* Signed daily packet receipt, written once by the 22:00 check and never
+     rewritten (corrections append to 'corrections'). Component times are the
+     server-stamped moments each part reached the record. 'seal' = HMAC over
+     every field, keyed by SEAL_SECRET — the receipt proves timeliness rather
+     than inferring it from file presence. */
+  'Receipts':       ['date', 'day', 'deadline_et', 'weight_at', 'front_at', 'left_at', 'rear_at', 'right_at', 'video_at', 'attest_at', 'attest_status', 'video_sha256', 'photo_sha256s', 'verdict', 'missing', 'ap_decision', 'corrections', 'sealed_at', 'seal'],
 };
 
-/* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
-   from Sunday 13 Sept 2026. The nightly check at 22:20 rules on the night. */
+/* §3.4 Evening Supervision — 18:00–22:00 ET. UNTIL FURTHER NOTICE (AP ruling,
+   14 Sept 2026) nights are ASSIGNED by the Accountability Partner, not
+   automatic: a night is required only when the Supervision tab holds a row
+   for that date with required = yes (written from the /ap/ console). The
+   22:20 check rules only on assigned nights. */
 var SUPERVISION_START = '2026-09-13';
-var SUPERVISION_NIGHTS = [0, 1, 2, 3, 4]; // JS getDay: Sun=0 … Thu=4
 function supervisionScheduled(ds) {
   if (ds < SUPERVISION_START) return false;
-  var a = ds.split('-').map(Number);
-  var dow = new Date(Date.UTC(a[0], a[1] - 1, a[2], 12)).getUTCDay();
-  return SUPERVISION_NIGHTS.indexOf(dow) !== -1;
+  var sr = supervisionRow(ds);
+  return !!(sr && /^(yes|true|1)$/i.test(String(sr.vals[1] || '').trim()));
+}
+/* Assign (required=yes) or release (required=no) a night. Never touches a
+   night already ruled COMPLETED / MISSED / EXCEPTION. */
+function supervisionAssign(ds, on, note) {
+  var sh = supervisionSheet();
+  var sr = supervisionRow(ds);
+  if (sr) {
+    var cur = String(sr.vals[2] || '');
+    if (/^(COMPLETED|MISSED|EXCEPTION)/i.test(cur)) return { ok: false, error: 'That night is already ruled ' + cur.split(' · ')[0] + '.' };
+    sh.getRange(sr.row, 2).setValue(on ? 'yes' : 'no');
+    if (note) sh.getRange(sr.row, 7).setValue(note);
+    return { ok: true };
+  }
+  if (!on) return { ok: true };
+  sh.appendRow([ds, 'yes', '', '', '', '', note || 'assigned by the AP ' + menuToday()]);
+  return { ok: true };
 }
 function supervisionSheet() { return tab('Supervision'); }
 function supervisionRow(ds) {
@@ -129,7 +167,7 @@ function createRecordSpreadsheet() {
   }
   var TAB_COLORS = { 'Weigh-ins': '#B3261E', 'Violation Log': '#B3261E', 'Updates': '#B3261E',
     'Attestation': '#6B6A64', 'Corrective Log': '#6B6A64', 'Weekly Log': '#6B6A64',
-    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412', 'Supervision': '#B3261E', 'Observer': '#6B6A64' };
+    'Confirmations': '#6B6A64', 'Health': '#6B6A64', 'Site State': '#141412', 'Supervision': '#B3261E', 'Observer': '#6B6A64', 'AP Actions': '#141412' };
   for (var tc in TAB_COLORS) { var tsh = file.getSheetByName(tc); if (tsh) tsh.setTabColor(TAB_COLORS[tc]); }
   file.getSheetByName('Weigh-ins').setColumnWidth(1, 110);
   file.getSheetByName('Violation Log').setColumnWidth(2, 460);
@@ -246,8 +284,7 @@ function handleUnlock(obj) {
     return jsonOut({ ok: false, error: 'keys not accepted' });
   }
   cache.remove('unlock_misses');
-  var stamped = new Date().toISOString();
-  return jsonOut({ ok: true, token: sealFor(['unlock', stamped].join('|')), issued: stamped });
+  return jsonOut(Object.assign({ ok: true }, unlockGrant()));
 }
 /* ═════ OBSERVER SUBMISSIONS ═════
    A relay (functions/observer.js when hosted on Cloudflare Pages) verifies
@@ -263,26 +300,120 @@ function observerOk(s) {
 }
 function handleObserver(obj) {
   var clip = function (v, n) { return String(v || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, n); };
-  var TYPES = ['Encouragement', 'I know Micheal personally', 'Possible compliance issue', 'Found/shared elsewhere', 'Question', 'Other'];
-  var type = clip(obj.type, 60); if (TYPES.indexOf(type) === -1) type = 'Other';
+  var TYPES = ['Possible missed requirement', 'Incorrect or inconsistent record', 'Missing or broken evidence', 'Suspected misuse of public material', 'Question for the Accountability Partner'];
+  var type = clip(obj.type, 60); if (TYPES.indexOf(type) === -1) type = 'Question for the Accountability Partner';
   var message = clip(obj.message, 4000);
   if (!message) return jsonOut({ ok: false, error: 'empty message' });
+  var ref = clip(obj.record_ref, 40);
+  if (TYPES.indexOf(type) <= 2 && !ref) return jsonOut({ ok: false, error: 'date or Project Day required' });
   var name = clip(obj.name, 120), email = clip(obj.email, 200), src = clip(obj.source_url, 500);
-  var quotable = /^(yes|true|on|1)$/i.test(String(obj.quotable || '')) ? 'yes' : 'no';
   var stamp = Utilities.formatDate(new Date(), 'America/New_York', "yyyy-MM-dd HH:mm 'ET'");
   var sh = tab('Observer');
-  sh.appendRow([stamp, type, message, name, email, src, quotable, 'received', '']);
+  sh.appendRow([stamp, type, ref, message, name, email, src, 'received', '']);
   var n = sh.getLastRow() - 1;
   try {
-    sendMail(AP_EMAIL, 'Observer submission #' + n + ' — ' + type,
-      'Received ' + stamp + '\nType: ' + type + '\nQuotable anonymously: ' + quotable +
-      (name ? '\nName/nickname: ' + name : '') + (email ? '\nEmail: ' + email : '') + (src ? '\nSource URL: ' + src : '') +
+    sendMail(AP_EMAIL, 'Record issue report #' + n + ' — ' + type + (ref ? ' — ' + ref : ''),
+      'Received ' + stamp + '\nType: ' + type + (ref ? '\nRecord reference: ' + ref : '') +
+      (name ? '\nName: ' + name : '') + (email ? '\nEmail: ' + email : '') + (src ? '\nLink: ' + src : '') +
       '\n\n' + message +
-      '\n\n— Review on the Observer tab (col H: received → dismissed / verified / published / actioned). ' +
-      'A substantiated compliance issue is logged through the MRB menu; nothing publishes from this tab.' + apSign());
+      '\n\n— A report is evidence for review, not a verdict. Check it against the record and the written rules. ' +
+      'Review on the Observer tab (col H: received → dismissed / verified / published / actioned). Nothing publishes from this tab.' + apSign());
   } catch (e) { Logger.log('Observer mail failed: ' + e); }
   return jsonOut({ ok: true, n: n });
 }
+
+/* ═════ CORNER TIME — server-drawn length ═════
+   Minimum per level is the published rule; the extra is random and unknown to
+   the participant. The draw is logged and HMAC-sealed before the session runs,
+   so the length cannot be chosen, shortened, or claimed afterwards. */
+var CORNER_RANGES = { 1: [10, 20], 2: [20, 40], 3: [30, 60] };
+function handleCornerDraw(obj) {
+  var ref = String(obj.ref || '').trim().toUpperCase().slice(0, 40);
+  var vdate = String(obj.violation_date || '').trim().slice(0, 10);
+  if (!ref || !/^\d{4}-\d{2}-\d{2}$/.test(vdate)) return jsonOut({ ok: false, error: 'assignment and violation date required' });
+  var sh = tab('Corner Draws'), vals = sh.getDataRange().getValues();
+  for (var i = vals.length - 1; i >= 1; i--) {
+    if (String(vals[i][1]) === ref) return jsonOut({ ok: true, minutes: Number(vals[i][4]), level: Number(vals[i][3]), drawn_at: vals[i][0] instanceof Date ? vals[i][0].toISOString() : String(vals[i][0]), seal: String(vals[i][5]), reused: true });
+  }
+  var vl = violationLogSheet().getDataRange().getValues(), dates = [];
+  for (var k = 1; k < vl.length; k++) { var d = vlRowDate(vl[k][0]); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.push(d); }
+  dates.sort();
+  var pos = dates.indexOf(vdate);
+  if (pos < 0) return jsonOut({ ok: false, error: 'no violation on the record for that date' });
+  var level = Math.min(3, pos + 1);
+  var rg = CORNER_RANGES[level];
+  var minutes = rg[0] + Math.floor(Math.random() * (rg[1] - rg[0] + 1));
+  var at = new Date().toISOString();
+  var seal = sealFor(['corner-draw', at, ref, vdate, level, minutes].join('|'));
+  sh.appendRow([at, ref, vdate, level, minutes, seal]);
+  return jsonOut({ ok: true, minutes: minutes, level: level, drawn_at: at, seal: seal });
+}
+function cornerDrawFor(ref) {
+  var vals = tab('Corner Draws').getDataRange().getValues();
+  for (var i = vals.length - 1; i >= 1; i--) if (ref && String(vals[i][1]) === ref) return { minutes: Number(vals[i][4]), seal: String(vals[i][5]), level: Number(vals[i][3]), vdate: String(vals[i][2]) };
+  return null;
+}
+
+/* Consent recording captured and sealed by the assistant. Upserts the day's
+   Confirmations row (url stays blank until the public link is filed through
+   ytfiled kind=consent). The seal must be a 64-hex attestation seal. */
+function handleConfirmationFiled(obj) {
+  var date = String(obj.date || '').trim(), seal = String(obj.attestation_seal || '').trim().toLowerCase();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonOut({ ok: false, error: 'bad date' });
+  if (!/^[a-f0-9]{64}$/.test(seal)) return jsonOut({ ok: false, error: 'missing attestation seal' });
+  var version = String(obj.version || AGREEMENT_EDITION).trim().slice(0, 8);
+  var day = Number(obj.day) || dayOf(date);
+  var cf = tab('Confirmations'), cv = cf.getDataRange().getValues();
+  for (var i = cv.length - 1; i >= 1; i--) {
+    if (apDateStr(cv[i][1]) === date) { cf.getRange(i + 1, 6).setValue(seal); cf.getRange(i + 1, 3).setValue(version); return jsonOut({ ok: true, updated: true }); }
+  }
+  cf.appendRow([new Date(), date, version, day, '', seal]);
+  return jsonOut({ ok: true });
+}
+
+/* Weekly review captured and sealed by the assistant. One Weekly Log row per
+   week (upsert by week number). */
+function handleWeeklyFiled(obj) {
+  var date = String(obj.date || '').trim(), seal = String(obj.attestation_seal || '').trim().toLowerCase();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonOut({ ok: false, error: 'bad date' });
+  if (!/^[a-f0-9]{64}$/.test(seal)) return jsonOut({ ok: false, error: 'missing attestation seal' });
+  var week = Number(obj.week) || 0;
+  var rowVals = [new Date(), date, week, Number(obj.documented) || 0, Number(obj.required) || 7, obj.weight === '' || obj.weight == null ? '' : Number(obj.weight), Number(obj.open) || 0, String(obj.url || '').trim()];
+  var wl = tab('Weekly Log'), wv = wl.getDataRange().getValues();
+  for (var i = wv.length - 1; i >= 1; i--) {
+    if (Number(wv[i][2]) === week && week) { wl.getRange(i + 1, 1, 1, rowVals.length).setValues([rowVals]); return jsonOut({ ok: true, updated: true }); }
+  }
+  wl.appendRow(rowVals);
+  return jsonOut({ ok: true });
+}
+
+/* ═════ AGREEMENT GATE ═════
+   One definition, used by every automatic consequence. Nothing is declared,
+   escalated, or ruled while the agreement is not active. */
+function agreementIsActive() {
+  var st = siteStateAll();
+  return !!(String(st.agreement_edition || '') && st.agreement_confirmation_verified_at && st.mrb_signature_verified_at && st.ap_signature_verified_at);
+}
+
+/* ═════ UNLOCK GRANT ═════
+   Token = issuedMs.expiresMs.hmac(unlock|issued|expires|sha256(current code)).
+   Required on every filing action. Changing the unlock code revokes all
+   outstanding grants because the code hash is part of the seal. */
+function unlockGrant() {
+  var code = PropertiesService.getScriptProperties().getProperty('UNLOCK_CODE') || '';
+  var issued = Date.now(), expires = issued + 14 * 24 * 3600 * 1000;
+  return { token: issued + '.' + expires + '.' + sealFor(['unlock', issued, expires, sha256Hex(code)].join('|')), issued: new Date(issued).toISOString(), expires: expires };
+}
+function grantOk(tok) {
+  var m = String(tok || '').match(/^(\d{13})\.(\d{13})\.([a-f0-9]{64})$/);
+  if (!m) return false;
+  var issued = Number(m[1]), expires = Number(m[2]);
+  if (!(expires > Date.now() && issued <= Date.now() + 60000 && expires - issued <= 15 * 24 * 3600 * 1000)) return false;
+  var code = PropertiesService.getScriptProperties().getProperty('UNLOCK_CODE') || '';
+  if (!code) return false;
+  return sealFor(['unlock', issued, expires, sha256Hex(code)].join('|')) === m[3];
+}
+function participantOk(obj) { return keyOk(obj.key) && grantOk(obj.unlock); }
 
 function keyOk(k) {
   var stored = PropertiesService.getScriptProperties().getProperty('PACKET_KEY');
@@ -330,12 +461,14 @@ function routeGet(e) {
    cannot contain a code that did not exist until seconds ago. Today's
    scale-synced weight rides along so the assistant burns the OFFICIAL figure
    into the overlay instead of asking for a typed one. */
-function issueChallenge(kind) {
+function issueChallenge(kind, obj) {
   var code = String(Math.floor(1000 + Math.random() * 9000));
   var now = new Date();
   var today = Utilities.formatDate(now, 'America/New_York', 'yyyy-MM-dd');
   var day = Math.floor((new Date(today) - new Date(PROJECT_START)) / 864e5) + 1;
-  attestationSheet().appendRow([now, today, day, 'challenge-issued', code, String(kind || 'daily'), '', '', '', '']);
+  // col H carries the binding (assignment ref, if any); col J becomes CONSUMED on use.
+  var bind = String((obj && (obj.ref || obj.assignment_id)) || '').trim().toUpperCase().slice(0, 40);
+  attestationSheet().appendRow([now, today, day, 'challenge-issued', code, String(kind || 'daily'), '', bind, '', 'ISSUED']);
   var syncedW = '';
   try {
     var wv = weighinsSheet().getDataRange().getValues();
@@ -351,17 +484,22 @@ function doPost(e) {
     if (e && e.postData && e.postData.contents && String(e.postData.contents).charAt(0) === '{') {
       var obj = null;
       try { obj = JSON.parse(e.postData.contents); } catch (perr) {}
-      if (obj && obj.action === 'attest') return keyOk(obj.key) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'packet') return keyOk(obj.key) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'correctivefiled') return keyOk(obj.key) ? handleCorrectiveFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'ytfiled') return keyOk(obj.key) ? handleYtFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'challenge') return keyOk(obj.key) ? issueChallenge(String(obj.kind || 'daily')) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'attest') return participantOk(obj) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'packet') return participantOk(obj) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'keycheck') return jsonOut({ ok: keyOk(obj.key) });
+      if (obj && obj.action === 'scripts') return keyOk(obj.key) ? jsonOut({ ok: true, overrides: scriptOverrides().map }) : jsonOut({ ok: false, error: 'unauthorized' }); // Pages Function /api/media-init asks before minting upload URLs
+      if (obj && obj.action === 'correctivefiled') return participantOk(obj) ? handleCorrectiveFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'ytfiled') return participantOk(obj) ? handleYtFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'challenge') return participantOk(obj) ? issueChallenge(String(obj.kind || 'daily'), obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'ping') return keyOk(obj.key) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'mystate') return keyOk(obj.key) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'cornerdraw') return participantOk(obj) ? handleCornerDraw(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'confirmationfiled') return participantOk(obj) ? handleConfirmationFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'weeklyfiled') return participantOk(obj) ? handleWeeklyFiled(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'observer') return observerOk(obj.secret) ? handleObserver(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'vidinit') return keyOk(obj.key) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
-      if (obj && obj.action === 'vidchunk') return keyOk(obj.key) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'vidinit') return participantOk(obj) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized' });
+      if (obj && obj.action === 'vidchunk') return participantOk(obj) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action && String(obj.action).indexOf('ap') === 0) return apOk(obj.key) ? handleApAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
     }
     return jsonOut({ ok: false, error: 'unknown action' });
@@ -383,8 +521,87 @@ function ensureWeighinsColumns() {
   }
 }
 
+/* Append-only schema upgrade: for every tab, add any TRAILING headers that
+   TABS defines but the sheet lacks (Sept 14: Violation Log I
+   event_verification, Confirmations F attestation_seal). Never reorders or
+   renames; a sheet whose existing headers differ is reported and left alone. */
+/* One-time: old Observer layout (…, message@C, …, quotable@G, review@H) →
+   new (record_ref@C inserted, quotable removed). Detects by header. */
+function migrateObserverTab() {
+  var sh = ss().getSheetByName('Observer'); if (!sh) return;
+  var hdr = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0].map(String);
+  if (hdr[2] === 'record_ref') return;
+  if (hdr[2] === 'message' && hdr[6] === 'quotable') {
+    sh.deleteColumn(7);              // quotable
+    sh.insertColumnBefore(3);        // record_ref
+    sh.getRange(1, 1, 1, TABS['Observer'].length).setValues([TABS['Observer']])
+      .setFontWeight('bold').setFontFamily('IBM Plex Mono').setFontSize(10).setBackground('#141412').setFontColor('#FAFAF7');
+    Logger.log('Observer: migrated to record_ref layout.');
+  } else Logger.log('Observer: unrecognised header layout — left untouched.');
+}
+
+function ensureTabHeaders() {
+  var s = ss();
+  Object.keys(TABS).forEach(function (name) {
+    var sh = s.getSheetByName(name);
+    if (!sh) return;
+    var cols = TABS[name];
+    var width = Math.min(sh.getLastColumn(), cols.length);
+    var have = width > 0 ? sh.getRange(1, 1, 1, width).getValues()[0].map(function (v) { return String(v).trim(); }) : [];
+    var prefixOk = have.every(function (v, i) { return v === cols[i]; });
+    if (!prefixOk) { Logger.log(name + ': headers differ from TABS — left untouched (fix by hand; do not reorder).'); return; }
+    if (have.length < cols.length) {
+      var add = cols.slice(have.length);
+      sh.getRange(1, have.length + 1, 1, add.length).setValues([add])
+        .setFontWeight('bold').setFontFamily('IBM Plex Mono').setFontSize(10).setBackground('#141412').setFontColor('#FAFAF7');
+      Logger.log(name + ': appended header(s) ' + add.join(', '));
+    }
+  });
+}
+
+/* Latest server_seal of a VALID-CONSUMED 'confirmation' capture-attested row
+   for the given date — the value the Confirmations tab binds to (col F). */
+function confirmationSealFor(date) {
+  var att = tab('Attestation');
+  var last = att.getLastRow();
+  if (last < 2) return '';
+  var rows = att.getRange(2, 1, last - 1, 14).getValues();
+  for (var i = rows.length - 1; i >= 0; i--) {
+    var d = rows[i][1] instanceof Date ? Utilities.formatDate(rows[i][1], 'America/New_York', 'yyyy-MM-dd') : String(rows[i][1] || '').trim();
+    if (d !== String(date || '').trim()) continue;
+    if (String(rows[i][3]).trim() !== 'capture-attested' || String(rows[i][5]).trim() !== 'confirmation') continue;
+    if (String(rows[i][9]).trim() !== 'VALID-CONSUMED') continue;
+    return String(rows[i][12] || '').trim().toLowerCase();
+  }
+  return '';
+}
+
+/* Run once to copy SEAL_SECRET into the deployment environment as
+   ATTESTATION_SEAL_SECRET (the publisher verifies seals against it). */
+function showSealSecret() { Logger.log(sealSecret()); }
+
+/* Site State keys the publisher REQUIRES to exist (it refuses to infer them).
+   Written only when absent — never overwrites an AP-set value. */
+function ensureSiteState() {
+  var sh = tab('Site State');
+  var vals = sh.getDataRange().getValues();
+  var have = {};
+  for (var i = 1; i < vals.length; i++) have[String(vals[i][0] || '').trim()] = true;
+  var required = { start_date: PROJECT_START_FALLBACK };
+  Object.keys(required).forEach(function (k) {
+    if (have[k]) return;
+    sh.appendRow([k, required[k]]);
+    sh.getRange(sh.getLastRow(), 2).setNumberFormat('@'); // keep the ISO date as text
+    Logger.log('Site State: added ' + k + ' = ' + required[k]);
+  });
+}
+
 function setup() {
   ensureWeighinsColumns();
+  migrateObserverTab();
+  ensureTabHeaders();
+  ensureSiteState();
+  repairSiteState();
   ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('importPhotos').timeBased().everyMinutes(10).create();
   ScriptApp.newTrigger('mirrorToMicheal').timeBased().everyHours(1).create();
@@ -426,6 +643,18 @@ function setup() {
    folder and never touch the public record. */
 
 var ANGLE_COLS = { front: 4, left: 5, rear: 6, right: 7 };
+
+/* Server-stamped arrival of each packet component. Written the first time a
+   component reaches the record (never overwritten), read by the nightly
+   receipt. Stored in Site State-like rows on a hidden 'Received' tab:
+   key = date|component, value = ISO server time. */
+function receivedSheet() { var s = ss(); var sh = s.getSheetByName('Received'); if (!sh) { sh = s.insertSheet('Received'); sh.getRange(1, 1, 1, 2).setValues([['key', 'received_at']]).setFontWeight('bold'); sh.hideSheet(); } return sh; }
+var RECEIVED_CACHE = null;
+function receivedAll() { if (RECEIVED_CACHE) return RECEIVED_CACHE; var v = receivedSheet().getDataRange().getValues(); var o = {}; for (var i = 1; i < v.length; i++) if (v[i][0]) o[String(v[i][0])] = v[i][1] instanceof Date ? v[i][1].toISOString() : String(v[i][1] || ''); RECEIVED_CACHE = o; return o; }
+function markReceived(dateIso, component) {
+  var key = dateIso + '|' + component; var all = receivedAll(); if (all[key]) return all[key];
+  var iso = new Date().toISOString(); receivedSheet().appendRow([key, iso]); all[key] = iso; return iso;
+}
 
 /* Named subfolder of the public photos folder (created on first use). */
 function publicSubfolder(name) {
@@ -499,6 +728,7 @@ function importPhotos() {
     var cell = sh.getRange(rec.row, col);
     if (String(cell.getValue() || '').trim()) return; // first file per slot is final
     cell.setValue(url);
+    try { markReceived(dateStr, isVid ? 'video' : angle); } catch (e) {}
   });
 }
 
@@ -591,31 +821,40 @@ function correctiveFolder() {
    row (set status back to Unresolved, note it in corrections). */
 function handleCorrectiveFiled(obj) {
   var sh = violationLogSheet();
-  var row = 0;
-  var n = parseInt(String(obj.ref || '').replace(/^V-0*/i, ''), 10);
-  if (n && n >= 1 && n + 1 <= sh.getLastRow()) row = n + 1;
-  if (!row && obj.date) {
-    // Fall back to the entry date — prefer the latest unresolved match.
-    var v = sh.getDataRange().getValues();
-    for (var i = 1; i < v.length; i++) {
-      var ds = v[i][0] instanceof Date ? Utilities.formatDate(v[i][0], 'America/New_York', 'yyyy-MM-dd') : String(v[i][0] || '').trim();
-      if (ds !== String(obj.date).trim()) continue;
-      row = i + 1;
-      if (!/^\s*(resolved|satisfied|closed)/i.test(String(v[i][2] || ''))) break;
-    }
+  var ref = String(obj.id || obj.ref || '').trim().toUpperCase();
+  var date = String(obj.date || '').trim();
+  var url = canonicalYouTube(obj.url) || '';
+  var seal = String(obj.attestation_seal || '').trim().toLowerCase();
+  var clipR = function (v) { return String(v || '').replace(/[\u0000-\u001F]/g, ' ').replace(/;/g, ',').trim().slice(0, 200); };
+  var rc1 = clipR(obj.reflection_chose), rc2 = clipR(obj.reflection_will);
+  if (!ref) return jsonOut({ ok: false, error: 'violation id required' });
+  if (!url) return jsonOut({ ok: false, error: 'a public YouTube link is required' });
+  if (!/^[a-f0-9]{64}$/.test(seal)) return jsonOut({ ok: false, error: 'attestation seal required' });
+  if (rc1.length < 8 || rc2.length < 8) return jsonOut({ ok: false, error: 'both reflection sentences are required' });
+  var draw = cornerDrawFor(ref);
+  if (!draw) return jsonOut({ ok: false, error: 'no server draw exists for this assignment' });
+  var att = attestationSheet().getDataRange().getValues(), capOk = false;
+  for (var a = att.length - 1; a >= 1; a--) {
+    if (String(att[a][3]) === 'capture-attested' && String(att[a][5]) === 'corrective' && String(att[a][12] || '').toLowerCase() === seal && /^VALID-CONSUMED/.test(String(att[a][9] || ''))) { capOk = true; break; }
   }
-  if (!row) return jsonOut({ ok: false, error: 'bad ref' });
+  if (!capOk) return jsonOut({ ok: false, error: 'seal does not match a valid corrective capture' });
+  var v = sh.getDataRange().getValues(), row = 0;
+  for (var i = v.length - 1; i >= 1; i--) {
+    if (vlRowDate(v[i][0]) !== (draw.vdate || date)) continue;
+    if (/^\s*(resolved|satisfied|closed)/i.test(String(v[i][2] || ''))) continue;
+    row = i + 1; break;
+  }
+  if (!row) return jsonOut({ ok: false, error: 'no open violation for this assignment' });
   var now = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd HH:mm');
   if (!String(sh.getRange(row, 4).getValue() || '').trim()) sh.getRange(row, 4).setValue(now);
-  var url = String(obj.url || '').trim();
-  if (url) sh.getRange(row, 8).setValue(url);
-  // Submission resolves the entry (§8 as amended). Overrule = AP edits the row.
-  var todayIso = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
-  if (!/^\s*resolved/i.test(String(sh.getRange(row, 3).getValue() || ''))) {
-    sh.getRange(row, 3).setValue('Resolved · ' + todayIso);
-    sh.getRange(row, 5).setValue(todayIso);
-  }
-  return jsonOut({ ok: true });
+  sh.getRange(row, 8).setValue(url);
+  var prev = String(sh.getRange(row, 7).getValue() || '').trim();
+  var notes = ['Corner time served: Level ' + draw.level + ' · ' + draw.minutes + ' min (server draw ' + draw.seal.slice(0, 12) + '…)', 'Reflection — chose instead: ' + rc1 + ' · will do differently: ' + rc2];
+  notes.forEach(function (nt) { if (prev.indexOf(nt) === -1) prev = prev ? prev + '; ' + nt : nt; });
+  sh.getRange(row, 7).setValue(prev);
+  // Filing never resolves. Only the Accountability Partner verifies resolution (APR1).
+  sh.getRange(row, 3).setValue('Corrected · awaiting verification · ' + now.slice(0, 10));
+  return jsonOut({ ok: true, status: 'awaiting verification' });
 }
 
 /* Files the public YouTube URL for any session kind (§2: YouTube is an
@@ -623,8 +862,18 @@ function handleCorrectiveFiled(obj) {
    daily → Weigh-ins col H · corrective → Violation Log col H (via
    handleCorrectiveFiled) · weekly → Weekly Log url · confirmation →
    Confirmations url · demo → Site State demo_video_url. */
+/* Canonical YouTube link: youtu.be/ID. Accepts watch?v=, shorts/, embed/,
+   live/, m., and share-sheet ?si= variants; anything else returns ''. */
+function canonicalYouTube(raw) {
+  var s = String(raw || '').trim();
+  var m = s.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/(?:shorts|embed|live|v)\/([A-Za-z0-9_-]{11})(?:[\/?#].*)?$/)
+    || s.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})(?:[&#].*)?$/)
+    || s.match(/^https?:\/\/youtu\.be\/([A-Za-z0-9_-]{11})(?:[\/?#].*)?$/);
+  return m ? 'https://youtu.be/' + m[1] : '';
+}
+
 function handleYtFiled(obj) {
-  var url = String(obj.url || '').trim();
+  var url = canonicalYouTube(obj.url) || String(obj.url || '').trim();
   if (!/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(url)) return jsonOut({ ok: false, error: 'not a YouTube link' });
   var kind = String(obj.kind || '');
   var date = String(obj.date || '').trim();
@@ -650,14 +899,21 @@ function handleYtFiled(obj) {
   }
   if (kind === 'consent') {
     // Consent Confirmation filed from the File tool. Upsert by date so a
-    // re-record after an amendment lands on the same day's row.
+    // re-record after an amendment lands on the same day's row. Col F carries
+    // the server_seal of the day's sealed 'confirmation' capture so the
+    // publisher can bind the posted video to its attested take.
     var cf = tab('Confirmations');
+    var seal = confirmationSealFor(date);
     var cv = cf.getDataRange().getValues();
     for (var k2 = cv.length - 1; k2 >= 1; k2--) {
       var d3 = cv[k2][1] instanceof Date ? Utilities.formatDate(cv[k2][1], 'America/New_York', 'yyyy-MM-dd') : String(cv[k2][1] || '').trim();
-      if (d3 === date) { cf.getRange(k2 + 1, 5).setValue(url); return jsonOut({ ok: true }); }
+      if (d3 === date) {
+        cf.getRange(k2 + 1, 5).setValue(url);
+        if (seal) cf.getRange(k2 + 1, 6).setValue(seal);
+        return jsonOut({ ok: true });
+      }
     }
-    cf.appendRow([new Date(), date, '', Math.floor((new Date(date) - new Date(PROJECT_START)) / 864e5) + 1, url]);
+    cf.appendRow([new Date(), date, AGREEMENT_EDITION, Math.floor((new Date(date) - new Date(PROJECT_START)) / 864e5) + 1, url, seal]);
     return jsonOut({ ok: true });
   }
   if (kind === 'supervision') {
@@ -765,8 +1021,14 @@ function handlePacket(obj) {
     for (var v = 1; v < vv.length; v++) if (apDateStr(vv[v][0]) === today) { vrow = v + 1; break; }
     if (!vrow) { vs.appendRow([today]); vrow = vs.getLastRow(); }
     vs.getRange(vrow, 8).setValue(videoUrl); // column H — inspection video
+    try { markReceived(today, 'video'); } catch (e) {}
     var dur = Math.round(Number(obj.duration_sec) || 0);
     if (dur > 0) vs.getRange(vrow, 9).setValue(dur); // column I — recording length in seconds (VideoObject duration)
+    handlePacketMediaFields(vs, vrow, obj);
+  }
+  if (!videoUrl && (obj.stream_uid || obj.r2_key)) {
+    var ms = weighinsSheet(), mv = ms.getDataRange().getValues();
+    for (var mi = 1; mi < mv.length; mi++) if (apDateStr(mv[mi][0]) === today) { handlePacketMediaFields(ms, mi + 1, obj); break; }
   }
 
   /* Manual weight is no longer accepted (AP directive): the official daily
@@ -783,6 +1045,245 @@ function handlePacket(obj) {
   if (obj.finalize) importPhotos(); // pull anything just written into its column
   return jsonOut({ ok: true });
 }
+
+/* ═════ CLOUDFLARE STREAM (player) + R2 (originals) ═════
+   The assistant uploads each take to R2 (untouched original) and Stream
+   (playback copy) via the site's /api/media-init Pages Function, then files
+   stream_uid + r2_key with the packet. Weigh-ins J/K; Violation Log J.
+   Setup: setCloudflareMedia(cfAccountId, streamToken, r2AccountId, r2Bucket)
+   then setR2Keys(accessKeyId, secret) — needed only for backfillR2FromDrive. */
+function setCloudflareMedia(cfAccountId, streamToken, r2AccountId, r2Bucket) {
+  var p = PropertiesService.getScriptProperties();
+  p.setProperty('CF_ACCOUNT_ID', String(cfAccountId || '').trim());
+  p.setProperty('STREAM_API_TOKEN', String(streamToken || '').trim());
+  p.setProperty('R2_ACCOUNT_ID', String(r2AccountId || '').trim());
+  p.setProperty('R2_BUCKET', String(r2Bucket || 'mrb-evidence').trim());
+  Logger.log('Cloudflare media properties stored.');
+}
+function setR2Keys(accessKeyId, secret) {
+  var p = PropertiesService.getScriptProperties();
+  p.setProperty('R2_ACCESS_KEY_ID', String(accessKeyId || '').trim());
+  p.setProperty('R2_SECRET_ACCESS_KEY', String(secret || '').trim());
+  Logger.log('R2 keys stored.');
+}
+/* Idempotent: never overwrites a filled cell. */
+function handlePacketMediaFields(sh, row, obj) {
+  var uid = String(obj.stream_uid || '').trim(), key = String(obj.r2_key || '').trim();
+  // Photo originals in R2: the publisher mirrors any 'originals/…' value in D–G
+  // from the bucket instead of Drive. First value per slot is final.
+  var pk = obj.photo_keys && typeof obj.photo_keys === 'object' ? obj.photo_keys : {};
+  var cols = { front: 4, left: 5, rear: 6, right: 7 };
+  Object.keys(cols).forEach(function (a) {
+    var k = String(pk[a] || '').trim();
+    if (k && /^originals\//.test(k) && !String(sh.getRange(row, cols[a]).getValue() || '').trim()) { sh.getRange(row, cols[a]).setValue(k); try { markReceived(apDateStr(sh.getRange(row, 1).getValue()), a); } catch (e) {} }
+  });
+  if (/^[a-f0-9]{32}$/i.test(uid) && !String(sh.getRange(row, 10).getValue() || '').trim()) sh.getRange(row, 10).setValue(uid.toLowerCase());
+  if (key && /^originals\//.test(key) && !String(sh.getRange(row, 11).getValue() || '').trim()) sh.getRange(row, 11).setValue(key.slice(0, 200));
+}
+/* File a corrective recording's Stream uid by hand (Violation Log col J). */
+function setCorrectiveStreamUid(date, uid) {
+  if (!/^[a-f0-9]{32}$/i.test(String(uid || ''))) { Logger.log('Bad uid'); return; }
+  var sh = violationLogSheet(), vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === String(date)) { sh.getRange(i + 1, 10).setValue(String(uid).toLowerCase()); Logger.log('Filed.'); return; }
+  Logger.log('No violation row for ' + date);
+}
+/* One-off: re-apply allowedOrigins to every Stream uid already filed
+   (Weigh-ins col J + Violation Log col J). Fixes "not configured to be
+   allowed on this domain" on the AP console. Safe to re-run. */
+function streamFixOrigins() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('CF_ACCOUNT_ID'), tok = p.getProperty('STREAM_API_TOKEN');
+  if (!acct || !tok) { Logger.log('Run setCloudflareMedia first.'); return; }
+  var uids = [];
+  [weighinsSheet(), violationLogSheet()].forEach(function (sh) { sh.getDataRange().getValues().slice(1).forEach(function (r) { var u = String(r[9] || '').trim().toLowerCase(); if (/^[a-f0-9]{32}$/.test(u)) uids.push(u); }); });
+  var ok = 0, bad = 0;
+  uids.forEach(function (uid) {
+    var res = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + uid, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+      payload: JSON.stringify({ allowedOrigins: ['michealrayberry.com', 'www.michealrayberry.com', 'ap.michealrayberry.com', '*.michealrayberry.com', '*.pages.dev'], requireSignedURLs: false }) });
+    if (res.getResponseCode() < 300) ok++; else { bad++; Logger.log(uid + ': ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); }
+  });
+  Logger.log('Stream origins fixed on ' + ok + ' video(s); ' + bad + ' failed.');
+}
+
+/* Auto-captions for every filed Stream video that lacks English captions.
+   Stream generates them only for uploads made after captions were enabled,
+   so the backfilled days need this once. Safe to re-run (skips existing).
+   The publisher prints the generated transcript on each watch page. */
+function streamGenerateCaptions() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('CF_ACCOUNT_ID'), tok = p.getProperty('STREAM_API_TOKEN');
+  if (!acct || !tok) { Logger.log('Run setCloudflareMedia first.'); return; }
+  var uids = [];
+  [weighinsSheet(), violationLogSheet()].forEach(function (sh) { sh.getDataRange().getValues().slice(1).forEach(function (r) { var u = String(r[9] || '').trim().toLowerCase(); if (/^[a-f0-9]{32}$/.test(u)) uids.push(u); }); });
+  var made = 0, had = 0, bad = 0;
+  uids.forEach(function (uid) {
+    var base = 'https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + uid + '/captions';
+    var list = UrlFetchApp.fetch(base, { muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok } });
+    var j = {}; try { j = JSON.parse(list.getContentText()); } catch (e) {}
+    if (j.success && (j.result || []).some(function (c) { return c.language === 'en'; })) { had++; return; }
+    var res = UrlFetchApp.fetch(base + '/en/generate', { method: 'post', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok } });
+    if (res.getResponseCode() < 300) made++; else { bad++; Logger.log(uid + ': ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); }
+  });
+  Logger.log('Captions: ' + made + ' requested, ' + had + ' already present, ' + bad + ' failed. Generation takes a few minutes per video; rebuild the site afterwards.');
+}
+
+/* BACKFILL Days 1–N → Stream by upload-from-URL, one row per run (6-min limit).
+   Re-run until it logs "nothing left". Toggles link-sharing on the Drive file
+   only for the duration of the copy. */
+function backfillStreamFromDrive() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('CF_ACCOUNT_ID'), tok = p.getProperty('STREAM_API_TOKEN');
+  if (!acct || !tok) { Logger.log('Run setCloudflareMedia first.'); return; }
+  var sh = weighinsSheet(), vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) {
+    if (String(vals[i][9] || '').trim()) continue;
+    var dateIso = apDateStr(vals[i][0]);
+    var file = findDriveBackup_(dateIso, 'inspection');
+    if (!file) { Logger.log(dateIso + ': no Drive backup found — skipped'); continue; }
+    // The backups were uploaded by the participant's account, so this script
+    // (running as the AP) cannot change their sharing; Stream's copy-from-URL
+    // needs a public link. Upload the bytes directly instead (basic upload,
+    // multipart). Apps Script caps outbound payloads at 50 MB; bigger files
+    // are logged and uploaded by hand.
+    var blob = file.getBlob();
+    var size = file.getSize();
+    if (size > 45 * 1024 * 1024) { Logger.log(dateIso + ': ' + Math.round(size / 1048576) + ' MB — over the Apps Script payload cap; upload to Stream by hand and paste the uid into column J.'); continue; }
+    var res = UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream', {
+      method: 'post', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+      payload: { file: blob.setName('micheal-ray-berry-day-' + ('00' + dayOf(dateIso)).slice(-3) + '-inspection-' + dateIso + (/webm/i.test(blob.getContentType()) ? '.webm' : '.mp4')) },
+    });
+    var body = {}; try { body = JSON.parse(res.getContentText()); } catch (err) {}
+    if (body.success && body.result && body.result.uid) {
+      // name + origins + thumbnail via a follow-up PATCH (cheap; no memory cost)
+      try { UrlFetchApp.fetch('https://api.cloudflare.com/client/v4/accounts/' + acct + '/stream/' + body.result.uid, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, headers: { Authorization: 'Bearer ' + tok },
+        payload: JSON.stringify({ meta: { name: 'Micheal Ray Berry — Day ' + dayOf(dateIso) + ' inspection — ' + dateIso, date: dateIso, kind: 'daily' }, allowedOrigins: ['michealrayberry.com', 'www.michealrayberry.com', 'ap.michealrayberry.com', '*.michealrayberry.com', '*.pages.dev'], thumbnailTimestampPct: 0.05 }) }); } catch (err) {}
+    }
+    if (!body.success) { Logger.log(dateIso + ': Stream copy failed — ' + res.getContentText().slice(0, 300)); return; }
+    sh.getRange(i + 1, 10).setValue(body.result.uid);
+    Logger.log(dateIso + ': Stream uid ' + body.result.uid + ' filed. Re-run for the next row.');
+    return;
+  }
+  Logger.log('Stream backfill: nothing left.');
+}
+/* Originals → private R2 bucket via SigV4 PUT, one row per run. ≤ 45 MB/file
+   (Apps Script fetch payload cap); larger originals are copied by hand. */
+function backfillR2FromDrive() {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence';
+  var ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
+  if (!acct || !ak || !sk) { Logger.log('Run setCloudflareMedia + setR2Keys first.'); return; }
+  var sh = weighinsSheet(), vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) {
+    if (String(vals[i][10] || '').trim()) continue;
+    var dateIso = apDateStr(vals[i][0]);
+    var file = findDriveBackup_(dateIso, 'inspection');
+    if (!file) { Logger.log(dateIso + ': no Drive backup — skipped'); continue; }
+    var size = file.getSize();
+    if (size > 45 * 1024 * 1024) { Logger.log(dateIso + ': ' + Math.round(size / 1048576) + ' MB — over the Apps Script payload cap; upload to R2 by hand as originals/… and paste the key into column K.'); continue; }
+    var blob = file.getBlob();
+    var ext = /webm/i.test(blob.getContentType()) ? 'webm' : 'mp4';
+    var key = 'originals/' + dateIso.slice(0, 4) + '/' + dateIso.slice(5, 7) + '/micheal-ray-berry-day-' + ('00' + dayOf(dateIso)).slice(-3) + '-inspection-' + dateIso + '.' + ext;
+    var res = r2Put_(acct, bucket, ak, sk, key, blob);
+    if (res.getResponseCode() >= 300) { Logger.log(dateIso + ': R2 PUT ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200)); return; }
+    sh.getRange(i + 1, 11).setValue(key);
+    Logger.log(dateIso + ': archived as ' + key + '. Re-run for the next row.');
+    return;
+  }
+  Logger.log('R2 backfill: nothing left.');
+}
+/* Historical photo originals → private R2 bucket, one day (4 angles) per run.
+   Source order per angle: the Drive file the sheet cell points at (or pointed
+   at before the mirror repointed it — matched by filename in the photos
+   folder), else the committed repo copy fetched over HTTPS. Records the key in
+   a 'R2 Photo Keys' tab so the sheet's public URLs stay untouched. Re-run
+   until "nothing left". */
+function backfillPhotosToR2() {
+  var p = PropertiesService.getScriptProperties();
+  if (!p.getProperty('R2_ACCOUNT_ID') || !p.getProperty('R2_ACCESS_KEY_ID')) { Logger.log('Run setCloudflareMedia + setR2Keys first.'); return; }
+  var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence', ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
+  var log = tab('R2 Photo Keys'); var doneRows = log.getDataRange().getValues().slice(1); var done = {};
+  doneRows.forEach(function (r) { done[apDateStr(r[0]) + '|' + String(r[1]).trim()] = true; });
+  var vals = weighinsSheet().getDataRange().getValues(); var angles = ['front', 'left', 'rear', 'right'];
+  for (var r = 1; r < vals.length; r++) {
+    var dateIso = apDateStr(vals[r][0]); if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) continue;
+    var pending = angles.filter(function (a) { return !done[dateIso + '|' + a] && String(vals[r][3 + angles.indexOf(a)] || '').trim(); });
+    if (!pending.length) continue;
+    var day = dayOf(dateIso), okCount = 0;
+    for (var i = 0; i < pending.length; i++) {
+      var a = pending[i], cell = String(vals[r][3 + angles.indexOf(a)] || '').trim();
+      var name = 'micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-' + a + '-' + dateIso + '.jpg';
+      var blob = null;
+      try {
+        if (/^originals\//.test(cell)) { log.appendRow(["'" + dateIso, a, cell, 'already-r2', new Date()]); okCount++; continue; }
+        var id = driveIdFromUrl(cell);
+        if (id) blob = DriveApp.getFileById(id).getBlob();
+        else { var f = findDriveBackup_(dateIso, a); if (f) blob = f.getBlob(); }
+        if (!blob && /^https?:/i.test(cell)) { var resp = UrlFetchApp.fetch(cell, { muteHttpExceptions: true, followRedirects: true }); if (resp.getResponseCode() === 200) blob = resp.getBlob(); }
+        if (!blob) { Logger.log(dateIso + ' ' + a + ': no source found'); log.appendRow(["'" + dateIso, a, '', 'no-source', new Date()]); continue; }
+        blob.setContentType('image/jpeg');
+        var key = 'originals/' + dateIso.slice(0, 4) + '/' + dateIso.slice(5, 7) + '/micheal-ray-berry-day-' + ('00' + day).slice(-3) + '-photo-' + a + '-' + dateIso + '.jpg';
+        var res = r2Put_(acct, bucket, ak, sk, key, blob);
+        if (res.getResponseCode() >= 300) { Logger.log(dateIso + ' ' + a + ': R2 PUT ' + res.getResponseCode()); return; }
+        log.appendRow(["'" + dateIso, a, key, 'archived', new Date()]); okCount++;
+      } catch (e) { Logger.log(dateIso + ' ' + a + ': ' + e); return; }
+    }
+    Logger.log(dateIso + ': ' + okCount + '/' + pending.length + ' photo originals archived. Re-run for the next day.');
+    return;
+  }
+  Logger.log('Photo backfill: nothing left.');
+}
+
+/* Loops backfillPhotosToR2 inside a 5-minute budget. Run until it logs "nothing left". */
+function backfillPhotosToR2All() {
+  var t0 = Date.now();
+  while (Date.now() - t0 < 300000) {
+    var before = tab('R2 Photo Keys').getLastRow();
+    backfillPhotosToR2();
+    if (tab('R2 Photo Keys').getLastRow() === before) return;
+  }
+  Logger.log('Time budget reached — run again.');
+}
+
+function findDriveBackup_(dateIso, stem) {
+  var root = photosFolder(), q = "title contains '" + stem + "-" + dateIso + "'";
+  var it = root.searchFiles(q); if (it.hasNext()) return it.next();
+  var subs = root.getFolders();
+  while (subs.hasNext()) { var f = subs.next().searchFiles(q); if (f.hasNext()) return f.next(); }
+  return null;
+}
+function dayOf(dateIso) { var s = new Date(projectStart() + 'T12:00:00Z'), d = new Date(dateIso + 'T12:00:00Z'); return Math.round((d - s) / 86400000) + 1; }
+function r2Put_(acct, bucket, ak, sk, key, blob) {
+  var host = acct + '.r2.cloudflarestorage.com';
+  var amz = Utilities.formatDate(new Date(), 'UTC', "yyyyMMdd'T'HHmmss'Z'"), date = amz.slice(0, 8), scope = date + '/auto/s3/aws4_request';
+  var uri = '/' + bucket + '/' + key.split('/').map(encodeURIComponent).join('/');
+  var ct = blob.getContentType() || 'application/octet-stream', ph = 'UNSIGNED-PAYLOAD';
+  var canonical = ['PUT', uri, '', 'content-type:' + ct, 'host:' + host, 'x-amz-content-sha256:' + ph, 'x-amz-date:' + amz, '', 'content-type;host;x-amz-content-sha256;x-amz-date', ph].join('\n');
+  var sts = ['AWS4-HMAC-SHA256', amz, scope, hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, canonical, Utilities.Charset.UTF_8))].join('\n');
+  var k = hmac_('AWS4' + sk, date); k = hmac_(k, 'auto'); k = hmac_(k, 's3'); k = hmac_(k, 'aws4_request');
+  var sig = hex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(sts).getBytes(), k));
+  return UrlFetchApp.fetch('https://' + host + uri, { method: 'put', contentType: ct, payload: blob, muteHttpExceptions: true,
+    headers: { 'x-amz-date': amz, 'x-amz-content-sha256': ph, Authorization: 'AWS4-HMAC-SHA256 Credential=' + ak + '/' + scope + ', SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=' + sig } });
+}
+/* SigV4 GET from the private R2 bucket; returns a Blob. Used by the photo
+   mirror for 'originals/…' keys filed by the assistant. */
+function r2Get_(key) {
+  var p = PropertiesService.getScriptProperties();
+  var acct = p.getProperty('R2_ACCOUNT_ID'), bucket = p.getProperty('R2_BUCKET') || 'mrb-evidence', ak = p.getProperty('R2_ACCESS_KEY_ID'), sk = p.getProperty('R2_SECRET_ACCESS_KEY');
+  if (!acct || !ak || !sk) throw new Error('R2 keys not set (setCloudflareMedia + setR2Keys)');
+  var host = acct + '.r2.cloudflarestorage.com';
+  var amz = Utilities.formatDate(new Date(), 'UTC', "yyyyMMdd'T'HHmmss'Z'"), date = amz.slice(0, 8), scope = date + '/auto/s3/aws4_request';
+  var uri = '/' + bucket + '/' + key.split('/').map(encodeURIComponent).join('/');
+  var ph = 'UNSIGNED-PAYLOAD';
+  var canonical = ['GET', uri, '', 'host:' + host, 'x-amz-content-sha256:' + ph, 'x-amz-date:' + amz, '', 'host;x-amz-content-sha256;x-amz-date', ph].join('\n');
+  var sts = ['AWS4-HMAC-SHA256', amz, scope, hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, canonical, Utilities.Charset.UTF_8))].join('\n');
+  var k = hmac_('AWS4' + sk, date); k = hmac_(k, 'auto'); k = hmac_(k, 's3'); k = hmac_(k, 'aws4_request');
+  var sig = hex_(Utilities.computeHmacSha256Signature(Utilities.newBlob(sts).getBytes(), k));
+  var res = UrlFetchApp.fetch('https://' + host + uri, { method: 'get', muteHttpExceptions: true, headers: { 'x-amz-date': amz, 'x-amz-content-sha256': ph, Authorization: 'AWS4-HMAC-SHA256 Credential=' + ak + '/' + scope + ', SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=' + sig } });
+  if (res.getResponseCode() >= 300) throw new Error('R2 GET ' + res.getResponseCode());
+  var b = res.getBlob(); b.setName(key.split('/').pop()); return b;
+}
+function hmac_(key, data) { return Utilities.computeHmacSha256Signature(Utilities.newBlob(data).getBytes(), typeof key === 'string' ? Utilities.newBlob(key).getBytes() : key); }
+function hex_(bytes) { return bytes.map(function (b) { return ('0' + (b & 255).toString(16)).slice(-2); }).join(''); }
 
 /* ═════ CAPTURE ATTESTATION (challenge codes + file fingerprints) ═════
    Every session fetches a one-time code (logged with server time, spoken
@@ -810,16 +1311,24 @@ function handleAttest(obj) {
   var now = new Date();
   var today = Utilities.formatDate(now, 'America/New_York', 'yyyy-MM-dd');
   var code = String(obj.code || '').trim();
+  var kind = String(obj.kind || '');
   var status = 'NO CODE';
   if (code) {
     status = 'UNKNOWN CODE';
     var vals = sh.getDataRange().getValues();
     for (var i = vals.length - 1; i >= 1; i--) {
-      if (String(vals[i][3]) === 'challenge-issued' && String(vals[i][4]) === code) {
-        var ageMin = Math.round((now - new Date(vals[i][0])) / 60000);
-        status = (ageMin <= 90 ? 'VALID' : 'STALE') + ' — code issued ' + ageMin + ' min before attest';
-        break;
-      }
+      if (String(vals[i][3]) !== 'challenge-issued' || String(vals[i][4]) !== code) continue;
+      var ageMin = Math.round((now - new Date(vals[i][0])) / 60000);
+      var cstate = String(vals[i][9] || '');
+      if (/^CONSUMED/.test(cstate)) { status = 'REPLAYED — code already used ' + cstate.slice(9); break; }
+      if (String(vals[i][5] || 'daily') !== kind) { status = 'KIND MISMATCH — issued for ' + vals[i][5]; break; }
+      var bindRef = String(vals[i][7] || '').trim();
+      var gotRef = String(obj.ref || obj.assignment_id || '').trim().toUpperCase();
+      if (bindRef && gotRef && bindRef !== gotRef) { status = 'ASSIGNMENT MISMATCH'; break; }
+      if (ageMin > 90) { status = 'STALE — code issued ' + ageMin + ' min before attest'; break; }
+      sh.getRange(i + 1, 10).setValue('CONSUMED ' + now.toISOString());
+      status = 'VALID-CONSUMED';
+      break;
     }
   }
   /* Chunk chain: a rolling SHA-256 over each ~2s of recording, seeded from the
@@ -874,64 +1383,125 @@ function verifySeal(code, videoSha, photoShas, chain, stampedAt, expectedSeal) {
    after the fact and can resolve it with a note under §9. */
 
 function nightlyComplianceCheck() {
-  // Environment follows the record: end-of-day state drives the home.
   importPhotos(); // final scan so a 9:58 PM upload still counts
-  try { withingsSync(); } catch (ew) {} // final weight pull so tonight's reading is on the record
+  try { withingsSync(); } catch (ew) {}
   triggerDeploy(); // the ONE production deploy of the day — photo commits are [skip ci]
 
   var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   if (today < PROJECT_START) return;
+  var v = validatePacket(today); // fail-closed: any doubt → not compliant
+  var receipt = writeReceipt(today, v); // receipts are kept either way — they are facts, not consequences
+  if (!agreementIsActive()) return;   // no declarations, escalations, or notices before activation
+  correctiveDeadlineCheck(today);
+  if (v.ok) return;
 
-  correctiveDeadlineCheck(today); // escalate any 72-hour corrective deadline that lapsed (§8.3)
-
-  var vals = weighinsSheet().getDataRange().getValues();
-  var row = null;
-  for (var i = 1; i < vals.length; i++) {
-    var d = vals[i][0];
-    var ds = d instanceof Date ? Utilities.formatDate(d, 'America/New_York', 'yyyy-MM-dd') : String(d).trim();
-    if (ds === today) { row = vals[i]; break; }
-  }
-
-  var missing = [];
-  if (!row) missing.push('entire daily row (no weight, no photos)');
-  else {
-    if (!parseFloat(row[1])) missing.push('scale-synced weight (no Withings reading reached the record — step on the scale and let it sync)');
-    if (!String(row[3] || '').trim()) missing.push('front daily photo (column D)');
-  }
-  // Capture attestation: was a daily session attested today (challenge + hashes)?
-  var attested = false;
-  try {
-    var av = attestationSheet().getDataRange().getValues();
-    for (var a = av.length - 1; a >= 1; a--) {
-      var ad = av[a][1];
-      var ads = ad instanceof Date ? Utilities.formatDate(ad, 'America/New_York', 'yyyy-MM-dd') : String(ad).trim();
-      if (ads === today && String(av[a][3]) === 'capture-attested' && String(av[a][5]).indexOf('daily') === 0) { attested = true; break; }
-    }
-  } catch (aerr) { attested = true; }
-  if (!attested) missing.push('capture attestation (no challenge code / file fingerprints logged today)');
-  if (!missing.length) return;
-  var autoDeclared = autoDeclareViolation(today, missing);
-  if (autoDeclared) triggerDeploy(); // violation mode goes live tonight, not tomorrow
-
-  var dayNum = Math.floor((new Date(today) - new Date(PROJECT_START)) / 864e5) + 1;
+  var autoDeclared = autoDeclareViolation(today, v.missing);
+  if (autoDeclared) triggerDeploy();
+  var dayNum = dayOf(today);
   MailApp.sendEmail({
     to: AP_EMAIL,
     subject: 'MRB Day ' + dayNum + ' - 10 PM deadline check: packet incomplete' + (autoDeclared ? ' - VIOLATION V-AUTO DECLARED' : ''),
     body: 'Automated 10 PM ET compliance check for ' + today + ' (Day ' + dayNum + ').\n\n' +
-      'Missing at deadline:\n- ' + missing.join('\n- ') + '\n\n' +
+      'Missing or invalid at deadline:\n- ' + v.missing.join('\n- ') + '\n\n' +
+      'Receipt sealed: ' + receipt.seal.slice(0, 16) + '… (Receipts tab)\n\n' +
       (autoDeclared
-        ? 'AUTO-DECLARATION (AP amendment A2): the system has logged a Violation Event for ' + today + ' on the public record and fired the violation consequence. ' +
-          'The site enters violation mode on tonight\'s deploy. No action is required to uphold it.\n' +
-          'If a documented medical event or verified platform failure (\u00a79) applies, resolve the entry from the record sheet (MRB menu) with a note; the reversal is itself logged.\n\n'
+        ? 'AUTO-DECLARATION: a Violation Event for ' + today + ' is on the log pending your confirmation. If a documented §9 exception applies, waive it from the console with a reason; the waiver is itself logged.\n\n'
         : 'A violation for today is already on the log; no duplicate was added.\n\n') +
-      'All times in this check are Google server time (America/New_York) - the device clock plays no part.\n' +
-      'Cross-check file authenticity against the Attestation tab: hash the received file (shasum -a 256) and compare.\n\n' +
-      'Tracker: https://docs.google.com/spreadsheets/d/' + CONFIG.SHEET_ID + '\n' +
-      'Console: the MRB menu in the record sheet.\n' +
-      'This is an automated message from the site Apps Script.',
+      'All times are Google server time (America/New_York); the device clock plays no part.\n' +
+      'Console: https://ap.michealrayberry.com/',
   });
-  // He should not learn of the declaration from the website in the morning.
-  try { mrbViolationNotice(today, missing, autoDeclared); } catch (e) {}
+  try { mrbViolationNotice(today, v.missing, autoDeclared); } catch (e) {}
+}
+
+/* Fail-closed packet validation. Every component must be present AND have
+   reached the record before the 22:00 ET deadline by server time, and the
+   day's sealed attestation must be VALID (a stale/unknown code or a sheet
+   error is a failure, never a pass). Returns { ok, missing[], parts }. */
+function validatePacket(today) {
+  var missing = [], parts = { deadline: today + 'T22:00:00', weight_at: '', front_at: '', left_at: '', rear_at: '', right_at: '', video_at: '', attest_at: '', attest_status: '', video_sha256: '', photo_sha256s: '' };
+  var deadlineMs = etToMs(today, 22, 0);
+  var rec = {}; try { rec = receivedAll(); } catch (e) { missing.push('arrival log unreadable (' + e + ')'); }
+  var onTime = function (iso) { var t = iso ? Date.parse(iso) : NaN; return !isNaN(t) && t <= deadlineMs; };
+  var row = null;
+  try {
+    var vals = weighinsSheet().getDataRange().getValues();
+    for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === today) { row = vals[i]; break; }
+  } catch (e) { missing.push('Weigh-ins unreadable (' + e + ')'); }
+  if (!row) missing.push('entire daily row (no weight, no photos, no video)');
+  else {
+    if (!parseFloat(row[1])) missing.push('scale-synced weight (no Withings reading reached the record)');
+    else { parts.weight_at = rec[today + '|weight'] || ''; if (parts.weight_at && !onTime(parts.weight_at)) missing.push('weight arrived after the 10:00 PM deadline (' + parts.weight_at + ')'); }
+    var angles = ['front', 'left', 'rear', 'right'];
+    var seen = {};
+    angles.forEach(function (a, k) {
+      var cell = String(row[3 + k] || '').trim();
+      if (!cell) { missing.push(a + ' photograph (column ' + 'DEFG'[k] + ')'); return; }
+      if (seen[cell]) missing.push(a + ' photograph duplicates another angle'); seen[cell] = true;
+      parts[a + '_at'] = rec[today + '|' + a] || '';
+      if (parts[a + '_at'] && !onTime(parts[a + '_at'])) missing.push(a + ' photograph arrived after the deadline (' + parts[a + '_at'] + ')');
+    });
+    if (!String(row[7] || '').trim()) missing.push('inspection video (column H)');
+    else { parts.video_at = rec[today + '|video'] || ''; if (parts.video_at && !onTime(parts.video_at)) missing.push('inspection video arrived after the deadline (' + parts.video_at + ')'); }
+  }
+  // Sealed attestation: a daily capture-attested row for today whose status begins VALID and whose seal re-derives.
+  try {
+    var av = attestationSheet().getDataRange().getValues(); var found = null;
+    for (var a = av.length - 1; a >= 1; a--) {
+      if (apDateStr(av[a][1]) !== today || String(av[a][3]) !== 'capture-attested' || String(av[a][5]).indexOf('daily') !== 0) continue;
+      found = av[a]; break;
+    }
+    if (!found) missing.push('sealed capture attestation (no daily attestation row for today)');
+    else {
+      parts.attest_at = found[0] instanceof Date ? found[0].toISOString() : String(found[0]);
+      parts.attest_status = String(found[9] || ''); parts.video_sha256 = String(found[6] || ''); parts.photo_sha256s = String(found[7] || '');
+      if (!/^VALID/.test(parts.attest_status)) missing.push('capture attestation not VALID (' + parts.attest_status + ')');
+      var seal = String(found[12] || ''), stamped = String(found[13] || '');
+      var derived = seal && stamped ? sealFor([String(found[4] || ''), parts.video_sha256, parts.photo_sha256s, String(found[10] || ''), stamped].join('|')) : '';
+      if (!seal || derived !== seal) missing.push('attestation seal does not re-derive (row altered or unsealed)');
+      if (!onTime(parts.attest_at)) missing.push('attestation logged after the deadline (' + parts.attest_at + ')');
+    }
+  } catch (e) { missing.push('Attestation tab unreadable (' + e + ') — treated as failed'); }
+  return { ok: missing.length === 0, missing: missing, parts: parts };
+}
+
+function etToMs(dateIso, h, m) {
+  // ET offset for that date via Utilities (handles DST)
+  var probe = new Date(dateIso + 'T12:00:00Z');
+  var etStr = Utilities.formatDate(probe, 'America/New_York', 'Z'); // e.g. -0400
+  var sign = etStr[0] === '-' ? -1 : 1, oh = Number(etStr.slice(1, 3)), om = Number(etStr.slice(3, 5));
+  var offsetMin = sign * (oh * 60 + om);
+  return Date.UTC(Number(dateIso.slice(0, 4)), Number(dateIso.slice(5, 7)) - 1, Number(dateIso.slice(8, 10)), h, m) - offsetMin * 60000;
+}
+
+/* One receipt per day, written by the 22:00 check and never rewritten. AP
+   decisions and later corrections append to their columns. */
+function writeReceipt(today, v) {
+  var sh = tab('Receipts'); var vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === today) return { row: i + 1, seal: String(vals[i][18] || ''), existing: true };
+  var p = v.parts, verdict = v.ok ? 'COMPLIANT' : (p.video_at || p.front_at || p.weight_at ? 'INCOMPLETE' : 'NOT FILED');
+  var sealedAt = new Date().toISOString();
+  var fields = [today, dayOf(today), '22:00 ET', p.weight_at, p.front_at, p.left_at, p.rear_at, p.right_at, p.video_at, p.attest_at, p.attest_status, p.video_sha256, p.photo_sha256s, verdict, v.missing.join('; '), '', '', sealedAt];
+  var seal = sealFor(fields.map(String).join('|'));
+  sh.appendRow(fields.concat([seal]));
+  return { row: sh.getLastRow(), seal: seal, existing: false };
+}
+/* Append an AP decision / correction to a day's receipt (never overwrites). */
+function receiptNote(dateIso, col, text) {
+  var sh = tab('Receipts'); var vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === dateIso) { var c = col === 'ap_decision' ? 16 : 17; var prev = String(vals[i][c - 1] || ''); sh.getRange(i + 1, c).setValue((prev ? prev + '; ' : '') + menuToday() + ': ' + text); return true; }
+  return false;
+}
+/* Re-derive a receipt's seal from its own fields; logs VALID or MISMATCH. */
+function verifyReceipt(dateIso) {
+  var vals = tab('Receipts').getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) if (apDateStr(vals[i][0]) === dateIso) {
+    var f = vals[i].slice(0, 18).map(function (x, k) { return k === 0 ? apDateStr(x) : (x instanceof Date ? x.toISOString() : String(x)); });
+    f[15] = ''; f[16] = ''; // ap_decision / corrections are appended after sealing and excluded from the seal
+    var got = sealFor(f.join('|'));
+    Logger.log(got === String(vals[i][18]) ? 'RECEIPT VALID for ' + dateIso : 'RECEIPT MISMATCH for ' + dateIso + '\nderived ' + got + '\nstored  ' + vals[i][18]);
+    return got === String(vals[i][18]);
+  }
+  Logger.log('No receipt for ' + dateIso); return false;
 }
 
 /* ═════ 10:20 PM SUPERVISION CHECK (§3.4) ═════
@@ -939,6 +1509,7 @@ function nightlyComplianceCheck() {
    becomes MISSED and a Violation Event is declared automatically. Runs after
    the 22:00 packet check so the two declarations never collide. */
 function supervisionNightlyCheck() {
+  if (!agreementIsActive()) return;
   var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   if (!supervisionScheduled(today)) return;
   var sr = supervisionRow(today);
@@ -947,7 +1518,7 @@ function supervisionNightlyCheck() {
   var sh = supervisionSheet();
   if (sr) sh.getRange(sr.row, 3).setValue('MISSED');
   else sh.appendRow([today, 'yes', 'MISSED', '', '', '', 'no archive link filed by 10:20 PM ET']);
-  violationLogSheet().appendRow([today, 'Evening Supervision session not completed — 6:00–10:00 PM ET (§3.4) [auto-declared]', 'Unresolved']);
+  violationLogSheet().appendRow([today, 'Evening Supervision session not completed — 6:00–10:00 PM ET (§3.4) [auto-declared]', 'Unresolved', '', '', '', '', '', '']);
   triggerDeploy();
   var day = dayOf(today);
   var c = nextConsequence();
@@ -973,7 +1544,7 @@ function autoDeclareViolation(today, missing) {
     if (ds === today && txt.indexOf('72-hour corrective deadline') === -1 && txt.indexOf('Evening Supervision') === -1) return false; // already on the log for today
   }
   var what = missing.length === 1 ? missing[0] : 'Daily Compliance Packet incomplete (' + missing.length + ' items)';
-  sh.appendRow([today, 'Missed 10 PM ET deadline — ' + what + ' [auto-declared]', 'Unresolved']);
+  sh.appendRow([today, 'Missed 10 PM ET deadline — ' + what + ' [auto-declared]', 'Unresolved', '', '', '', '', '', '']);
   return true;
 }
 
@@ -1005,7 +1576,7 @@ function correctiveDeadlineCheck(today) {
     if (corrections.indexOf('[72h-escalated:' + noticeStr + ']') !== -1) continue; // already escalated for this notice
     var dayDiff = Math.round((todayDate - new Date(noticeStr + 'T00:00:00Z')) / 864e5);
     if (dayDiff < 4) continue; // within the 72-hour window (notice at 22:00; day-4 check is the first past 72h)
-    sh.appendRow([today, 'Missed 72-hour corrective deadline for the ' + noticeStr + ' violation [auto-declared, next level]', 'Unresolved']);
+    sh.appendRow([today, 'Missed 72-hour corrective deadline for the ' + noticeStr + ' violation [auto-declared, next level]', 'Unresolved', '', '', '', '', '', '']);
     var note = today + ': 72-hour corrective deadline missed — new Violation Event auto-declared at the next level [72h-escalated:' + noticeStr + ']';
     sh.getRange(i + 1, 7).setValue(corrections ? corrections + '; ' + note : note);
     lapsed.push(noticeStr);
@@ -1096,7 +1667,48 @@ function stateGet(k) {
   return '';
 }
 
+/* ═════ SITE STATE REPAIR ═════
+   The publisher requires Site State row 1 to be exactly key | value. Twice a
+   paste has landed in A1/B1 and fused rows into the header (multi-line cells),
+   which fails every build with "Site State schema mismatch". This repairs it
+   idempotently: splits fused header cells back into rows, forces A1/B1,
+   drops blank rows, dedupes keys (last wins). Safe to run any time; also
+   runs from setup() and from the console's Publish action. */
+function repairSiteState() {
+  var sh = tab('Site State');
+  var vals = sh.getDataRange().getValues();
+  if (!vals.length) { sh.getRange(1, 1, 1, 2).setValues([['key', 'value']]); return 'created header'; }
+  var rows = [];
+  var report = [];
+  for (var r = 0; r < vals.length; r++) {
+    var k = String(vals[r][0] == null ? '' : vals[r][0]), v = String(vals[r][1] == null ? '' : vals[r][1]);
+    if (r === 0 && (/\n/.test(k) || /\n/.test(v))) {
+      var ks = k.split(/\r?\n/), vs = v.split(/\r?\n/);
+      report.push('header held ' + Math.max(ks.length, vs.length) + ' fused lines');
+      for (var i = 1; i < Math.max(ks.length, vs.length); i++) rows.push([String(ks[i] || '').trim(), String(vs[i] || '').trim()]);
+      continue; // header itself is rewritten below
+    }
+    if (r === 0) continue;
+    if (!k.trim() && !v.trim()) continue;
+    rows.push([k.trim(), v]);
+  }
+  // dedupe by key, last wins
+  var seen = {}, out = [];
+  for (var j = rows.length - 1; j >= 0; j--) { if (!rows[j][0] || seen[rows[j][0]]) continue; seen[rows[j][0]] = true; out.unshift(rows[j]); }
+  sh.clearContents();
+  sh.getRange(1, 1, 1, 2).setValues([['key', 'value']]);
+  if (out.length) sh.getRange(2, 1, out.length, 2).setValues(out);
+  sh.getRange(1, 1, 1, 2).setFontWeight('bold');
+  var msg = 'Site State repaired: ' + out.length + ' rows' + (report.length ? ' (' + report.join('; ') + ')' : '');
+  Logger.log(msg);
+  return msg;
+}
+
+/* stateSet must never write into row 1. If the sheet has no header, create
+   it first; then append/update the key on rows 2+. */
 function stateSet(k, val) {
+  var __sh = tab('Site State');
+  if (String(__sh.getRange(1, 1).getValue()).trim() !== 'key' || String(__sh.getRange(1, 2).getValue()).trim() !== 'value') repairSiteState();
   var sh = siteStateSheet();
   var v = sh.getDataRange().getValues();
   for (var i = 1; i < v.length; i++) if (String(v[i][0]) === k) { sh.getRange(i + 1, 2).setValue(val); return; }
@@ -1135,6 +1747,7 @@ function missedDayStreak() {
 
 function abandonmentCheck() {
   completionStreakAlert();
+  if (!agreementIsActive()) return;
   var stage = stateGet('abandoned');
   if (stage === 'confirmed') return; // permanent — nothing to do
   var streak = missedDayStreak();
@@ -1266,6 +1879,12 @@ function onOpen() {
     .addItem('Publish site now', 'menuPublish')
     .addSeparator()
     .addItem('Declare violation (today)', 'menuDeclareViolation')
+    .addItem('Verify violation → PUBLISH', 'menuVerifyViolation')
+    .addItem('Verify resolution → CLOSE', 'menuVerifyResolution')
+    .addSeparator()
+    .addItem('Agreement · ACTIVATE Edition 2', 'menuActivateAgreement')
+    .addItem('Agreement · activation status', 'menuActivationStatus')
+    .addItem('Agreement · DEACTIVATE (clear flag)', 'menuDeactivateAgreement')
     .addItem('Overrule selected entry', 'menuOverrule')
     .addItem('Post update to the site', 'menuPostUpdate')
     .addItem('Supervision · mark tonight EXCEPTION', 'menuSupervisionException')
@@ -1293,8 +1912,152 @@ function menuDeclareViolation() {
   var ui = SpreadsheetApp.getUi();
   var r = ui.prompt('Declare violation (today)', 'Nature of the documentation failure — published verbatim (§8: factual and neutral):', ui.ButtonSet.OK_CANCEL);
   if (r.getSelectedButton() !== ui.Button.OK || !r.getResponseText().trim()) return;
-  violationLogSheet().appendRow([menuToday(), r.getResponseText().trim(), 'Unresolved']);
+  violationLogSheet().appendRow([menuToday(), r.getResponseText().trim(), 'Unresolved', '', '', '', '', '', '']);
   ui.alert('Entered. The site shows it on the next publish (Attestation → MRB → Publish site now).');
+}
+
+/* ═════ AP VERIFICATION MARKERS (publisher contract) ═════
+   The publisher lists a Violation Log row only when col I carries
+   APV1|<verified date>|sha256("violation-v1\n<date>\n<violation text>")
+   and treats it Resolved only when col F carries
+   APR1|<resolution date>|sha256("violation-resolution-v1\n<APV1 marker>\n<date>")
+   with the resolution date in col E. Both bind the exact row text, so
+   editing wording or date after verification unpublishes the entry until
+   re-verified. Select the row in the Violation Log tab, then use the menu. */
+function sha256Hex(s) {
+  var raw = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8);
+  return raw.map(function (b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
+}
+function vlRowDate(v) { return v instanceof Date ? Utilities.formatDate(v, 'America/New_York', 'yyyy-MM-dd') : String(v || '').trim(); }
+function selectedViolationRow(ui) {
+  var sh = SpreadsheetApp.getActiveSheet();
+  if (sh.getName() !== 'Violation Log') { ui.alert('Select the entry’s row in the Violation Log tab first.'); return null; }
+  var row = sh.getActiveRange().getRow();
+  if (row < 2) { ui.alert('Select the entry’s row (not the header).'); return null; }
+  return { sh: sh, row: row, vals: sh.getRange(row, 1, 1, 9).getValues()[0] };
+}
+function menuVerifyViolation() {
+  var ui = SpreadsheetApp.getUi();
+  var p = selectedViolationRow(ui); if (!p) return;
+  if (/^APV1\|/.test(String(p.vals[8] || ''))) { ui.alert('Row ' + p.row + ' is already verified.'); return; }
+  var date = vlRowDate(p.vals[0]), text = String(p.vals[1] || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !text) { ui.alert('Row needs an ISO date in A and wording in B.'); return; }
+  var c = ui.alert('Verify violation — row ' + p.row, date + '\n"' + text + '"\n\nPublish this as a verified Violation Event? Editing A or B afterwards unpublishes it until re-verified.', ui.ButtonSet.YES_NO);
+  if (c !== ui.Button.YES) return;
+  var today = menuToday();
+  p.sh.getRange(p.row, 9).setValue('APV1|' + today + '|' + sha256Hex('violation-v1\n' + date + '\n' + text));
+  if (!String(p.vals[2] || '').trim()) p.sh.getRange(p.row, 3).setValue('Unresolved');
+  triggerDeploy();
+  ui.alert('Verified. Published on the next build (triggered).');
+}
+function menuVerifyResolution() {
+  var ui = SpreadsheetApp.getUi();
+  var p = selectedViolationRow(ui); if (!p) return;
+  var ev = String(p.vals[8] || '').trim();
+  if (!/^APV1\|/.test(ev)) { ui.alert('Row ' + p.row + ' is not a verified violation yet — verify it first.'); return; }
+  if (/^APR1\|/.test(String(p.vals[5] || ''))) { ui.alert('Row ' + p.row + ' is already resolved.'); return; }
+  var today = menuToday();
+  var c = ui.alert('Verify resolution — row ' + p.row, vlRowDate(p.vals[0]) + '\n"' + String(p.vals[1]).slice(0, 80) + '"\n\nMark RESOLVED as of ' + today + '? The corrective evidence (col H) should already be filed.', ui.ButtonSet.YES_NO);
+  if (c !== ui.Button.YES) return;
+  p.sh.getRange(p.row, 5).setValue(today);
+  p.sh.getRange(p.row, 6).setValue('APR1|' + today + '|' + sha256Hex('violation-resolution-v1\n' + ev + '\n' + today));
+  p.sh.getRange(p.row, 3).setValue('Resolved · ' + today);
+  triggerDeploy();
+  ui.alert('Resolution verified. Published on the next build (triggered).');
+}
+
+/* ═════ AGREEMENT ACTIVATION (publisher gate) ═════
+   Enforcement publishes only when Site State holds a complete, self-
+   consistent tuple: agreement_edition=2, both signature-verified dates,
+   the reviewed Edition 2 confirmation's date + review date, and its
+   fingerprint sha256("agreement-confirmation-v1\n2\n<date>\n<canonical url>
+   \n<attestation seal>\n<video sha256>"). The publisher recomputes the
+   fingerprint from the Confirmations + Attestation rows and fails the build
+   if anything disagrees — so this menu derives every value from the sheet
+   and asks the AP only for the two facts it cannot know: that both
+   signatures were personally verified. */
+function canonicalYouTubeForFingerprint(raw) {
+  // publisher confirmationVideoUrl(): exactly watch?v=ID or youtu.be/ID
+  var s = String(raw || '').trim();
+  var m = s.match(/^https:\/\/(?:www\.)?youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/);
+  if (m) return 'https://www.youtube.com/watch?v=' + m[1];
+  m = s.match(/^https:\/\/youtu\.be\/([A-Za-z0-9_-]{11})$/);
+  return m ? 'https://youtu.be/' + m[1] : '';
+}
+function latestEdition2Confirmation() {
+  var cf = tab('Confirmations').getDataRange().getValues();
+  for (var i = cf.length - 1; i >= 1; i--) {
+    if (String(cf[i][2]).trim() !== '2') continue;
+    var date = vlRowDate(cf[i][1]);
+    var url = canonicalYouTubeForFingerprint(cf[i][4]);
+    var seal = String(cf[i][5] || '').trim().toLowerCase();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !url || !/^[a-f0-9]{64}$/.test(seal)) continue;
+    // matching sealed capture → video hash
+    var att = tab('Attestation').getDataRange().getValues();
+    for (var a = att.length - 1; a >= 1; a--) {
+      if (vlRowDate(att[a][1]) !== date) continue;
+      if (String(att[a][3]).trim() !== 'capture-attested' || String(att[a][5]).trim() !== 'confirmation') continue;
+      if (String(att[a][9]).trim() !== 'VALID-CONSUMED') continue;
+      if (String(att[a][12] || '').trim().toLowerCase() !== seal) continue;
+      var vh = String(att[a][6] || '').trim().toLowerCase();
+      if (!/^[a-f0-9]{64}$/.test(vh)) continue;
+      return { row: i + 1, date: date, url: url, seal: seal, videoHash: vh,
+        fingerprint: sha256Hex('agreement-confirmation-v1\n2\n' + date + '\n' + url + '\n' + seal + '\n' + vh) };
+    }
+  }
+  return null;
+}
+function menuActivationStatus() {
+  var ui = SpreadsheetApp.getUi();
+  var st = siteStateAll();
+  var c = latestEdition2Confirmation();
+  var lines = [
+    'agreement_edition: ' + (st.agreement_edition || '(blank — INACTIVE)'),
+    'mrb_signature_verified_at: ' + (st.mrb_signature_verified_at || '—'),
+    'ap_signature_verified_at: ' + (st.ap_signature_verified_at || '—'),
+    'agreement_confirmation_date: ' + (st.agreement_confirmation_date || '—'),
+    'agreement_confirmation_verified_at: ' + (st.agreement_confirmation_verified_at || '—'),
+    'agreement_confirmation_fingerprint: ' + (st.agreement_confirmation_fingerprint ? st.agreement_confirmation_fingerprint.slice(0, 16) + '…' : '—'),
+    '',
+    'Edition 2 confirmation on record: ' + (c ? 'YES — ' + c.date + ' · ' + c.url + ' · fingerprint ' + c.fingerprint.slice(0, 16) + '…' : 'NO (needs a filed consent link with a sealed confirmation capture)'),
+    c && st.agreement_confirmation_fingerprint ? 'Fingerprint matches Site State: ' + (c.fingerprint === String(st.agreement_confirmation_fingerprint).toLowerCase()) : '',
+  ];
+  ui.alert('Agreement activation status', lines.filter(function (x) { return x !== undefined; }).join('\n'), ui.ButtonSet.OK);
+}
+function menuActivateAgreement() {
+  var ui = SpreadsheetApp.getUi();
+  var c = latestEdition2Confirmation();
+  if (!c) { ui.alert('Cannot activate', 'No Edition 2 consent confirmation is on record with a sealed capture.\n\nMicheal records the Consent Confirmation in the assistant, posts it, and files the link; col F (attestation_seal) fills automatically. Then run this again.', ui.ButtonSet.OK); return; }
+  var today = menuToday();
+  var q1 = ui.alert('Step 1 of 3 — Micheal\'s signature', 'Have you personally verified Micheal Ray Berry\'s signature on the Edition 2 agreement?', ui.ButtonSet.YES_NO);
+  if (q1 !== ui.Button.YES) { ui.alert('Not activated.'); return; }
+  var q2 = ui.alert('Step 2 of 3 — your signature', 'Have you counter-signed the Edition 2 agreement and verified your own signature?', ui.ButtonSet.YES_NO);
+  if (q2 !== ui.Button.YES) { ui.alert('Not activated.'); return; }
+  var q3 = ui.alert('Step 3 of 3 — consent recording', 'Consent recording on record:\n' + c.date + '\n' + c.url + '\n\nHave you watched it and confirmed a clear, deliberate nod inside the CONFIRMATION WINDOW? (Stillness is not consent.)', ui.ButtonSet.YES_NO);
+  if (q3 !== ui.Button.YES) { ui.alert('Not activated. If the nod was unclear, the recording must be rejected and re-made.'); return; }
+  var go = ui.alert('ACTIVATE Edition 2', 'This publishes enforcement: verified violations, supervision status, nightly checks. Effective date = latest of Day 1, both signature dates, the confirmation date, and today.\n\nProceed?', ui.ButtonSet.YES_NO);
+  if (go !== ui.Button.YES) { ui.alert('Not activated.'); return; }
+  stateSet('mrb_signature_verified_at', today);
+  stateSet('ap_signature_verified_at', today);
+  stateSet('agreement_confirmation_date', c.date);
+  stateSet('agreement_confirmation_verified_at', today);
+  stateSet('agreement_confirmation_fingerprint', c.fingerprint);
+  stateSet('agreement_edition', '2'); // commit flag last
+  try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+  try {
+    tab('Updates').appendRow([today, 'official', 'Edition 2 agreement activated',
+      'Both signatures verified and the Edition 2 consent recording of ' + c.date + ' reviewed by the Accountability Partner. Enforcement is active from this date.', c.url]);
+  } catch (e) {}
+  triggerDeploy();
+  ui.alert('Activated', 'Site State written. Deploy triggered — if the publisher rejects the tuple the build fails closed and the site stays as it was; check the Netlify log.', ui.ButtonSet.OK);
+}
+function menuDeactivateAgreement() {
+  var ui = SpreadsheetApp.getUi();
+  var go = ui.alert('DEACTIVATE', 'Clear agreement_edition? Enforcement stops publishing on the next build (other tuple keys are kept for the record). Log the reason in Updates afterwards.', ui.ButtonSet.YES_NO);
+  if (go !== ui.Button.YES) return;
+  stateSet('agreement_edition', '');
+  triggerDeploy();
+  ui.alert('Cleared. Deploy triggered.');
 }
 
 function menuOverrule() {
@@ -1427,12 +2190,438 @@ function handleApState() {
   return jsonOut(out);
 }
 
+/* ═════ AP CONSOLE (/ap/) — JSON API ═════
+   Everything the MRB sheet menu does, callable from the web console with the
+   AP key. Each op returns { ok, ... } and the console re-reads 'status'.
+   Writes are the same code paths the menu uses; nothing is hand-typed that
+   the record can compute. */
+/* ═════ VOICE SCRIPT OVERRIDES ═════ */
+function scriptOverrides() {
+  var v = tab('Scripts').getDataRange().getValues(), map = {}, meta = {};
+  for (var i = 1; i < v.length; i++) {
+    var k = String(v[i][0] || '').trim(), t = String(v[i][1] || '');
+    if (!k || !t.trim()) continue;
+    map[k] = t;
+    meta[k] = { updated_at: v[i][2] instanceof Date ? v[i][2].toISOString() : String(v[i][2] || ''), updated_by: String(v[i][3] || '') };
+  }
+  return { map: map, meta: meta };
+}
+function scriptSet(key, template, actor) {
+  key = String(key || '').trim();
+  if (!/^[A-Za-z]+(\.[a-z_]+)?$/.test(key)) return { ok: false, error: 'Bad script key.' };
+  template = String(template == null ? '' : template).replace(/\r\n/g, '\n').slice(0, 4000);
+  var sh = tab('Scripts'), v = sh.getDataRange().getValues();
+  for (var i = 1; i < v.length; i++) if (String(v[i][0]).trim() === key) {
+    if (!template.trim()) { sh.deleteRow(i + 1); return { ok: true, reverted: true }; }
+    sh.getRange(i + 1, 2, 1, 3).setValues([[template, new Date(), actor || 'console']]); return { ok: true };
+  }
+  if (!template.trim()) return { ok: true, reverted: true };
+  sh.appendRow([key, template, new Date(), actor || 'console']);
+  return { ok: true };
+}
+
+function apAudit(obj, result) {
+  try {
+    var args = Object.assign({}, obj); delete args.key; delete args.action; delete args.actor; delete args.actor_ip; delete args.actor_ua;
+    tab('AP Actions').appendRow([new Date(), String(obj.actor || 'menu'), String(obj.actor_ip || ''), String(obj.actor_ua || ''), String(obj.op || ''), JSON.stringify(args).slice(0, 2000), String(result || '').slice(0, 300)]);
+  } catch (e) { Logger.log('AP audit failed: ' + e); }
+}
+function handleApConsole(obj) {
+  var res = handleApConsoleInner(obj);
+  var op = String(obj.op || 'status');
+  if (op !== 'status') { var txt = ''; try { txt = res.getContent(); } catch (e) {} apAudit(obj, txt); }
+  return res;
+}
+function handleApConsoleInner(obj) {
+  var today = menuToday();
+  var op = String(obj.op || 'status');
+  var out = { ok: true };
+  var deploy = false;
+
+  if (op === 'status') return jsonOut(apConsoleStatus(today));
+
+  if (op === 'publish') { var rep = repairSiteState(); triggerDeploy(); return jsonOut({ ok: true, note: rep }); }
+
+  if (op === 'scripts_list') { var so = scriptOverrides(); return jsonOut({ ok: true, overrides: so.map, meta: so.meta }); }
+  if (op === 'scripts_set') return jsonOut(scriptSet(obj.key, obj.template, obj.actor));
+
+  if (op === 'declare') {
+    var dd = /^\d{4}-\d{2}-\d{2}$/.test(String(obj.date || '')) ? String(obj.date) : today;
+    var txt = String(obj.text || '').trim();
+    if (!txt) return jsonOut({ ok: false, error: 'Wording is required.' });
+    violationLogSheet().appendRow([dd, txt, 'Unresolved', '', '', '', '', '', '']);
+    return jsonOut({ ok: true, row: violationLogSheet().getLastRow() });
+  }
+
+  if (op === 'verify_violation' || op === 'verify_resolution' || op === 'overrule') {
+    var sh = violationLogSheet();
+    var row = Number(obj.row);
+    if (!(row >= 2 && row <= sh.getLastRow())) return jsonOut({ ok: false, error: 'Bad row.' });
+    var v = sh.getRange(row, 1, 1, 9).getValues()[0];
+    var date = vlRowDate(v[0]), text = String(v[1] || '').trim(), ev = String(v[8] || '').trim();
+    if (op === 'verify_violation') {
+      if (/^APV1\|/.test(ev)) return jsonOut({ ok: false, error: 'Already verified.' });
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !text) return jsonOut({ ok: false, error: 'Row needs an ISO date and wording.' });
+      sh.getRange(row, 9).setValue('APV1|' + today + '|' + sha256Hex('violation-v1\n' + date + '\n' + text));
+      if (!String(v[2] || '').trim()) sh.getRange(row, 3).setValue('Unresolved');
+      deploy = true;
+    } else if (op === 'verify_resolution') {
+      if (!/^APV1\|/.test(ev)) return jsonOut({ ok: false, error: 'Verify the violation first.' });
+      if (/^APR1\|/.test(String(v[5] || ''))) return jsonOut({ ok: false, error: 'Already resolved.' });
+      sh.getRange(row, 5).setValue(today);
+      sh.getRange(row, 6).setValue('APR1|' + today + '|' + sha256Hex('violation-resolution-v1\n' + ev + '\n' + today));
+      sh.getRange(row, 3).setValue('Resolved · ' + today);
+      deploy = true;
+    } else {
+      var reason = String(obj.reason || '').trim() || 'fails the §8 standard';
+      sh.getRange(row, 3).setValue('Unresolved · overruled · ' + today);
+      sh.getRange(row, 5).setValue('');
+      sh.getRange(row, 6).setValue('');
+      var prev = String(sh.getRange(row, 7).getValue() || '').trim();
+      var note = today + ': overruled — ' + reason + '; replacement session required';
+      sh.getRange(row, 7).setValue(prev ? prev + '; ' + note : note);
+      deploy = true;
+    }
+    if (deploy) triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+
+  if (op === 'activate') {
+    var c = latestEdition2Confirmation();
+    if (!c) return jsonOut({ ok: false, error: 'No Edition 2 consent recording with a sealed capture is on record.' });
+    var at = obj.attest || {};
+    if (!(at.mrb === true && at.ap === true && at.nod === true)) return jsonOut({ ok: false, error: 'All three attestations are required.' });
+    stateSet('mrb_signature_verified_at', today);
+    stateSet('ap_signature_verified_at', today);
+    stateSet('agreement_confirmation_date', c.date);
+    stateSet('agreement_confirmation_verified_at', today);
+    stateSet('agreement_confirmation_fingerprint', c.fingerprint);
+    stateSet('agreement_edition', '2');
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { tab('Updates').appendRow([today, 'official', 'Agreement activated', 'Both signatures verified and the consent recording of ' + c.date + ' reviewed by the Accountability Partner. Enforcement is active from this date.', c.url]); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+
+  /* Reverse activation. Enforcement stops; nothing already on the record is
+     altered. Requires a written reason, which is published to Updates. */
+  if (op === 'deactivate') {
+    var why = String(obj.reason || '').trim();
+    if (!why) return jsonOut({ ok: false, error: 'A written reason is required.' });
+    if (!stateGet('agreement_confirmation_verified_at')) return jsonOut({ ok: false, error: 'The agreement is not active.' });
+    ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, ''); });
+    stateSet('agreement_edition', '');
+    stateSet('agreement_confirmation_attested_by', '');
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { tab('Updates').appendRow([today, 'official', 'Agreement enforcement suspended', why, '']); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'deactivate') { stateSet('agreement_edition', ''); triggerDeploy(); return jsonOut({ ok: true }); }
+
+  if (op === 'supervision_assign' || op === 'supervision_release') {
+    var ad = String(obj.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ad)) return jsonOut({ ok: false, error: 'Date required.' });
+    if (ad < today) return jsonOut({ ok: false, error: 'Cannot assign a past night.' });
+    var res = supervisionAssign(ad, op === 'supervision_assign', String(obj.note || '').trim());
+    if (res.ok) triggerDeploy();
+    return jsonOut(res);
+  }
+
+  if (op === 'supervision_exception') {
+    var ds = /^\d{4}-\d{2}-\d{2}$/.test(String(obj.date || '')) ? String(obj.date) : today;
+    var why = String(obj.reason || '').trim();
+    if (!why) return jsonOut({ ok: false, error: 'Reason is required (published verbatim).' });
+    var sr = supervisionRow(ds);
+    var st = 'EXCEPTION · ' + why;
+    if (sr) supervisionSheet().getRange(sr.row, 3).setValue(st);
+    else supervisionSheet().appendRow([ds, supervisionScheduled(ds) ? 'yes' : 'no', st, '', '', '', '']);
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+
+  if (op === 'observer_review') {
+    var osh = tab('Observer');
+    var orow = Number(obj.row);
+    if (!(orow >= 2 && orow <= osh.getLastRow())) return jsonOut({ ok: false, error: 'Bad row.' });
+    var rv = String(obj.review || '').trim().toLowerCase();
+    if (['received', 'dismissed', 'verified', 'published', 'actioned'].indexOf(rv) === -1) return jsonOut({ ok: false, error: 'Bad review state.' });
+    osh.getRange(orow, 8).setValue(rv);
+    osh.getRange(orow, 9).setValue(String(obj.note || '').trim());
+    return jsonOut({ ok: true });
+  }
+
+  if (op === 'post_update') {
+    var title = String(obj.title || '').trim(), body = String(obj.body || '').trim();
+    if (!title) return jsonOut({ ok: false, error: 'Title is required.' });
+    tab('Updates').appendRow([today, obj.amendment === true ? 'amendment' : 'official', title, body, String(obj.link || '').trim()]);
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+
+  if (op === 'stage') {
+    var key = String(obj.key || ''), val = String(obj.value || '');
+    if (['abandoned', 'completed'].indexOf(key) === -1) return jsonOut({ ok: false, error: 'Bad stage key.' });
+    if (['', 'presumed', 'confirmed'].indexOf(val) === -1) return jsonOut({ ok: false, error: 'Bad stage value.' });
+    stateSet(key, val);
+    if (key === 'abandoned' && val && !stateGet('abandoned_date')) stateSet('abandoned_date', today);
+    if (key === 'completed' && val === 'confirmed' && !stateGet('completed_date')) stateSet('completed_date', today);
+    if (!val) stateSet(key + '_date', '');
+    return jsonOut({ ok: true });
+  }
+
+  /* ── Project control ── */
+  if (op === 'start_project') {
+    var startWhy = String(obj.reason || 'Agreement counter-signed; enforcement begins today.').trim();
+    var vsP = violationLogSheet(), vvP = vsP.getDataRange().getValues(), marked = 0;
+    for (var pi = 1; pi < vvP.length; pi++) {
+      var stP = String(vvP[pi][2] || '').toLowerCase();
+      if (stP === 'unresolved' || stP === 'open' || stP === 'declared') {
+        vsP.getRange(pi + 1, 3).setValue('not enforced');
+        var corrP = String(vvP[pi][6] || '');
+        vsP.getRange(pi + 1, 7).setValue((corrP ? corrP + '; ' : '') + 'Before activation — not enforced under §9 (' + today + ')');
+        marked++;
+      }
+    }
+    var nowIsoP = new Date().toISOString();
+    ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoP); });
+    stateSet('agreement_effective_date', today);
+    stateSet('agreement_edition', '2');
+    stateSet('agreement_confirmation_date', stateGet('agreement_confirmation_date') || today);
+    stateSet('banner_mode', 'auto');
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { tab('Updates').appendRow([today, 'official', 'Agreement activated', startWhy + (marked ? ' ' + marked + ' pre-activation entr' + (marked === 1 ? 'y was' : 'ies were') + ' recorded as not enforced under §9.' : ''), '']); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true, marked: marked });
+  }
+  if (op === 'resume') {
+    if (stateGet('agreement_confirmation_verified_at')) return jsonOut({ ok: false, error: 'Already active.' });
+    var nowIsoR = new Date().toISOString();
+    ['mrb_signature_verified_at', 'ap_signature_verified_at', 'agreement_confirmation_verified_at'].forEach(function (k) { stateSet(k, nowIsoR); });
+    stateSet('agreement_edition', '2');
+    if (!stateGet('agreement_confirmation_attested_by') && !(typeof latestEdition2Confirmation === 'function' && latestEdition2Confirmation())) {
+      stateSet('agreement_confirmation_attested_by', String(obj.actor || 'menu') + ' ' + today);
+      if (!/^[a-f0-9]{64}$/.test(String(stateGet('agreement_confirmation_fingerprint') || ''))) stateSet('agreement_confirmation_fingerprint', sha256Hex('ap-attested-consent-review\n' + today + '\n' + String(obj.actor || 'menu')));
+      if (!stateGet('agreement_confirmation_date')) stateSet('agreement_confirmation_date', today);
+    }
+    try { tab('Updates').appendRow([today, 'official', 'Enforcement resumed', String(obj.reason || '').trim(), '']); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'banner_mode') {
+    var mode = String(obj.mode || 'auto').toLowerCase();
+    if (['auto', 'on', 'off'].indexOf(mode) === -1) return jsonOut({ ok: false, error: 'mode must be auto|on|off' });
+    stateSet('banner_mode', mode);
+    stateSet('banner_mode_reason', String(obj.reason || '').trim().slice(0, 300));
+    triggerDeploy();
+    return jsonOut({ ok: true, mode: mode });
+  }
+
+  /* ── Fresh start: new Day 1, nothing before it on the record ──
+     Archives every record tab to a dated copy inside the same spreadsheet
+     (tab names prefixed "ARCHIVE <date> ·"), clears the live tabs, resets
+     Site State (start_date = chosen day; activation cleared; banner auto),
+     writes one Updates entry, and redeploys. TF060 is a static page and is
+     untouched. Requires reason + the exact typed date as a second factor. */
+  if (op === 'fresh_start') {
+    var nd = String(obj.new_start || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(nd)) return jsonOut({ ok: false, error: 'new_start must be YYYY-MM-DD' });
+    if (String(obj.confirm_date || '') !== nd) return jsonOut({ ok: false, error: 'Type the new Day 1 date again to confirm.' });
+    var fsWhy = String(obj.reason || '').trim(); if (!fsWhy) return jsonOut({ ok: false, error: 'A written reason is required (published).' });
+    var s = ss(); var stamp = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd HHmm');
+    var archived = [];
+    ['Weigh-ins', 'Violation Log', 'Attestation', 'Corrective Log', 'Weekly Log', 'Confirmations', 'Health', 'Supervision', 'Updates', 'R2 Photo Keys'].forEach(function (name) {
+      var sh = s.getSheetByName(name); if (!sh) return;
+      if (sh.getLastRow() > 1) {
+        var copy = sh.copyTo(s); copy.setName(('ARCHIVE ' + stamp + ' · ' + name).slice(0, 99)); copy.hideSheet(); archived.push(name);
+        sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(1, sh.getLastColumn())).clearContent();
+      }
+    });
+    // Site State: keep only the keys that describe the project, reset the rest
+    // The fresh start IS the activation decision: the AP attests the agreement
+    // stands from the new Day 1, so enforcement begins that night with no
+    // second ceremony. (Suspend remains available.)
+    var fsIso = new Date().toISOString(), fsActor = String(obj.actor || 'menu');
+    var keep = { start_date: nd, banner_mode: 'auto', agreement_edition: '2', mrb_signature_verified_at: fsIso, ap_signature_verified_at: fsIso, agreement_confirmation_verified_at: fsIso, agreement_confirmation_date: nd, agreement_confirmation_fingerprint: sha256Hex('ap-attested-consent-review\n' + nd + '\n' + fsActor), agreement_confirmation_attested_by: fsActor + ' ' + today, agreement_effective_date: nd, abandoned: '', abandoned_date: '', completed: '', completed_date: '', verdict_seen: '', submitted_seen: '', milestones_hit: '', intro_video_url: stateGet('intro_video_url') || '', wait_still_url: '', wait_still_date: '' };
+    var stTab = tab('Site State'); if (stTab.getLastRow() > 1) stTab.getRange(2, 1, stTab.getLastRow() - 1, 2).clearContent();
+    Object.keys(keep).forEach(function (k) { stateSet(k, keep[k]); });
+    try { CacheService.getScriptCache().remove('mrb_start_date'); } catch (e) {}
+    try { PropertiesService.getScriptProperties().deleteProperty('GH_MIRRORED'); } catch (e) {}
+    tab('Updates').appendRow([nd, 'official', 'Fresh start — Day 1 is ' + nd, fsWhy + ' All prior entries were archived by the Accountability Partner; nothing before this date is part of the current record. The agreement is active from this date by the Accountability Partner\u2019s attestation. The TF060 page is unchanged.', '']);
+    triggerDeploy();
+    return jsonOut({ ok: true, archived: archived, start_date: nd });
+  }
+
+  /* ── Review queue ── */
+  if (op === 'review_queue') {
+    var wsQ = weighinsSheet(), wvQ = wsQ.getDataRange().getValues();
+    var vlogQ = violationLogSheet().getDataRange().getValues();
+    var items = [];
+    for (var rq = 1; rq < wvQ.length; rq++) {
+      var dq = apDateStr(wvQ[rq][0]); if (!dq) continue;
+      if (String(wvQ[rq][2] || '').indexOf('[AP:') !== -1) continue;
+      items.push({ kind: 'daily', date: dq, day: dayOf(dq), weight: wvQ[rq][1], video: wvQ[rq][7] || '', stream_uid: wvQ[rq][9] || '', photos: [wvQ[rq][3], wvQ[rq][4], wvQ[rq][5], wvQ[rq][6]].filter(Boolean).length, note: wvQ[rq][2] || '' });
+    }
+    for (var qq = 1; qq < vlogQ.length; qq++) {
+      var vdq = vlRowDate(vlogQ[qq][0]); var vstq = String(vlogQ[qq][2] || '').toLowerCase();
+      var evq = String(vlogQ[qq][8] || ''), resq = String(vlogQ[qq][5] || '');
+      if (vlogQ[qq][7] && !/^APR1\|/.test(resq)) items.push({ kind: 'corrective', row: qq + 1, date: vdq, violation: vlogQ[qq][1], status: vstq, recording: vlogQ[qq][7] || '', stream_uid: vlogQ[qq][9] || '', submitted: vlRowDate(vlogQ[qq][3]) });
+      else if (!/^APV1\|/.test(evq) && vstq !== 'not enforced' && vstq !== 'resolved') items.push({ kind: 'declared', row: qq + 1, date: vdq, violation: vlogQ[qq][1], status: vstq });
+    }
+    items.sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    return jsonOut({ ok: true, items: items.slice(0, 60) });
+  }
+  if (op === 'review_daily') {
+    var rd = String(obj.date || ''), dec = String(obj.decision || '');
+    var ws2 = weighinsSheet(), wv2 = ws2.getDataRange().getValues();
+    for (var r2 = 1; r2 < wv2.length; r2++) if (apDateStr(wv2[r2][0]) === rd) {
+      var noteR = String(wv2[r2][2] || '');
+      ws2.getRange(r2 + 1, 3).setValue((noteR ? noteR + ' ' : '') + '[AP:' + dec + ' ' + today + ']');
+      if (dec === 'reject') violationLogSheet().appendRow([rd, String(obj.reason || 'Daily packet rejected on review'), 'Unresolved', '', '', '', 'AP review ' + today, '', '', '']);
+      try { receiptNote(rd, 'ap_decision', dec === 'reject' ? 'REJECTED — ' + String(obj.reason || '') : 'ACCEPTED'); } catch (e) {}
+      triggerDeploy();
+      return jsonOut({ ok: true });
+    }
+    return jsonOut({ ok: false, error: 'No weigh-in row for ' + rd });
+  }
+  if (op === 'add_violation') {
+    var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(obj.date || '')) ? String(obj.date) : today, what = String(obj.violation || '').trim();
+    if (!what) return jsonOut({ ok: false, error: 'violation text required' });
+    violationLogSheet().appendRow([ad, what, 'Unresolved', '', '', '', 'Added by AP ' + today + (obj.reason ? ': ' + String(obj.reason) : ''), '', '', '']);
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'waive') {
+    var wr = String(obj.reason || '').trim(); if (!wr) return jsonOut({ ok: false, error: 'A written §9 reason is required.' });
+    var vs3 = violationLogSheet(), rowW = Number(obj.row) || 0;
+    if (!rowW) { var vv3 = vs3.getDataRange().getValues(); for (var w = 1; w < vv3.length; w++) if (vlRowDate(vv3[w][0]) === String(obj.date || '')) { rowW = w + 1; break; } }
+    if (!(rowW >= 2 && rowW <= vs3.getLastRow())) return jsonOut({ ok: false, error: 'No entry.' });
+    vs3.getRange(rowW, 3).setValue('not enforced');
+    var corrW = String(vs3.getRange(rowW, 7).getValue() || '');
+    vs3.getRange(rowW, 7).setValue((corrW ? corrW + '; ' : '') + 'Waived under §9: ' + wr + ' (' + today + ')');
+    try { receiptNote(vlRowDate(vs3.getRange(rowW, 1).getValue()), 'corrections', 'Waived under §9: ' + wr); } catch (e) {}
+    triggerDeploy();
+    return jsonOut({ ok: true });
+  }
+  if (op === 'set_stream_uid') {
+    var su = String(obj.uid || '').trim().toLowerCase(), sd = String(obj.date || ''), target = String(obj.target || 'daily');
+    if (!/^[a-f0-9]{32}$/.test(su)) return jsonOut({ ok: false, error: 'bad uid' });
+    var sh4 = target === 'corrective' ? violationLogSheet() : weighinsSheet(); var v4 = sh4.getDataRange().getValues();
+    for (var x = 1; x < v4.length; x++) if ((target === 'corrective' ? vlRowDate(v4[x][0]) : apDateStr(v4[x][0])) === sd) { sh4.getRange(x + 1, 10).setValue(su); triggerDeploy(); return jsonOut({ ok: true }); }
+    return jsonOut({ ok: false, error: 'No row for ' + sd });
+  }
+
+  /* ── Record editing, guarded ── */
+  if (op === 'edit_weighin') {
+    var ed = String(obj.date || ''), er = String(obj.reason || '').trim();
+    if (!er) return jsonOut({ ok: false, error: 'A written reason is required.' });
+    var ws5 = weighinsSheet(), wv5 = ws5.getDataRange().getValues();
+    for (var y = 1; y < wv5.length; y++) if (apDateStr(wv5[y][0]) === ed) {
+      if (obj.weight != null && obj.weight !== '' && !isNaN(Number(obj.weight))) ws5.getRange(y + 1, 2).setValue(Number(obj.weight));
+      if (typeof obj.note === 'string') ws5.getRange(y + 1, 3).setValue(obj.note + ' [AP edit ' + today + ': ' + er + ']');
+      else ws5.getRange(y + 1, 3).setValue(String(wv5[y][2] || '') + ' [AP edit ' + today + ': ' + er + ']');
+      if (obj.clear_photo) { var colC = { front: 4, left: 5, rear: 6, right: 7 }[String(obj.clear_photo)]; if (colC) ws5.getRange(y + 1, colC).setValue(''); }
+      triggerDeploy();
+      return jsonOut({ ok: true });
+    }
+    return jsonOut({ ok: false, error: 'No row for ' + ed });
+  }
+
+  /* ── Ops ── */
+  if (op === 'actions_log') {
+    var al = tab('AP Actions').getDataRange().getValues().slice(1).slice(-50).reverse();
+    return jsonOut({ ok: true, rows: al.map(function (r) { return { at: r[0], actor: r[1], ip: r[2], op: r[4], args: String(r[5] || '').slice(0, 200), result: String(r[6] || '').slice(0, 120) }; }) });
+  }
+  if (op === 'observer_inbox') {
+    var all = tab('Observer').getDataRange().getValues().slice(1);
+    var ob = all.slice(-50).reverse(); var base = all.length;
+    return jsonOut({ ok: true, rows: ob.map(function (r, k) { return { n: base - k, at: r[0], type: r[1], ref: r[2], message: String(r[3] || '').slice(0, 600), name: r[4], email: r[5], link: r[6], review: r[7] }; }) });
+  }
+  if (op === 'media_backfill_status') {
+    var wv6 = weighinsSheet().getDataRange().getValues().slice(1);
+    return jsonOut({ ok: true, rows: wv6.filter(function (r) { return r[7]; }).length, missing_stream: wv6.filter(function (r) { return r[7] && !r[9]; }).length, missing_r2: wv6.filter(function (r) { return r[7] && !r[10]; }).length });
+  }
+  return jsonOut({ ok: false, error: 'unknown op' });
+}
+
+function apConsoleStatus(today) {
+  var st = siteStateAll();
+  var ps = packetState(today);
+  var et = new Date();
+  var nowEt = Utilities.formatDate(et, 'America/New_York', 'HH:mm');
+  // weigh-ins, last 14
+  var wv = weighinsSheet().getDataRange().getValues();
+  var att = attestationSheet().getDataRange().getValues();
+  var attestedDates = {};
+  for (var a = 1; a < att.length; a++) if (String(att[a][3]) === 'capture-attested' && String(att[a][5]) === 'daily') attestedDates[apDateStr(att[a][1])] = true;
+  var weighins = [];
+  for (var i = wv.length - 1; i >= 1 && weighins.length < 14; i--) {
+    var d = apDateStr(wv[i][0]); if (!d) continue;
+    var photos = [3, 4, 5, 6].filter(function (c) { return String(wv[i][c] || '').trim(); }).length;
+    weighins.push({ date: d, day: dayOf(d), weight: wv[i][1] ? Number(wv[i][1]) : null, photos: photos, video: !!String(wv[i][7] || '').trim(), attested: !!attestedDates[d] });
+  }
+  // violations
+  var pv = violationLogSheet().getDataRange().getValues();
+  var violations = [];
+  for (var p = 1; p < pv.length; p++) {
+    if (!pv[p][0]) continue;
+    var evm = String(pv[p][8] || '').trim(), apr = String(pv[p][5] || '').trim();
+    violations.push({ row: p + 1, date: apDateStr(pv[p][0]), day: dayOf(apDateStr(pv[p][0])), violation: String(pv[p][1] || ''), status: String(pv[p][2] || ''),
+      submitted: String(pv[p][3] || ''), resolved: apDateStr(pv[p][4]) || '', recording: String(pv[p][7] || ''), corrections: String(pv[p][6] || ''),
+      verified: /^APV1\|/.test(evm), verifiedAt: (evm.match(/^APV1\|(\d{4}-\d{2}-\d{2})/) || [])[1] || '', resolutionVerified: /^APR1\|/.test(apr) });
+  }
+  // supervision: tonight + last 7 scheduled
+  var sup = { tonight: { date: today, scheduled: supervisionScheduled(today), status: '' }, recent: [] };
+  var sv = supervisionSheet().getDataRange().getValues();
+  var srow = supervisionRow(today); if (srow) sup.tonight.status = String(srow.vals[2] || '');
+  sup.upcoming = [];
+  for (var s = sv.length - 1; s >= 1; s--) {
+    var sd0 = apDateStr(sv[s][0]);
+    var rowObj = { date: sd0, required: String(sv[s][1] || ''), status: String(sv[s][2] || ''), url: String(sv[s][5] || ''), note: String(sv[s][6] || '') };
+    if (sd0 > today) sup.upcoming.push(rowObj);
+    else if (sup.recent.length < 7) sup.recent.push(rowObj);
+  }
+  sup.upcoming.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  sup.mode = 'assigned';
+  // observers
+  var ov = tab('Observer').getDataRange().getValues();
+  var observers = [];
+  for (var o = ov.length - 1; o >= 1 && observers.length < 30; o--) {
+    if (!ov[o][0]) continue;
+    observers.push({ row: o + 1, received_at: String(ov[o][0] || ''), type: String(ov[o][1] || ''), message: String(ov[o][2] || ''), name: String(ov[o][3] || ''), email: String(ov[o][4] || ''), source_url: String(ov[o][5] || ''), quotable: String(ov[o][6] || ''), review: String(ov[o][7] || 'received'), note: String(ov[o][8] || '') });
+  }
+  // updates last 6
+  var uv = tab('Updates').getDataRange().getValues();
+  var updates = [];
+  for (var u = uv.length - 1; u >= 1 && updates.length < 6; u--) updates.push({ date: apDateStr(uv[u][0]), type: String(uv[u][1] || ''), title: String(uv[u][2] || ''), body: String(uv[u][3] || ''), link: String(uv[u][4] || '') });
+  var c = latestEdition2Confirmation();
+  return {
+    banner_mode: stateGet('banner_mode') || 'auto',
+    ok: true, today: today, day: dayOf(today), nowEt: nowEt, start: PROJECT_START,
+    packet: { complete: ps.complete, missing: ps.missing },
+    weighins: weighins,
+    agreement: {
+      active: String(st.agreement_edition || '') === '2',
+      edition: st.agreement_edition || '',
+      effectiveDate: st.agreement_effective_date || '',
+      mrbSig: st.mrb_signature_verified_at || '', apSig: st.ap_signature_verified_at || '',
+      confDate: st.agreement_confirmation_date || '', confVerifiedAt: st.agreement_confirmation_verified_at || '',
+      fingerprint: st.agreement_confirmation_fingerprint || '',
+      confirmation: c ? { date: c.date, url: c.url, fingerprint: c.fingerprint, matches: c.fingerprint === String(st.agreement_confirmation_fingerprint || '').toLowerCase() } : null,
+    },
+    violations: violations, supervision: sup, observers: observers, updates: updates,
+    stage: { abandoned: st.abandoned || '', abandoned_date: st.abandoned_date || '', completed: st.completed || '', completed_date: st.completed_date || '' },
+    hook: !!(PropertiesService.getScriptProperties().getProperty('BUILD_HOOK') || PropertiesService.getScriptProperties().getProperty('NETLIFY_HOOK')),
+  };
+}
+
 function handleApAction(obj) {
   var today = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   try {
+    if (obj.action === 'apconsole') return handleApConsole(obj);
     if (obj.action === 'apviolation') {
       var sh = violationLogSheet();
-      if (obj.op === 'declare') { sh.appendRow([String(obj.date || today), String(obj.violation || 'Violation Event'), 'Unresolved']); return jsonOut({ ok: true }); }
+      if (obj.op === 'declare') { sh.appendRow([String(obj.date || today), String(obj.violation || 'Violation Event'), 'Unresolved', '', '', '', '', '', '']); return jsonOut({ ok: true }); }
       if (obj.op === 'resolve' && obj.row) { sh.getRange(Number(obj.row), 3).setValue('Resolved · ' + today + (obj.note ? ' · ' + String(obj.note) : '')); return jsonOut({ ok: true }); }
     }
     if (obj.action === 'apcorrective') {
@@ -1466,8 +2655,9 @@ function handleApAction(obj) {
     }
     if (obj.action === 'apconfirmation') {
       var cf = tab('Confirmations');
-      cf.appendRow([new Date(), String(obj.date || ''), Number(obj.version) || 1,
-        Number(obj.day) || '', String(obj.url || '')]);
+      var cdate = String(obj.date || '');
+      cf.appendRow([new Date(), cdate, Number(obj.version) || AGREEMENT_EDITION,
+        Number(obj.day) || '', String(obj.url || ''), confirmationSealFor(cdate)]);
       return jsonOut({ ok: true });
     }
 
@@ -1734,7 +2924,7 @@ function autoWeighIn(ds, lb, label) {
     var d0 = vals[i][0];
     var ds0 = d0 instanceof Date ? Utilities.formatDate(d0, 'America/New_York', 'yyyy-MM-dd') : String(d0).trim();
     if (ds0 === ds) {
-      if (Number(vals[i][1]) !== Number(lb)) sh.getRange(i + 1, 2).setValue(lb);
+      if (Number(vals[i][1]) !== Number(lb)) sh.getRange(i + 1, 2).setValue(lb); try { markReceived(ds, 'weight'); } catch (eW) {}
       if (String(vals[i][2] || '').indexOf('scale-synced') === -1) sh.getRange(i + 1, 3).setValue(('' + (vals[i][2] || '')).trim() ? vals[i][2] + ' · ' + label : label);
       return;
     }
@@ -1817,15 +3007,16 @@ function githubMirrorPhotos() {
     for (var a = 0; a < angles.length && pushed < 20; a++) {
       var url = String(vals[r][3 + a] || '').trim();
       if (!url) { missing++; continue; }
-      if (!/^https?:/i.test(url)) { missing++; continue; }
+      var fromR2 = /^originals\//.test(url); // R2 key filed by the assistant
+      if (!fromR2 && !/^https?:/i.test(url)) { missing++; continue; }
 
       var name = 'micheal-ray-berry-day-' + String(day).padStart(3, '0') + '-' + angles[a] + '-' + date + '.jpg';
       var repoPath = 'photos/' + date.slice(0, 4) + '/' + date.slice(5, 7) + '/' + date.slice(8, 10) + '/' + name;
       var publicUrl = 'https://michealrayberry.com/' + repoPath;
       if (done[repoPath]) {
-        // Already in the repo. If the cell still points at Drive, repoint it —
-        // otherwise the sheet keeps a private URL the site cannot serve.
-        if (driveIdFromUrl(url)) {
+        // Already in the repo. If the cell still points at Drive or R2, repoint it —
+        // otherwise the sheet keeps a private reference the site cannot serve.
+        if (fromR2 || driveIdFromUrl(url)) {
           weighinsSheet().getRange(r + 1, 4 + a).setValue(publicUrl);
           repointed++;
         }
@@ -1837,9 +3028,11 @@ function githubMirrorPhotos() {
         // Drive links are read through DriveApp (works on private files);
         // anything else — e.g. an already-public michealrayberry.com URL from
         // the retired mirror — is fetched over HTTP.
-        var id = driveIdFromUrl(url);
+        var id = fromR2 ? null : driveIdFromUrl(url);
         var blob;
-        if (id) {
+        if (fromR2) {
+          blob = r2Get_(url);
+        } else if (id) {
           blob = DriveApp.getFileById(id).getBlob();
         } else {
           var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true });
@@ -1874,7 +3067,7 @@ function githubMirrorPreview() {
     var day = Math.floor((new Date(date) - new Date(PROJECT_START)) / 864e5) + 1;
     if (day < 1) continue;
     var have = 0;
-    for (var a = 0; a < 4; a++) if (/^https?:/i.test(String(vals[r][3 + a] || '').trim())) have++;
+    for (var a = 0; a < 4; a++) if (/^(https?:|originals\/)/i.test(String(vals[r][3 + a] || '').trim())) have++;
     if (have) out.push('Day ' + day + ' · ' + date + ' · ' + have + '/4 photos' + (have === 4 ? '' : '  ← incomplete, will not publish'));
   }
   Logger.log(out.length ? out.join('\n') : 'No photo URLs found in the Weigh-ins tab.');
@@ -1947,6 +3140,33 @@ function handleMyState() {
   }
 
   out.siteState = siteStateAll();
+
+  /* Fields the assistant validates (myState): projectStart, agreementActive,
+     weekly {eligible,reason,date,day,week}, corrective [assignment entries]. */
+  var st = out.siteState;
+  out.projectStart = PROJECT_START;
+  out.agreementActive = !!(String(st.agreement_edition || '') && st.agreement_confirmation_verified_at && st.mrb_signature_verified_at && st.ap_signature_verified_at);
+  var dow = Utilities.formatDate(new Date(), 'America/New_York', 'u'); // 1 = Monday
+  var week = Math.floor((day - 1) / 7);
+  var reviewedToday = false;
+  try { var wl = tab('Weekly Log').getDataRange().getValues(); for (var q = 1; q < wl.length; q++) if (apDateStr(wl[q][1]) === today) reviewedToday = true; } catch (e) {}
+  out.weekly = dow === '1' && day >= 8 && !reviewedToday
+    ? { eligible: true, reason: '', date: today, day: day, week: week }
+    : { eligible: false, reason: reviewedToday ? 'This week\'s review is already filed' : (day < 8 ? 'The first weekly review is due on the first Monday after Day 7' : 'Weekly review is due on Mondays'), date: today, day: day, week: Math.max(1, week) };
+  // Corrective assignments: open, not waived / not enforced, no recording filed yet.
+  var hex = function (s, n) { return sha256Hex(s).slice(0, n).toUpperCase(); };
+  var seq = 0; out.corrective = [];
+  for (var cv = 1; cv < pv.length; cv++) {
+    var cd = apDateStr(pv[cv][0]); if (!/^\d{4}-\d{2}-\d{2}$/.test(cd)) continue;
+    var cst = String(pv[cv][2] || '').toLowerCase();
+    if (/not enforced|waived/.test(cst)) continue;
+    seq++;
+    if (!/^(unresolved|open|declared)/.test(cst) || String(pv[cv][7] || '').trim()) continue;
+    var lvl = Math.min(3, seq), txt = String(pv[cv][1] || '');
+    var due = Utilities.formatDate(new Date(new Date(cd + 'T12:00:00Z').getTime() + 3 * 864e5), 'America/New_York', 'yyyy-MM-dd');
+    out.corrective.push({ id: 'V-' + hex('v|' + cd + '|' + txt, 12), assignmentId: 'C-' + hex('c|' + cd + '|' + txt, 24), attemptId: 'A-' + hex('a|' + cd + '|' + txt + '|' + today, 24),
+      violationDate: cd, violation: txt, assignment: 'Corner time — Level ' + lvl, due: due, level: lvl, minutes: lvl * 10 });
+  }
   return jsonOut(out);
 }
 
@@ -2157,8 +3377,9 @@ function nextConsequence() {
   } catch (e) {}
   var level = Math.min(3, total + 1);
   var mins = { 1: 10, 2: 20, 3: 30 }[level];
+  var range = { 1: '10–20', 2: '20–40', 3: '30–60' }[level];
   return { level: level, mins: mins, open: open, total: total,
-    text: 'Level ' + level + ' — ' + mins + ' continuous minutes of corner time, recorded in one unbroken take and published beside the entry' };
+    text: 'Level ' + level + ' — ' + range + ' minutes of corner time, the length drawn by the server and not announced, recorded in one unbroken take and published beside the entry' };
 }
 
 /* 7 AM ET. States the day, the deadline, and the cost of missing it. */
