@@ -1,16 +1,30 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Worker "mrb": the record API, cron and (from step 2) the site itself.
-  // The Pages projects ignore this file (no pages_build_output_dir).
+  // Worker "mrb": the public site, the record API and the cron jobs.
   "name": "mrb",
   "main": "src/worker.ts",
   "compatibility_date": "2026-08-22",
   "compatibility_flags": ["nodejs_compat"],
-  // Step 1 ships dark: no route, no workers.dev or preview hostname. Nothing is
-  // reachable until step 2 adds the michealrayberry.com route behind Access.
+  // No workers.dev or preview hostname: the site is reachable only on its own
+  // domain, behind Cloudflare Access where required. Routes are added at cutover.
   "workers_dev": false,
   "preview_urls": false,
   "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // The static build and report-card rendering run inside cron and AP requests.
+  "limits": { "cpu_ms": 300000 },
+
+  // Static files (public/) are served before the Worker runs, except these paths.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/assistant", "/assistant/*", "/observer", "/report"]
+  },
+  "rules": [
+    { "type": "Text", "globs": ["**/*.html", "**/*.txt"], "fallthrough": true },
+    { "type": "Data", "globs": ["**/*.ttf"], "fallthrough": true },
+    { "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }
+  ],
+
   "d1_databases": [
     {
       "binding": "DB",
@@ -19,12 +33,36 @@
       "migrations_dir": "migrations"
     }
   ],
+  // photos/ (filed photographs), site/ (the built site); later backups/.
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "mrb-media" }],
+  // Short-lived state: current build id, Sheets mirror digest.
+  "kv_namespaces": [{ "binding": "CACHE", "id": "e7c86f0e66634f48966299171fa8b361" }],
+
+  "triggers": {
+    "crons": [
+      "*/5 * * * *",   // Sheets mirror (steps 2–3 only, while SHEETS_MIRROR = on)
+      "10 4 * * *",    // 00:10 ET during daylight time: nightly rebuild
+      "10 5 * * *"     // 00:10 ET during standard time: nightly rebuild
+    ]
+  },
+
   "vars": {
+    "SITE_ORIGIN": "https://michealrayberry.com",
     "ACCESS_TEAM_DOMAIN": "",
     "MRB_EMAIL": "michealrayberry@gmail.com",
     "AP_EMAIL": "ap@michealrayberry.com",
-    "TWITCH_CHANNEL": "michealrayberry"
+    "TWITCH_CHANNEL": "michealrayberry",
+    // Cloudflare Image Transformations for photo derivatives: "on" once enabled on the zone.
+    "IMAGE_TRANSFORMS": "off",
+    "PUBLIC_SUPERVISION_URLS_ENABLED": "false",
+    // "on" mirrors the Google Sheets into D1 every 5 minutes (until step 4).
+    "SHEETS_MIRROR": "off",
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAE-PPlGkpwWU3XVt"
   }
-  // Secrets (wrangler secret put): ACCESS_AUD_ASSISTANT, ACCESS_AUD_MRB, ACCESS_AUD_AP.
-  // Local dev: DEV_ACCESS_EMAIL in .dev.vars (see .dev.vars.example).
+  // Secrets (wrangler secret put):
+  //   ACCESS_AUD_ASSISTANT, ACCESS_AUD_MRB, ACCESS_AUD_AP  Access application audiences
+  //   SHEETS_FEEDS         JSON of the seven published feed URLs (Sheets mirror)
+  //   TURNSTILE_SECRET, OBSERVER_SECRET, SUBSCRIBE_RELAY_KEY  observer form + sign-up relay
+  // Local dev: .dev.vars (see .dev.vars.example).
 }
