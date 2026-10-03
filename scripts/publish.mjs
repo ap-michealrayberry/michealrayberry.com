@@ -197,7 +197,9 @@ function normalizedHeader(value) {
 
 function validateTable(rows, expected, label) {
   const actual = (rows[0] || []).map(normalizedHeader);
-  const ok = actual.length === expected.length && expected.every((name, index) => {
+  // Trailing columns beyond the governed set (e.g. stream_uid, r2_key) are
+  // operational: they are dropped here and never reach the public output.
+  const ok = actual.length >= expected.length && expected.every((name, index) => {
     const choices = Array.isArray(name) ? name : [name];
     return choices.map(normalizedHeader).includes(actual[index]);
   });
@@ -208,11 +210,16 @@ function validateTable(rows, expected, label) {
       : `${actual.length} column(s): ${actual.slice(0, 15).join(', ').slice(0, 300) || '(empty)'}`;
     throw new Error(`${label} schema mismatch; expected ${expected.map((v) => Array.isArray(v) ? v.join('|') : v).join(', ')}; received ${got}`);
   }
-  for (let index = 1; index < rows.length; index++) {
-    if (rows[index].length !== expected.length) {
-      throw new Error(`${label} row ${index + 1} has ${rows[index].length} columns; expected exactly ${expected.length}.`);
-    }
+  if (actual.length > expected.length) {
+    console.warn(`${label}: ignoring ${actual.length - expected.length} trailing column(s): ${actual.slice(expected.length).join(', ')}`);
   }
+  for (let index = 1; index < rows.length; index++) {
+    if (rows[index].length !== actual.length) {
+      throw new Error(`${label} row ${index + 1} has ${rows[index].length} columns; expected exactly ${actual.length}.`);
+    }
+    if (actual.length > expected.length) rows[index] = rows[index].slice(0, expected.length);
+  }
+  if (actual.length > expected.length) rows[0] = rows[0].slice(0, expected.length);
   return rows;
 }
 
