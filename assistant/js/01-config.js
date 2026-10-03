@@ -1,14 +1,6 @@
 (function (MRB) {
   "use strict";
 
-  try {
-    localStorage.removeItem("mrb_packet_key"); localStorage.removeItem("mrb_exec_url");
-    if (localStorage.getItem("mrb_unlock_token") !== "SERVER-SESSION") {
-      localStorage.removeItem("mrb_unlock_token"); localStorage.removeItem("mrb_unlock_until");
-    }
-  } catch (e) {}
-  var PROJECT = {"schemaVersion":1,"edition":2,"person":"Micheal Ray Berry","siteOrigin":"https://michealrayberry.com","startDate":"2026-10-11","testStartDate":"2026-10-03","startWeightLb":340,"goalWeightLb":200,"completionDays":28,"milestonesLb":[320,300,275,250,225,200],"deadlineEt":"22:00","supervision":{"section":"3.4","startDate":"2026-10-11","nights":[0,1,2,3,4],"startEt":"18:00","endEt":"22:00","publicLiveEnabled":true,"twitchChannel":"michealrayberry"},"amendmentSection":"12.1","correctionMinutes":[10,20,30]};
-
   var STORAGE = {
     unlockToken: "mrb_unlock_token",
     unlockUntil: "mrb_unlock_until",
@@ -74,8 +66,8 @@
 
   function getConfig() {
     return {
-      deviceKey: "SERVER-MANAGED",
-      execUrl: "/api/assistant",
+      deviceKey: readStorage(STORAGE.deviceKey, ""),
+      execUrl: readStorage(STORAGE.execUrl, ""),
       elKey: readStorage(STORAGE.elKey, ""),
       elVoice: readStorage(STORAGE.elVoice, DEFAULT_EL_VOICE) || DEFAULT_EL_VOICE,
       demoMode: readStorage(STORAGE.demoMode, "") === "enabled",
@@ -83,8 +75,8 @@
   }
 
   function saveConfig(partial) {
-    try { localStorage.removeItem(STORAGE.deviceKey); localStorage.removeItem(STORAGE.execUrl); } catch (e) {}
-    
+    if (partial.deviceKey !== undefined) writeStorage(STORAGE.deviceKey, partial.deviceKey);
+    if (partial.execUrl !== undefined) writeStorage(STORAGE.execUrl, partial.execUrl);
     if (partial.demoMode !== undefined) writeStorage(STORAGE.demoMode, partial.demoMode ? "enabled" : "");
     if (partial.elKey !== undefined) writeStorage(STORAGE.elKey, partial.elKey);
     if (partial.elVoice !== undefined) writeStorage(STORAGE.elVoice, partial.elVoice || DEFAULT_EL_VOICE);
@@ -101,7 +93,6 @@
   ];
 
   MRB.config = {
-    PROJECT: PROJECT,
     STORAGE: STORAGE,
     DEFAULT_EL_VOICE: DEFAULT_EL_VOICE,
     ORIENTATION: ORIENTATION,
