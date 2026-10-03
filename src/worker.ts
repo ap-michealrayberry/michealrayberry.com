@@ -10,6 +10,16 @@ import { etDate, etWallTime } from './rules';
 type Who = Extract<Identity, { ok: true }>;
 const app = new Hono<{ Bindings: Env; Variables: { who: Who } }>();
 
+// One canonical host: www.michealrayberry.com redirects to michealrayberry.com.
+app.use('*', async (c, next) => {
+  const url = new URL(c.req.url);
+  if (url.hostname === 'www.michealrayberry.com') {
+    url.hostname = 'michealrayberry.com';
+    return c.redirect(url.toString(), 301);
+  }
+  await next();
+});
+
 app.onError((error, c) => {
   console.error(JSON.stringify({ message: 'unhandled error', path: c.req.path, error: String(error?.stack || error) }));
   return c.json({ ok: false, error: 'Internal error.' }, 500);
