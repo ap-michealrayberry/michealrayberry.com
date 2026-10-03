@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Micheal Ray Berry — public accountability, 340 to 200</title>
-<meta name="description" content="A voluntary public accountability record. Declared start: 340 lb on {{ startDateLong }}. Goal: 200 lb held for 28 consecutive days.">
+<title>Micheal Ray Berry — public accountability, {{ startWeight }} to {{ goalWeight }}</title>
+<meta name="description" content="A voluntary public accountability record. Declared start: {{ startWeight }} lb on {{ startDateLong }}. Goal: {{ goalWeight }} lb held for {{ completionDays }} consecutive days.">
 <link rel="canonical" href="https://michealrayberry.com/">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#141412">
@@ -14,18 +14,18 @@
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Micheal Ray Berry — Public Accountability Project">
-<meta property="og:title" content="Micheal Ray Berry — public accountability, 340 to 200">
-<meta property="og:description" content="A voluntary public accountability record. Declared start: 340 lb on {{ startDateLong }}. Goal: 200 lb held for 28 consecutive days.">
+<meta property="og:title" content="Micheal Ray Berry — public accountability, {{ startWeight }} to {{ goalWeight }}">
+<meta property="og:description" content="A voluntary public accountability record. Declared start: {{ startWeight }} lb on {{ startDateLong }}. Goal: {{ goalWeight }} lb held for {{ completionDays }} consecutive days.">
 <meta property="og:url" content="https://michealrayberry.com/">
 <meta property="og:image" content="https://michealrayberry.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Micheal Ray Berry Public Accountability Project — declared 340-pound start toward a 200-pound goal">
+<meta property="og:image:alt" content="Micheal Ray Berry Public Accountability Project — declared {{ startWeight }}-pound start toward a {{ goalWeight }}-pound goal">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://michealrayberry.com/og-image.png">
-<meta name="twitter:image:alt" content="Micheal Ray Berry Public Accountability Project — declared 340-pound start toward a 200-pound goal">
-<meta name="twitter:title" content="Micheal Ray Berry — public accountability, 340 to 200">
-<meta name="twitter:description" content="Voluntary public record. Declared start: 340 lb. Goal: 200 lb held for 28 days.">
+<meta name="twitter:image:alt" content="Micheal Ray Berry Public Accountability Project — declared {{ startWeight }}-pound start toward a {{ goalWeight }}-pound goal">
+<meta name="twitter:title" content="Micheal Ray Berry — public accountability, {{ startWeight }} to {{ goalWeight }}">
+<meta name="twitter:description" content="Voluntary public record. Declared start: {{ startWeight }} lb. Goal: {{ goalWeight }} lb held for {{ completionDays }} days.">
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -47,12 +47,12 @@
         "url": "https://michealrayberry.com/",
         "mainEntityOfPage": { "@id": "https://michealrayberry.com/#website" },
         "sameAs": ["https://www.youtube.com/@michealrayberry", "https://www.twitch.tv/michealrayberry"],
-        "description": "Voluntary participant in a public accountability project with a declared 340-pound start and 200-pound goal."
+        "description": "Voluntary participant in a public accountability project with a declared {{ startWeight }}-pound start and {{ goalWeight }}-pound goal."
       },
       {
         "@type": "Dataset",
         "name": "Micheal Ray Berry public weigh-in record",
-        "description": "Published dated weigh-in records, notes, four-angle accountability photographs, and inspection videos after a declared 340-pound starting point.",
+        "description": "Published dated weigh-in records, notes, four-angle accountability photographs, and inspection videos after a declared {{ startWeight }}-pound starting point.",
         "url": "https://michealrayberry.com/dashboard/",
         "creator": { "@type": "Person", "name": "Micheal Ray Berry" },
         "isAccessibleForFree": true,
@@ -122,13 +122,13 @@
   <noscript>
     <div style="max-width: 760px; margin: 0 auto; padding: 48px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.7; color: #141412;">
       <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 30px; text-transform: uppercase; margin: 0 0 6px;">Micheal Ray Berry — Public Accountability Project</h1>
-      <p style="margin: 0 0 18px; color: #6B6A64;">A voluntary public accountability record whose generated pages report the current agreement status. Declared start 340 lb toward 200; Day 1 is {{ startDateLong }}. The archive is <a href="/daily/">/daily/</a> and <a href="/violations/">/violations/</a>.</p>
+      <p style="margin: 0 0 18px; color: #6B6A64;">A voluntary public accountability record whose generated pages report the current agreement status. Declared start {{ startWeight }} lb toward {{ goalWeight }}; Day 1 is {{ startDateLong }}. The archive is <a href="/daily/">/daily/</a> and <a href="/violations/">/violations/</a>.</p>
       <p style="margin: 0 0 18px;">Edition 2 defines a 10:00 PM Eastern daily packet: a standardized four-angle inspection video, four daily photos, a weight entry, and a tracker update. The generated agreement page reports whether those requirements are active.</p>
       <p style="margin: 0 0 8px;">The complete record is published as static pages:</p>
       <ul style="margin: 0 0 18px; padding-left: 20px;">
         <li><a href="/daily/">Daily record — every documented day</a></li>
         <li><a href="/weeks/">Weekly summaries</a></li>
-        <li><a href="/milestones/">Milestones — 320, 300, 275, 250, 225, 200 lb</a></li>
+        <li><a href="/milestones/">Milestones — 320, 300, 275, 250, 225, {{ goalWeight }} lb</a></li>
       </ul>
       <p style="margin: 0; color: #6B6A64;">Administered by the Accountability Partner: ap@michealrayberry.com</p>
     </div>
@@ -140,8 +140,8 @@
 <template id="__bundler_thumbnail">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     <rect width="100" height="100" fill="#141412"></rect>
-    <text x="50" y="47" text-anchor="middle" font-family="monospace" font-size="16" font-weight="700" fill="#FAFAF7">340</text>
-    <text x="50" y="66" text-anchor="middle" font-family="monospace" font-size="16" font-weight="700" fill="#B3261E">200</text>
+    <text x="50" y="47" text-anchor="middle" font-family="monospace" font-size="16" font-weight="700" fill="#FAFAF7">{{ startWeight }}</text>
+    <text x="50" y="66" text-anchor="middle" font-family="monospace" font-size="16" font-weight="700" fill="#B3261E">{{ goalWeight }}</text>
   </svg>
 </template>
 
@@ -196,11 +196,11 @@
             <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 80px); line-height: 0.93; text-transform: uppercase; margin: 0; max-width: 820px; text-wrap: balance;">Micheal Ray Berry is under public accountability</h1>
             <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #3A3935; line-height: 1.6;">Documented daily under his real name · Publicly supervised 6–10 PM ET, Sunday–Thursday</p>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid #141412;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); border: 1px solid #141412;">
             <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Day</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;">{{ dayCounterLabel }}</span></div>
             <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Current · lb</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;"><span data-live-key="currentLabel">{{ currentLabel }}</span></span></div>
             <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px; background: #FBF1F0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">{{ openCountHeading }}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600; color: #B3261E;"><span data-live-key="openCountLabel">{{ openCountLabel }}</span></span></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Declared start · lb</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;">340</span></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Declared start · lb</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;">{{ startWeight }}</span></div>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
             <section data-sup-module aria-label="Evening Supervision" style="border: 1px solid #141412; background: #FFFFFF; display: flex; flex-direction: column;">
@@ -210,7 +210,7 @@
               </div>
               <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
                 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.04em; color: #3A3935;">6:00–10:00 PM ET · Sunday–Thursday · live on Twitch</span>
-                <p style="margin: 0; font-size: 16px; line-height: 1.55; text-wrap: pretty;">During Evening Supervision, Micheal remains publicly observable while at home under the project’s prescribed uniform and conduct requirements.</p>
+                <p style="margin: 0; font-size: 16px; line-height: 1.55; text-wrap: pretty;">During Evening Supervision, Micheal remains publicly observable during the scheduled session under the project’s prescribed uniform and conduct requirements.</p>
                 <span data-sup-when style="display: none; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;"></span>
                 <a data-sup-action href="/live/" style="margin-top: auto; align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #141412;">Supervision status →</a>
               </div>
@@ -235,7 +235,7 @@
                   <sc-if value="{{ noOwed }}" hint-placeholder-val="{{ true }}">
                   <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Nothing owed</span>
                   </sc-if>
-                  <span style="font-size: 15px; line-height: 1.5;">Misses are declared automatically and answered with recorded corner time — 10, 20 or 30 minutes by level — published beside the entry within 72 hours.</span>
+                  <span style="font-size: 15px; line-height: 1.5;">Possible misses are flagged automatically. After AP verification, corrections are assigned at 10, 20 or 30 minutes by level and published beside the entry within 72 hours.</span>
                   <div style="display: flex; gap: 8px 18px; flex-wrap: wrap;"><a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Corrective sessions →</a><a href="/accountable/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E;">Hold me accountable →</a><a href="/notify/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Get notified →</a></div>
                 </div>
               </div>
@@ -243,7 +243,7 @@
           </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
-          <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" fetchpriority="high" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start 340." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
+          <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" fetchpriority="high" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start {{ startWeight }}." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64; line-height: 1.6;">Official photograph · project uniform</span>
           <div style="margin-top: 14px; border-top: 1px solid #141412; padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Progress · {{ startLabel }} → {{ goalLabel }} lb</span>
@@ -254,15 +254,7 @@
         </div>
       </div>
     </section>
-    <section style="border-bottom: 1px solid #141412; padding: 48px 32px; background: #F3F2EC;">
-      <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); gap: 40px;">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E; line-height: 1.6;">Statement of consent to exposure</span>
-        <div style="display: flex; flex-direction: column; gap: 14px; max-width: 820px;">
-          <p style="margin: 0; font-size: clamp(19px, 2.2vw, 24px); line-height: 1.5; font-weight: 500; text-wrap: pretty;">“I am deliberately making this accountability public. I want this project seen, found, shared, discussed, and followed under my real name. Visibility creates pressure I cannot quietly escape. I consent to people observing this public record and holding me to the commitments I have voluntarily made.”</p>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64;">— Micheal Ray Berry</span>
-        </div>
-      </div>
-    </section>
+    <section style="padding:28px 32px;border-bottom:1px solid #141412"><p style="max-width:1160px;margin:auto"><a href="/about/">Why this is public</a> · <a href="/consent/">Participation evidence</a> · <a href="/testing/">Public test archive</a></p></section>
     <section style="border-bottom: 1px solid #141412; padding: 40px 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
         <p style="margin: 0; font-size: 16px; line-height: 1.6; max-width: 760px;">{{ agreementStatusSentence }} The record is administered by the Accountability Partner. Questions and reports: <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>.</p>
@@ -333,9 +325,9 @@
     <section style="border-bottom: 1px solid #141412; padding: 48px 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64;">
-          <span>340 lbs</span>
+          <span>{{ startWeight }} lbs</span>
           <span>{{ pctLabel }} of the declared 140 lb span</span>
-          <span style="color: #B3261E;">200 lbs</span>
+          <span style="color: #B3261E;">{{ goalWeight }} lbs</span>
         </div>
         <div style="height: 22px; border: 1px solid #141412; background: #FAFAF7; position: relative;">
           <div style="position: absolute; top: 0; left: 0; bottom: 0; background: #141412; width: {{ pctWidth }};"></div>
@@ -365,14 +357,14 @@
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px;">
       <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">Weight Record</h2>
-        <svg id="mrb-weight-chart" viewBox="0 0 1000 340" role="img" aria-labelledby="weight-chart-title weight-chart-desc" style="width: 100%; height: auto; display: block;">
+        <svg id="mrb-weight-chart" viewBox="0 0 1000 {{ startWeight }}" role="img" aria-labelledby="weight-chart-title weight-chart-desc" style="width: 100%; height: auto; display: block;">
           <title id="weight-chart-title">Recorded weight over time</title>
-          <desc id="weight-chart-desc">A line chart of every published weigh-in, with the 200-pound goal marked.</desc>
+          <desc id="weight-chart-desc">A line chart of every published weigh-in, with the {{ goalWeight }}-pound goal marked.</desc>
           <line x1="60" y1="20" x2="60" y2="300" stroke="#141412" stroke-width="1"></line>
           <line x1="60" y1="300" x2="990" y2="300" stroke="#141412" stroke-width="1"></line>
           <line data-goal-line x1="60" y1="280" x2="990" y2="280" stroke="#B3261E" stroke-width="1" stroke-dasharray="6 5"></line>
-          <text data-goal-label x="66" y="274" fill="#B3261E" font-family="IBM Plex Mono, monospace" font-size="14">GOAL 200</text>
-          <text x="10" y="28" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">340</text>
+          <text data-goal-label x="66" y="274" fill="#B3261E" font-family="IBM Plex Mono, monospace" font-size="14">GOAL {{ goalWeight }}</text>
+          <text x="10" y="{{ completionDays }}" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">{{ startWeight }}</text>
           <text x="10" y="164" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">255</text>
           <text x="10" y="298" fill="#6B6A64" font-family="IBM Plex Mono, monospace" font-size="13">170</text>
           <polyline data-series points="" fill="none" stroke="#141412" stroke-width="2.5"></polyline>
@@ -404,7 +396,7 @@
             </div>
           </sc-for>
         </div>
-        <p style="font-size: 15px; color: #6B6A64; margin: 0; max-width: 640px;">Up, down, or flat — it gets posted. The goal of 200 pounds must be held for 28 consecutive days before the project is complete.</p>
+        <p style="font-size: 15px; color: #6B6A64; margin: 0; max-width: 640px;">Up, down, or flat — it gets posted. The goal of {{ goalWeight }} pounds must be held for {{ completionDays }} consecutive days before the project is complete.</p>
       </div>
     </section>
 
@@ -485,7 +477,7 @@
       <div style="max-width: 1160px; margin: 0 auto;">
         <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 20px;">§6 — Weight thresholds</p>
         <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0 0 20px;">The Milestone Ladder</h1>
-        <p style="max-width: 680px; font-size: 17px; line-height: 1.65; margin: 0;">Six fixed thresholds between the declared 340-pound start and the 200-pound goal. Under Edition 2, a dated threshold crossing becomes an official milestone only after the separate verification weigh-in, milestone video, and Accountability Partner review while the terms apply. The final phase is 28 consecutive days at goal.</p>
+        <p style="max-width: 680px; font-size: 17px; line-height: 1.65; margin: 0;">Six fixed thresholds between the declared {{ startWeight }}-pound start and the {{ goalWeight }}-pound goal. Under Edition 2, a dated threshold crossing becomes an official milestone only after the separate verification weigh-in, milestone video, and Accountability Partner review while the terms apply. The final phase is {{ completionDays }} consecutive days at goal.</p>
       </div>
     </section>
     <section style="border-bottom: 1px solid #141412; padding: 56px 32px 24px;">
@@ -513,9 +505,9 @@
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">About · what “under” means</span>
           <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 60px); line-height: 0.95; text-transform: uppercase; margin: 0;">Micheal Ray Berry is under public accountability</h1>
           <p style="margin: 0; font-size: 18px; line-height: 1.65;">Micheal Ray Berry asked for this structure in writing. {{ agreementStatusSentence }} The Accountability Partner holds the site, the domain, the record and the accounts; Micheal files to it and cannot edit it.</p>
-          <p style="margin: 0; font-size: 18px; line-height: 1.65;">Every day he files weight, four photographs, an inspection video and a tracker update by 10:00 PM ET. Five evenings a week, Sunday to Thursday, he is on a public live stream at home. Misses are declared automatically and answered with recorded corner time, published beside the entry.</p>
+          <p style="margin: 0; font-size: 18px; line-height: 1.65;">Every day he files weight, four photographs, an inspection video and a tracker update by 10:00 PM ET. Five evenings a week, Sunday to Thursday, he is on a public live stream. Possible misses are flagged automatically. The Accountability Partner verifies each Violation Event before assigning a recorded correction.</p>
         </div>
-        <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" loading="lazy" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start 340." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
+        <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" loading="lazy" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start {{ startWeight }}." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
       </div>
     </section>
     <section style="border-bottom: 1px solid #141412; padding: 48px 32px; background: #F3F2EC;">
@@ -552,7 +544,7 @@
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this really is the Micheal Ray Berry you know, and the results are under his real name.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Recognition is an intended part of the public project. If you know him, you may hold him to it: ask whether today’s packet is filed, whether he served the corner time he owes, or whether he is home for Evening Supervision. He published the rules so that people who know him can know what he owes. See <a href="/accountable/" style="color: #B3261E; font-weight: 600;">Hold Me Accountable</a>.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Recognition is an intended part of the public project. In ordinary personal settings, people who know him may ask about the published record; workplace contact is excluded: ask whether today’s packet is filed, whether he served the corner time he owes, or whether he attended Evening Supervision. He published the rules so that people who know him can know what he owes. See <a href="/accountable/" style="color: #B3261E; font-weight: 600;">Hold Me Accountable</a>.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice an inconsistency or a possible breach, report it through the <a href="/observer/" style="color: #B3261E; font-weight: 600;">Observer Submission</a> page (no name or email required) or <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>. The Accountability Partner reviews it; Micheal does not.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">Holding him to the record is welcome. Harassment, threats, contact with his employer or coworkers, attempts to obtain private information, or showing up uninvited is not.</p>
           </div>
@@ -570,7 +562,7 @@
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">When does it end?</span>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Edition 2 defines completion as 200 pounds held for 28 consecutive days and confirmed through its review process while active. Other endings may be documented, subject to current consent, privacy, and safety rules.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Edition 2 defines completion as {{ goalWeight }} pounds held for {{ completionDays }} consecutive days and confirmed through its review process while active. Other endings may be documented, subject to current consent, privacy, and safety rules.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">What does the record show?</span>
@@ -583,6 +575,15 @@
     <section style="border-bottom: 1px solid #141412; padding: 48px 32px; background: #F1F0EA;">
       <div style="max-width: 1160px; margin: 0 auto; font-family: 'IBM Plex Mono', monospace; font-size: 15px; letter-spacing: 0.06em;">
         <span>— Micheal Ray Berry</span>
+      </div>
+    </section>
+    <section style="border-bottom: 1px solid #141412; padding: 48px 32px; background: #F3F2EC;">
+      <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); gap: 40px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E; line-height: 1.6;">Public participation statement</span>
+        <div style="display: flex; flex-direction: column; gap: 14px; max-width: 820px;">
+          <p style="margin: 0; font-size: clamp(19px, 2.2vw, 24px); line-height: 1.5; font-weight: 500; text-wrap: pretty;">“I am deliberately making this accountability public. I want this project seen, found, shared, discussed, and followed under my real name. Visibility creates pressure I cannot quietly escape. I consent to people observing this public record and holding me to the commitments I have voluntarily made.”</p>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64;">— Micheal Ray Berry</span>
+        </div>
       </div>
     </section>
   </div>
@@ -608,9 +609,9 @@
               <li>Standardized uniform (§4.1: plain black unitard), pose, and four-angle documentation format</li>
               <li>Consequences (§8): corner time, 10 / 20 / 30 minutes by level, recorded and published. The public entry records the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result</li>
               <li>Weekly Review — the week’s numbers read to camera from the record every Monday</li>
-              <li>Evening Supervision (§3.4) — a fixed-camera session streamed live on Twitch (twitch.tv/michealrayberry), 6:00–10:00 PM ET, on nights preceding a scheduled workday (ordinarily Sunday–Thursday), in the black standard uniform; water only, home-cooked dinner, published rules; an apparent miss becomes a Violation Event only after explicit Accountability Partner review. Scheduled from September 13, 2026 — <a href="/live/" style="color: #141412; font-weight: 600;">the supervision console</a></li>
-              <li>Published weight thresholds at 320 / 300 / 275 / 250 / 225 / 200 lbs</li>
-              <li>Amendment process (§13): no new rule binds unless it is documented, logged in Updates, and co-signed after the execution gate is active</li>
+              <li>Evening Supervision (§3.4) — a fixed-camera session streamed live on Twitch (twitch.tv/michealrayberry), 6:00–10:00 PM ET, on nights preceding a scheduled workday (ordinarily Sunday–Thursday), in the black standard uniform; water only, home-cooked dinner, published rules; an apparent miss becomes a Violation Event only after explicit Accountability Partner review. For this edition, scheduled from {{ supervisionStartDateLong }} — <a href="/live/" style="color: #141412; font-weight: 600;">the supervision console</a></li>
+              <li>Published weight thresholds at 320 / 300 / 275 / 250 / 225 / {{ goalWeight }} lbs</li>
+              <li>Amendment process (§{{ amendmentSection }}): no new rule binds unless it is documented, logged in Updates, and co-signed after the execution gate is active</li>
               <li>Durable public record, abandonment terms, and website administration rules, subject to the stated safety, privacy, consent, and legal limits</li>
             </ul>
           </div>
@@ -630,7 +631,7 @@
         <div style="background: #141412; color: #FAFAF7; padding: 32px 36px; display: flex; flex-direction: column; gap: 12px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">On completion</span>
           <span style="font-size: 20px; font-weight: 600;">The record ends in daylight too.</span>
-          <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #D8D6CF;">Edition 2 defines verified completion at 200 pounds held for 28 consecutive days, followed by an archival completion record. <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}">That process is active from the recorded effective date.</sc-if><sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}">That process is inactive while execution is unverified.</sc-if></p>
+          <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #D8D6CF;">Edition 2 defines verified completion at {{ goalWeight }} pounds held for {{ completionDays }} consecutive days, followed by an archival completion record. <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}">That process is active from the recorded effective date.</sc-if><sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}">That process is inactive while execution is unverified.</sc-if></p>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E; margin-top: 16px;">Edition 2 archive rule</span>
           <span style="font-size: 20px; font-weight: 600;">An ending without verified completion remains documented.</span>
           <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #D8D6CF;">Edition 2 defines an archival ending after thirty consecutive active days without required documentation, written notice, and a seven-day opportunity to resume. Safety, privacy, and lawful takedown or redaction processes remain available and are documented transparently.</p>
@@ -718,7 +719,7 @@
           </div>
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Milestone resets</span>
-            <span style="font-size: 18px; font-weight: 600;">320 · 300 · 275 · 250 · 225 · 200</span>
+            <span style="font-size: 18px; font-weight: 600;">320 · 300 · 275 · 250 · 225 · {{ goalWeight }}</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3A3935;">A recorded weight at or below a threshold marks progress. Thresholds do not erase violation history or automatically change a corrective level.</p>
           </div>
         </div>
@@ -910,7 +911,7 @@
       <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">A voluntary public accountability project with {{ footerTermsLabel }} and defined limits. <a href="/agreement/" style="color: #FAFAF7;" style-hover="color: #B3261E;">Consent &amp; boundaries</a></p>
       <div style="border-top: 1px solid #3A3935; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A8983;">
         <span class="mrb-footer-contacts" style="display: flex; gap: 6px 20px; flex-wrap: wrap;"><span style="white-space: nowrap;">Accountability Partner: <a href="mailto:ap@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">ap@michealrayberry.com</a></span><span style="white-space: nowrap;">Micheal Ray Berry: <a href="mailto:contact@michealrayberry.com" style="color: #FAFAF7;" style-hover="color: #B3261E;">contact@michealrayberry.com</a></span></span>
-        <span class="mrb-footer-actions" style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/share/" style="color: #FAFAF7; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Share</a> <a href="/observer/" style="color: #FAFAF7; text-decoration: none; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Observer →</a><a href="/assistant/" style="display: inline-flex; align-items: center; gap: 7px; color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;"><span class="rec-lamp" aria-hidden="true"></span>Recording Assistant</a><span>© 2026 Micheal Ray Berry</span></span>
+        <span class="mrb-footer-actions" style="white-space: nowrap; display: flex; gap: 16px; align-items: center;"><a href="/share/" style="color: #FAFAF7; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Share</a> <a href="/observer/" style="color: #FAFAF7; text-decoration: none; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;" style-hover="color: #B3261E;">Observer →</a><a href="/testing/" style="color: #FAFAF7; text-decoration: none;" style-hover="color: #B3261E;">Public tests</a><span>© 2026 Micheal Ray Berry</span></span>
       </div>
     </div>
   </footer>

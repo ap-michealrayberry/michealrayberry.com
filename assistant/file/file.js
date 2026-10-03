@@ -1,3 +1,4 @@
+var PROJECT = {"schemaVersion":1,"edition":2,"person":"Micheal Ray Berry","siteOrigin":"https://michealrayberry.com","startDate":"2026-10-11","testStartDate":"2026-10-03","startWeightLb":340,"goalWeightLb":200,"completionDays":28,"milestonesLb":[320,300,275,250,225,200],"deadlineEt":"22:00","supervision":{"section":"3.4","startDate":"2026-10-11","nights":[0,1,2,3,4],"startEt":"18:00","endEt":"22:00","publicLiveEnabled":true,"twitchChannel":"michealrayberry"},"amendmentSection":"12.1","correctionMinutes":[10,20,30]};
 (function () {
   "use strict";
 
@@ -193,7 +194,7 @@
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
+      "\n\nPublic Accountability Project — declared " + PROJECT.startWeightLb + " lb start and " + PROJECT.goalWeightLb + " lb goal. The agreement page reports current applicability. " +
       "The official record is " + BASE + "/. Recorded through the official Recording Assistant; " +
       "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
       "Agreement: " + BASE + "/agreement\nContact: ap@michealrayberry.com";
@@ -316,10 +317,10 @@
   }
 
   function deviceKey() {
-    try { return localStorage.getItem("mrb_packet_key") || ""; } catch (e) { return ""; }
+    return "SERVER-MANAGED";
   }
   function execUrl() {
-    try { return localStorage.getItem("mrb_exec_url") || ""; } catch (e) { return ""; }
+    return "/api/assistant";
   }
   function unlockToken() {
     try { return localStorage.getItem("mrb_unlock_token") || ""; } catch (e) { return ""; }
@@ -440,7 +441,7 @@
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured" };
     var res = await fetch(endpoint, {
-      method: "POST",
+      method: "POST", credentials: "same-origin",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "correctivefiled", key: key, unlock: unlockToken(), id: vId,
         assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal }),
@@ -453,7 +454,7 @@
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured", local: true };
     var res = await fetch(endpoint, {
-      method: "POST",
+      method: "POST", credentials: "same-origin",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({ action: "ytfiled", key: key, unlock: unlockToken(), kind: kind, date: date, url: url,
         attestation_seal: seal || "" }),
@@ -466,7 +467,7 @@
     var key = deviceKey();
     if (!endpoint || !key) throw new Error("Participant server is not configured");
     var res = await fetch(endpoint, {
-      method: "POST",
+      method: "POST", credentials: "same-origin",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "mystate", key: key, unlock: unlockToken() }),
     });

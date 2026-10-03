@@ -40,9 +40,9 @@
       <main class="lock-main">
         <form class="panel lock-panel" id="lock-form" autocomplete="off">
           <h1 class="lock-title">Recording Assistant</h1>
-          <p class="settings-note">The capture instrument opens only with both keys: the device key held by the participant and the unlock code issued by the Accountability Partner. Both are checked by the record server.</p>
-          <label class="field">
-            <span>Device key (participant)</span>
+          <p class="settings-note">Sign in through the protected access page, then enter the unlock code issued by the Accountability Partner. The recording session expires after two hours.</p>
+          <label class="field" hidden>
+            <span>Server-managed device key</span>
             <input type="password" id="lock-device-key" class="mono" inputmode="text" autocomplete="off" />
           </label>
           <label class="field">
@@ -166,12 +166,12 @@
             Device configuration
           </button>
           <div id="settings-body" class="settings-body" hidden>
-            <label class="field">
-              <span>Device key</span>
+            <label class="field" hidden>
+              <span>Server-managed device key</span>
               <input type="password" id="input-device-key" class="mono" autocomplete="off" placeholder="mrb_packet_key" />
             </label>
-            <label class="field">
-              <span>Apps Script exec URL</span>
+            <label class="field" hidden>
+              <span>Server relay</span>
               <input type="url" id="input-exec-url" class="mono" placeholder="https://script.google.com/…/exec" />
             </label>
             <label class="field">

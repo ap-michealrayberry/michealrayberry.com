@@ -9,14 +9,15 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { PROJECT } from './project-config.mjs';
 
 const VIEWS = [
-  { page: 'home', slug: '', label: 'Home', title: 'Micheal Ray Berry — public accountability, 340 to 200',
-    desc: 'A voluntary public accountability record. Declared start: 340 lb on {{ startDateLong }}. Goal: 200 lb held for 28 consecutive days.' },
+  { page: 'home', slug: '', label: 'Home', title: `Micheal Ray Berry — public accountability, ${PROJECT.startWeightLb} to ${PROJECT.goalWeightLb}`,
+    desc: 'A voluntary public accountability record. Declared start: {{ startWeight }} lb on {{ startDateLong }}. Goal: {{ goalWeight }} lb held for {{ completionDays }} consecutive days.' },
   { page: 'dashboard', slug: 'dashboard', label: 'Dashboard', title: 'Dashboard — weigh-in log, weight chart, daily photographs — Micheal Ray Berry',
     desc: 'The weigh-in log, weight chart, threshold ladder, and published daily documentation photographs of the Micheal Ray Berry Public Accountability Project.' },
-  { page: 'milestones', slug: 'milestones', label: 'Milestones', title: 'Weight Thresholds — 320 to 200 | Micheal Ray Berry',
-    desc: 'Six published weight thresholds between the declared 340-pound baseline and 200 pounds, each recorded or not from dated weigh-ins.' },
+  { page: 'milestones', slug: 'milestones', label: 'Milestones', title: `Weight Thresholds — ${PROJECT.milestonesLb[0]} to ${PROJECT.goalWeightLb} | Micheal Ray Berry`,
+    desc: `${PROJECT.milestonesLb.length} published weight thresholds between the declared ${PROJECT.startWeightLb}-pound baseline and ${PROJECT.goalWeightLb} pounds, each recorded or not from dated weigh-ins.` },
   { page: 'uniform', slug: 'uniform', label: 'Uniform', title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
     desc: 'Edition 2 defines black for routine documentation and pink for recorded corrective sessions; the agreement page reports current applicability.' },
   { page: 'updates', slug: 'updates', label: 'Updates', title: 'Updates — Micheal Ray Berry Public Accountability Project',
@@ -27,7 +28,7 @@ const VIEWS = [
     desc: 'The current status and public summary of Edition 2: daily requirements, documentation standards, violations, corrective sessions, and limits.' },
 ];
 
-const MILESTONES = [320, 300, 275, 250, 225, 200];
+const MILESTONES = PROJECT.milestonesLb;
 const FONTS = '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">';
 
 /* ── template engine ─────────────────────────────────────────────── */
@@ -90,7 +91,7 @@ function computeValues(ctx) {
   const { rows, violations, updates, siteState, attestMap, photoFiles, findPhoto, relUrl, publicVideoUrl, videoEmbed, longDate, htmlEscape, normalizeDate, SITE_ORIGIN, START_DATE, todayIso } = ctx;
   const LAUNCH_DATE = ctx.LAUNCH_DATE || START_DATE, TEST_PHASE = !!ctx.TEST_PHASE;
   const esc = (s) => htmlEscape(String(s == null ? '' : s));
-  const startWeight = 340, goalWeight = 200;
+  const startWeight = PROJECT.startWeightLb, goalWeight = PROJECT.goalWeightLb;
   const dayOf = (iso) => Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(START_DATE + 'T12:00:00Z')) / 864e5) + 1;
   const fmt = (n) => (Math.round(n * 10) / 10).toFixed(1);
   const canonicalOrigin = new URL(SITE_ORIGIN).origin;
@@ -149,8 +150,8 @@ function computeValues(ctx) {
   const wrCurrent = closedWeek >= 1 ? 'Week ' + (closedWeek + 1) + ' in progress — day ' + ((daysSince % 7) + 1) + ' of 7.' : '';
 
   // chart
-  const X0 = 60, X1 = 990, Y0 = 20, Y1 = 300, W_TOP = 340, W_BOT = 170;
-  const maxDay = Math.max(dayNumber, 28);
+  const X0 = 60, X1 = 990, Y0 = 20, Y1 = 300, W_TOP = startWeight, W_BOT = goalWeight - 30;
+  const maxDay = Math.max(dayNumber, PROJECT.completionDays);
   const xOf = (d) => X0 + ((d - 1) / Math.max(1, maxDay - 1)) * (X1 - X0);
   const yOf = (w) => Y0 + ((W_TOP - w) / (W_TOP - W_BOT)) * (Y1 - Y0);
   const chartDots = data.map((e) => ({ x: xOf(dayOf(e.date)).toFixed(1), y: yOf(e.weight).toFixed(1) }));
@@ -217,10 +218,10 @@ function computeValues(ctx) {
       detail: hit ? 'Weight recorded ' + fmtDate(hit.date) + ' · Day ' + dayOf(hit.date) : (last ? fmt(Math.max(0, current - t)) + ' lb away at last recorded weight' : 'No measured weight recorded yet') };
   });
   const lowest = data.length ? Math.min(...data.map((e) => e.weight)) : startWeight;
-  const milestoneCells = MILESTONES.map((m) => ({ label: String(m), tag: data.length && lowest <= m ? 'Threshold recorded' : (m === 200 ? 'Goal' : 'Ahead'), bg: data.length && lowest <= m ? '#141412' : '#FAFAF7', color: data.length && lowest <= m ? '#FAFAF7' : (m === 200 ? '#B3261E' : '#141412') }));
+  const milestoneCells = MILESTONES.map((m) => ({ label: String(m), tag: data.length && lowest <= m ? 'Threshold recorded' : (m === goalWeight ? 'Goal' : 'Ahead'), bg: data.length && lowest <= m ? '#141412' : '#FAFAF7', color: data.length && lowest <= m ? '#FAFAF7' : (m === goalWeight ? '#B3261E' : '#141412') }));
 
   // updates
-  const ups = (updates && updates.length ? updates : [{ date: longDate(START_DATE), type: 'official', title: 'Entry 001 — Project Commencement', body: 'The project begins under the published protocol and public record. The protocol declares a start of 340 lb. Nothing before this date is on the record. The Agreement page reports the current execution status.', link: '/daily/' }])
+  const ups = (updates && updates.length ? updates : [{ date: longDate(START_DATE), type: 'official', title: 'Entry 001 — Project Commencement', body: `Official Day 1 is ${LAUNCH_DATE}; the declared baseline is ${startWeight} lb. Prelaunch tests remain in the separate public test archive. The Agreement page reports current execution status.`, link: '/daily/' }])
     .slice().sort((a, b) => (Date.parse(a.date) || 0) - (Date.parse(b.date) || 0));
   // amendments: Updates rows typed 'amendment' render on the agreement page (§12.1 log), newest first
   const amendments = ups.filter((u) => String(u.type || '').toLowerCase() === 'amendment').reverse()
@@ -279,13 +280,20 @@ function computeValues(ctx) {
       ? 'T-' + Math.round((Date.parse(LAUNCH_DATE + 'T12:00:00Z') - Date.parse(todayIso + 'T12:00:00Z')) / 864e5)
       : rawDay < 1 ? '—' : String(dayNumber),
     startDateLong: esc(longDate(LAUNCH_DATE)),
+    startWeight: String(startWeight), goalWeight: String(goalWeight),
+    completionDays: String(PROJECT.completionDays),
+    milestoneList: MILESTONES.join(', '),
+    supervisionStartDateLong: esc(longDate(LAUNCH_DATE)),
+    amendmentSection: PROJECT.amendmentSection,
+    publicTestPhase: TEST_PHASE,
+    publicTestNotice: TEST_PHASE ? 'Public prelaunch testing is active. All outcomes are TEST simulations; agreement execution has not been inferred.' : '',
     startLabel: fmt(startWeight), goalLabel: fmt(goalWeight),
     currentLabel: last ? fmt(current) : '—', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
     pctLabel: last ? pct.toFixed(1) + '%' : '—', pctWidth: last ? Math.max(0.5, pct) + '%' : '0%',
     cleanDays: agreementExecuted ? String(cleanDays) : '—',
     cleanDaysHeading: agreementExecuted ? 'Days without violation' : 'Requirements inactive',
-    nextMilestone: ms.length ? String(ms[0]) : '200',
-    toMilestoneLabel: !last ? 'No measured weight recorded yet' : ms.length ? (current - ms[0] > 0 ? (current - ms[0]).toFixed(1) + ' lbs to go' : '') : (current <= 200 ? 'final threshold recorded' : ''),
+    nextMilestone: ms.length ? String(ms[0]) : String(goalWeight),
+    toMilestoneLabel: !last ? 'No measured weight recorded yet' : ms.length ? (current - ms[0] > 0 ? (current - ms[0]).toFixed(1) + ' lbs to go' : '') : (current <= goalWeight ? 'final threshold recorded' : ''),
     wrClosed, wrCurrent,
     hasAttested: attestedDays > 0, attestedLabel: attestedDays + (attestedDays === 1 ? ' day attested ✓' : ' days attested ✓'),
     logRows, milestoneCells, milestoneRows, penaltyRows, hasPenalties: penaltyRows.length > 0, noPenalties: penaltyRows.length === 0,
@@ -295,23 +303,25 @@ function computeValues(ctx) {
     introVideoEmbed: introEmbed, introVideoUrl: introUrl && !introEmbed ? esc(introUrl) : '', noIntroVideo: !introUrl,
     latestVideoEmbed: latestEmbed, latestVideoUrl: latestVideoUrl && !latestEmbed ? esc(latestVideoUrl) : '', noLatestVideo: !latestVideoUrl,
     latestVideoLabel: latestWithVideo ? 'Day ' + dayOf(latestWithVideo.date) + ' · ' + latestWithVideo.date : 'Daily inspection archive',
-    agreementExecuted, agreementInactive: !agreementExecuted,
+    agreementExecuted: agreementExecuted && !TEST_PHASE, agreementInactive: !agreementExecuted || TEST_PHASE,
     agreementEffectiveDateLong: agreementExecuted ? esc(longDate(agreementEffectiveDate)) : '',
-    agreementStatusSentence: agreementExecuted
+    agreementStatusSentence: TEST_PHASE
+      ? 'Public prelaunch testing is active; TEST outcomes do not verify Edition 2 execution.'
+      : agreementExecuted
       ? 'Edition 2 execution is recorded as verified effective ' + esc(longDate(agreementEffectiveDate)) + '.'
       : 'Edition 2 execution is not verified; its proposed requirements are inactive.',
     agreementScopeLabel: agreementExecuted ? 'Edition 2 scope' : 'Proposed Edition 2 scope',
     agreementRulesNoun: agreementExecuted ? 'The executed agreement' : 'The draft',
-    agreementFullHeading: agreementExecuted ? 'Edition 2 — execution verified' : 'Edition 2 — execution not verified',
+    agreementFullHeading: TEST_PHASE ? 'Edition 2 — public test simulation' : agreementExecuted ? 'Edition 2 — execution verified' : 'Edition 2 — execution not verified',
     agreementConsentScopeLabel: agreementExecuted ? 'Recorded consent scope' : 'Proposed consent scope',
     footerTermsLabel: agreementExecuted ? 'published Edition 2 terms' : 'published proposed terms',
     inViolation: agreementExecuted && openCount > 0,
-    openCountHeading: agreementExecuted ? 'Unresolved violations' : 'Operative violations',
+    openCountHeading: TEST_PHASE ? 'Unresolved test events' : agreementExecuted ? 'Unresolved violations' : 'Operative violations',
     openCountLabel: agreementExecuted ? String(openCount) : '—',
-    agreementStatus: agreementExecuted
+    agreementStatus: TEST_PHASE ? 'Public test simulation · official execution not inferred' : agreementExecuted
       ? 'agreement executed · ' + openCount + ' unresolved'
       : 'agreement execution not verified · requirements inactive',
-    projectStatusLabel: agreementExecuted ? 'Under agreement' : 'Public accountability record',
+    projectStatusLabel: TEST_PHASE ? 'Public testing' : agreementExecuted ? 'Under agreement' : 'Public accountability record',
     deadlineHeading: agreementExecuted ? 'Deadline' : 'Proposed deadline',
     deadlineValue: agreementExecuted ? '10:00 PM ET daily' : '10:00 PM ET if activated',
     complianceLabel: !agreementExecuted ? 'Edition 2 requirements are not active'
@@ -323,18 +333,6 @@ function computeValues(ctx) {
     owedLabel: esc(owedLabel), owedHref, owedDue: esc(owedDue),
     _chart: chart,
   };
-}
-
-async function renderLlmsStartDate(ctx, startDateLong) {
-  const file = path.join(ctx.ROOT, 'llms.txt');
-  const source = await fs.readFile(file, 'utf8');
-  const marker = /(<!-- START_DATE_LONG:BEGIN -->)[\s\S]*?(<!-- START_DATE_LONG:END -->)/g;
-  const matches = [...source.matchAll(marker)];
-  if (matches.length !== 2) {
-    throw new Error(`llms.txt must contain exactly two START_DATE_LONG marker pairs; found ${matches.length}.`);
-  }
-  const rendered = source.replace(marker, `$1${startDateLong}$2`);
-  if (rendered !== source) await fs.writeFile(file, rendered);
 }
 
 /* ── assembly ─────────────────────────────────────────────────────── */
@@ -350,7 +348,6 @@ export async function buildStaticSite(ctx) {
   const bodyTpl = src.slice(bodyStart, bodyEnd);
 
   const vals = computeValues(ctx);
-  await renderLlmsStartDate(ctx, vals.startDateLong);
   const out = [];
   for (const v of VIEWS) {
     const scope = Object.assign({}, vals, {
@@ -369,7 +366,7 @@ export async function buildStaticSite(ctx) {
     }
     const canonical = v.slug ? ctx.SITE_ORIGIN + '/' + v.slug + '/' : ctx.SITE_ORIGIN + '/';
     const description = fill(v.desc, vals);
-    const pageHead = head
+    const pageHead = fill(head, vals)
       .replace(/<title>[^<]*<\/title>/, `<title>${ctx.htmlEscape(v.title)}</title>`)
       .replace(/(<meta name="description" content=")[^"]*(")/, `$1${ctx.htmlEscape(description)}$2`)
       .replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${canonical}$2`)

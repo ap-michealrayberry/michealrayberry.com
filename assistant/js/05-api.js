@@ -34,23 +34,15 @@
   async function postJson(body) {
     var c = cfg();
     var payload = Object.assign({}, body || {});
-    if (payload.action !== "unlock") {
-      try {
-        var unlock = localStorage.getItem("mrb_unlock_token") || "";
-        if (unlock) payload.unlock = unlock;
-      } catch (e) {
-        /* Storage can be unavailable in private browsing; the server fails closed. */
-      }
-    }
     if (c.demoMode) {
       return mockPost(payload);
     }
     if (!c.execUrl) throw new Error("Apps Script exec URL missing; offline demo was not explicitly enabled");
-    var res = await fetch(c.execUrl, {
+    var res = await fetch("/api/assistant", {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
-      credentials: "omit",
+      credentials: "same-origin",
       redirect: "follow",
     });
     var text = await res.text();
@@ -93,7 +85,7 @@
     if (action === "mystate") {
       return Promise.resolve({
         ok: true,
-        projectStart: "2026-08-31",
+        projectStart: MRB.config.PROJECT.startDate,
         agreementActive: false,
         corrective: [],
         weekly: {

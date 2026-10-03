@@ -7,6 +7,9 @@ import { lstat, open, readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { PROJECT } from './project-config.mjs';
+const AUDIT_NOW = process.env.SOURCE_DATE_EPOCH ? Number(process.env.SOURCE_DATE_EPOCH) * 1000 : Date.now();
+if (!Number.isFinite(AUDIT_NOW)) throw new Error('Invalid SOURCE_DATE_EPOCH');
 import vm from 'node:vm';
 import { crc32, inflateSync } from 'node:zlib';
 
@@ -36,23 +39,23 @@ const FORBIDDEN_PUBLIC_PATHS = new Set([
   'record.js',
 ]);
 const PUBLIC_DATA_FILES = new Set([
-  'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json',
+  'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json', 'data/testing.json',
   'data/weigh-ins.csv', 'data/violations.csv',
 ]);
 const PUBLIC_ROOT_FILES = new Set([
-  'index.html', '404.html', '_headers', '_redirects',
+  'index.html', '404.html', '_headers', '_redirects', '_routes.json',
   '4554f3d3df9ebbf5cc1ec9578b5f4589.txt', 'indexnow-key.txt',
   'avatar.png', 'favicon.png', 'favicon.svg', 'og-image.png',
   'feed.xml', 'robots.txt', 'llms.txt',
-  'live.js', 'livenav.js', 'share.js', 'unsw.js', 'forms.html',
+  'live.js', 'livenav.js', 'share.js', 'unsw.js', 'forms.js', 
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
   'sitemap-violations.xml',
 ]);
 const PUBLIC_TOP_LEVEL_DIRECTORIES = new Set([
-  'about', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
+  'about', 'accountable', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
   'daily', 'dashboard', 'data', 'live', 'manifests', 'media', 'milestones',
-  'observer', 'photos', 'positions', 'schemas', 'share',
+  'notify', 'observer', 'partner', 'photos', 'positions', 'schemas', 'share', 'testing',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ]);
 const PUBLIC_EXTENSIONS = new Set([
@@ -61,18 +64,17 @@ const PUBLIC_EXTENSIONS = new Set([
   '.woff', '.woff2', '.xml',
 ]);
 const PUBLIC_OFFICIAL_PHOTOS = new Set([
-  'photos/official/micheal-ray-berry-correction-uniform.png',
   'photos/official/micheal-ray-berry-official-front-v2.jpg',
   'photos/official/micheal-ray-berry-official-front-480.webp',
   'photos/official/micheal-ray-berry-official-front-800.webp',
   'photos/official/micheal-ray-berry-official-front-1200.webp',
 ]);
 const REQUIRED_FILES = [
-  'index.html', '404.html', '_headers', '_redirects', 'forms.html',
+  'index.html', '404.html', '_headers', '_redirects', '_routes.json', 
   'robots.txt', 'llms.txt', 'feed.xml', 'favicon.png', 'favicon.svg',
   'og-image.png', 'avatar.png', 'indexnow-key.txt',
   '4554f3d3df9ebbf5cc1ec9578b5f4589.txt',
-  'live.js', 'livenav.js', 'share.js', 'unsw.js',
+  'live.js', 'livenav.js', 'share.js', 'unsw.js', 'forms.js',
   'assistant/index.html', 'assistant/app.js', 'assistant/styles.css',
   'assistant/sw.js', 'assistant/manifest.webmanifest',
   'assistant/icons/icon-192.png', 'assistant/icons/icon-512.png',
@@ -80,7 +82,6 @@ const REQUIRED_FILES = [
   'verify/index.html', 'verify/verify.js',
   'data/attestations.json', 'data/supervision.json',
   'data/weigh-ins.csv', 'data/violations.csv', 'data/feed-manifest.json',
-  'photos/official/micheal-ray-berry-correction-uniform.png',
   'photos/official/micheal-ray-berry-official-front-v2.jpg',
   'photos/official/micheal-ray-berry-official-front-480.webp',
   'photos/official/micheal-ray-berry-official-front-800.webp',
@@ -91,7 +92,7 @@ const REQUIRED_FILES = [
   'corrections/index.html', 'positions/index.html', 'consent/index.html',
   'uniform/index.html', 'updates/index.html', 'share/index.html',
   'live/index.html', 'accountable/index.html', 'notify/index.html', 'partner/index.html', 'observer/index.html', 'observer/received/index.html',
-  'weeks/index.html',
+  'weeks/index.html', 'testing/index.html', 'data/testing.json',
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
   'sitemap-violations.xml',
@@ -101,8 +102,8 @@ const REQUIRED_COUNTS = [
   // cannot represent an empty/fresh sheet. Once the public record exists, a
   // transient upstream failure must not replace it with a gap-only deployment.
   { code: 'daily-pages', pattern: /^daily\/\d{4}-\d{2}-\d{2}-day-\d+\/index\.html$/, minimum: 1 },
-  { code: 'cards', pattern: /^cards\/\d{4}-\d{2}-\d{2}\.png$/, minimum: 1 },
-  { code: 'milestone-pages', pattern: /^milestones\/(?:200|225|250|275|300|320)-lb\/index\.html$/, exact: 6 },
+  { code: 'cards', pattern: /^cards\/\d{4}-\d{2}-\d{2}\.png$/, minimum: 0 },
+  { code: 'milestone-pages', pattern: new RegExp('^milestones/(' + PROJECT.milestonesLb.join('|') + ')-lb/index\\.html$'), exact: PROJECT.milestonesLb.length },
   { code: 'week-pages', pattern: /^weeks\/week-\d+\/index\.html$/, minimum: 1 },
 ];
 const REQUIRED_SITEMAPS = [
@@ -110,7 +111,7 @@ const REQUIRED_SITEMAPS = [
   'sitemap-images.xml', 'sitemap-videos.xml', 'sitemap-violations.xml',
 ];
 const PUBLIC_JAVASCRIPT = new Set([
-  'live.js', 'livenav.js', 'share.js', 'unsw.js',
+  'live.js', 'livenav.js', 'share.js', 'unsw.js', 'forms.js',
   'assistant/app.js', 'assistant/sw.js', 'assistant/file/file.js',
   'verify/verify.js',
 ]);
@@ -486,12 +487,13 @@ function forbiddenReason(relativePath) {
 function isReviewedNestedPath(relativePath) {
   if (REQUIRED_FILES.includes(relativePath)) return true;
   return [
+    /^testing\/\d{4}-\d{2}-\d{2}\/index\.html$/,
     /^cards\/\d{4}-\d{2}-\d{2}\.png$/,
     /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/index\.html$/,
     /^manifests\/\d{4}-\d{2}-\d{2}\.(?:json|sha256)$/,
     /^media\/(?!responsive\/)[a-z0-9][a-z0-9._\/-]*\.(?:mp4|webm)$/,
     /^media\/responsive\/\d{4}\/\d{2}\/\d{2}\/micheal-ray-berry-day-\d{3,}-(?:front|left|rear|right)-\d{4}-\d{2}-\d{2}-\d+\.webp$/,
-    /^milestones\/(?:200|225|250|275|300|320)-lb\/index\.html$/,
+    new RegExp('^milestones/(' + PROJECT.milestonesLb.join('|') + ')-lb/index\\.html$'),
     /^photos\/\d{4}\/\d{2}\/\d{2}\/[^/]+\.(?:jpe?g|png|webp)$/,
     /^violations\/v-[a-f0-9]{12}\/index\.html$/,
     /^weeks\/week-\d{2,}\/index\.html$/,
@@ -1214,12 +1216,39 @@ function inspectFreshTimestamp(relativePath, value, location = 'published_at') {
     addError('feed-freshness', relativePath, `${location} must be an ISO-8601 timestamp with timezone`);
     return;
   }
-  const age = Date.now() - new Date(value).getTime();
+  const age = AUDIT_NOW - new Date(value).getTime();
   if (age < -5 * 60 * 1000) addError('feed-freshness', relativePath, `${location} is more than five minutes in the future`);
   if (age > 48 * 60 * 60 * 1000) addError('feed-freshness', relativePath, `${location} is older than 48 hours`);
 }
 
 function inspectPublicFeed(relativePath, value) {
+  if (relativePath === 'data/testing.json') {
+    exactObjectKeys(value, ['schema_version','phase','test_start_date','official_start_date','records','violations','supervision'], relativePath, '$');
+    if (value.schema_version !== 1 || value.phase !== 'prelaunch-test' || value.test_start_date !== PROJECT.testStartDate || value.official_start_date !== PROJECT.startDate) addError('test-schema',relativePath,'Test archive facts differ from the reviewed config');
+    for (const key of ['records','violations','supervision']) if (!Array.isArray(value[key])) addError('test-schema',relativePath,key + ' must be an array');
+    const seen = new Set();
+    for (const r of value.records || []) {
+      exactObjectKeys(r, ['date','label','weight_lb','video_url','photos'],relativePath,'record');
+      if (!validIsoDate(r.date) || r.date < PROJECT.testStartDate || r.date >= PROJECT.startDate || seen.has(r.date)) addError('test-schema',relativePath,'Invalid or duplicate test date');
+      seen.add(r.date);
+      const expectedLabel = 'T-' + Math.round((Date.parse(PROJECT.startDate + 'T12:00:00Z') - Date.parse(r.date + 'T12:00:00Z')) / 864e5);
+      if (r.label !== expectedLabel || (r.weight_lb !== null && (typeof r.weight_lb !== 'number' || !Number.isFinite(r.weight_lb)))) addError('test-schema',relativePath,'Invalid label or weight');
+      exactObjectKeys(r.photos, ['front','left','rear','right'],relativePath,'photos');
+      for (const u of Object.values(r.photos || {})) if (u !== null && !strictSameOriginAsset(u,'/photos/',['.jpg','.jpeg','.png','.webp'])) addError('test-schema',relativePath,'Unsafe test photo URL');
+      if (r.video_url && !reviewedVideoUrl(r.video_url)) addError('test-schema',relativePath,'Unsafe test video URL');
+    }
+    for (const v of value.violations || []) {
+      exactObjectKeys(v,['date','public_id','description','state','verified_at','recording_url'],relativePath,'violation');
+      if (!seen.has(v.date) || !/^V-[A-F0-9]{12}$/.test(v.public_id) || !validIsoDate(v.verified_at) || !['open','corrected','resolved'].includes(v.state)) addError('test-schema',relativePath,'Invalid test event');
+      if (v.recording_url && !reviewedVideoUrl(v.recording_url)) addError('test-schema',relativePath,'Unsafe correction URL');
+    }
+    for (const v of value.supervision || []) {
+      exactObjectKeys(v,['date','required','status','video_url'],relativePath,'supervision');
+      if (!seen.has(v.date) || typeof v.required !== 'boolean' || !['COMPLETED','MISSED','SUBMITTED','EXCEPTION','PENDING'].includes(v.status)) addError('test-schema',relativePath,'Invalid test supervision');
+      if (v.video_url && !reviewedVideoUrl(v.video_url)) addError('test-schema',relativePath,'Unsafe supervision URL');
+    }
+    return;
+  }
   if (relativePath === 'data/attestations.json') {
     exactObjectKeys(value, ['schema_version', 'published_at', 'limitations', 'records'], relativePath, '$');
     if (value?.schema_version !== 1) addError('json-schema', relativePath, 'schema_version must equal 1');
@@ -1278,9 +1307,10 @@ function inspectPublicFeed(relativePath, value) {
   if (relativePath === 'data/feed-manifest.json') {
     exactObjectKeys(value, [
       'schema_version', 'published_at', 'project_start_date',
-      'agreement_active', 'agreement_effective_date',
+      'agreement_active', 'agreement_effective_date', 'record_phase', 'official_start_date',
     ], relativePath, '$');
     if (value?.schema_version !== 1) addError('json-schema', relativePath, 'schema_version must equal 1');
+    if (!['test','official'].includes(value.record_phase) || !validIsoDate(value.official_start_date)) addError('project-facts',relativePath,'Invalid record phase or official start date');
     inspectFreshTimestamp(relativePath, value?.published_at);
     if (!validIsoDate(value?.project_start_date)) {
       addError('json-schema', relativePath, 'project_start_date must be a real YYYY-MM-DD date');
@@ -1293,7 +1323,7 @@ function inspectPublicFeed(relativePath, value) {
     } else if (value?.agreement_active) {
       if (!validIsoDate(value.agreement_effective_date)
         || value.agreement_effective_date < value.project_start_date
-        || value.agreement_effective_date > new Date().toISOString().slice(0, 10)) {
+        || value.agreement_effective_date > new Date(AUDIT_NOW).toISOString().slice(0, 10)) {
         addError('json-schema', relativePath, 'active agreement_effective_date must be a real date from project start through today');
       }
     } else if (value.agreement_effective_date !== '') {
@@ -2179,7 +2209,7 @@ async function runSelfTests() {
   inspectPublicFeed('data/feed-manifest.json', {
     schema_version: 1,
     published_at: now,
-    project_start_date: '2026-08-31',
+    project_start_date: '2026-08-31', record_phase: 'official', official_start_date: '2026-08-31',
     agreement_active: false,
     agreement_effective_date: '',
   });
@@ -2187,7 +2217,7 @@ async function runSelfTests() {
   inspectPublicFeed('data/feed-manifest.json', {
     schema_version: 1,
     published_at: now,
-    project_start_date: '2026-08-31',
+    project_start_date: '2026-08-31', record_phase: 'official', official_start_date: '2026-08-31',
     agreement_active: false,
     agreement_effective_date: '2026-09-13',
   });
@@ -2394,6 +2424,11 @@ async function main() {
     try {
       const value = JSON.parse(source);
       parsedJson.set(relativePath, value);
+      if (relativePath === '_routes.json') {
+        exactObjectKeys(value,['version','include','exclude'],relativePath,'$');
+        if (value.version !== 1 || JSON.stringify(value.include) !== JSON.stringify(['/api/*','/assistant','/assistant/*']) || value.exclude?.length) addError('function-routing',relativePath,'Functions must cover all API and protected assistant routes');
+        continue;
+      }
       const references = relativePath.endsWith('.webmanifest')
         ? webmanifestReferences(relativePath, value)
         : collectJsonReferences(value, [], '$', relativePath);
@@ -2433,6 +2468,11 @@ async function main() {
     if (!/^manifests\/\d{4}-\d{2}-\d{2}\.json$/.test(relativePath)) continue;
     const reviewed = reviewedVideoUrl(manifest?.record?.video_url);
     if (reviewed?.kind === 'same-origin') expectedLocalVideos.add(reviewed.parsed.pathname.replace(/^\/+/, ''));
+  }
+  const testArchive = parsedJson.get('data/testing.json');
+  for (const u of [...(testArchive?.records || []).map(r => r.video_url), ...(testArchive?.violations || []).map(v => v.recording_url), ...(testArchive?.supervision || []).map(v => v.video_url)]) {
+    const reviewed = reviewedVideoUrl(u);
+    if (reviewed?.kind === 'same-origin') expectedLocalVideos.add(reviewed.parsed.pathname.slice(1));
   }
   const actualLocalVideos = new Set(normalizedFiles.filter((relativePath) => /^media\/.+\.(?:mp4|webm)$/i.test(relativePath)));
   compareSets('video-inventory', 'media', 'reviewed local video inventory', actualLocalVideos, expectedLocalVideos);
@@ -2653,6 +2693,10 @@ async function main() {
         if (reference?.pathname) expectedResponsive.add(reference.pathname.replace(/^\/+/, ''));
       }
     }
+  }
+  for (const record of testArchive?.records || []) for (const u of Object.values(record.photos || {})) {
+    const ref = u && sameOriginReference(u);
+    if (ref?.pathname) expectedDailyPhotos.add(ref.pathname.slice(1));
   }
   const actualResponsive = new Set(normalizedFiles.filter((file) => file.startsWith('media/responsive/')));
   compareSets('responsive-inventory', 'media/responsive', 'responsive media inventory', actualResponsive, expectedResponsive);

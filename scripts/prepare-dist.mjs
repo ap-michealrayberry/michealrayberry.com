@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { PROJECT } from './project-config.mjs';
 
 const ROOT = path.resolve(process.env.GITHUB_WORKSPACE || process.cwd());
 const DIST = path.join(ROOT, 'dist');
@@ -20,29 +21,27 @@ if (packageManifest.name !== 'mrb-seo-publisher') {
 // Explicit deploy allowlist. Repository source, operations notes, Apps Script,
 // local tooling, and future stray files are excluded unless reviewed here.
 const FILES = [
-  'index.html', '404.html', '_headers', '_redirects',
+  'index.html', '404.html', '_headers', '_redirects', '_routes.json',
   '4554f3d3df9ebbf5cc1ec9578b5f4589.txt', 'indexnow-key.txt',
   'avatar.png', 'favicon.png', 'favicon.svg', 'og-image.png',
   'feed.xml', 'robots.txt', 'llms.txt',
-  'live.js', 'livenav.js', 'share.js', 'unsw.js',
-  'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json',
+  'live.js', 'livenav.js', 'share.js', 'unsw.js', 'forms.js',
+  'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json', 'data/testing.json',
   'data/weigh-ins.csv', 'data/violations.csv',
-  // Netlify uses this hidden page to discover the observer form at deploy time.
-  'forms.html',
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
   'sitemap-violations.xml',
 ];
 
 const DIRECTORIES = [
-  'about', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
+  'about', 'accountable', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
   'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
-  'observer', 'photos', 'positions', 'schemas', 'share',
+  'notify', 'observer', 'partner', 'photos', 'positions', 'schemas', 'share', 'testing',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ];
 
 const REVIEWED_DIRECTORY_FILES = new Set([
-  'about/index.html', 'agreement/index.html',
+  'about/index.html', 'agreement/index.html', 'testing/index.html',
   'assistant/index.html', 'assistant/app.js', 'assistant/styles.css',
   'assistant/sw.js', 'assistant/manifest.webmanifest',
   'assistant/icons/icon-192.png', 'assistant/icons/icon-512.png',
@@ -53,7 +52,6 @@ const REVIEWED_DIRECTORY_FILES = new Set([
   'schemas/daily-record-manifest-v1.json', 'share/index.html',
   'uniform/index.html', 'updates/index.html',
   'verify/index.html', 'verify/verify.js', 'violations/index.html', 'weeks/index.html',
-  'photos/official/micheal-ray-berry-correction-uniform.png',
   'photos/official/micheal-ray-berry-official-front-v2.jpg',
   'photos/official/micheal-ray-berry-official-front-480.webp',
   'photos/official/micheal-ray-berry-official-front-800.webp',
@@ -94,10 +92,11 @@ function isReviewedDirectoryFile(relativePath) {
   if (REVIEWED_LOCAL_MEDIA.has(relativePath)) return true;
   if (REVIEWED_MANIFEST_ASSETS.has(relativePath)) return true;
   return [
+    /^testing\/\d{4}-\d{2}-\d{2}\/index\.html$/,
     /^cards\/\d{4}-\d{2}-\d{2}\.png$/,
     /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/index\.html$/,
     /^manifests\/\d{4}-\d{2}-\d{2}\.(?:json|sha256)$/,
-    /^milestones\/(?:200|225|250|275|300|320)-lb\/index\.html$/,
+    new RegExp('^milestones/(' + PROJECT.milestonesLb.join('|') + ')-lb/index\\.html$'),
     /^violations\/v-[a-f0-9]{12}\/index\.html$/,
     /^weeks\/week-\d{2,}\/index\.html$/,
   ].some((pattern) => pattern.test(relativePath));
@@ -253,8 +252,21 @@ async function copyPublicDirectory(sourceRoot, destinationRoot, prefix) {
   }
 }
 
+const testArchive = JSON.parse(await fs.readFile(path.join(ROOT, 'data/testing.json'), 'utf8'));
+const TEST_PHOTOS = new Set(testArchive.records.flatMap(r => Object.values(r.photos || {})).filter(Boolean).map(u => {
+  const url = new URL(u);
+  if (url.origin !== SITE_ORIGIN || url.search || url.hash || url.username || url.password) throw new Error('Unsafe test asset URL');
+  const relative = url.pathname.slice(1);
+  if (!/^photos\/\d{4}\/\d{2}\/\d{2}\/[^/]+\.(?:jpe?g|png|webp)$/.test(relative)) throw new Error('Unsafe test asset path');
+  return relative;
+}));
 const REVIEWED_LOCAL_MEDIA = await referencedLocalMedia();
+for (const raw of [...testArchive.records.map(r => r.video_url), ...testArchive.violations.map(v => v.recording_url), ...testArchive.supervision.map(s => s.video_url)]) {
+  const relative = canonicalLocalMedia(raw);
+  if (relative) REVIEWED_LOCAL_MEDIA.add(relative);
+}
 const REVIEWED_MANIFEST_ASSETS = await referencedManifestAssets();
+for (const relative of TEST_PHOTOS) REVIEWED_MANIFEST_ASSETS.add(relative);
 if (isReviewedDirectoryFile('violations/v-001/index.html')) {
   throw new Error('Deploy allowlist invariant failed: legacy numeric violation routes must remain private.');
 }

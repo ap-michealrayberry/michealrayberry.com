@@ -20,8 +20,12 @@
     "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/audit-output.mjs dist",
     "postdeploy:indexnow": "node scripts/submit-indexnow.mjs",
     "check-apps-script-syntax": "node -e \"const fs=require('node:fs'),vm=require('node:vm');new vm.Script(fs.readFileSync('apps-script/Code.gs','utf8'),{filename:'apps-script/Code.gs'})\"",
-    "check-browser-syntax": "node -e \"const fs=require('node:fs'),vm=require('node:vm');for(const file of process.argv.slice(1))new vm.Script(fs.readFileSync(file,'utf8'),{filename:file})\" -- live.js livenav.js share.js unsw.js assistant/app.js assistant/sw.js assistant/file/file.js assistant/js/05-api.js assistant/js/12-scripts.js assistant/js/14-upload-queue.js assistant/js/18-app.js verify/verify.js",
-    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/static-site.mjs && node --check scripts/prepare-dist.mjs && node --check scripts/audit-output.mjs && node --check scripts/test-apps-script.mjs && node --check scripts/test-release.mjs && node --check scripts/submit-indexnow.mjs && node --check functions/observer.js && npm run check-apps-script-syntax && npm run check-browser-syntax && npm run check-assistant-bundle"
+    "check-browser-syntax": "node -e \"const fs=require('node:fs'),vm=require('node:vm');for(const file of process.argv.slice(1))new vm.Script(fs.readFileSync(file,'utf8'),{filename:file})\" -- forms.js live.js livenav.js share.js unsw.js assistant/app.js assistant/sw.js assistant/file/file.js assistant/js/05-api.js assistant/js/12-scripts.js assistant/js/14-upload-queue.js assistant/js/18-app.js verify/verify.js",
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/static-site.mjs && node --check scripts/prepare-dist.mjs && node --check scripts/audit-output.mjs && node --check scripts/test-apps-script.mjs && node --check scripts/test-release.mjs && node --check scripts/submit-indexnow.mjs && node --check functions/api/observer.js && node --check functions/api/subscribe.js && node --check functions/api/assistant.js && node --check server/access.js && npm run check-config && npm run check-apps-script-syntax && npm run check-browser-syntax && npm run check-assistant-bundle",
+    "sync-config": "node scripts/sync-project-config.mjs && node scripts/build-assistant.mjs",
+    "check-config": "node scripts/sync-project-config.mjs --check",
+    "test:functions": "node --test scripts/test-functions.mjs",
+    "build-assistant": "node scripts/build-assistant.mjs"
   },
   "dependencies": {
     "sharp": "0.35.4"

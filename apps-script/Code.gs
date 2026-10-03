@@ -1,3 +1,47 @@
+/* PROJECT_CONFIG:BEGIN — generated; edit project-config-v2.json, then npm run sync-config. */
+var PROJECT_FACTS = {
+  "schemaVersion": 1,
+  "edition": 2,
+  "person": "Micheal Ray Berry",
+  "siteOrigin": "https://michealrayberry.com",
+  "startDate": "2026-10-11",
+  "testStartDate": "2026-10-03",
+  "startWeightLb": 340,
+  "goalWeightLb": 200,
+  "completionDays": 28,
+  "milestonesLb": [
+    320,
+    300,
+    275,
+    250,
+    225,
+    200
+  ],
+  "deadlineEt": "22:00",
+  "supervision": {
+    "section": "3.4",
+    "startDate": "2026-10-11",
+    "nights": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "startEt": "18:00",
+    "endEt": "22:00",
+    "publicLiveEnabled": true,
+    "twitchChannel": "michealrayberry"
+  },
+  "amendmentSection": "12.1",
+  "correctionMinutes": [
+    10,
+    20,
+    30
+  ]
+};
+/* PROJECT_CONFIG:END */
+
 /**
  * MRB Public Accountability Project — record engine
  * ═══════════════════════════════════════════════════════════════════
@@ -31,21 +75,21 @@ var CONFIG = {
 
 var AP_EMAIL = 'ap@michealrayberry.com';
 var MRB_EMAIL = 'contact@michealrayberry.com';
-var PROJECT_START_FALLBACK = '2026-10-11';
-var TEST_START_FALLBACK = '2026-10-03';
-var AGREEMENT_EDITION = 2;
+var PROJECT_START_FALLBACK = PROJECT_FACTS.startDate;
+var TEST_START_FALLBACK = PROJECT_FACTS.testStartDate;
+var AGREEMENT_EDITION = PROJECT_FACTS.edition;
 /* Public supervision video switch. ON by user ruling, Oct 3 2026: /live/ embeds
    the Twitch live stream (twitch.tv/michealrayberry) during a confirmed session and the homepage carries
    the Evening Supervision module. Agreement execution still gates whether any
    session is REQUIRED. */
-var PUBLIC_SUPERVISION_VIDEO_ENABLED = true;
+var PUBLIC_SUPERVISION_VIDEO_ENABLED = PROJECT_FACTS.supervision.publicLiveEnabled;
 /* Day 1 of the CURRENT attempt. The Site State key `start_date` overrides the
    fallback (cached 5 min), so a restart is ONE sheet edit — script, publisher,
    and SPA all read the same cell. */
 var PROJECT_LAUNCH = (function () {
   try {
     var c = CacheService.getScriptCache().get('mrb_start_date');
-    if (c) return c;
+    if (c === PROJECT_START_FALLBACK) return c;
     // Module loading must be read-only. Setup/migration helpers create and
     // protect sheets deliberately; a gate-adjacent read never does so.
     var stateSheet = ssReadOnly().getSheetByName('Site State');
@@ -65,7 +109,7 @@ var PROJECT_LAUNCH = (function () {
    if the agreement were active: checks run, violations are declared, emails
    are sent with a [TEST] prefix and T-n day labels. It ends by itself on the
    launch date — PROJECT_START becomes the official Day 1 and every earlier row
-   falls outside the agreement period (never counted, never published). */
+   moves to the permanent public test archive (never counted in official totals). */
 var TEST_STATE = (function () {
   var out = { mode: '', start: TEST_START_FALLBACK };
   try {
@@ -87,7 +131,7 @@ var TEST_STATE = (function () {
 })();
 function testPhaseActive(today) {
   today = today || Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
-  return TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
+  return PROJECT_LAUNCH === PROJECT_FACTS.startDate && TEST_STATE.start === PROJECT_FACTS.testStartDate && TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
     TEST_STATE.start <= today && today < PROJECT_LAUNCH;
 }
 var TEST_PHASE = testPhaseActive();
@@ -133,16 +177,15 @@ var TABS = {
      verify COMPLETED. Public output receives sanitized status only. */
   'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
   /* Observer submissions relayed by action 'observer' (shared secret
-     OBSERVER_SECRET). On Netlify the /observer/ form posts to Netlify Forms
-     instead, so this tab fills only if a relay is wired. AP-only; never read
+     OBSERVER_SECRET). The Cloudflare /api/observer relay accepts validated Turnstile submissions. AP-only; never read
      by the site. review = received | dismissed | verified | published | actioned. */
   'Observer':       ['received_at', 'type', 'message', 'name', 'email', 'source_url', 'quotable', 'review', 'ap_note'],
 };
 
 /* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
-   from Sunday 13 Sept 2026. The nightly check at 22:20 rules on the night. */
-var SUPERVISION_START = '2026-09-13';
-var SUPERVISION_NIGHTS = [0, 1, 2, 3, 4]; // JS getDay: Sun=0 … Thu=4
+   from the versioned Edition 2 start date, or the explicit test start while testing. The nightly check at 22:20 rules on the night. */
+var SUPERVISION_START = TEST_PHASE ? TEST_STATE.start : PROJECT_FACTS.supervision.startDate;
+var SUPERVISION_NIGHTS = PROJECT_FACTS.supervision.nights; // JS getDay: Sun=0 … Thu=4
 function supervisionScheduled(ds) {
   if (ds < SUPERVISION_START) return false;
   var a = ds.split('-').map(Number);
@@ -1418,7 +1461,7 @@ function unlockOk(c) {
 }
 
 var ASSISTANT_UNLOCK_TOKEN_VERSION = 'MRBU1';
-var ASSISTANT_UNLOCK_TOKEN_MS = 14 * 24 * 60 * 60 * 1000;
+var ASSISTANT_UNLOCK_TOKEN_MS = 2 * 60 * 60 * 1000;
 var ASSISTANT_UNLOCK_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 function sha256Text(value) {
@@ -1572,10 +1615,6 @@ function keyOk(k) {
    unlock requires the device key + AP-supplied code; ap* requires the AP key. */
 
 function doGet(e) {
-  if (e && e.parameter && /^(subscribe|confirm|unsubscribe)$/.test(String(e.parameter.sub || ''))) {
-    try { return handleSubscribeAction(e.parameter); }
-    catch (se) { return jsonOut({ ok: false, error: String(se.message || se) }); }
-  }
   try {
     return routeGet(e);
   } catch (err) {
@@ -1712,6 +1751,7 @@ function doPost(e) {
     if (e && e.postData && e.postData.contents && String(e.postData.contents).charAt(0) === '{') {
       var obj = null;
       try { obj = JSON.parse(e.postData.contents); } catch (perr) {}
+      if (obj && obj.action === 'subscribe' && /^(subscribe|confirm|unsubscribe)$/.test(String(obj.sub || ''))) return handleSubscribeAction(obj);
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'attest') return deviceAuthorized(obj) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'packet') return deviceAuthorized(obj) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
@@ -4020,6 +4060,7 @@ function agreementExecutionState() {
     out.effectiveDate = [out.projectStart, out.mrbSignatureDate, out.apSignatureDate, out.consentDate, out.confirmationReviewDate]
       .sort().pop();
   }
+  if (out.projectStart && out.projectStart !== PROJECT_FACTS.startDate) out.error = 'Site State start_date differs from the versioned Edition 2 config';
   if (testPhaseActive(out.today)) {
     out.test = true;
     out.launchDate = PROJECT_LAUNCH;
@@ -4139,12 +4180,12 @@ function completionStreakAlert(activeGate) {
   for (var k = 0; k < 60; k++) {
     if (ds2 < gate.effectiveDate) break;
     var w2 = byDate[ds2];
-    if (w2 === undefined || w2 > 200.0) { if (k === 0) { ds2 = isoDateOffset(ds2, -1); continue; } break; } // today may not be filed yet
+    if (w2 === undefined || w2 > PROJECT_FACTS.goalWeightLb) { if (k === 0) { ds2 = isoDateOffset(ds2, -1); continue; } break; } // today may not be filed yet
     streak++;
     ds2 = isoDateOffset(ds2, -1);
   }
-  if (streak === 14 || streak === 21 || streak >= 28) {
-    var key = 'COMPLETION_ALERT_' + (streak >= 28 ? 28 : streak);
+  if (streak === 14 || streak === 21 || streak >= PROJECT_FACTS.completionDays) {
+    var key = 'COMPLETION_ALERT_' + (streak >= PROJECT_FACTS.completionDays ? PROJECT_FACTS.completionDays : streak);
     var props = PropertiesService.getScriptProperties();
     var recorded = withActiveAgreementMutation('the completion watch marker could be recorded', function () {
       if (props.getProperty(key)) return { changed: false, recorded: false };
@@ -4153,8 +4194,8 @@ function completionStreakAlert(activeGate) {
     });
     if (!recorded.recorded) return;
     MailApp.sendEmail(AP_EMAIL,
-      streak >= 28 ? 'COMPLETION CONDITION MET — 28 days at/under 200 (§6.3)' : 'Completion watch — ' + streak + ' days at/under 200',
-      streak >= 28
+      streak >= PROJECT_FACTS.completionDays ? 'COMPLETION CONDITION MET — ' + PROJECT_FACTS.completionDays + ' days at/under ' + PROJECT_FACTS.goalWeightLb + ' (§6.3)' : 'Completion watch — ' + streak + ' days at/under ' + PROJECT_FACTS.goalWeightLb,
+      streak >= PROJECT_FACTS.completionDays
         ? 'The tracker shows 28 consecutive days at or under 200.0 lbs.\n\nSchedule the official on-camera completion weigh-in (§6.3). Once verified, declare completion from the record sheet (MRB menu → Stage)'
         : streak + ' consecutive days at or under 200.0 lbs. At 28, the completion condition is met pending the official weigh-in.');
   }
@@ -5239,10 +5280,9 @@ function handleApAction(obj) {
   }
 }
 
-/* ═════ BUILD HOOK (Netlify) ═════
-   Netlify → Site configuration → Build & deploy → Build hooks → Add (branch
-   main), copy the URL, then run setBuildHook. Host-neutral: any URL that
-   accepts an empty POST works (Cloudflare Pages deploy hooks too). */
+/* ═════ BUILD HOOK (Cloudflare Pages) ═════
+   Pages project → Settings → Builds & deployments → Deploy hooks (main),
+   copy the private URL, then run setBuildHook. */
 
 function setBuildHook(url) {
   PropertiesService.getScriptProperties().setProperty('BUILD_HOOK', String(url || '').trim());
@@ -5264,7 +5304,7 @@ function setSecondaryBuildHook(url) {
 function triggerDeploy() {
   var props = PropertiesService.getScriptProperties();
   var hooks = [
-    { name: 'Netlify', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
+    { name: 'Cloudflare Pages', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
     { name: 'Secondary host (unused)', url: props.getProperty('BUILD_HOOK_2') },
   ].filter(function (x) { return !!x.url; });
 
@@ -5290,7 +5330,7 @@ function triggerDeploy() {
   var h = null;
   if (!h) {
     Logger.log('NO BUILD HOOK SET — nothing was triggered.\n' +
-      'Netlify → Site configuration → Build & deploy → Build hooks →\n' +
+      'Cloudflare Pages → Settings → Builds & deployments → Deploy hooks →\n' +
       'Add build hook (branch main), then run\n' +
       "setBuildHook('https://api.netlify.com/build_hooks/...')");
     return;
@@ -6028,8 +6068,8 @@ function handleMyState() {
   // The agreement's baseline is declared, not inferred from the first scale
   // reading. Keep the earliest observed measurement available as a separate
   // fact so a late first sync cannot silently rewrite the 340 lb declaration.
-  out.start = 340;
-  out.declaredStart = 340;
+  out.start = PROJECT_FACTS.startWeightLb;
+  out.declaredStart = PROJECT_FACTS.startWeightLb;
   out.earliestMeasurement = weights.length ? weights[0] : null;
   out.latest = weights.length ? weights[weights.length - 1] : null;
   out.history = weights.slice(-30);
@@ -6270,7 +6310,7 @@ function sendMail(to, subject, body) {
     if (TEST_PHASE) {
       subject = '[TEST] ' + testLabels(subject);
       body = testLabels(body) + '\n\n— Testing phase. The official record begins ' + PROJECT_LAUNCH +
-        '. Entries dated before then are test entries and leave the public record at launch.';
+        '. Test entries remain at https://michealrayberry.com/testing/ after launch and do not count toward official progress.';
     }
     MailApp.sendEmail(to, subject, body);
     return true;
@@ -6597,7 +6637,7 @@ function correctiveSubmittedWatch() {
   if (changed) stateSetWhileAgreementActive('the corrective-submission watch marker could be recorded', 'submitted_seen', JSON.stringify(seen));
 }
 
-var MILESTONES = [320, 300, 275, 250, 225, 200];
+var MILESTONES = PROJECT_FACTS.milestonesLb;
 
 function milestoneWatch() {
   var gate = activeAgreementGate('milestoneWatch');
@@ -6625,7 +6665,7 @@ function milestoneWatch() {
     changed = true;
     if (priming) continue;
     var day = dayOf(latestDate);
-    var final = target === 200;
+    var final = target === PROJECT_FACTS.goalWeightLb;
     mailMRB('THRESHOLD RECORDED — ' + target + ' lb scale row on Day ' + day,
       'The scale row for ' + latestDate + ' recorded ' + latest + ' lb, at or below the ' + target + '-pound threshold.\n\n' +
       'This is a threshold observation, not an official milestone. The milestone requires\n' +
@@ -6887,7 +6927,10 @@ function handleSubscribeAction(p) {
     if (!/^[a-f0-9]{32}$/.test(token)) return jsonOut({ ok: false, error: 'invalid token' });
     for (var j = 1; j < vals.length; j++) {
       if (String(vals[j][2]) !== token) continue;
-      if (p.sub === 'confirm') { sh.getRange(j + 1, 2).setValue('ACTIVE'); sh.getRange(j + 1, 5).setValue(now); return jsonOut({ ok: true, state: 'active' }); }
+      if (p.sub === 'confirm') {
+        if (vals[j][1] === 'ACTIVE') return jsonOut({ ok: true, state: 'active' });
+        if (vals[j][1] !== 'PENDING' || now - new Date(vals[j][3]) > 48 * 60 * 60 * 1000) return jsonOut({ ok: false, error: 'expired token' });
+        sh.getRange(j + 1, 2).setValue('ACTIVE'); sh.getRange(j + 1, 5).setValue(now); return jsonOut({ ok: true, state: 'active' }); }
       if (p.sub === 'unsubscribe') { sh.getRange(j + 1, 2).setValue('UNSUBSCRIBED'); return jsonOut({ ok: true, state: 'unsubscribed' }); }
     }
     return jsonOut({ ok: false, error: 'unknown token' });
