@@ -157,13 +157,11 @@ describe('serving', () => {
 });
 
 describe('cron', () => {
-  it('runs the nightly build only at 00:10 ET', async () => {
-    expect(await runScheduled('10 4 * * *', env, new Date('2026-10-06T04:10:00Z'))).toMatch(/nightly build done/);
-    expect(await runScheduled('10 5 * * *', env, new Date('2026-10-06T05:10:00Z'))).toBe('not 00:10 ET');
-    expect(await runScheduled('10 5 * * *', env, new Date('2026-11-10T05:10:00Z'))).toMatch(/nightly build/);
-  });
-
-  it('leaves the Sheets mirror off unless enabled', async () => {
-    expect(await runScheduled('*/5 * * * *', env, NOW)).toBe('mirror off');
+  it('runs the nightly build and backup at 00:10 ET, once, in both EDT and EST', async () => {
+    expect((await runScheduled(env, new Date('2026-10-06T04:10:00Z')))['nightly-build-backup']).toMatch(/^build done; backup \d+ bytes$/);
+    expect((await runScheduled(env, new Date('2026-10-06T04:15:00Z')))['nightly-build-backup']).toBeUndefined();
+    expect((await runScheduled(env, new Date('2026-10-06T05:10:00Z')))['nightly-build-backup']).toBeUndefined();
+    expect((await runScheduled(env, new Date('2026-11-10T05:10:00Z')))['nightly-build-backup']).toMatch(/^build done/);
+    expect(await env.MEDIA.head('backups/2026-10-05.sql')).not.toBeNull();
   });
 });

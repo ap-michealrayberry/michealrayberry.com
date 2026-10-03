@@ -4,10 +4,11 @@ import { getMe } from './api/me';
 import * as filing from './api/filing';
 import { setState } from './api/ap';
 import { runBuild } from './build';
-import { mirrorSheets } from './cron/sheets-mirror';
-import { formConfig, observerReport, subscribe } from './legacy';
+import { runDue } from './cron/schedule';
+import { JOBS } from './cron/jobs';
+import * as fitbit from './cron/fitbit';
+import { formConfig, observerReport, subscribe } from './api/public';
 import { serveSite } from './site';
-import { etDate, etWallTime } from './rules';
 
 type Who = Extract<Identity, { ok: true }>;
 const app = new Hono<{ Bindings: Env; Variables: { who: Who } }>();
@@ -48,7 +49,10 @@ app.use('/api/*', async (c, next) => {
   await next();
 });
 
-app.get('/api/me', async (c) => c.json({ ok: true, ...(await getMe(c.env.DB, c.get('who'))), ...(await filing.assistantState(c.env)) }));
+app.get('/api/me', async (c) => c.json({
+  ok: true, ...(await getMe(c.env.DB, c.get('who'))), ...(await filing.assistantState(c.env)),
+  fitbit: { configured: !!c.env.FITBIT_CLIENT_ID, connected: !!(await c.env.CACHE.get('fitbit:tokens')) },
+}));
 
 // Filing API: Micheal only, file-only (README §2.4).
 const mrbOnly = async (c: filing.Ctx, next: () => Promise<void>) => {
@@ -96,42 +100,39 @@ app.on(['GET', 'HEAD'], '/assistant/*', async (c) => {
   return res;
 });
 app.get('/assistant', (c) => c.redirect('/assistant/', 301));
+// Fitbit authorisation (Micheal, once): under /mrb/ so Access protects the callback too.
+app.get('/mrb/fitbit/connect', async (c) => {
+  const who = await accessIdentity(c.req.raw, c.env);
+  if (!who.ok || who.role !== 'mrb') return c.text('Authorized access is required.', 403);
+  return fitbit.connect(c.env);
+});
+app.get('/mrb/fitbit/callback', async (c) => {
+  const who = await accessIdentity(c.req.raw, c.env);
+  if (!who.ok || who.role !== 'mrb') return c.text('Authorized access is required.', 403);
+  return fitbit.callback(c.env, c.req.raw);
+});
 app.on(['GET', 'HEAD'], '/mrb/*', (c) => protectedApp(c, 'mrb', 'MRB portal'));
 app.get('/mrb', (c) => c.redirect('/mrb/', 301));
 
 // Everything else is the public site.
 app.all('*', (c) => serveSite(c.req.raw, c.env, c.executionCtx as ExecutionContext));
 
-/** Runs the job for a cron schedule. The two nightly schedules cover EDT and EST; only the one at 00:10 ET runs. */
-export async function runScheduled(cron: string, env: Env, now: Date): Promise<string> {
-  if (cron === '*/5 * * * *') {
-    let outcome = 'mirror off';
-    let build = false;
-    if (env.SHEETS_MIRROR === 'on') {
-      const mirror = await mirrorSheets(env, now);
-      outcome = mirror.changed ? 'mirror changed' : 'mirror unchanged';
-      build = mirror.changed;
-    }
-    // A filing that arrived while a build was running left a note.
-    if (await env.CACHE.get('build:again')) {
-      await env.CACHE.delete('build:again');
-      build = true;
-    }
-    if (!build) return outcome;
-    const result = await runBuild(env, 'cron', now);
-    return `${outcome}; build ${result.built ? 'done' : `skipped (${result.reason})`}`;
+/** The 5-minute tick: every due job (src/cron/jobs.ts) and any build a filing queued. */
+export async function runScheduled(env: Env, now: Date): Promise<Record<string, string>> {
+  const outcomes = await runDue(env, JOBS, now);
+  if (await env.CACHE.get('build:again')) {
+    await env.CACHE.delete('build:again');
+    const result = await runBuild(env, 'queued', now);
+    outcomes['queued-build'] = result.built ? 'done' : `skipped (${result.reason})`;
   }
-  const midnight = etWallTime(etDate(now), 0, 10).getTime();
-  if (Math.abs(now.getTime() - midnight) > 30 * 60 * 1000) return 'not 00:10 ET';
-  const build = await runBuild(env, 'nightly', now);
-  return `nightly build ${build.built ? 'done' : `skipped (${build.reason})`}`;
+  return outcomes;
 }
 
 export default {
   fetch: app.fetch,
   async scheduled(controller, env, ctx) {
-    ctx.waitUntil(runScheduled(controller.cron, env, new Date(controller.scheduledTime)).then(
-      (outcome) => console.log(JSON.stringify({ message: 'cron', cron: controller.cron, outcome })),
+    ctx.waitUntil(runScheduled(env, new Date(controller.scheduledTime)).then(
+      (outcome) => { if (Object.keys(outcome).length) console.log(JSON.stringify({ message: 'cron', outcome })); },
       (error) => console.error(JSON.stringify({ message: 'cron failed', cron: controller.cron, error: String(error?.stack || error) })),
     ));
   },

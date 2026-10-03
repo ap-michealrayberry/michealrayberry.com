@@ -18,6 +18,7 @@ import {
 import { loadGate, loadSiteState } from '../state';
 import { appendEvent, sha256Hex } from '../events';
 import { buildSoon } from '../build';
+import { mailAP } from '../mail';
 import type { Identity } from '../auth/access';
 
 type Who = Extract<Identity, { ok: true }>;
@@ -516,6 +517,14 @@ export async function corrective(c: Ctx) {
       .bind(stamp, video!.url, target.violationId),
   ]);
   await record(c, 'filing.corrective', target.ref, { assignment_id: target.assignmentId, attempt_id: target.attemptId, url: video!.url, after_due: late });
+  const v = await c.env.DB.prepare('SELECT date, violation FROM violations WHERE id = ?').bind(target.violationId).first<{ date: string; violation: string }>();
+  c.executionCtx.waitUntil(mailAP(c.env, `Corrective session submitted — ${v?.date} — awaiting your verification`,
+    `A corrective session has been submitted against the entry ${target.ref} for ${v?.date}.\n\n` +
+    `Submitted: ${stamp}${late ? ' (after the recorded due time — your review decides whether the deadline was met, §8)' : ''}\n` +
+    `Assignment: ${target.assignmentId}\nAttempt: ${target.attemptId}\nRequirement missed: ${v?.violation}\nRecording: ${video!.url}\n\n` +
+    'The entry remains submitted and unresolved; the recording is published beside it on the next build.\n' +
+    'Review it for identity, attire, posture, elapsed time, and completion (§8).\n' +
+    'If accepted, resolve the entry in the AP console. If it fails, overrule with the written reason and require a replacement session.', 'corrective-submitted'));
   return c.json({ ok: true, status: 'submitted-awaiting-ap-verification', assignment_id: target.assignmentId, attempt_id: target.attemptId, idempotent: false });
 }
 
@@ -539,7 +548,12 @@ export async function milestone(c: Ctx) {
   if (weight == null || weight > threshold) fail(`No scale reading at or below ${threshold} lb is on the record for ${date}.`, 409);
   const res = await c.env.DB.prepare('INSERT OR IGNORE INTO milestone_filings (date, threshold, weight_lb, url, attestation_seal) VALUES (?, ?, ?, ?, ?)')
     .bind(date, threshold, weight, video!.url, att.server_seal).run();
-  if (res.meta.changes === 1) await record(c, 'filing.milestone', String(threshold), { date, weight, url: video!.url });
+  if (res.meta.changes === 1) {
+    await record(c, 'filing.milestone', String(threshold), { date, weight, url: video!.url });
+    c.executionCtx.waitUntil(mailAP(c.env, `Milestone verification filed — ${threshold} lb — ${date}`,
+      `Micheal filed the milestone video for the ${threshold}-pound threshold.\n\nScale-synced weight on ${date}: ${weight} lb\nRecording: ${video!.url}\n\n` +
+      'The milestone becomes official only after your review of the verification weigh-in and the video (§7).', 'milestone-filed'));
+  }
   return c.json({ ok: true, status: 'submitted-awaiting-ap-review', idempotent: res.meta.changes !== 1 });
 }
 
@@ -565,6 +579,9 @@ export async function correctionRequest(c: Ctx) {
     .bind(new Date().toISOString(), v!.id, reason, evidence || null).run();
   if (res.meta.changes !== 1) fail('A correction request for this entry is already on file.', 409);
   await record(c, 'filing.correction-request', ref, { reason, evidence_url: evidence || null }, false);
+  c.executionCtx.waitUntil(mailAP(c.env, `CORRECTION REQUEST — ${ref} (${v!.date})`,
+    `Micheal requested a factual correction of this Violation Event (contract §3).\n\nEntry: ${ref}\n\nReason:\n${reason}\n\nEvidence: ${evidence || '(none given)'}\n\n` +
+    'Review it against the written rules (§8) and record a dated explanation if anything changes. The request is in the AP console.', 'correction-request'));
   return c.json({ ok: true });
 }
 
