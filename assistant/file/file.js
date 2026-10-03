@@ -105,7 +105,7 @@
       window: "inactive",
       reason: waiting
         ? "Agreement status is still being checked. Filing remains locked."
-        : "The agreement is pending counter-signature. " + label + " is proposed and is not currently due or enforceable.",
+        : "Edition 2 execution is not verified. " + label + " is proposed and is not currently due or enforceable.",
       checks: [{
         label: "Agreement execution",
         ok: false,
@@ -193,16 +193,17 @@
     var brand = " | Micheal Ray Berry";
     var dayN = pad3(ctx.day);
     var tail =
-      "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
-      "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
-      "The record: " + BASE + "/\nThe agreement: " + BASE + "/agreement\nRecord issues: " + BASE + "/report/ · ap@michealrayberry.com";
+      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
+      "The official record is " + BASE + "/. Recorded through the official Recording Assistant; " +
+      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
+      "Agreement: " + BASE + "/agreement\nContact: ap@michealrayberry.com";
     if (type === "supervision") {
       return {
         title: "Evening Supervision — Day " + dayN + " · " + ctx.date + brand,
         desc:
-          "Evening Supervision archive for Day " + dayN + " (" + ctx.date + "), 6:00–10:00 PM ET, on a night assigned by the Accountability Partner under §3.4. " +
-          "Fixed camera, normal evening activity, published rules. Status is ruled on the record." +
-          "\nSupervision: " + BASE + "/live/" + tail,
+          "Recorded Evening Supervision submission under the proposed §3.4 process, 6:00–10:00 PM ET. " +
+          "Public live video is disabled pending safety review; any archive and status await Accountability Partner review. " +
+          "Console and rules: " + BASE + "/live/" + tail,
       };
     }
     if (type === "corrective") {
@@ -210,25 +211,24 @@
       return {
         title: "Corrective Session — " + vid + " \u00b7 " + ctx.date + brand,
         desc:
-          "Corner time recorded in one continuous unedited take against violation " + vid + ". " +
-          "Filed to the record under §8 and published beside the entry once the Accountability Partner accepts it.\n" +
-          "Entry: " + BASE + "/violations/" + vid.toLowerCase() + "/\nThe standard: " + BASE + "/corrections/" + tail,
+          "Corrective session filed against " + vid + " on the official record of the Micheal Ray Berry " +
+          "Public Accountability Project. One continuous take. Public: embedded beside the entry at " +
+          "https://michealrayberry.com/violations/" + vid.toLowerCase() + "/" + tail,
       };
     }
     if (type === "consent") {
       return {
-        title: "Recorded Consent Statement · " + ctx.date + brand,
+        title: "Consent Statement — Pending Review · " + ctx.date + brand,
         desc:
-          "Micheal Ray Berry's recorded consent to the Public Accountability Project Agreement, made on " + ctx.date + ". " +
-          "The statement is read by a synthetic voice while he appears on camera; participation is confirmed by entering the Inspection position and consent by a deliberate nod inside the timed confirmation window. " +
-          "Submitted to the Accountability Partner for review; the agreement takes effect only when both signatures and this recording are verified.\n" +
-          "Agreement: " + BASE + "/agreement" + tail,
+          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement on " +
+          ctx.date + ". The recording alone does not prove comprehension, consent, or agreement execution." + tail,
       };
     }
     return {
       title: "Daily Inspection — Day " + dayN + " · " + ctx.date + brand,
       desc:
-        "Day " + dayN + " of the record (" + ctx.date + "): the standardized four-angle daily inspection, filed with the day's scale-synced weight and four documentation photographs before the 10:00 PM ET deadline.\n" +
+        "Standardized four-angle daily inspection for Day " + dayN + " (" + ctx.date + "), " +
+        "filed with the day's weight and four documentation photographs.\n" +
         "Day page: " + BASE + "/daily/" + ctx.date + "-day-" + dayN + "/" + tail,
     };
   }
@@ -435,7 +435,7 @@
     $("filing-day").textContent = date + " · Day " + pad3(dayNumber(date)) + " · sealed capture";
   }
 
-  async function postCorrectiveFiled(vId, assignmentId, attemptId, date, url, seal, reflection) {
+  async function postCorrectiveFiled(vId, assignmentId, attemptId, date, url, seal) {
     var endpoint = execUrl();
     var key = deviceKey();
     if (!endpoint || !key) return { ok: false, error: "Not configured" };
@@ -443,8 +443,7 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "correctivefiled", key: key, unlock: unlockToken(), id: vId,
-        assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal,
-        reflection_chose: (reflection && reflection.chose) || "", reflection_will: (reflection && reflection.will) || "" }),
+        assignment_id: assignmentId, attempt_id: attemptId, date: date, url: url, attestation_seal: seal }),
     });
     return res.json();
   }
@@ -508,7 +507,7 @@
         loaded: true,
         active: supervision.agreement_active === true && participantState.agreementActive === true,
         message: supervision.agreement_active === true && participantState.agreementActive === true
-          ? "Agreement active"
+          ? "Edition 2 active"
           : "Not verified · requirements inactive",
       };
     } catch (error) {
@@ -676,11 +675,6 @@
         msg.textContent = "Enter the current attempt id from the recorded session, such as A-00112233445566778899AABB.";
         return;
       }
-      var reflection = { chose: (($("cv-chose") && $("cv-chose").value) || "").trim(), will: (($("cv-will") && $("cv-will").value) || "").trim() };
-      if (reflection.chose.length < 8 || reflection.will.length < 8) {
-        msg.textContent = "Write both sentences: what you chose instead, and what you will do differently.";
-        return;
-      }
       var captures = await loadCorrectiveCaptures();
       var capture = captures.find(function (candidate) { return candidate.seal === $("cv-capture").value; });
       var correctiveSeal = capture ? capture.seal : "";
@@ -697,9 +691,8 @@
       $("yt-file").disabled = true;
       msg.textContent = "Filing\u2026";
       try {
-        var rc = await postCorrectiveFiled(vId, assignmentId, attemptId, date, url, correctiveSeal, reflection);
+        var rc = await postCorrectiveFiled(vId, assignmentId, attemptId, date, url, correctiveSeal);
         var correctiveAccepted = !!(rc && rc.ok === true);
-        if (correctiveAccepted) { try { localStorage.setItem("mrb_last_reflection", reflection.will); } catch (e) {} }
         saveCorrectiveDraft(vId, assignmentId, attemptId, {
           url: url,
           date: date,

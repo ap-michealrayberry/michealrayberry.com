@@ -20,18 +20,67 @@
     var n = ctx.day;
     var date = fmtDateLong(ctx.date);
     var w = ctx.weight;
-    // Published sequence: WAIT → FRONT → LEFT → REAR → RIGHT → WAIT (/positions/).
     return [
-      { id: "wait_open", label: "Opening — Wait", sec: 12, pose: "WAIT POSITION",
-        text: "Micheal Ray Berry. Daily inspection. Day " + n + ". " + date + ". The scale says " + w + " pounds. " +
-          "You agreed to be seen like this every day, on good days and bad ones. Full uniform. One continuous take. The code is on screen. " +
-          "Wait. Hold." },
-      { id: "inspection", label: "Front", sec: 8, pose: "FRONT · HANDS BEHIND HEAD", text: "Front. Hands behind your head. Eyes forward. Hold." },
-      { id: "left", label: "Left", sec: 5, pose: "LEFT PROFILE · HANDS BEHIND HEAD", text: "Left. Hold." },
-      { id: "rear", label: "Rear", sec: 5, pose: "REAR · HANDS BEHIND HEAD", text: "Rear. Hold." },
-      { id: "right", label: "Right", sec: 5, pose: "RIGHT PROFILE · HANDS BEHIND HEAD", text: "Right. Hold." },
-      { id: "wait_close", label: "Closing — Wait", sec: 10, pose: "WAIT POSITION",
-        text: "Wait. Hold. Inspection complete. The packet is due by ten PM Eastern. Not almost. Not later. Filed. Release." },
+      {
+        id: "wait_open",
+        label: "Opening — Wait",
+        sec: 12,
+        pose: "WAIT POSITION",
+        text:
+          "This is the official Daily Inspection for Micheal Ray Berry, Day " +
+          n +
+          ". Today is " +
+          date +
+          ". Documented weight: " +
+          w +
+          " pounds. Remain in Wait position. Full project uniform clearly visible. " +
+          "This is one continuous take. Verification code is displayed on screen.",
+      },
+      {
+        id: "inspection",
+        label: "Front — Inspection",
+        sec: 8,
+        pose: "INSPECTION · HANDS BEHIND HEAD",
+        text:
+          "Inspection position. Feet shoulder-width apart. Hands behind the head. Eyes forward. Hold.",
+      },
+      {
+        id: "left",
+        label: "Left",
+        sec: 5,
+        pose: "LEFT PROFILE · HANDS BEHIND HEAD",
+        text: "Left profile. Turn left. Hold.",
+      },
+      {
+        id: "rear",
+        label: "Rear",
+        sec: 5,
+        pose: "REAR · HANDS BEHIND HEAD",
+        text: "Rear view. Turn to the rear. Hold.",
+      },
+      {
+        id: "right",
+        label: "Right",
+        sec: 5,
+        pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
+        text: "Right profile. Turn right. Hold.",
+      },
+      {
+        id: "front_close",
+        label: "Front — Closing View",
+        sec: 6,
+        pose: "FRONT · HANDS BEHIND HEAD",
+        text: "Front. Return to the front. Hold. Four required views complete.",
+      },
+      {
+        id: "wait_close",
+        label: "Return to Wait — Completion",
+        sec: 10,
+        pose: "WAIT POSITION",
+        text:
+          "Wait position. Hold. The remaining Daily Compliance Packet requirements " +
+          "are due by ten PM Eastern. Up, down, or flat, it gets posted. Daily Inspection complete. Release.",
+      },
     ];
   }
 
@@ -40,25 +89,25 @@
       {
         id: "front",
         label: "Front",
-        text: "Front photograph. Feet apart. Hands behind your head. Still.",
+        text: "Front photograph. Inspection position. Feet shoulder-width apart. Hands behind the head. Hold.",
         pose: "FRONT · HANDS BEHIND HEAD",
       },
       {
         id: "left",
         label: "Left",
-        text: "Left. Still.",
+        text: "Left profile photograph. Left profile. Hands behind the head. Hold.",
         pose: "LEFT PROFILE · HANDS BEHIND HEAD",
       },
       {
         id: "rear",
         label: "Rear",
-        text: "Rear. Still.",
+        text: "Rear photograph. Rear view. Hands behind the head. Hold.",
         pose: "REAR · HANDS BEHIND HEAD",
       },
       {
         id: "right",
         label: "Right",
-        text: "Right. Still.",
+        text: "Right profile photograph. Right profile. Hands behind the head. Hold.",
         pose: "RIGHT PROFILE · HANDS BEHIND HEAD",
       },
     ];
@@ -71,31 +120,42 @@
    */
   function cornerSegments(ctx) {
     var date = fmtDateLong(ctx.violationDate || ctx.date);
-    var violation = ctx.violation || "complete a documented requirement";
+    var violation = ctx.violation || "a confirmed violation";
     var level = ctx.level || 1;
+    var minutes = ctx.minutes || 10;
     return [
       {
         id: "wait_open",
         label: "Opening — Wait",
-        sec: 30,
+        sec: 16,
         pose: "WAIT POSITION",
         text:
-          "Micheal Ray Berry. Corrective session. You are in Wait because on " + date + " you failed: " + violation + ". " +
-          "You do not decide what happens next. The agreement does, and you gave it that authority. " +
-          "Level " + level + ". You will not be told the length. You will not ask. " +
-          "Full uniform. One continuous take. The code is on screen. " +
-          "Nod once to show you accept the correction.",
+          "This is a Corrective Session for Micheal Ray Berry under the Public Accountability Project. " +
+          "The entry being corrected is " +
+          violation +
+          ", dated " +
+          date +
+          ". This is Level " +
+          level +
+          ", with an assigned duration of " +
+          minutes +
+          " minutes. Remain in Wait position. Full project uniform clearly visible. " +
+          "This is one continuous take. Verification code is displayed on screen.",
       },
       {
         id: "to_corner",
         label: "Assume Corner Position",
-        sec: 24,
-        pose: "CORNER POSITION · HANDS BEHIND HEAD OR BACK",
+        sec: 18,
+        pose: "CORNER POSITION · HANDS BEHIND HEAD",
         text:
-          "Turn. Face the corner. Feet apart. Knees soft. " +
-          "Hands behind your head, or behind your back, and they stay there. You may change between the two. You may not lower them. " +
-          "You may not lean. You may not turn around until you are told. " +
-          "You broke a rule you asked for. Now you obey this one. Begin.",
+          "Corner position. Turn around and face the corner. Feet shoulder-width apart. Hands behind the head. " +
+          "Do not lean against either wall. Eyes toward the corner. Hold the position. " +
+          "This session was assigned because " +
+          violation +
+          " was not completed as required. The original entry remains part of the project record. " +
+          "The timer begins now. Duration: " +
+          minutes +
+          " minutes.",
       },
     ];
   }
@@ -113,36 +173,74 @@
    * Timed-hold lines keyed by remaining seconds (exact script per level).
    * Returns { atSec, text }[] sorted descending by atSec.
    */
-  function cornerHoldMarks(level, totalSec, lastReflection) {
-    // Sixteen cues at seventeenths of the hidden length. None states time.
-    // The participant never speaks: "repeat silently" lines are internal only.
-    var T = Math.max(600, Number(totalSec) || 600);
-    var last = String(lastReflection || "").trim();
-    var lines = [
-      "Look at yourself. Standing in the correction uniform because private promises were not enough.",
-      "You needed something visible. Something you could not casually ignore.",
-      "You are not standing here because you did not understand the rule. You understood it perfectly.",
-      "You are standing here because understanding was not enough. You needed accountability attached to the choice.",
-      "All you had to do was follow the rule. You could have completed the requirement and gone on with your evening. Instead, you chose the option that brought you here.",
-      "Do not call this unfair. You wrote the standard before the violation happened.",
-      "You wanted a consequence that could compete with the temptation to ignore the rule. This is the consequence competing.",
-      "You do not get to demand stronger accountability and then complain that it is uncomfortable.",
-      "You are not supposed to enjoy being corrected. You are supposed to remember it.",
-      "The embarrassment is part of the memory. The memory is supposed to follow you back to the next decision.",
-      "Your pride does not outrank the agreement. Your discomfort does not rewrite the rules.",
-      "Repeat it silently. I asked for accountability stronger than my excuses.",
-      "Repeat it silently. I will not resent the structure I asked for.",
-      (last ? "Last time you said: " + last + ". " : "") + "Decide what you will do tomorrow. A time. An action.",
-      "You wanted consequences with enough weight to matter. This is what weight feels like.",
-      "Do not waste this by repeating the same choice tomorrow. Hold until you are released.",
+  function cornerHoldMarks(level) {
+    var n = Math.max(1, Math.min(3, level | 0));
+    if (n === 1) {
+      return [
+        {
+          atSec: 5 * 60,
+          text:
+            "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+        },
+        {
+          atSec: 60,
+          text:
+            "One minute remaining. Maintain the Corner Position until released by the timer.",
+        },
+      ];
+    }
+    if (n === 2) {
+      return [
+        {
+          atSec: 10 * 60,
+          text:
+            "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+        },
+        {
+          atSec: 5 * 60,
+          text:
+            "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
+        },
+        {
+          atSec: 60,
+          text:
+            "One minute remaining. Maintain the Corner Position until released by the timer.",
+        },
+      ];
+    }
+    // Level 3 — 30 minutes
+    return [
+      {
+        atSec: 20 * 60,
+        text:
+          "Twenty minutes remaining. The original compliance entry remains documented in the current public record. Maintain the Corner Position.",
+      },
+      {
+        atSec: 15 * 60,
+        text:
+          "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.",
+      },
+      {
+        atSec: 10 * 60,
+        text: "Ten minutes remaining. Continue holding the required position.",
+      },
+      {
+        atSec: 5 * 60,
+        text:
+          "Five minutes remaining. A completed capture may be submitted against the assigned corrective requirement; acceptance remains pending Accountability Partner verification. It does not remove the original violation from the record. Maintain the Corner Position.",
+      },
+      {
+        atSec: 60,
+        text:
+          "One minute remaining. Maintain the Corner Position until released by the timer.",
+      },
     ];
-    return lines.map(function (text, k) { return { atSec: Math.round(T * (1 - (k + 1) / 17)), text: text }; });
   }
 
   /** @deprecated generic interval — prefer cornerHoldMarks */
   function cornerInterval(minutesLeft, isHalf) {
     if (isHalf) {
-      return "Halfway. Follow the agreed correction through to completion. Maintain the required position. Acceptance remains subject to Accountability Partner review.";
+      return "Halfway. The purpose of this session is accountability for the documented compliance failure. Maintain the Corner Position.";
     }
     var m = Math.round(minutesLeft);
     if (m <= 1) {
@@ -157,15 +255,20 @@
   function cornerTimerComplete(ctx) {
     var v = (ctx && ctx.violation) || "the documented compliance failure";
     var d = ctx && (ctx.violationDate || ctx.date);
-    return "Time. You may turn around. Wait position. Face the camera. Hands behind your head. Nod once to show you have learned from this.";
+    return (
+      "Time complete. Before release, the record states the failure in full. " +
+      "Micheal Ray Berry failed " + v + (d ? ", dated " + fmtDateLong(d) : "") + ". " +
+      "The compliance entry remains documented. This completed capture still requires sealing, public filing, and Accountability Partner verification; it does not itself close or erase the entry. " +
+      "Wait position."
+    );
   }
 
   function cornerClosing(ctx) {
-    var d = ctx && (ctx.violationDate || ctx.date);
     return (
-      "The corrective session" + (d ? " for " + fmtDateLong(d) : "") + " is complete and filed for review. " +
-      "The violation remains on the record. This session answers for it. It does not erase it. " +
-      "Before you file, write what you chose instead and what you will do differently. Then you are dismissed."
+      "Remain in Wait position. Hands behind the back. Head upright. Eyes forward. Hold. " +
+      "Level " +
+      (ctx.level || 1) +
+      " Corrective Session capture is complete. It is ready to be sealed and backed up; public filing and Accountability Partner verification remain pending. Session complete. Release."
     );
   }
 
@@ -256,16 +359,20 @@
 
   function weeklyOpening(ctx) {
     return (
-      "Micheal Ray Berry. Weekly review. Week " + (ctx.week || "") + ". " +
-      "Face the camera. Hands behind your head, and they stay there. " +
-      "You do not summarise your week. The record does. Listen to it."
+      "This is the Weekly Review for Micheal Ray Berry under the Public Accountability Project. " +
+      "Week " +
+      (ctx.week || "") +
+      ". " +
+      "Hands behind the head throughout. Everything stated in this session is taken from the record. Nothing is composed."
     );
   }
 
   function weeklyAssessment(documented) {
-    var d = Math.max(0, Math.min(7, Number(documented) || 0)), m = 7 - d;
-    if (m === 0) return "Seven of seven days filed. That is the standard, not an achievement. Hold.";
-    return d + " of 7 days filed. " + (m === 1 ? "One day" : m + " times") + " you chose otherwise. The record noticed. Hold, and think about which days, and why.";
+    return (
+      "This week's documented days: " +
+      documented +
+      " of 7. Assessment is read from the record only."
+    );
   }
 
   function weeklyWeightMid(endW) {
@@ -276,69 +383,16 @@
   }
 
   function weeklyClosing(ctx) {
-    var d = Math.max(0, Math.min(7, Number(ctx.documented) || 0));
     return (
-      "Week " + (ctx.week || "") + " is read. " +
-      (d === 7 ? "Keep it that way. " : "You know what next week requires. There is nothing to add to that. ") +
-      "The numbers stand. Release."
+      "Weekly review for week " +
+      (ctx.week || "") +
+      " is complete. " +
+      (ctx.summaryLine || "") +
+      " The numbers stand as read. Session ends. Release."
     );
   }
 
-  /**
-   * Recorded Consent Statement. Two-stage confirmation:
-   * Inspection position = voluntary participation in the recording;
-   * a deliberate nod inside the timed CONFIRMATION WINDOW = consent.
-   * Stillness is never consent — the rejection rule is read aloud.
-   * The statement is heard in Wait (arms down); Inspection is entered after.
-   */
-  function confirmationSegments(ctx) {
-    var date = fmtDateLong(ctx.date);
-    var code = ctx.code || "";
-    var ed = String(ctx.version || "2");
-    return [
-      { id: "open", label: "Opening — Wait", sec: 6, pose: "WAIT POSITION · FACE CAMERA",
-        text: "Public Accountability Project. Recorded consent statement. Recording date, " + date + ". Verification code, " + code + ". " +
-          "The person appearing in this recording is Micheal Ray Berry. This is his recorded consent statement for the Public Accountability Project Agreement, made on " + date + ". " +
-          "The narration is presented by a synthetic voice because Micheal Ray Berry will not speak during this recording. His participation and confirmation are communicated through deliberate physical actions explained in this statement." },
-      { id: "look", label: "Look into camera", sec: 3, pose: "WAIT · LOOK INTO CAMERA", text: "Micheal Ray Berry, look directly into the camera." },
-      { id: "statement", label: "Consent statement", sec: 0, pose: "WAIT · LISTEN",
-        text: "Remain in Wait position while the complete consent statement is presented. The following words constitute Micheal Ray Berry's consent statement. " +
-          "I am Micheal Ray Berry. Before making this recording, I received and read the complete Public Accountability Project Agreement. I understand its purpose, requirements, documentation standards, enforcement procedures, withdrawal provisions, and stated limits. " +
-          "I had the opportunity to review the agreement, consider its consequences, ask questions, and request clarification before deciding whether to accept it. I understand that I should not confirm this statement if I have not read the agreement, do not understand a material term, or do not presently consent to participating. " +
-          "I understand that the project creates a public accountability record under my real name. That record may include my weight, physical progress, daily inspections, photographs, recorded weigh-ins, required videos, completed requirements, missed deadlines, violations, corrective sessions, weekly summaries, and other information expressly authorized by the agreement. " +
-          "I understand that these materials may be publicly accessible and may be viewed, saved, copied, discussed, indexed by search engines, or encountered by people I know. I understand that material published online cannot be guaranteed to disappear completely, even if it is later removed from the project's official website. " +
-          "I understand that this accountability structure is intentionally demanding. Compliance may sometimes be uncomfortable, inconvenient, repetitive, or difficult. Those foreseeable feelings do not, by themselves, excuse a missed requirement or permit me to rewrite an accurate record after the fact. " +
-          "I requested this structure because I want clear standards, consistent documentation, meaningful external accountability, and an accurate record of both compliance and failure. I understand that the project must record failures honestly if the accountability system is to remain credible. " +
-          "I understand that I may not unilaterally edit, soften, conceal, rewrite, falsify, or remove an established project record merely because I later dislike it or regret it. Requests involving factual errors, personal safety, protected private information, withdrawal, or removal must be handled according to the procedures and limits stated in the agreement. " +
-          "I understand that an accurate record may distinguish between the original entry and a later correction. A correction should preserve the integrity of the record while clearly identifying what was inaccurate and what information replaced it. " +
-          "I understand that my participation does not eliminate my personal safety, privacy, legal rights, or ability to withdraw consent. Withdrawal may end future participation and future obligations, subject to the agreement's stated procedure. The treatment of accurate material published before withdrawal is governed by the agreement's record-retention, privacy, and safety provisions. " +
-          "I understand that emergency intervention and safety-takedown procedures remain available when their stated conditions are met. Nothing in the agreement requires me to continue an activity that presents an immediate and genuine threat to health or safety. Nothing authorizes illegal conduct, medical neglect, financial consequences of any kind, workplace interference, or the disclosure of information excluded by the agreement. " +
-          "I understand that this project includes a consensual submissive role. I am choosing to follow the Accountability Partner's direction within the written agreement. I understand the difference between following instructions during an agreed session and deciding whether I consent to participate. My consent is not established merely by following a command. " +
-          "I understand that the Accountability Partner's authority exists only within the defined scope of the agreement. The Accountability Partner may review evidence, determine compliance, document violations, require agreed corrective actions, and administer the record as authorized by the agreement. That authority does not extend beyond the agreement or override its safety, privacy, legal, and withdrawal provisions. " +
-          "I affirm that I requested this accountability arrangement voluntarily. I have not been threatened, forced, blackmailed, deceived, or improperly pressured into accepting it. I understand that declining to confirm this recording would prevent the agreement from taking effect and would not authorize anyone to represent that I consented. " +
-          "I approved the language used in this recording before it began. I understand that a synthetic voice is presenting the statement while I appear on camera. My deliberate actions on camera are intended to document my identity, attention, and voluntary response. " +
-          "This recording will be submitted to the Accountability Partner for verification. The agreement does not take effect merely because this video was recorded. It takes effect only after the recording has been reviewed, both parties have signed the agreement, and the Accountability Partner has formally confirmed activation. " +
-          "The complete consent statement has now been presented." },
-      { id: "participate", label: "Confirm participation — Inspection", sec: 8, pose: "ENTER INSPECTION · PARTICIPATION",
-        text: "Micheal Ray Berry. You will now voluntarily move from the Wait position into the Inspection position. By doing so, you confirm that you are knowingly participating in this consent recording, that the complete agreement was made available to you before recording began, and that you have heard the complete statement. If you are participating voluntarily, enter the Inspection position now." },
-      { id: "hold", label: "Hold — look into camera", sec: 4, pose: "INSPECTION · LOOK INTO CAMERA",
-        text: "The Inspection position has been acknowledged. Remain in that position and look directly into the camera." },
-      { id: "nod", label: "CONFIRMATION WINDOW", sec: 5, pose: "CONFIRMATION WINDOW · NOD TO CONSENT", tone: "warn",
-        text: "If you have reviewed the complete agreement, understood this statement, and voluntarily consent to the agreement as of " + date + ", clearly nod your head now." },
-      { id: "rule", label: "Rejection rule", sec: 2, pose: "INSPECTION · HOLD",
-        text: "The nod must be deliberate and clearly visible. Silence, continued stillness, an unclear movement, or merely remaining in the Inspection position must not be treated as consent. If no clear nod occurred, this recording must be rejected and the agreement must not be activated. " +
-          "If a clear nod occurred, Micheal Ray Berry's physical confirmation has been recorded. This confirmation remains subject to review by the Accountability Partner and completion of both signatures." },
-      { id: "wait_close", label: "Return to Wait", sec: 5, pose: "WAIT POSITION · FACE CAMERA",
-        text: "Micheal Ray Berry, you may now return to the Wait position. Remain facing the camera for five seconds." },
-      { id: "close", label: "Close", sec: 3, pose: "WAIT POSITION",
-        text: "This consent recording concluded on " + date + " using verification code " + code + "." },
-    ];
-  }
-  // Single-string form of the same statement (transcripts, legacy callers).
   function confirmationScript(ctx) {
-    return confirmationSegments(ctx).map(function (s) { return s.text; }).join(" ");
-  }
-  function confirmationScriptLegacy(ctx) {
     return (
       "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
       (ctx.version || "1") +
@@ -346,7 +400,7 @@
       fmtDateLong(ctx.date) +
       ". " +
       "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
-      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. The agreement remains pending unless the Accountability Partner separately verifies this statement and both signatures."
+      "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
     );
   }
 
@@ -387,63 +441,8 @@
     weeklyAssessment: weeklyAssessment,
     weeklyWeightMid: weeklyWeightMid,
     weeklyClosing: weeklyClosing,
-    confirmationSegments: confirmationSegments,
     confirmationScript: confirmationScript,
     demoScript: demoScript,
     fmtDateLong: fmtDateLong,
   };
-})(window.MRB);
-
-/* AP-edited script overrides (Scripts tab, edited from ap.michealrayberry.com).
-   Keys: "<function>.<segment id>" for segment lists, "<function>" for single
-   lines. Placeholders: {day} {date} {date_long} {weight} {week} {level}
-   {minutes} {code} {violation} {violation_date} {summary} {version}.
-   Timing (sec), poses and order are never overridden — only the spoken text. */
-(function (MRB) {
-  "use strict";
-  var S = MRB.scripts; if (!S) return;
-  var OV = {};
-  try { OV = JSON.parse(localStorage.getItem("mrb_script_overrides") || "{}") || {}; } catch (e) { OV = {}; }
-  function vars(ctx) {
-    ctx = ctx || {};
-    var w = ctx.weight;
-    return {
-      day: ctx.day, date: ctx.date, date_long: ctx.date ? S.fmtDateLong(ctx.date) : "",
-      weight: w == null || w === "" ? "" : (typeof w === "number" ? w.toFixed(1) : w),
-      week: ctx.week, level: ctx.level || 1, minutes: ctx.minutes || 10, code: ctx.code || "",
-      violation: ctx.violation || "a confirmed violation",
-      violation_date: (ctx.violationDate || ctx.date) ? S.fmtDateLong(ctx.violationDate || ctx.date) : "",
-      summary: ctx.summaryLine || "", version: ctx.version || "",
-    };
-  }
-  function render(t, ctx) { var v = vars(ctx); return String(t).replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? String(v[k]) : m; }); }
-  function has(k) { return Object.prototype.hasOwnProperty.call(OV, k) && String(OV[k]).trim() !== ""; }
-  function wrapSegments(name) {
-    var f = S[name]; if (typeof f !== "function") return;
-    S[name] = function (ctx) {
-      var list = f.apply(this, arguments) || [];
-      return list.map(function (s) { var k = name + "." + s.id; return has(k) ? Object.assign({}, s, { text: render(OV[k], ctx) }) : s; });
-    };
-  }
-  function wrapLine(name) {
-    var f = S[name]; if (typeof f !== "function") return;
-    S[name] = function (ctx) { return has(name) ? render(OV[name], ctx) : f.apply(this, arguments); };
-  }
-  ["dailySegments", "photoPrompts", "cornerSegments", "confirmationSegments"].forEach(wrapSegments);
-  ["cornerTimerComplete", "cornerClosing", "weeklyOpening", "weeklyClosing", "demoScript", "announcementScript"].forEach(wrapLine);
-  S.setOverrides = function (o) { OV = o && typeof o === "object" ? o : {}; try { localStorage.setItem("mrb_script_overrides", JSON.stringify(OV)); } catch (e) {} };
-  S.getOverrides = function () { return OV; };
-  function refresh() {
-    try {
-      var c = MRB.config && MRB.config.get ? MRB.config.get() : {};
-      if (!c.execUrl || !c.deviceKey) return;
-      fetch(c.execUrl, { method: "POST", body: JSON.stringify({ action: "scripts", key: c.deviceKey }) })
-        .then(function (r) { return r.json(); })
-        .then(function (j) { if (j && j.ok && j.overrides) S.setOverrides(j.overrides); })
-        .catch(function () {});
-    } catch (e) {}
-  }
-  setTimeout(refresh, 1500);
-  setInterval(refresh, 10 * 60 * 1000);
-  S.refreshOverrides = refresh;
 })(window.MRB);

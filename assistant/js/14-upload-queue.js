@@ -269,40 +269,6 @@
     throw new Error("Drive upload ended without a finalized private URL");
   }
 
-  /* R2 original + Stream playback copy, via the site's own /api/media-init
-     (Cloudflare Pages Function). One PUT each; the Function mints both URLs. */
-  async function mediaShip(item, blob, statusWriter) {
-    var cfg = MRB.config.get();
-    var init = await fetch("/api/media-init", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ key: cfg.deviceKey, kind: item.kind, date: item.date, day: item.day, mime: item.mime || blob.type || "video/mp4" }) })
-      .then(function (r) { return r.json(); }).catch(function () { return null; });
-    if (!init || !init.ok) throw new Error((init && init.error) || "media-init failed");
-    if (!item.r2Key && init.r2_put_url) {
-      if (statusWriter) statusWriter("Archiving original — " + formatBytes(blob.size));
-      var r2 = await fetch(init.r2_put_url, { method: "PUT", body: blob, headers: { "content-type": item.mime || blob.type || "video/mp4" } });
-      if (!r2.ok) throw new Error("R2 PUT " + r2.status);
-      item.r2Key = init.r2_key; await putSession(item);
-    }
-    if (init.photos && Array.isArray(item.photos)) {
-      for (var pi = 0; pi < item.photos.length; pi++) {
-        var ph = item.photos[pi]; var slot = init.photos[ph.id];
-        if (!slot || ph.r2Key || !ph.blob) continue;
-        if (statusWriter) statusWriter("Archiving photograph " + (pi + 1) + "/" + item.photos.length);
-        var pr = await fetch(slot.r2_put_url, { method: "PUT", body: ph.blob, headers: { "content-type": "image/jpeg" } });
-        if (!pr.ok) throw new Error("R2 photo PUT " + pr.status);
-        ph.r2Key = slot.r2_key; await putSession(item);
-      }
-    }
-    if (!item.streamUid && init.stream_url) {
-      if (statusWriter) statusWriter("Uploading playback copy — " + formatBytes(blob.size));
-      var fd = new FormData(); fd.append("file", blob, driveName(item, blob));
-      var st = await fetch(init.stream_url, { method: "POST", body: fd });
-      if (!st.ok) throw new Error("Stream upload " + st.status);
-      item.streamUid = init.stream_uid; await putSession(item);
-    }
-    return { r2Key: item.r2Key || "", streamUid: item.streamUid || "" };
-  }
-
   /* Legacy direct PUT — kept for any old queue item that still carries a
      presigned URL; new uploads all go through driveRelayUpload. */
   async function resumablePut(uploadUrl, blob, onProgress, priorOffset) {
@@ -452,12 +418,6 @@
     }
     item.phase = "video-uploaded";
     await putSession(item);
-    // Evidence original → R2; playback copy → Cloudflare Stream. Both are
-    // best-effort here: a failure is logged on the item and retried on the
-    // next queue pass, but never blocks the filing (Drive already has a copy).
-    if (!MRB.config.get().demoMode && (!item.r2Key || !item.streamUid)) {
-      try { await mediaShip(item, blob, statusWriter); } catch (e) { item.mediaError = String(e && e.message || e); await putSession(item); }
-    }
 
     var attestBody = {
       date: item.date,
@@ -467,8 +427,6 @@
       video_sha256: item.video_sha256,
       chunk_chain: item.chunk_chain,
       chunk_count: item.chunk_count,
-      stream_uid: item.streamUid || "",
-      r2_key: item.r2Key || "",
     };
     if (item.weight != null) attestBody.weight = item.weight;
     if (item.photo_sha256s) attestBody.photo_sha256s = item.photo_sha256s;
@@ -509,9 +467,6 @@
         weight: item.weight,
         video_url: filedUrl,
         duration_sec: item.durationSec,
-        stream_uid: item.streamUid || "",
-        r2_key: item.r2Key || "",
-        photo_keys: (item.photos || []).reduce(function (o, ph) { if (ph.r2Key) o[ph.id] = ph.r2Key; return o; }, {}),
         attestation_seal: item.seal,
         finalize: true,
       });

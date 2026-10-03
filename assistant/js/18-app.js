@@ -88,13 +88,16 @@
 
   function applyAuthoritativeAvailability() {
     var config = MRB.config.get();
+    var active = !!(recordCache && recordCache.agreementActive && participantStateCache && participantStateCache.agreementActive);
     var daily = MRB.ui.byId("card-daily");
     var corrective = MRB.ui.byId("card-corrective");
     var weekly = MRB.ui.byId("card-weekly");
-    if (daily) { daily.disabled = false; daily.title = ""; }
+    if (daily) daily.disabled = !active;
     if (corrective) {
-      corrective.disabled = correctiveEntries().length === 0;
-      corrective.title = corrective.disabled ? "No corrective session is assigned" : "";
+      corrective.disabled = !active || correctiveEntries().length === 0;
+      corrective.title = corrective.disabled
+        ? (!active ? "Unavailable until Edition 2 execution is verified" : "No eligible AP corrective assignment")
+        : "";
     }
     if (weekly) {
       var weeklyState = participantStateCache && participantStateCache.weekly;
@@ -102,8 +105,10 @@
         /^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) &&
         Number(weeklyState.day) >= 8 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
-      weekly.disabled = !weeklyComplete;
-      weekly.title = weekly.disabled ? String(weeklyState && weeklyState.reason || "Weekly review is due on Mondays") : "";
+      weekly.disabled = !active || !weeklyComplete;
+      weekly.title = weekly.disabled
+        ? (!active ? "Unavailable until Edition 2 execution is verified" : String(weeklyState && weeklyState.reason || "Weekly review is not due"))
+        : "";
     }
     if (config.demoMode) {
       ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement"].forEach(function (id) {
@@ -122,6 +127,7 @@
     }
     if (type === "corrective" || type === "weekly") {
       participantStateCache = await MRB.api.myState();
+      if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
     }
     MRB.ui.showView("preflight");
     MRB.ui.byId("preflight-title").textContent =
@@ -347,6 +353,7 @@
     if (type === "corrective" || type === "weekly") {
       try {
         participantStateCache = await MRB.api.myState();
+        if (!participantStateCache.agreementActive) throw new Error("Edition 2 execution is not active.");
         if (type === "corrective") {
           var selectedId = String(entry && entry.id || "");
           var selectedAssignmentId = String(entry && entry.assignmentId || "");
@@ -497,9 +504,10 @@
     var brand = " | Micheal Ray Berry"; // short suffix survives YouTube's ~70-char truncation; the project name lives in the channel + description
     var dayN = ytPad3(ctx.day);
     var tail =
-      "\n\nMicheal Ray Berry Public Accountability Project — 340 lb declared start, 200 lb goal, documented daily under his real name from August 31, 2026. " +
-      "Every recording is made through the official Recording Assistant with a burned-in day, weight, verification code and date; the Accountability Partner verifies each filing against the record.\n" +
-      "The record: " + base + "/\nThe agreement: " + base + "/agreement\nRecord issues: " + base + "/report/ · ap@michealrayberry.com";
+      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
+      "The official record is " + base + "/. Recorded through the official Recording Assistant; " +
+      "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
+      "Agreement: " + base + "/agreement\nContact: ap@michealrayberry.com";
     if (type === "corrective") {
       var ref = String(ctx.vRef || "").trim().toUpperCase();
       if (!/^V-[A-F0-9]{12}$/.test(ref)) {
@@ -508,9 +516,9 @@
       return {
         title: "Corrective Session — " + ref + " · Level " + (ctx.level || 1) + " Corner Time · " + ctx.date + brand,
         desc:
-          "Corner time, Level " + (ctx.level || 1) + ", recorded in one continuous unedited take against violation " + ref +
+          "Corner time recorded in one continuous, unedited take against violation " + ref +
           (ctx.violation ? " — missed requirement: " + ctx.violation + "." : ".") +
-          " Filed to the record under §8 and published beside the entry once the Accountability Partner accepts it." +
+          " Published beside the entry under the proposed §8 process; submission awaits Accountability Partner verification, and the public record remains visible." +
           "\nViolation log: " + base + "/violations/\nThe standard: " + base + "/corrections/" + tail,
       };
     }
@@ -518,18 +526,17 @@
       return {
         title: "Weekly Review — Week " + (ctx.week || "") + " · " + ctx.date + brand,
         desc:
-          "Week " + (ctx.week || "") + " read from the record to camera: days documented, the weight and its change, entries still open. " +
-          "A review of the completed week, not a consequence." +
+          "The week read from the record: days documented, the weight, entries still open. " +
+          "Not a consequence — a concise review of the completed week." +
           "\nWeekly record: " + base + "/weeks/" + tail,
       };
     }
     if (type === "confirmation") {
       return {
-        title: "Recorded Consent Statement · " + ctx.date + brand,
+        title: "Consent Statement — Pending Review · " + ctx.date + brand,
         desc:
-          "Micheal Ray Berry's recorded consent to the Public Accountability Project Agreement, made on " + ctx.date + ". " +
-          "The statement is read by a synthetic voice while he appears on camera; participation is confirmed by entering the Inspection position and consent by a deliberate nod inside the timed confirmation window. " +
-          "Submitted to the Accountability Partner for review; the agreement takes effect only when both signatures and this recording are verified." +
+          "Participant statement submitted for Accountability Partner review concerning the proposed Public Accountability Agreement. " +
+          "The recording alone does not prove comprehension, consent, or agreement execution." +
           "\nAgreement: " + base + "/agreement" + tail,
       };
     }
@@ -537,7 +544,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "Announcement of the Micheal Ray Berry Public Accountability Project: 340 lb declared start, 200 lb goal, and a daily public documentation standard under a written agreement. Day 1 is August 31, 2026." +
+          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is August 31, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }
@@ -553,7 +560,8 @@
     return {
       title: "Daily Inspection — Day " + dayN + " · " + ctx.date + brand,
       desc:
-        "Day " + dayN + " of the record (" + ctx.date + "): the standardized four-angle daily inspection, filed with the day's scale-synced weight and four documentation photographs before the 10:00 PM ET deadline." +
+        "Standardized four-angle daily inspection for Day " + dayN + " (" + ctx.date + "), " +
+        "filed with the day's weight and four documentation photographs." +
         "\nDay page: " + base + "/daily/" + ctx.date + "-day-" + dayN + "/" + tail,
     };
   }
@@ -883,10 +891,6 @@
       MRB.config.save({ demoMode: false });
       var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
       var expires = Number(r && r.expires);
-      if (r && r.ok && r.token && !isFinite(expires)) {
-        var issuedMs = Date.parse(r.issued || "");
-        expires = (isFinite(issuedMs) ? issuedMs : Date.now()) + 14 * 24 * 3600 * 1000;
-      }
       if (!r || !r.ok || !r.token || !isFinite(expires) || expires <= Date.now()) {
         throw new Error((r && r.error) || "Server returned an invalid unlock grant");
       }

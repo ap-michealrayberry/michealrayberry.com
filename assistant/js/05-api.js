@@ -106,10 +106,6 @@
         demo: true,
       });
     }
-    if (action === "cornerdraw") {
-      var lv = Math.max(1, Math.min(3, Number(body && body.level) || 1));
-      return Promise.resolve({ ok: true, demo: true, minutes: [0, 10, 20, 30][lv], seal: "demo", drawn_at: new Date().toISOString() });
-    }
     if (action === "packet" || action === "weeklyfiled" || action === "confirmationfiled" || action === "ping" || action === "challenge" || action === "ytfiled" || action === "correctivefiled") {
       return Promise.resolve({ ok: true, demo: true, code: action === "challenge" ? "1001" : undefined });
     }
@@ -231,15 +227,6 @@
     return data;
   }
 
-  /* Server-drawn corner length for this assignment (sealed before the session). */
-  async function cornerDraw(level, ref, violationDate) {
-    var key = ensureKey();
-    var data = await postJson({ action: "cornerdraw", key: key, level: level, ref: ref || "", violation_date: violationDate || "" });
-    var m = Number(data && data.minutes);
-    if (!data || !data.ok || !isFinite(m) || m < 10 || m > 60) throw new Error((data && data.error) || "Corner-time draw unavailable");
-    return { minutes: Math.floor(m), seal: String(data.seal || ""), drawnAt: String(data.drawn_at || "") };
-  }
-
   async function fetchSheetCsv(sheetName) {
     var feeds = {
       "Weigh-ins": "/data/weigh-ins.csv",
@@ -328,7 +315,6 @@
     weeklyfiled: weeklyfiled,
     confirmationfiled: confirmationfiled,
     myState: myState,
-    cornerDraw: cornerDraw,
     loadRecord: loadRecord,
     fetchSheetCsv: fetchSheetCsv,
     pingServer: pingServer,

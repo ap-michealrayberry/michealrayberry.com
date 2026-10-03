@@ -18,13 +18,13 @@ const VIEWS = [
   { page: 'milestones', slug: 'milestones', label: 'Milestones', title: 'Weight Thresholds — 320 to 200 | Micheal Ray Berry',
     desc: 'Six published weight thresholds between the declared 340-pound baseline and 200 pounds, each recorded or not from dated weigh-ins.' },
   { page: 'uniform', slug: 'uniform', label: 'Uniform', title: 'Project Uniform — Micheal Ray Berry Public Accountability Project',
-    desc: 'The agreement defines black for routine documentation and pink for recorded corrective sessions; the agreement page reports current applicability.' },
+    desc: 'Edition 2 defines black for routine documentation and pink for recorded corrective sessions; the agreement page reports current applicability.' },
   { page: 'updates', slug: 'updates', label: 'Updates', title: 'Updates — Micheal Ray Berry Public Accountability Project',
     desc: 'Official entries by the Accountability Partner and dated notes on the record, newest first.' },
   { page: 'about', slug: 'about', label: 'About', title: 'About the Project \u2014 Micheal Ray Berry',
     desc: 'Why this public accountability project exists, how it is administered by an independent Accountability Partner, and the documentation standard behind the record.' },
   { page: 'agreement', slug: 'agreement', label: 'Agreement', title: 'Accountability Agreement Status \u2014 Micheal Ray Berry',
-    desc: 'The current status and public summary of the agreement: daily requirements, documentation standards, violations, corrective sessions, and limits.' },
+    desc: 'The current status and public summary of Edition 2: daily requirements, documentation standards, violations, corrective sessions, and limits.' },
 ];
 
 const MILESTONES = [320, 300, 275, 250, 225, 200];
@@ -257,13 +257,12 @@ function computeValues(ctx) {
   const todayRow = byDate[todayIso];
   const packetDone = !!(todayRow && !Number.isNaN(todayRow.weight) && hasPublishedPhotos(todayRow) && todayRow.video);
   const openCount = openList.length;
-  const corner = cornerSummary(violations, agreementExecuted);
   const ms = MILESTONES.filter((m) => m < current);
   return {
     dayNumber, dayCounterLabel: rawDay < 1 ? '—' : String(dayNumber),
     startDateLong: esc(longDate(START_DATE)),
     startLabel: fmt(startWeight), goalLabel: fmt(goalWeight),
-    currentLabel: last ? fmt(current) : '—', currentDateLabel: last ? esc(longDate(last.date)) : 'no measurement yet', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
+    currentLabel: last ? fmt(current) : '—', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
     pctLabel: last ? pct.toFixed(1) + '%' : '—', pctWidth: last ? Math.max(0.5, pct) + '%' : '0%',
     cleanDays: agreementExecuted ? String(cleanDays) : '—',
     cleanDaysHeading: agreementExecuted ? 'Days without violation' : 'Requirements inactive',
@@ -281,37 +280,26 @@ function computeValues(ctx) {
     agreementExecuted, agreementInactive: !agreementExecuted,
     agreementEffectiveDateLong: agreementExecuted ? esc(longDate(agreementEffectiveDate)) : '',
     agreementStatusSentence: agreementExecuted
-      ? 'The agreement is recorded as active effective ' + esc(longDate(agreementEffectiveDate)) + '.'
-      : 'The agreement is pending counter-signature; its requirements are not yet active.',
-    agreementScopeLabel: agreementExecuted ? 'Agreement scope' : 'Pending agreement scope',
+      ? 'Edition 2 execution is recorded as verified effective ' + esc(longDate(agreementEffectiveDate)) + '.'
+      : 'Edition 2 execution is not verified; its proposed requirements are inactive.',
+    agreementScopeLabel: agreementExecuted ? 'Edition 2 scope' : 'Proposed Edition 2 scope',
     agreementRulesNoun: agreementExecuted ? 'The executed agreement' : 'The draft',
-    agreementFullHeading: agreementExecuted ? 'Agreement — active' : 'Agreement — pending counter-signature',
+    agreementFullHeading: agreementExecuted ? 'Edition 2 — execution verified' : 'Edition 2 — execution not verified',
     agreementConsentScopeLabel: agreementExecuted ? 'Recorded consent scope' : 'Proposed consent scope',
-    footerTermsLabel: agreementExecuted ? 'published terms' : 'published pending terms',
-    inViolation: (String((siteState || {}).violation_mode_effective || '') === 'true') || (String((siteState || {}).banner_mode || 'auto') === 'auto' && (agreementExecuted && openCount > 0)),
-    owedMinutes: String(corner.owed),
-    servedMinutes: String(corner.served),
-    openCountNum: String(openCount),
-    dueAtIso: corner.soonestDueIso,
-    dueAtLabel: corner.soonestDueLabel,
-    dueRelative: corner.soonestDueRelative,
-    overdueSuffix: corner.overdueSuffix,
-    dueWord: corner.dueWord,
-    allOverdue: corner.allOverdue,
-    heroPhoto: ((String((siteState || {}).violation_mode_effective || '') === 'true') || (String((siteState || {}).banner_mode || 'auto') === 'auto' && (agreementExecuted && openCount > 0))) ? '/photos/official/micheal-ray-berry-correction-uniform.png' : '/photos/official/micheal-ray-berry-official-front-v2.jpg',
-    heroPhotoAlt: ((String((siteState || {}).violation_mode_effective || '') === 'true') || (String((siteState || {}).banner_mode || 'auto') === 'auto' && (agreementExecuted && openCount > 0))) ? 'Micheal Ray Berry in the designated pink correction uniform. A documented requirement was missed and a corrective obligation is open.' : 'Micheal Ray Berry, official photograph — black unitard, steel or titanium collar, hands behind head. Declared start 340.',
+    footerTermsLabel: agreementExecuted ? 'published Edition 2 terms' : 'published proposed terms',
+    inViolation: agreementExecuted && openCount > 0,
     openCountHeading: agreementExecuted ? 'Unresolved violations' : 'Operative violations',
     openCountLabel: agreementExecuted ? String(openCount) : '—',
     agreementStatus: agreementExecuted
       ? 'agreement executed · ' + openCount + ' unresolved'
-      : 'agreement pending counter-signature · requirements not yet active',
+      : 'agreement execution not verified · requirements inactive',
     projectStatusLabel: agreementExecuted ? 'Under agreement' : 'Public accountability record',
     deadlineHeading: agreementExecuted ? 'Deadline' : 'Proposed deadline',
     deadlineValue: agreementExecuted ? '10:00 PM ET daily' : '10:00 PM ET if activated',
-    complianceLabel: !agreementExecuted ? 'Agreement pending — requirements not yet active'
+    complianceLabel: !agreementExecuted ? 'Edition 2 requirements are not active'
       : openCount > 0 ? (openCount === 1 ? 'One unresolved violation' : openCount + ' unresolved violations')
         : (rawDay < 1 ? 'Record not yet started' : packetDone ? 'Today’s required media and weight filed' : 'Today’s packet due'),
-    todayPacketLabel: !agreementExecuted ? 'Filed daily · counts toward the record once the agreement is active'
+    todayPacketLabel: !agreementExecuted ? 'No filing is due · execution not verified'
       : rawDay < 1 ? '' : (packetDone ? 'Required media and weight filed · ' : 'Due · ') + todayIso,
     _chart: chart,
   };
@@ -330,43 +318,6 @@ async function renderLlmsStartDate(ctx, startDateLong) {
 }
 
 /* ── assembly ─────────────────────────────────────────────────────── */
-/* Corner time owed / served and the soonest corrective deadline, from the
-   Violation Log only. Level follows confirmed-count order (capped at 3). Owed
-   counts each open entry at its level minimum (10/20/30 — the drawn length is
-   unknown until served); served uses the actual minutes from the entry's
-   "Corner time served: Level N · M min" note when present;
-   the 72 h clock runs from the entry's declaration (eventVerifiedAt when
-   present, else the violation date at 22:00 ET). Served = resolved entries. */
-function cornerSummary(violations, active) {
-  const minutesFor = (i) => [10, 20, 30][Math.min(2, i)];
-  const confirmed = (violations || []).filter((v) => v.state === 'open' || v.state === 'resolved')
-    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  let owed = 0, served = 0, soonest = null, openN = 0, overdueN = 0;
-  const now = Date.now();
-  confirmed.forEach((v, i) => {
-    const mins = minutesFor(i);
-    if (v.state === 'resolved') { const m = String(v.corrections || '').match(/Corner time served: Level \d · (\d+) min/); served += m ? Number(m[1]) : mins; return; }
-    owed += mins; openN += 1;
-    const base = v.eventVerifiedAt ? new Date(v.eventVerifiedAt) : new Date(`${v.date}T22:00:00-04:00`);
-    const due = new Date(base.getTime() + 72 * 3600e3);
-    if (Number.isNaN(due.getTime())) return;
-    if (due.getTime() < now) overdueN += 1;
-    if (!soonest || due < soonest) soonest = due;
-  });
-  const fmt = (d) => d.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-  const rel = (d) => { const ms = d - Date.now(); const a = Math.abs(ms); const h = Math.floor(a / 3600e3), m = Math.floor((a % 3600e3) / 60e3); const txt = h >= 24 ? `${h} h` : h > 0 ? `${h} h ${m} m` : `${m} m`; return ms < 0 ? `overdue by ${txt}` : `${txt} remaining`; };
-  return {
-    owed: active ? owed : 0, served,
-    soonestDueIso: active && soonest ? soonest.toISOString() : '',
-    soonestDueLabel: active && soonest ? fmt(soonest) : '',
-    soonestDueRelative: active && soonest ? rel(soonest) : '',
-    overdueSuffix: !active || !openN ? '' : overdueN === openN ? ' · ALL OVERDUE' : overdueN > 0 ? ` · ${overdueN} OVERDUE` : '',
-    dueWord: overdueN > 0 ? 'earliest due' : 'due',
-    allOverdue: !!(active && openN && overdueN === openN),
-    overdue: !!(active && soonest && soonest < new Date()),
-  };
-}
-
 export async function buildStaticSite(ctx) {
   const src = await fs.readFile(path.join(ctx.ROOT, 'site.template.html'), 'utf8');
   const headStart = src.indexOf('<head>') + 6, headEnd = src.indexOf('</head>');
@@ -385,8 +336,6 @@ export async function buildStaticSite(ctx) {
     const scope = Object.assign({}, vals, {
       isHome: v.page === 'home', isDashboard: v.page === 'dashboard', isMilestones: v.page === 'milestones',
       isUniform: v.page === 'uniform', isUpdates: v.page === 'updates', isAbout: v.page === 'about', isAgreement: v.page === 'agreement',
-      isRecordSection: ['milestones', 'updates'].includes(v.page),
-      isProtocolSection: ['uniform', 'agreement'].includes(v.page),
     });
     for (const p of VIEWS) scope['is' + p.page[0].toUpperCase() + p.page.slice(1) + 'Nav'] = v.page === p.page ? 'page' : undefined;
     let body = expand(bodyTpl, scope);

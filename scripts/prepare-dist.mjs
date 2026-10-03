@@ -24,9 +24,11 @@ const FILES = [
   '4554f3d3df9ebbf5cc1ec9578b5f4589.txt', 'indexnow-key.txt',
   'avatar.png', 'favicon.png', 'favicon.svg', 'og-image.png',
   'feed.xml', 'robots.txt', 'llms.txt',
-  'live.js', 'livenav.js', 'report.js', 'share.js', 'unsw.js',
+  'live.js', 'livenav.js', 'share.js', 'unsw.js',
   'data/attestations.json', 'data/supervision.json', 'data/feed-manifest.json',
   'data/weigh-ins.csv', 'data/violations.csv',
+  // Netlify uses this hidden page to discover the observer form at deploy time.
+  'forms.html',
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
   'sitemap-violations.xml',
@@ -34,8 +36,8 @@ const FILES = [
 
 const DIRECTORIES = [
   'about', 'agreement', 'assistant', 'cards', 'consent', 'corrections',
-  'daily', 'faq', 'dashboard', 'live', 'manifests', 'media', 'milestones',
-  'report', 'photos', 'positions', 'protocol', 'schemas', 'share', 'tf060',
+  'daily', 'dashboard', 'live', 'manifests', 'media', 'milestones',
+  'observer', 'photos', 'positions', 'schemas', 'share',
   'uniform', 'updates', 'verify', 'violations', 'weeks',
 ];
 
@@ -47,12 +49,11 @@ const REVIEWED_DIRECTORY_FILES = new Set([
   'assistant/file/index.html', 'assistant/file/file.js', 'assistant/file/file.css',
   'consent/index.html', 'corrections/index.html', 'daily/index.html',
   'dashboard/index.html', 'live/index.html', 'milestones/index.html',
-  'report/index.html', 'report/received/index.html', 'positions/index.html',
-  'protocol/index.html', 'schemas/daily-record-manifest-v1.json', 'share/index.html', 'tf060/index.html', 'faq/index.html',
+  'observer/index.html', 'observer/received/index.html', 'positions/index.html',
+  'schemas/daily-record-manifest-v1.json', 'share/index.html',
   'uniform/index.html', 'updates/index.html',
   'verify/index.html', 'verify/verify.js', 'violations/index.html', 'weeks/index.html',
   'photos/official/micheal-ray-berry-correction-uniform.png',
-  'photos/official/micheal-ray-berry-tf060-continues.png',
   'photos/official/micheal-ray-berry-official-front-v2.jpg',
   'photos/official/micheal-ray-berry-official-front-480.webp',
   'photos/official/micheal-ray-berry-official-front-800.webp',
@@ -64,7 +65,6 @@ const PRIVATE_PATHS = new Set([
   'assistant/bundle-sections.json',
   'assistant/js',
   'live/overlay.html',
-  'live/overlay.js',
 ]);
 
 const PUBLIC_EXTENSIONS = new Set([
@@ -95,7 +95,7 @@ function isReviewedDirectoryFile(relativePath) {
   if (REVIEWED_MANIFEST_ASSETS.has(relativePath)) return true;
   return [
     /^cards\/\d{4}-\d{2}-\d{2}\.png$/,
-    /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/(?:video\/)?index\.html$/,
+    /^daily\/\d{4}-\d{2}-\d{2}-day-\d{3,}\/index\.html$/,
     /^manifests\/\d{4}-\d{2}-\d{2}\.(?:json|sha256)$/,
     /^milestones\/(?:200|225|250|275|300|320)-lb\/index\.html$/,
     /^violations\/v-[a-f0-9]{12}\/index\.html$/,
