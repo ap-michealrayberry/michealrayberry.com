@@ -7,11 +7,9 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 /home        /            301
 # Every public page is a static file generated at build time from
 # site.template.html — no client-side rendering, no SPA rewrites.
-/accountability-partner  /  301
+/accountability-partner  /partner/  301
 /personal    /  301
 /personal/*  /  301
-/partner     /  301
-/partner/*   /  301
 /log         /violations/   301
 /annex/* / 301
 /annex / 301
@@ -66,3 +64,5 @@ https://www.michaelrayberry.com/*  https://michealrayberry.com/:splat  301!
 # Reference became Share (Sept 13)
 /reference    /share/  301
 /reference/*  /share/  301
+/hold-me-accountable   /accountable/   301
+/hold-me-accountable/  /accountable/   301

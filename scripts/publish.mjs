@@ -1170,8 +1170,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1347,8 +1346,7 @@ function milestonePage(target, entries) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1411,6 +1409,24 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
     weekCards.push(reportCard(cardCtx(d, { date, complete: !!e, photoCount: e ? 4 : 0, photo: e ? { url: e.photos.front.variants?.[0]?.url || e.photos.front.sourceUrl } : null }), { compact: true, link: `/daily/${date}-day-${String(d).padStart(3, '0')}/` }));
   }
   const filesPresent = weekEntries.length;
+  const wFrom = dateForDay(firstDay), wTo = dateForDay(firstDay + 6);
+  const elapsed = Math.max(0, Math.min(7, todayDay - firstDay));
+  const wChain = [...VIO_CHAIN.values()].filter((c) => c.v.date >= wFrom && c.v.date <= wTo);
+  const wSup = (CARD_CTX?.supervision || []).filter((s) => s.required && s.date >= wFrom && s.date <= wTo && s.date < todayEtIso());
+  const wSupMissed = wSup.filter((s) => /^MISSED/i.test(s.status)).length;
+  const wOwed = wChain.filter((c) => c.v.state !== 'resolved').reduce((n, c) => n + c.mins, 0);
+  const wServed = wChain.filter((c) => c.v.state === 'resolved').reduce((n, c) => n + c.mins, 0);
+  const wEvidence = filesPresent >= elapsed && wChain.every((c) => c.v.state === 'open' || c.v.recording);
+  const auditHtml = `<section aria-label="Weekly audit" style="border:1px solid #141412;margin:0 0 28px">
+    <div style="padding:12px 16px;border-bottom:1px solid #D8D6CF;font:700 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase">Weekly audit · Week ${week}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      ${[['Days with files present', `${filesPresent} of ${elapsed}`], ['Days incomplete', String(Math.max(0, elapsed - filesPresent))],
+        ['Supervision', wSup.length ? `${wSup.length - wSupMissed} of ${wSup.length}${wSupMissed ? ' · ' + wSupMissed + ' missed' : ''}` : '—'],
+        ['Violations this week', `${wChain.length}${wChain.filter((c) => c.v.state !== 'resolved').length ? ' · ' + wChain.filter((c) => c.v.state !== 'resolved').length + ' open' : ''}`],
+        ['Corner time owed / served', `${wOwed} / ${wServed} min`], ['Evidence complete', wEvidence ? 'Yes' : 'No']]
+        .map(([k, val]) => `<div style="padding:14px 16px;border-right:1px solid #EDEBE4;border-bottom:1px solid #EDEBE4"><div style="font:600 10px/1.3 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64">${k}</div><div style="font:600 20px/1.3 'IBM Plex Mono',ui-monospace,monospace;margin-top:6px${k === 'Evidence complete' && !wEvidence ? ';color:#B3261E' : ''}">${htmlEscape(val)}</div></div>`).join('')}
+    </div>
+  </section>`;
   const nav = [
     week > 1 ? `<a rel="prev" href="/weeks/week-${String(week - 1).padStart(2, '0')}/">← Week ${week - 1}</a>` : '',
     week < maxWeek ? `<a rel="next" href="/weeks/week-${String(week + 1).padStart(2, '0')}/">Week ${week + 1} →</a>` : '',
@@ -1446,8 +1462,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1458,6 +1473,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
 </header>
 <main id="main-content">
   <p class="intro">${htmlEscape(description)}</p>
+  ${auditHtml}
   ${weekCards.length ? `<h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:8px 0 12px">Report cards \u00B7 ${filesPresent} of ${weekCards.length} days have all listed files present · timing unverified</h2>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:0 0 32px">${weekCards.join('')}</div>` : ''}
   ${rows ? `<table><caption>Recorded entries for week ${week}</caption><thead><tr><th scope="col">Day</th><th scope="col">Date</th><th scope="col">Weight</th><th scope="col">Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No days currently have all listed files present in this week.</div>'}
@@ -1513,8 +1529,7 @@ function weeksIndexPage(entries, lastDay) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1728,8 +1743,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -1917,8 +1931,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2042,8 +2055,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2199,6 +2211,40 @@ function violationText(raw) {
   return s;
 }
 
+/* Corrective status + escalation chain (§8.1 level by position in the
+   accumulated count, capped at 3; §8.3 due 72 hours after the notice). */
+let VIO_CHAIN = new Map();
+function addDaysIso(iso, n) { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function violationChain(list) {
+  const ordered = list.slice().sort((a, b) => a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id)));
+  const today = todayEtIso();
+  const map = new Map();
+  ordered.forEach((v, i) => {
+    const level = Math.min(3, i + 1), mins = { 1: 10, 2: 20, 3: 30 }[level];
+    const notice = String(v.eventVerifiedAt || v.date).slice(0, 10);
+    const due = addDaysIso(notice, 3);
+    const overdue = v.state === 'open' && today > due;
+    const escalation = /72-hour corrective deadline/i.test(v.what);
+    const status = v.state === 'resolved'
+      ? `COMPLETED · RECORDED · ${v.submitted || v.resolved} · VERIFIED ${v.resolved}`
+      : v.state === 'corrected'
+        ? `SUBMITTED ${v.submitted} · AWAITING AP VERIFICATION`
+        : overdue ? 'OUTSTANDING · OVERDUE' : 'OUTSTANDING';
+    map.set(v.slug, { v, index: i, level, mins, notice, due, overdue, escalation, status,
+      requirement: `LEVEL ${level} · ${mins} MINUTES` });
+  });
+  return map;
+}
+function chainSteps(c) {
+  const s = [[c.v.date, `Requirement missed — ${c.v.what}`]];
+  if (c.v.eventVerifiedAt) s.push([String(c.v.eventVerifiedAt).slice(0, 10), 'Violation Event confirmed by the Accountability Partner']);
+  s.push([c.notice, `Corrective requirement assigned: Level ${c.level} · ${c.mins} minutes · due ${c.due}`]);
+  if (c.v.submitted) s.push([c.v.submitted, 'Corrective session recorded and filed']);
+  if (c.v.resolved) s.push([c.v.resolved, 'Completed · verified by the Accountability Partner']);
+  else if (c.overdue) s.push([c.due, 'Deadline passed unresolved — a new Violation Event at the next level follows']);
+  return s;
+}
+
 function violationPage(v, prev, next) {
   const canonical = `${SITE_ORIGIN}/violations/${v.slug}/`;
   const title = `${v.id} — ${longDate(v.date)} — Micheal Ray Berry Public Accountability Project`;
@@ -2289,8 +2335,7 @@ function violationPage(v, prev, next) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2299,6 +2344,13 @@ function violationPage(v, prev, next) {
     <p>${htmlEscape(longDate(v.date))} · ${dayLabelOf(v)}</p>
     <p><span class="vstate ${v.state}">${STATE_LABEL[v.state]}</span></p>
   </header>
+  ${(() => { const c = VIO_CHAIN.get(v.slug); if (!c) return ''; return `<section style="border:1px solid #141412;margin:0 0 28px;max-width:960px">
+    <div style="padding:14px 18px;background:${v.state === 'resolved' ? '#F1F0EA' : '#FBF1F0'};font:700 14px/1.5 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:${v.state === 'resolved' ? '#141412' : '#B3261E'}">Corrective requirement: ${htmlEscape(c.requirement)} · ${htmlEscape(c.status)}</div>
+    <div style="padding:14px 18px;border-top:1px solid #D8D6CF">
+      <div style="font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:#6B6A64;margin-bottom:10px">Escalation history</div>
+      ${chainSteps(c).map(([d, t]) => `<div style="display:grid;grid-template-columns:120px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid #EDEBE4;font-size:15px;line-height:1.5"><span style="font:600 13px/1.5 'IBM Plex Mono',ui-monospace,monospace">${htmlEscape(d)}</span><span>${htmlEscape(t)}</span></div>`).join('')}
+    </div>
+  </section>`; })()}
   <main id="main-content">
     <div class="vtable">
       ${rows.map(([k, val]) => `<div><b>${k}</b><p>${htmlEscape(String(val))}</p></div>`).join('')}
@@ -2471,8 +2523,7 @@ function positionsPage(entries, siteState = {}) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -2576,8 +2627,14 @@ function violationsIndexPage(violations) {
     <td>${htmlEscape(longDate(v.date))}</td>
     <td>${dayLabelOf(v)}</td>
     <td>${htmlEscape(v.what)}</td>
-    <td>${htmlEscape(v.state)}</td>
+    <td>${htmlEscape(VIO_CHAIN.get(v.slug) ? VIO_CHAIN.get(v.slug).requirement + ' · ' + VIO_CHAIN.get(v.slug).status : v.state)}</td>
   </tr>`).join('\n');
+  const chainAll = [...VIO_CHAIN.values()];
+  const minsOwed = chainAll.filter((c) => c.v.state !== 'resolved').reduce((n, c) => n + c.mins, 0);
+  const minsServed = chainAll.filter((c) => c.v.state === 'resolved').reduce((n, c) => n + c.mins, 0);
+  const historyHtml = chainAll.length ? `<h2>Escalation history</h2>
+    <p>Every entry in order, with the level its position in the count assigned. Corner time owed: <strong>${minsOwed} minutes</strong> · served and verified: <strong>${minsServed} minutes</strong>.</p>
+    <ol style="padding-left:22px;line-height:1.7">${chainAll.map((c) => `<li><a href="/violations/${c.v.slug}/">${htmlEscape(c.v.date)}</a> · ${htmlEscape(c.v.what)} → Level ${c.level} · ${c.mins} min → <strong>${htmlEscape(c.status)}</strong>${c.escalation ? ' · escalation' : ''}</li>`).join('')}</ol>` : '';
   const graph = [
     { '@type': 'WebPage', '@id': canonical, url: canonical, name: title, description, about: { '@id': PERSON_ID }, isPartOf: { '@id': `${SITE_ORIGIN}/#website` } },
     { '@type': 'BreadcrumbList', itemListElement: [
@@ -2605,8 +2662,7 @@ function violationsIndexPage(violations) {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
 <header>
@@ -2617,7 +2673,8 @@ function violationsIndexPage(violations) {
 <main id="main-content">
   <p class="intro">${violations.length} ${violations.length === 1 ? 'entry' : 'entries'} on the public log. ${open} unresolved. Each entry has a stable public page.</p>
   ${PRIOR_NOTE ? `<div style="border-left:4px solid var(--accent);background:#f1f0ea;padding:12px 16px;margin:0 0 16px;max-width:760px"><strong>Earlier attempt.</strong> ${htmlEscape(PRIOR_NOTE)}</div>` : ''}
-  ${violations.length ? `<table><caption>Published violation entries</caption><thead><tr><th scope="col">ID</th><th scope="col">Date</th><th scope="col">Day</th><th scope="col">Requirement</th><th scope="col">Status</th></tr></thead><tbody>${rows}</tbody></table>` : '<p>No violation entries have been published.</p>'}
+  ${violations.length ? `<table><caption>Published violation entries</caption><thead><tr><th scope="col">ID</th><th scope="col">Date</th><th scope="col">Day</th><th scope="col">Requirement</th><th scope="col">Status</th></tr></thead><tbody>${rows}</tbody></table>
+    ${historyHtml}` : '<p>No violation entries have been published.</p>'}
   <p><a href="/daily/">Daily record</a> · <a href="/corrections/">Corrective sessions</a></p>
 </main>
 <div class="sitefoot"><div class="sitefoot-in">
@@ -2764,6 +2821,134 @@ function observerReceivedPage() {
     <p><a href="/">Return to the record</a></p>`;
   return synPage({ title: 'Received — Observer Submission', desc: 'Your observer note has been delivered to the Accountability Partner.', canonical, body })
     .replace('<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">', '<meta name="robots" content="noindex,follow">');
+}
+
+/* /accountable/ — "Hold Me Accountable". Explicit permission for people who
+   know him to hold him to the published record, with the same limits as the
+   rest of the site. Static; the live state is read from the record pages. */
+function partnerPage() {
+  const canonical = `${SITE_ORIGIN}/partner/`;
+  const title = 'Local Accountability Partner — Micheal Ray Berry';
+  const desc = 'Position open: a local, in-person Accountability Partner for the Micheal Ray Berry public accountability record under Edition 2 §3.2.';
+  const DUTIES = ['In-person weigh-in verification', 'Supervising corrective sessions', 'Confirming or rejecting declared violations', 'Weekly review',
+    'Full-structure supervision (§3.2): schedule, devices, meals, check-ins, spending oversight'];
+  const body = `
+    <p style="font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:40px 32px 0">Position open · §3.2</p>
+    <h1 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2.4rem,6vw,4.6rem);line-height:.93;margin:10px 32px 24px;max-width:900px">Local Accountability Partner</h1>
+    <div style="padding:0 32px 64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;max-width:1160px">
+      <div style="display:flex;flex-direction:column;gap:20px;max-width:720px">
+        <p style="margin:0;font-size:18px;line-height:1.65">The record is administered remotely. Edition 2 §3.2 allows a second, local Accountability Partner to verify in person what the camera can only document. Any appointment, scope, and requirements must be written, logged publicly, and co-signed before they bind either person. The verifier’s identity stays private under §12.2.</p>
+        <div style="border-top:1px solid var(--ink)">${DUTIES.map((d) => `<div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:16px">${d}</div>`).join('')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;align-self:start">
+        <div style="background:var(--ink);color:var(--paper);padding:24px;display:flex;flex-direction:column;gap:12px">
+          <span style="font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8983">The one requirement</span>
+          <span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:32px;text-transform:uppercase;line-height:1">Enforce without softening</span>
+        </div>
+        <div style="border:1px solid var(--ink);padding:24px;display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)">Apply</span>
+          <span style="font-size:16px;line-height:1.55">Write to the Accountability Partner.</span>
+          <a href="mailto:ap@michealrayberry.com" style="font:600 15px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:var(--accent)">ap@michealrayberry.com</a>
+        </div>
+      </div>
+    </div>`;
+  return synPage({ title, desc, canonical, body, wide: true });
+}
+
+function notifyPage() {
+  const canonical = `${SITE_ORIGIN}/notify/`;
+  const title = 'Notifications — Micheal Ray Berry Public Accountability Record';
+  const desc = 'Subscribe to the Micheal Ray Berry public accountability record: the nightly result, new violations, escalations, completed corrections, missed supervision, and the weekly audit.';
+  const body = `
+    <p style="font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:40px 32px 0">Public accountability record · Notifications</p>
+    <h1 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2.4rem,6vw,4.6rem);line-height:.93;margin:10px 32px 20px;max-width:900px">Get the result without checking</h1>
+    <p style="margin:0 32px 28px;max-width:720px;font-size:19px;line-height:1.6">The record emails what happened, as it happens. You don’t have to remember to look, and he doesn’t have to tell you.</p>
+    <div style="padding:0 32px 64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;max-width:1160px">
+      <form method="post" action="/api/subscribe" style="border:1px solid var(--ink);padding:24px;display:flex;flex-direction:column;gap:14px;align-self:start">
+        <label for="email" style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase">Email address</label>
+        <input id="email" name="email" type="email" required autocomplete="email" style="font-size:17px;padding:12px;border:1px solid var(--ink);background:#fff">
+        <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+        <button type="submit" style="font:700 13px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--paper);border:0;padding:14px 18px;cursor:pointer;align-self:flex-start">Subscribe →</button>
+        <p style="margin:0;font-size:14px;line-height:1.55;color:var(--muted)">You’ll get a confirmation link first. Every message has an unsubscribe link. Your address is held privately by the Accountability Partner and never published.</p>
+      </form>
+      <div>
+        <h2 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:26px;margin:0 0 12px">What you’ll receive</h2>
+        <div style="border-top:1px solid var(--ink)">${[
+          ['Daily result', 'Every night after the 10:00 PM ET check: packet filed, or incomplete and what is missing.'],
+          ['New violation', 'When a Violation Event is confirmed, with the corrective requirement and its deadline.'],
+          ['Escalation', 'When a corrective deadline passes and the next level is assigned.'],
+          ['Correction completed', 'When a corrective session is recorded and verified.'],
+          ['Missed supervision', 'When a required Evening Supervision session is not on the record.'],
+          ['Weekly audit', 'Monday: days filed, misses, supervision, open violations.'],
+        ].map(([k, v]) => `<div style="display:grid;grid-template-columns:180px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)"><b style="font:700 12px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:var(--accent);text-transform:uppercase;letter-spacing:.1em">${k}</b><span style="font-size:15px;line-height:1.55">${v}</span></div>`).join('')}</div>
+      </div>
+    </div>`;
+  return synPage({ title, desc, canonical, body, wide: true });
+}
+
+function accountablePage() {
+  const canonical = `${SITE_ORIGIN}/accountable/`;
+  const title = 'Hold Me Accountable — Micheal Ray Berry';
+  const desc = 'Permission for anyone who knows Micheal Ray Berry to hold him to his published public accountability record: open violations, required corrections, the daily packet, and Evening Supervision.';
+  const SAY = [
+    ['Your record shows an open violation.', '/violations/'],
+    ['Have you completed your required correction?', '/corrections/'],
+    ['Your packet is still incomplete.', '/daily/'],
+    ['Aren’t you on supervision tonight?', '/live/'],
+    ['Did you post today’s inspection?', '/daily/'],
+  ];
+  const body = `
+    <style>
+      .ha-eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:40px 32px 0}
+      .ha-h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2.6rem,7vw,5.2rem);line-height:.93;margin:10px 32px 20px;max-width:900px}
+      .ha-lede{margin:0 32px 36px;max-width:720px;font-size:19px;line-height:1.6}
+      .ha-wrap{padding:0 32px 64px;display:flex;flex-direction:column;gap:44px;max-width:1160px}
+      .ha-say{border:1px solid var(--ink)}
+      .ha-say a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+      .ha-say a:last-child{border-bottom:none}
+      .ha-say a:hover{background:#FBF1F0}
+      .ha-say q{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.15;quotes:'\\201C' '\\201D'}
+      .ha-say span{font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+      h2.ha{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:26px;margin:0 0 14px}
+      .ha-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border:1px solid var(--ink)}
+      .ha-grid div{padding:18px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+      .ha-grid div:last-child{border-right:none}
+      .ha-grid b{font:700 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+      .ha-grid p{margin:0;font-size:15px;line-height:1.55}
+      .ha-no{border-left:3px solid var(--ink);padding-left:18px;max-width:760px}
+      .ha-no p{margin:0 0 10px;font-size:16px;line-height:1.6}
+    </style>
+    <p class="ha-eyebrow">Public accountability record · Permission</p>
+    <h1 class="ha-h1">Hold Me Accountable</h1>
+    <p class="ha-lede">If you know Micheal Ray Berry, you have his permission to hold him to this record — in person, in passing, in front of others. He published the rules so that the people around him can know exactly what he owes and ask whether he has done it.</p>
+    <div class="ha-wrap">
+      <section>
+        <h2 class="ha">You may say</h2>
+        <div class="ha-say">${SAY.map(([q, href]) => `<a href="${href}"><q>${htmlEscape(q)}</q><span>Check ${htmlEscape(href)} →</span></a>`).join('')}</div>
+      </section>
+      <section>
+        <h2 class="ha">Where to check before you ask</h2>
+        <div class="ha-grid">
+          <div><b>Owed now</b><p>The homepage shows any open entry and the corner time it requires, with its deadline.</p><p><a href="/">Homepage →</a></p></div>
+          <div><b>Violations</b><p>Every declared violation, its status, and the corrective session filed beside it.</p><p><a href="/violations/">Violation log →</a></p></div>
+          <div><b>Today’s packet</b><p>Weight, four photographs, inspection video and tracker, due by 10:00 PM ET.</p><p><a href="/daily/">The Record →</a></p></div>
+          <div><b>Tonight</b><p>Evening Supervision, 6:00–10:00 PM ET, Sunday–Thursday, live on Twitch.</p><p><a href="/live/">Supervision →</a></p></div>
+        </div>
+      </section>
+      <section>
+        <h2 class="ha">Get notified</h2>
+        <p style="max-width:760px;margin:0 0 28px;font-size:16px;line-height:1.6">Have the nightly result, new violations, escalations and completed corrections emailed to you: <a href="/notify/">subscribe</a>.</p>
+        <h2 class="ha">If the record looks wrong</h2>
+        <p style="max-width:760px;margin:0;font-size:16px;line-height:1.6">Report a possible breach or inconsistency through the <a href="/observer/">Observer Submission</a> page or <a href="mailto:ap@michealrayberry.com">ap@michealrayberry.com</a>. The Accountability Partner reviews it; Micheal does not.</p>
+      </section>
+      <section>
+        <h2 class="ha">Not permitted</h2>
+        <div class="ha-no">
+          <p>This permission covers the material deliberately published here. It does not authorize harassment, threats, stalking, attempts to obtain private information, contact with employers or coworkers, interference with employment, or showing up uninvited.</p>
+        </div>
+      </section>
+    </div>`;
+  return synPage({ title, desc, canonical, body, wide: true });
 }
 
 function livePage(supervision = [], violations = [], agreementActive = false, effectiveDate = '', publicUrlsEnabled = false) {
@@ -3026,8 +3211,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>
   <header>
@@ -3226,8 +3410,7 @@ const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IB
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
   <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/">Home</a><a href="/daily/">The Record</a><a href="/dashboard/">Dashboard</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Supervision</span></a><a href="/violations/">Violations</a></span>
-    <span class="nav-secondary"><a href="/positions/">Inspection</a><a href="/uniform/">Uniform</a><a href="/corrections/">Corrections</a><a href="/milestones/">Milestones</a><a href="/share/">Share</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/updates/">Updates</a></span>
+    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
   </nav>
 </div></div><script src="/livenav.js" defer></script>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
@@ -3735,6 +3918,7 @@ async function main() {
     : [];
   if (TEST_PHASE) violations = violations.map((v) => ({ ...v, what: `TEST · ${v.what}` }));
   assertUniqueViolationIdentities(violations);
+  VIO_CHAIN = violationChain(violations);
   const publicSupervisionUrlsEnabled = agreementExecutionActive
     && process.env.PUBLIC_SUPERVISION_URLS_ENABLED === 'true';
 
@@ -4032,6 +4216,18 @@ async function main() {
   }
   extraUrls.push(`${SITE_ORIGIN}/live/`);
 
+  if (await writeIfChanged(path.join(ROOT, 'partner', 'index.html'), partnerPage())) {
+    changedUrls.add(`${SITE_ORIGIN}/partner/`);
+  }
+  extraUrls.push(`${SITE_ORIGIN}/partner/`);
+  if (await writeIfChanged(path.join(ROOT, 'notify', 'index.html'), notifyPage())) {
+    changedUrls.add(`${SITE_ORIGIN}/notify/`);
+  }
+  extraUrls.push(`${SITE_ORIGIN}/notify/`);
+  if (await writeIfChanged(path.join(ROOT, 'accountable', 'index.html'), accountablePage())) {
+    changedUrls.add(`${SITE_ORIGIN}/accountable/`);
+  }
+  extraUrls.push(`${SITE_ORIGIN}/accountable/`);
   if (await writeIfChanged(path.join(ROOT, 'observer', 'index.html'), observerPage())) {
     changedUrls.add(`${SITE_ORIGIN}/observer/`);
   }

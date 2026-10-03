@@ -10,7 +10,7 @@
       var dot = a.querySelector('[data-live-dot]');
       if (dot) { dot.style.removeProperty('background'); dot.style.removeProperty('border-color'); dot.style.removeProperty('animation'); }
       var lab = a.querySelector('[data-live-label]');
-      if (lab) lab.textContent = 'Supervision';
+      if (lab) lab.textContent = 'Live';
     });
   }
   function light() {
@@ -20,7 +20,7 @@
       var dot = a.querySelector('[data-live-dot]');
       if (dot) { dot.style.background = '#B3261E'; dot.style.borderColor = '#B3261E'; dot.style.animation = 'livepulse 1.6s ease-in-out infinite'; }
       var lab = a.querySelector('[data-live-label]');
-      if (lab) lab.textContent = 'Supervision active';
+      if (lab) lab.textContent = 'Live now';
     });
     if (!document.getElementById('livepulse-kf')) {
       var s = document.createElement('style'); s.id = 'livepulse-kf';

@@ -90,7 +90,7 @@ const REQUIRED_FILES = [
   'about/index.html', 'agreement/index.html', 'violations/index.html',
   'corrections/index.html', 'positions/index.html', 'consent/index.html',
   'uniform/index.html', 'updates/index.html', 'share/index.html',
-  'live/index.html', 'observer/index.html', 'observer/received/index.html',
+  'live/index.html', 'accountable/index.html', 'notify/index.html', 'partner/index.html', 'observer/index.html', 'observer/received/index.html',
   'weeks/index.html',
   'sitemap.xml', 'sitemap-static.xml', 'sitemap-pages.xml',
   'sitemap-daily.xml', 'sitemap-images.xml', 'sitemap-videos.xml',
@@ -291,6 +291,8 @@ function routeCandidates(pathname) {
 }
 
 function internalTargetStatus(pathname, fileSet, redirectRules) {
+  // Cloudflare Pages Functions (functions/api/*.js) are served at /api/<name>.
+  if (/^\/api\/[a-z-]+$/.test(String(pathname))) return { ok: true };
   const decodedPath = safeDecode(pathname);
   const redirect = firstRedirect(decodedPath, redirectRules);
   if (redirect) {

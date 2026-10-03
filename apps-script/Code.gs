@@ -1572,6 +1572,10 @@ function keyOk(k) {
    unlock requires the device key + AP-supplied code; ap* requires the AP key. */
 
 function doGet(e) {
+  if (e && e.parameter && /^(subscribe|confirm|unsubscribe)$/.test(String(e.parameter.sub || ''))) {
+    try { return handleSubscribeAction(e.parameter); }
+    catch (se) { return jsonOut({ ok: false, error: String(se.message || se) }); }
+  }
   try {
     return routeGet(e);
   } catch (err) {
@@ -1955,6 +1959,7 @@ function setup() {
   ScriptApp.newTrigger('supervisionNightlyCheck').timeBased().everyDays(1).atHour(22).nearMinute(20).inTimezone('America/New_York').create();
   // Monday: project weeks run Monday→Sunday from Day 1 (Mon Aug 31); the
   // weekly review is recorded Monday, so both mails land Monday morning.
+  ScriptApp.newTrigger('subscriberWeeklyAudit').timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(9).nearMinute(30).inTimezone('America/New_York').create();
   ScriptApp.newTrigger('apWeeklyReview').timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(9).inTimezone('America/New_York').create();
   // Micheal's mail: the day's requirements at 07:00, a two-hour warning at
   // 20:00 (silent if the packet is already complete), a Monday review, and an
@@ -3543,7 +3548,14 @@ function nightlyComplianceCheck() {
   // four filing requirements in the Edition 2 Daily Compliance Packet.
   var packet = packetState(today);
   var missing = packet.missing.slice();
-  if (packet.complete) return;
+  var dayN = Math.floor((new Date(today) - new Date(PROJECT_START)) / 864e5) + 1;
+  if (packet.complete) {
+    notifySubscribers('daily', 'Daily Result: PACKET FILED — Day ' + dayN,
+      'Micheal Ray Berry — Daily Result for ' + today + ' (Day ' + dayN + ')\n\n' +
+      'Daily Compliance Packet: all required files present at the 10:00 PM ET check.\n\n' +
+      'Record: ' + SUB_SITE + '/daily/\n');
+    return;
+  }
   var checkedAt = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd HH:mm:ss z');
   var queued = queueViolationReview(today, 'PACKET:' + today,
     'Record-presence review — packet files were incomplete when checked at ' + checkedAt + ': ' + missing.join(', ') + '.');
@@ -3561,11 +3573,17 @@ function nightlyComplianceCheck() {
       'Console: the MRB menu in the record sheet.\n' +
       'This is an automated message from the site Apps Script.',
   });
+  notifySubscribers('daily', 'Daily Result: PACKET INCOMPLETE — Day ' + dayN,
+    'Micheal Ray Berry — Daily Result for ' + today + ' (Day ' + dayN + ')\n\n' +
+    'Daily Compliance Packet incomplete at the 10:00 PM ET check.\nMissing: ' + missing.join(', ') + '.\n\n' +
+    'The miss has been declared to the Accountability Partner for confirmation under §7. Once confirmed it is published as a Violation Event with its corrective requirement.\n\n' +
+    'Record: ' + SUB_SITE + '/daily/\n');
 }
 
-/* ═════ SCHEDULED SUPERVISION PRESENCE REVIEW (§3.4) ═════
-   Absence of a submitted record creates a private review signal only.
-   Authenticated AP action is required for MISSED or a Violation Event. */
+/* ═════ SCHEDULED SUPERVISION CHECK (§3.4) ═════
+   User ruling Oct 3 2026: no session record by the check = the night is
+   marked MISSED automatically (public) and a Violation Event is declared for
+   AP confirmation under §7, exactly like the packet. */
 function supervisionNightlyCheck() {
   var gate = activeAgreementGate('supervisionNightlyCheck');
   if (!gate || !dateWithinAgreement(gate.today, gate)) return;
@@ -3583,8 +3601,8 @@ function supervisionNightlyCheck() {
       return { changed: false, queued: false };
     }
     var sh = supervisionSheet();
-    if (sr) sh.getRange(sr.row, 3).setValue('REVIEW REQUIRED');
-    else sh.appendRow([today, 'yes', 'REVIEW REQUIRED', '', '', '', 'No submitted archive record was present when checked at ' + checkedAt]);
+    if (sr) sh.getRange(sr.row, 3).setValue('MISSED');
+    else sh.appendRow([today, 'yes', 'MISSED', '', '', '', 'Declared automatically: no session record was present when checked at ' + checkedAt]);
     return { changed: true, queued: true, today: today };
   });
   if (!review.queued) return;
@@ -3592,9 +3610,14 @@ function supervisionNightlyCheck() {
   queueViolationReview(today, 'SUPERVISION:' + today,
     'Supervision record-presence review — no submitted archive record was present when checked at ' + checkedAt + '.');
   try {
-    mailAP('AP REVIEW REQUIRED — Evening Supervision record ' + today,
-      'No submitted archive record was present when the scheduled check ran at ' + checkedAt + '. This is a private observation, not a MISSED ruling or Violation Event. Review the evidence and exception rules, then explicitly rule from the AP controls.');
+    mailAP('MISSED — Evening Supervision ' + today + ' — confirm the Violation Event',
+      'No session record was present when the scheduled check ran at ' + checkedAt + '. The night is now publicly marked MISSED. A Violation Event has been declared for your confirmation under §7: VERIFY or REJECT it from the MRB menu. If a documented §9 exception applies, mark the night EXCEPTION and reject the event with the reason.');
   } catch (e) {}
+  notifySubscribers('supervision', 'MISSED: Evening Supervision — ' + today,
+    'Micheal Ray Berry — Evening Supervision, ' + today + '\n\n' +
+    'The required 6:00–10:00 PM ET session was not on the record when checked at ' + checkedAt + '. The night is marked MISSED.\n\n' +
+    'The Violation Event is declared to the Accountability Partner for confirmation under §7.\n\n' +
+    'Supervision record: ' + SUB_SITE + '/live/\n');
 }
 
 /* A scheduled check may flag a possible lapsed corrective window, but only
@@ -4432,6 +4455,16 @@ function verifyViolationReview(rowNumber, finalText, gate, expectedIdentity) {
   });
   triggerDeploy();
   try { mrbViolationNotice(verified.row); } catch (e) {}
+  try {
+    var lvl = consequenceForLevel(verifiedViolationCount());
+    var esc = /72-hour corrective deadline/i.test(verified.text);
+    notifySubscribers(esc ? 'escalation' : 'violation',
+      (esc ? 'ESCALATION: ' : 'VIOLATION: ') + verified.text.slice(0, 80),
+      'Micheal Ray Berry — ' + (esc ? 'Escalation' : 'New Violation Event') + ', ' + verified.date + '\n\n' +
+      verified.text + '\n\n' +
+      'Corrective requirement: Level ' + lvl.level + ' · ' + lvl.mins + ' minutes of corner time, recorded in one unbroken take and published beside the entry. Due within 72 hours of this notice; missing it is a new Violation Event at the next level.\n\n' +
+      'Violation log: ' + SUB_SITE + '/violations/\n');
+  } catch (ne) { Logger.log('subscriber notice failed: ' + ne); }
   return { date: verified.date, text: verified.text, marker: verified.marker };
 }
 
@@ -4509,7 +4542,17 @@ function resolveViolationRow(rowNumber, note, gate, expectedIdentity, expectedRe
     return { changed: true, row: row, idempotent: false, marker: marker,
       assignmentId: currentReview.assignmentId, attemptId: currentReview.attemptId };
   });
-  if (resolved.changed) triggerDeploy();
+  if (resolved.changed) {
+    triggerDeploy();
+    try {
+      var rv = violationLogSheet().getRange(resolved.row, 1, 1, 2).getValues()[0];
+      notifySubscribers('corrected', 'CORRECTION COMPLETED: ' + apDateStr(rv[0]),
+        'Micheal Ray Berry — Correction completed\n\n' +
+        'Entry: ' + apDateStr(rv[0]) + ' · ' + String(rv[1] || '') + '\n' +
+        'Corrective session: COMPLETED · RECORDED · verified by the Accountability Partner ' + Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd') + '.\n\n' +
+        'The entry stays on the record. Violation log: ' + SUB_SITE + '/violations/\n');
+    } catch (ne) { Logger.log('subscriber notice failed: ' + ne); }
+  }
   return resolved;
 }
 
@@ -6797,4 +6840,108 @@ function normalizeDates() {
   out.push('');
   out.push('Reload the site — no redeploy needed; every reader takes the sheet as it stands.');
   Logger.log(out.join('\n'));
+}
+
+
+/* ═════ OBSERVER NOTIFICATIONS (user ruling Oct 3 2026) ═════
+   Anyone may subscribe with an email address; double opt-in by emailed link.
+   The public site never sees the /exec URL: the Cloudflare Pages Function
+   /api/subscribe relays with the SUBSCRIBE_RELAY_KEY script property.
+   Subscribers tab is private (AP-only): email · status · token · created · confirmed. */
+var SUB_SITE = 'https://michealrayberry.com';
+var SUB_HEADERS = ['email', 'status', 'token', 'created', 'confirmed'];
+function subscribersSheet() {
+  var book = ss();
+  var sh = book.getSheetByName('Subscribers');
+  if (!sh) { sh = book.insertSheet('Subscribers'); sh.appendRow(SUB_HEADERS); sh.setFrozenRows(1); }
+  return sh;
+}
+function setSubscribeRelayKey(key) {
+  if (!/^[A-Za-z0-9_-]{32,}$/.test(String(key || ''))) throw new Error('key must be 32+ url-safe characters');
+  PropertiesService.getScriptProperties().setProperty('SUBSCRIBE_RELAY_KEY', key);
+}
+function handleSubscribeAction(p) {
+  var expected = PropertiesService.getScriptProperties().getProperty('SUBSCRIBE_RELAY_KEY') || '';
+  if (!expected || !secureTextEquals(String(p.key || ''), expected)) return jsonOut({ ok: false, error: 'unauthorized' });
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = subscribersSheet(), vals = sh.getDataRange().getValues(), now = new Date();
+    if (p.sub === 'subscribe') {
+      var email = String(p.email || '').trim().toLowerCase();
+      if (!/^[^@\s]{1,64}@[^@\s]{1,190}\.[a-z]{2,}$/.test(email)) return jsonOut({ ok: false, error: 'invalid email' });
+      for (var i = 1; i < vals.length; i++) {
+        if (String(vals[i][0]).toLowerCase() !== email) continue;
+        if (vals[i][1] === 'ACTIVE') return jsonOut({ ok: true, state: 'active' });
+        if (vals[i][1] === 'PENDING' && now - new Date(vals[i][3]) < 10 * 60 * 1000) return jsonOut({ ok: true, state: 'pending' });
+        var t = Utilities.getUuid().replace(/-/g, '');
+        sh.getRange(i + 1, 2, 1, 3).setValues([['PENDING', t, now]]);
+        sendSubscribeConfirm(email, t);
+        return jsonOut({ ok: true, state: 'pending' });
+      }
+      var tok = Utilities.getUuid().replace(/-/g, '');
+      sh.appendRow([email, 'PENDING', tok, now, '']);
+      sendSubscribeConfirm(email, tok);
+      return jsonOut({ ok: true, state: 'pending' });
+    }
+    var token = String(p.token || '');
+    if (!/^[a-f0-9]{32}$/.test(token)) return jsonOut({ ok: false, error: 'invalid token' });
+    for (var j = 1; j < vals.length; j++) {
+      if (String(vals[j][2]) !== token) continue;
+      if (p.sub === 'confirm') { sh.getRange(j + 1, 2).setValue('ACTIVE'); sh.getRange(j + 1, 5).setValue(now); return jsonOut({ ok: true, state: 'active' }); }
+      if (p.sub === 'unsubscribe') { sh.getRange(j + 1, 2).setValue('UNSUBSCRIBED'); return jsonOut({ ok: true, state: 'unsubscribed' }); }
+    }
+    return jsonOut({ ok: false, error: 'unknown token' });
+  } finally { lock.releaseLock(); }
+}
+function sendSubscribeConfirm(email, token) {
+  sendMail(email, 'Confirm: Micheal Ray Berry public accountability notifications',
+    'You asked to receive notifications from the Micheal Ray Berry public accountability record: the nightly result, new violations, escalations, completed corrections, missed supervision, and the weekly audit.\n\n' +
+    'Confirm: ' + SUB_SITE + '/api/subscribe?confirm=' + token + '\n\n' +
+    'If you did not ask for this, ignore this message; nothing will be sent.\n\n— Administered by the Accountability Partner · ' + AP_EMAIL);
+}
+function notifySubscribers(kind, subject, body) {
+  try {
+    var sh = subscribersSheet(), vals = sh.getDataRange().getValues(), sent = 0;
+    for (var i = 1; i < vals.length; i++) {
+      if (vals[i][1] !== 'ACTIVE') continue;
+      if (MailApp.getRemainingDailyQuota() < 10) { Logger.log('SUBSCRIBER MAIL STOPPED — quota low after ' + sent); break; }
+      sendMail(String(vals[i][0]), 'Ray Berry — ' + subject, body +
+        '\n—\nYou subscribed at michealrayberry.com/notify/. Unsubscribe: ' + SUB_SITE + '/api/subscribe?unsubscribe=' + vals[i][2] +
+        '\nAdministered by the Accountability Partner · ' + AP_EMAIL);
+      sent++;
+    }
+    Logger.log('notifySubscribers(' + kind + '): ' + sent);
+    return sent;
+  } catch (e) { Logger.log('notifySubscribers failed: ' + e); return 0; }
+}
+function subscriberWeeklyAudit() {
+  var gate = activeAgreementGate('subscriberWeeklyAudit');
+  if (!gate) return;
+  var filed = 0, missed = 0, days = 0;
+  for (var i = 7; i >= 1; i--) {
+    var ds = isoDateOffset(gate.today, -i);
+    if (!dateWithinAgreement(ds, gate)) continue;
+    days++;
+    if (packetState(ds).complete) filed++; else missed++;
+  }
+  if (!days) return;
+  var sup = 0, supMissed = 0;
+  try {
+    var sv = supervisionSheet().getDataRange().getValues();
+    for (var r = 1; r < sv.length; r++) {
+      var d = apDateStr(sv[r][0]);
+      if (d < isoDateOffset(gate.today, -7) || d >= gate.today || !dateWithinAgreement(d, gate)) continue;
+      if (!/^(true|yes|1|required)$/i.test(String(sv[r][1]))) continue;
+      sup++; if (/^MISSED/i.test(String(sv[r][2]))) supMissed++;
+    }
+  } catch (e) {}
+  var summary = verifiedViolationSummary(violationLogSheet().getDataRange().getValues(), gate);
+  var week = Math.ceil((Math.floor((new Date(gate.today) - new Date(PROJECT_START)) / 864e5)) / 7);
+  notifySubscribers('weekly', 'Weekly Audit — Week ' + week,
+    'Micheal Ray Berry — Weekly Audit, the 7 days ending ' + isoDateOffset(gate.today, -1) + '\n\n' +
+    'Packet filed: ' + filed + ' of ' + days + ' days\n' +
+    'Packet incomplete at deadline: ' + missed + '\n' +
+    'Evening Supervision: ' + (sup - supMissed) + ' of ' + sup + ' required sessions on the record' + (supMissed ? ' · ' + supMissed + ' MISSED' : '') + '\n' +
+    'Open violations: ' + summary.open + ' · total on record: ' + summary.total + '\n\n' +
+    'Weekly page: ' + SUB_SITE + '/weeks/\n');
 }
