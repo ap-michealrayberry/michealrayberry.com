@@ -2,17 +2,28 @@
   "name": "mrb-seo-publisher",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "generate": "node scripts/publish.mjs",
-    "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/check-site.mjs dist && node scripts/check-seo.mjs dist",
-    "check-syntax": "node scripts/check-syntax.mjs",
-    "test": "node scripts/test-compatible.mjs",
-    "indexnow": "node scripts/submit-indexnow.mjs"
+    "prepare-dist": "node scripts/prepare-dist.mjs",
+    "audit-output": "node scripts/audit-output.mjs dist",
+    "test:publisher": "node scripts/publish.mjs --self-test",
+    "test:audit": "npm run test:publisher && node scripts/audit-output.mjs --self-test",
+    "test:apps-script": "node scripts/test-apps-script.mjs",
+    "test:assistant": "node scripts/test-assistant-recovery.mjs",
+    "test:release": "node scripts/test-release.mjs",
+    "security:audit": "npm audit --omit=dev --audit-level=high",
+    "check-assistant-bundle": "node scripts/audit-output.mjs --check-bundle",
+    "indexnow": "node scripts/submit-indexnow.mjs",
+    "build": "npm run check-syntax && node scripts/publish.mjs && node scripts/prepare-dist.mjs && node scripts/audit-output.mjs dist",
+    "postdeploy:indexnow": "node scripts/submit-indexnow.mjs",
+    "check-apps-script-syntax": "node -e \"const fs=require('node:fs'),vm=require('node:vm');new vm.Script(fs.readFileSync('apps-script/Code.gs','utf8'),{filename:'apps-script/Code.gs'})\"",
+    "check-browser-syntax": "node -e \"const fs=require('node:fs'),vm=require('node:vm');for(const file of process.argv.slice(1))new vm.Script(fs.readFileSync(file,'utf8'),{filename:file})\" -- live.js livenav.js share.js unsw.js assistant/app.js assistant/sw.js assistant/file/file.js assistant/js/05-api.js assistant/js/12-scripts.js assistant/js/14-upload-queue.js assistant/js/18-app.js verify/verify.js",
+    "check-syntax": "node --check scripts/publish.mjs && node --check scripts/static-site.mjs && node --check scripts/prepare-dist.mjs && node --check scripts/audit-output.mjs && node --check scripts/test-apps-script.mjs && node --check scripts/test-release.mjs && node --check scripts/submit-indexnow.mjs && node --check functions/observer.js && npm run check-apps-script-syntax && npm run check-browser-syntax && npm run check-assistant-bundle"
   },
   "dependencies": {
     "sharp": "0.35.4"
-  },
-  "engines": {
-    "node": ">=24"
   }
 }
