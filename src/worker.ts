@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { accessIdentity, type Identity } from './auth/access';
 import { getMe } from './api/me';
 import * as filing from './api/filing';
-import { setState } from './api/ap';
+import * as ap from './api/ap';
 import { runBuild } from './build';
 import { runDue } from './cron/schedule';
 import { JOBS } from './cron/jobs';
@@ -77,7 +77,17 @@ const apOnly = async (c: filing.Ctx, next: () => Promise<void>) => {
   await next();
 };
 app.post('/api/ap/build', apOnly, async (c) => c.json({ ok: true, ...(await runBuild(c.env, `ap:${c.get('who').email}`)) }));
-app.post('/api/ap/state', apOnly, setState);
+app.get('/api/ap/state', apOnly, ap.getState);
+app.post('/api/ap/state', apOnly, ap.setState);
+app.post('/api/ap/violation', apOnly, ap.violationOp);
+app.post('/api/ap/supervision', apOnly, ap.supervisionOp);
+app.post('/api/ap/update', apOnly, ap.updateOp);
+app.post('/api/ap/correction-request', apOnly, ap.correctionRequestOp);
+app.post('/api/ap/observer', apOnly, ap.observerOp);
+app.post('/api/ap/milestone', apOnly, ap.milestoneOp);
+app.post('/api/ap/recording', apOnly, ap.recordingOp);
+app.post('/api/ap/takedown', apOnly, ap.takedown);
+app.get('/api/ap/export.csv', apOnly, ap.exportCsv);
 
 app.all('/api/*', (c) => c.json({ ok: false, error: 'Not found.' }, 404));
 
@@ -113,6 +123,8 @@ app.get('/mrb/fitbit/callback', async (c) => {
 });
 app.on(['GET', 'HEAD'], '/mrb/*', (c) => protectedApp(c, 'mrb', 'MRB portal'));
 app.get('/mrb', (c) => c.redirect('/mrb/', 301));
+app.on(['GET', 'HEAD'], '/ap/*', (c) => protectedApp(c, 'ap', 'AP console'));
+app.get('/ap', (c) => c.redirect('/ap/', 301));
 
 // Everything else is the public site.
 app.all('*', (c) => serveSite(c.req.raw, c.env, c.executionCtx as ExecutionContext));

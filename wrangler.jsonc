@@ -23,7 +23,7 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/assistant", "/assistant/*", "/mrb", "/mrb/*", "/observer", "/report"]
+    "run_worker_first": ["/api/*", "/assistant", "/assistant/*", "/mrb", "/mrb/*", "/ap", "/ap/*", "/observer", "/report"]
   },
   "rules": [
     { "type": "Text", "globs": ["**/*.html", "**/*.txt"], "fallthrough": true },
