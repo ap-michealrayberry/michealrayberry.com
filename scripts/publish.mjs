@@ -65,7 +65,7 @@ const buildNow = () => new Date(BUILD_INSTANT.getTime());
    key `start_date` — a restart is a single sheet edit, no code change. When
    `prior_attempt_note` is set it renders on /daily so an earlier attempt is
    closed on the record, not erased (its photos stay in the repo history). */
-let START_DATE = '2026-10-11';
+let START_DATE = '2026-10-03'; // signed contract: Day 1 = Oct 3 2026
 /* Testing phase (Oct 2026): while today < the Site State start_date (the
    official Day 1) and Site State test_mode is not "off", the record runs from
    test_start_date as if the agreement were active. Pages show a testing
@@ -535,6 +535,8 @@ function publicVideoUrl(value = '') {
     && /^\/media\/[A-Za-z0-9._/-]+\.(?:mp4|webm)$/i.test(url.pathname) && !url.search) {
     return rootRelativeMedia ? url.pathname : `${url.origin}${url.pathname}`;
   }
+  if (url.hostname === 'iframe.videodelivery.net' && /^\/[a-f0-9]{32}$/.test(url.pathname) && !url.search) return `https://iframe.videodelivery.net${url.pathname}`;
+  if (/^customer-[a-z0-9]+\.cloudflarestream\.com$/.test(url.hostname) && /^\/[a-f0-9]{32}\/(?:iframe|watch)$/.test(url.pathname) && !url.search) return `https://${url.hostname}${url.pathname.replace(/\/watch$/, '/iframe')}`;
   if (/^(?:www\.)?youtube\.com$/i.test(url.hostname) && url.pathname === '/watch') {
     const id = url.searchParams.get('v') || '';
     return /^[A-Za-z0-9_-]{11}$/.test(id) && Array.from(url.searchParams.entries()).length === 1
@@ -576,9 +578,11 @@ function isSelfHosted(url) {
   return /^\/media\//i.test(safe) || /^https:\/\/michealrayberry\.com\/media\//i.test(safe);
 }
 
+const isStreamUrl = (u) => /^https:\/\/(?:iframe\.videodelivery\.net\/[a-f0-9]{32}|customer-[a-z0-9]+\.cloudflarestream\.com\/[a-f0-9]{32}\/iframe)$/.test(String(u || ''));
 function videoEmbed(url) {
   const safe = publicVideoUrl(url);
   if (!safe || isSelfHosted(safe)) return '';
+  if (isStreamUrl(safe)) return safe;
   const yid = youtubeId(safe);
   if (yid) return `https://www.youtube-nocookie.com/embed/${yid}`;
   return '';
@@ -620,6 +624,35 @@ async function fetchText(url, optional = false) {
     }
     throw error;
   }
+}
+
+/* Recording Assistant photographs live in the record media bucket (R2) since
+   Oct 3 2026. The publisher copies each filed one into photos/YYYY/MM/DD/ so
+   the existing derivative pipeline publishes it. */
+const MEDIA_PUBLIC_BASE = String(process.env.MEDIA_PUBLIC_BASE || 'https://pub-944fe11d344847f68307fb252477ba11.r2.dev').replace(/\/+$/, '');
+async function fetchMediaPhotos(rows) {
+  let fetched = 0;
+  for (const row of rows.slice(1)) {
+    for (let c = 3; c <= 6; c++) {
+      const u = String(row[c] || '').trim();
+      if (!u.startsWith(`${MEDIA_PUBLIC_BASE}/photos/`)) continue;
+      const rel = u.slice(MEDIA_PUBLIC_BASE.length + 1);
+      const m = rel.match(/^photos\/(\d{4})\/(\d{2})\/(\d{2})\/micheal-ray-berry-day-\d{3,}-(front|left|rear|right)-(\d{4}-\d{2}-\d{2})\.(?:jpe?g|png|webp)$/i);
+      if (!m) continue;
+      const dir = path.join(ROOT, 'photos', m[1], m[2], m[3]);
+      let present = [];
+      try { present = await fs.readdir(dir); } catch {}
+      if (present.some((n) => n.toLowerCase().includes(`-${m[4].toLowerCase()}-${m[5]}.`))) continue;
+      try {
+        const r = await fetch(u, { signal: AbortSignal.timeout(30000) });
+        if (!r.ok) { console.warn(`Media photo fetch failed (${r.status}): ${rel}`); continue; }
+        await fs.mkdir(dir, { recursive: true });
+        await fs.writeFile(path.join(ROOT, ...rel.split('/')), Buffer.from(await r.arrayBuffer()));
+        fetched++;
+      } catch (e) { console.warn(`Media photo fetch failed: ${rel} — ${e.message}`); }
+    }
+  }
+  if (fetched) console.log(`Fetched ${fetched} photograph(s) from the record media bucket.`);
 }
 
 function findPhoto(files, date, day, angle) {
@@ -2829,15 +2862,14 @@ function observerReceivedPage() {
 function partnerPage() {
   const canonical = `${SITE_ORIGIN}/partner/`;
   const title = 'Local Accountability Partner — Micheal Ray Berry';
-  const desc = 'Position open: a local, in-person Accountability Partner for the Micheal Ray Berry public accountability record under Edition 2 §3.2.';
-  const DUTIES = ['In-person weigh-in verification', 'Supervising corrective sessions', 'Confirming or rejecting declared violations', 'Weekly review',
-    'Full-structure supervision (§3.2): schedule, devices, meals, check-ins, spending oversight'];
+  const desc = 'Position open: a local, in-person Accountability Partner for the Micheal Ray Berry public accountability record under Edition 2 §3.';
+  const DUTIES = ['In-person weigh-in verification', 'Supervising corrective sessions', 'Reviewing evidence and confirming or rejecting violations', 'Weekly review'];
   const body = `
-    <p style="font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:40px 32px 0">Position open · §3.2</p>
+    <p style="font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:40px 32px 0">Position open · §3</p>
     <h1 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(2.4rem,6vw,4.6rem);line-height:.93;margin:10px 32px 24px;max-width:900px">Local Accountability Partner</h1>
     <div style="padding:0 32px 64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;max-width:1160px">
       <div style="display:flex;flex-direction:column;gap:20px;max-width:720px">
-        <p style="margin:0;font-size:18px;line-height:1.65">The record is administered remotely. Edition 2 §3.2 allows a second, local Accountability Partner to verify in person what the camera can only document. Any appointment, scope, and requirements must be written, logged publicly, and co-signed before they bind either person. The verifier’s identity stays private under §12.2.</p>
+        <p style="margin:0;font-size:18px;line-height:1.65">The record is administered remotely. Under §3 of the agreement a local Accountability Partner may be appointed to verify in person what the camera can only document — only after identity verification, references, a written scope and a trial period. The appointment and duties are documented, logged publicly without private identifying details, and co-signed before they take effect. Any financial or device authority would require a separate, revocable agreement.</p>
         <div style="border-top:1px solid var(--ink)">${DUTIES.map((d) => `<div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:16px">${d}</div>`).join('')}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;align-self:start">
@@ -2920,7 +2952,7 @@ function accountablePage() {
     </style>
     <p class="ha-eyebrow">Public accountability record · Permission</p>
     <h1 class="ha-h1">Hold Me Accountable</h1>
-    <p class="ha-lede">If you know Micheal Ray Berry, you have his permission to hold him to this record — in person, in passing, in front of others. He published the rules so that the people around him can know exactly what he owes and ask whether he has done it.</p>
+    <p class="ha-lede">If you know Micheal Ray Berry, you have his permission to hold him to this record by referring to what is published here. He published the rules so that the people around him can know exactly what he owes and ask whether he has done it.</p>
     <div class="ha-wrap">
       <section>
         <h2 class="ha">You may say</h2>
@@ -2944,7 +2976,7 @@ function accountablePage() {
       <section>
         <h2 class="ha">Not permitted</h2>
         <div class="ha-no">
-          <p>This permission covers the material deliberately published here. It does not authorize harassment, threats, stalking, attempts to obtain private information, contact with employers or coworkers, interference with employment, or showing up uninvited.</p>
+          <p>This permission covers the material deliberately published here. It does not authorize harassment, threats, stalking, confrontation, attempts to obtain private information, contact with employers or coworkers, interference with employment, or showing up uninvited. Observers may report evidence; they do not acquire authority to create requirements or impose consequences.</p>
         </div>
       </section>
     </div>`;
@@ -3602,7 +3634,7 @@ async function main() {
   {
     const testStart = isRealIsoDate(siteState.test_start_date) ? siteState.test_start_date : TEST_START_FALLBACK;
     const today = todayEtIso();
-    TEST_PHASE = String(siteState.test_mode || '').toLowerCase() !== 'off'
+    TEST_PHASE = false && String(siteState.test_mode || '').toLowerCase() !== 'off'
       && testStart < LAUNCH_DATE && testStart <= today && today < LAUNCH_DATE;
     if (TEST_PHASE) {
       START_DATE = testStart;
@@ -3929,6 +3961,7 @@ async function main() {
     agreementActive: agreementExecutionActive,
     agreementEffectiveDate,
   };
+  await fetchMediaPhotos(rows);
   const photoFiles = (await walk(path.join(ROOT, 'photos')))
     .filter((f) => /\.(?:jpe?g|png|webp)$/i.test(f) && !f.includes(`${path.sep}responsive${path.sep}`));
   const finalized = [];

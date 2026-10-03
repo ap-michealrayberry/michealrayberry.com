@@ -235,7 +235,7 @@
                   <sc-if value="{{ noOwed }}" hint-placeholder-val="{{ true }}">
                   <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Nothing owed</span>
                   </sc-if>
-                  <span style="font-size: 15px; line-height: 1.5;">Misses are declared automatically and answered with recorded corner time — 10, 20 or 30 minutes by level — published beside the entry within 72 hours.</span>
+                  <span style="font-size: 15px; line-height: 1.5;">Misses are flagged automatically and confirmed by the Accountability Partner, then answered with recorded corner time — 10, 20 or 30 minutes by level — published beside the entry within 72 hours.</span>
                   <div style="display: flex; gap: 8px 18px; flex-wrap: wrap;"><a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Corrective sessions →</a><a href="/accountable/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E;">Hold me accountable →</a><a href="/notify/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Get notified →</a></div>
                 </div>
               </div>
@@ -513,7 +513,7 @@
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">About · what “under” means</span>
           <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 60px); line-height: 0.95; text-transform: uppercase; margin: 0;">Micheal Ray Berry is under public accountability</h1>
           <p style="margin: 0; font-size: 18px; line-height: 1.65;">Micheal Ray Berry asked for this structure in writing. {{ agreementStatusSentence }} The Accountability Partner holds the site, the domain, the record and the accounts; Micheal files to it and cannot edit it.</p>
-          <p style="margin: 0; font-size: 18px; line-height: 1.65;">Every day he files weight, four photographs, an inspection video and a tracker update by 10:00 PM ET. Five evenings a week, Sunday to Thursday, he is on a public live stream at home. Misses are declared automatically and answered with recorded corner time, published beside the entry.</p>
+          <p style="margin: 0; font-size: 18px; line-height: 1.65;">Every day he files weight, four photographs, an inspection video and a tracker update by 10:00 PM ET. Five evenings a week, Sunday to Thursday, he is on a public live stream at home. Misses are flagged automatically, confirmed by the Accountability Partner, and answered with recorded corner time, published beside the entry.</p>
         </div>
         <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" loading="lazy" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start 340." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
       </div>
@@ -554,7 +554,7 @@
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this really is the Micheal Ray Berry you know, and the results are under his real name.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Recognition is an intended part of the public project. If you know him, you may hold him to it: ask whether today’s packet is filed, whether he served the corner time he owes, or whether he is home for Evening Supervision. He published the rules so that people who know him can know what he owes. See <a href="/accountable/" style="color: #B3261E; font-weight: 600;">Hold Me Accountable</a>.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice an inconsistency or a possible breach, report it through the <a href="/observer/" style="color: #B3261E; font-weight: 600;">Observer Submission</a> page (no name or email required) or <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>. The Accountability Partner reviews it; Micheal does not.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">Holding him to the record is welcome. Harassment, threats, contact with his employer or coworkers, attempts to obtain private information, or showing up uninvited is not.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">Holding him to the record is welcome. Harassment, threats, confrontation, contact with his employer or coworkers, attempts to obtain private information, or showing up uninvited is not.</p>
           </div>
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">Is this voluntary?</span>
@@ -591,91 +591,80 @@
   <!-- ==================== AGREEMENT ==================== -->
   <sc-if value="{{ isAgreement }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Agreement">
-    <section style="border-bottom: 1px solid #141412; padding: 72px 32px 80px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 64px; align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: 28px;">
-          <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">{{ agreementFullHeading }} · Day 1: {{ startDateLong }}</p>
-          <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1>
-          <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.65; max-width: 560px;">
-            <p style="margin: 0;"><strong>{{ agreementStatusSentence }}</strong></p>
-            <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0;">Edition 2 is the current draft and becomes operative only after both signatures and the separate consent confirmation are verified in the official record. This page is a public summary; signed copies and signature images remain private.</p></sc-if>
-            <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0;">The terms apply only on and after {{ agreementEffectiveDateLong }}. This page is a public summary; signed copies and signature images remain private. The <a href="/consent/" style="color: #B3261E;">consent confirmation page</a> reports the filed confirmation record.</p></sc-if>
-          </div>
-          <div style="border: 1px solid #141412; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px; max-width: 560px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">{{ agreementScopeLabel }}</span>
-            <ul style="margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.7; display: flex; flex-direction: column; gap: 6px;">
-              <li>Daily Compliance Packet — scale-synced weight, Daily Inspection video published to the official record, four-angle daily photos, and tracker update by 10:00 PM ET</li>
-              <li>Standardized uniform (§4.1: plain black unitard), pose, and four-angle documentation format</li>
-              <li>Consequences (§8): corner time, 10 / 20 / 30 minutes by level, recorded and published. The public entry records the date, the requirement missed, the status, the submission and resolution timestamps, and the verification result</li>
-              <li>Weekly Review — the week’s numbers read to camera from the record every Monday</li>
-              <li>Evening Supervision (§3.4) — a fixed-camera session streamed live on Twitch (twitch.tv/michealrayberry), 6:00–10:00 PM ET, on nights preceding a scheduled workday (ordinarily Sunday–Thursday), in the black standard uniform; water only, home-cooked dinner, published rules; an apparent miss becomes a Violation Event only after explicit Accountability Partner review. Scheduled from September 13, 2026 — <a href="/live/" style="color: #141412; font-weight: 600;">the supervision console</a></li>
-              <li>Published weight thresholds at 320 / 300 / 275 / 250 / 225 / 200 lbs</li>
-              <li>Amendment process (§13): no new rule binds unless it is documented, logged in Updates, and co-signed after the execution gate is active</li>
-              <li>Durable public record, abandonment terms, and website administration rules, subject to the stated safety, privacy, consent, and legal limits</li>
-            </ul>
-          </div>
-          <p style="margin: 0; font-size: 15px; color: #6B6A64; max-width: 560px;">{{ agreementRulesNoun }} defines violations as Accountability Partner-verified documentation failures — missed, late, false, or concealed records. Ordinary weight fluctuation, plateaus, or temporary gains are progress information, never violations and never corrective triggers.</p>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="width: 100%; aspect-ratio: 3 / 4; border: 1px solid #141412;">
-            <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 50vw" width="3189" height="4933" loading="lazy" decoding="async" alt="Micheal Ray Berry in the black standard uniform" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-          </div>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Fig. 1 — The official photograph, Edition 2 uniform. No agreement-signature image is published in the repository.</span>
+    <section style="border-bottom: 1px solid #141412; padding: 72px 32px 56px;">
+      <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">{{ agreementFullHeading }} · Day 1: {{ startDateLong }}</p>
+        <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1>
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 17px; line-height: 1.65; max-width: 760px;">
+          <p style="margin: 0;"><strong>{{ agreementStatusSentence }}</strong></p>
+          <p style="margin: 0;">Edition 2, dated October 3, 2026, is the only agreement. Project Day 1 is October 3, 2026. Below is a section-by-section summary of the signed text; the signed copy itself is held privately by both parties.</p>
+          <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; color: #3A3935;">The agreement becomes operative once the Accountability Partner records both verified signatures and the reviewed consent recording. Nothing is enforced before that date.</p></sc-if>
+          <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; color: #3A3935;">Operative since {{ agreementEffectiveDateLong }}. The recorded consent is linked from the <a href="/consent/" style="color: #B3261E;">consent confirmation page</a>. Safety, privacy and takedown procedures remain available.</p></sc-if>
         </div>
       </div>
     </section>
-
-    <section style="border-bottom: 1px solid #141412; padding: 64px 32px 80px; background: #F1F0EA;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
-        <div style="background: #141412; color: #FAFAF7; padding: 32px 36px; display: flex; flex-direction: column; gap: 12px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">On completion</span>
-          <span style="font-size: 20px; font-weight: 600;">The record ends in daylight too.</span>
-          <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #D8D6CF;">Edition 2 defines verified completion at 200 pounds held for 28 consecutive days, followed by an archival completion record. <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}">That process is active from the recorded effective date.</sc-if><sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}">That process is inactive while execution is unverified.</sc-if></p>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E; margin-top: 16px;">Edition 2 archive rule</span>
-          <span style="font-size: 20px; font-weight: 600;">An ending without verified completion remains documented.</span>
-          <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #D8D6CF;">Edition 2 defines an archival ending after thirty consecutive active days without required documentation, written notice, and a seven-day opportunity to resume. Safety, privacy, and lawful takedown or redaction processes remain available and are documented transparently.</p>
-        </div>
-        <div style="border: 1px solid #141412; background: #FAFAF7; padding: 32px 36px; display: flex; flex-direction: column; gap: 12px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Documented exceptions</span>
-          <span style="font-size: 20px; font-weight: 600;">Strict, but not blind.</span>
-          <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Documented exceptions depend on the requirement. Supervision exceptions may include a work-schedule conflict, travel, illness, emergency, a non-consenting visitor, or external technical failure. The Accountability Partner records the reason.</p>
-          <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">The Accountability Partner administers this record and is not publicly named.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Full text temporarily withdrawn pending handover amendments -->
-    <section style="border-bottom: 1px solid #141412; padding: 64px 32px 88px;">
-      <div style="max-width: 880px; margin: 0 auto 0 0; display: flex; flex-direction: column; gap: 16px;">
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">Agreement status</p>
-        <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">{{ agreementFullHeading }}</h2>
-        <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;"><strong>Agreement execution is not verified.</strong> Edition 2 is the proposed governing document. Publication of this summary does not prove consent or create an executed bilateral agreement. Signed copies and signature images remain private.</p></sc-if>
-        <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;"><strong>Agreement execution is recorded as verified effective {{ agreementEffectiveDateLong }}.</strong> This page summarizes the verified edition; signed copies and signature images remain private.</p></sc-if>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border: 1px solid #141412; max-width: 880px;">
-          <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;">{{ agreementConsentScopeLabel }}</span>
-            <ul style="margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.7; display: flex; flex-direction: column; gap: 4px;">
-              <li>Public documentation under his real name</li>
-              <li>Daily inspection in the uniform</li>
-              <li>Named inspection positions on camera</li>
-              <li>Corrective requirements — corner time, 10 / 20 / 30 minutes</li>
-              <li>The reputational exposure inherent in real-name documentation of his weight and appearance, missed requirements, rejected submissions, corrective recordings, failed attempts, and any ending without verified completion</li>
-              <li>The Accountability Partner as administering authority</li>
-              <li>Republication of public record content on the Partner’s own platforms (§10.2c) — public material only, never verification photographs</li>
-            </ul>
+    <section style="border-bottom: 1px solid #141412; padding: 24px 32px 64px;">
+      <div style="max-width: 1160px; margin: 0 auto; border-bottom: 1px solid #D8D6CF;">
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§1</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Parties and commencement</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Participant: Micheal Ray Berry. The Accountability Partner (AP) signs the final page and may remain unnamed publicly. Project Day 1 is October 3, 2026; all times are America/New_York. The agreement becomes operative only after both signatures are personally verified and the separate consent confirmation is filed and reviewed by the AP. The consent recording opens with 15 to 30 seconds in his own voice. No requirement or violation applies before activation.</p>
           </div>
-
-        </div>
-        <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 14px; line-height: 1.65; color: #6B6A64; max-width: 640px;">The process calls for consent to be confirmed on camera at execution and after material amendments. No qualifying confirmation is currently on record. Safety and privacy takedown procedures remain available.</p></sc-if>
-        <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; line-height: 1.65; color: #6B6A64; max-width: 640px;">A verified Edition 2 confirmation is on record; its public recording is linked from the <a href="/consent/" style="color: #B3261E;">consent confirmation page</a>. Safety and privacy takedown procedures remain available.</p></sc-if>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§2</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Objective and completion standard</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Declared starting baseline: 340.0 lb (a declared figure, not a measured one). Goal: a verified weight at or below 200.0 lb for 28 consecutive days. There is no promised rate or completion date. Weight gain, a plateau or slow loss is never a Violation Event.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§3</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Accountability Partner authority</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">The AP administers the website, domain, official record, evidence review, violation decisions, correction assignments and completion decisions. Micheal submits evidence and may request factual correction; he does not approve his own compliance or erase an adverse entry. A local AP may be appointed only after identity verification, references, a written scope and a trial period, publicly logged and co-signed. Financial or device authority requires a separate, revocable agreement.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§4</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Daily Compliance Packet</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Due by 10:00 PM ET each active day: the scale-synced weight record, the Daily Inspection video (one continuous four-angle take with the verification code), four photographs (front, left, rear, right) and the public tracker. Receipt, publication and AP acceptance are separate events; a missing file or automated alert alone does not establish a missed deadline.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§5</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Uniform and inspection standard</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Plain black full-body unitard for inspection, Weekly Review, milestones and Evening Supervision; the pink unitard only for corrective sessions. Fixed portrait camera, full body head to feet, face visible. Wait and Inspection positions in a fixed sequence. A materially obscured, mis-posed or incomplete view is recorded again.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§6</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Evening Supervision</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">6:00–10:00 PM ET on nights before a scheduled workday, ordinarily Sunday–Thursday, streamed on twitch.tv/michealrayberry from fixed cameras, in the black uniform. Water is the only beverage; dinner is a healthy home-cooked meal with yogurt for dessert; no delivery, takeout or convenience meals. Bathrooms, changing, private communications and non-consenting visitors stay off camera. The AP reviews each session; a later session does not erase a confirmed miss.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§7</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Weekly Review and milestones</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Every Monday, a Weekly Review filed in the black uniform and reported from the actual record. Milestones at 320, 300, 275, 250, 225 and 200 lb become official only after a verification weigh-in, a milestone video and AP review. Completion requires 28 consecutive qualifying daily weights at or below 200.0 lb and AP confirmation.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§8</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Violation Events and corrective sessions</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">A Violation Event is a specific post-activation failure verified by the AP against a written requirement. Automated flags and observer reports are evidence for review. Corner time follows the confirmed count: first 10 minutes, second 20, third and later 30. It is completed, recorded and filed within 72 hours of the assignment notice, in the pink unitard, facing the corner, hands behind the head, in one unbroken recording with the challenge code visible and AI-voiced narration. The session is published beside the entry; an accepted correction closes the obligation without erasing the entry.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§9</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Safety and documented exceptions</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">A corrective session stops immediately for pain, dizziness, numbness, injury concerns or an emergency, with no restart or added time. Health, medication, emergencies and essential work take priority. Exceptions are documented by the AP with the reason, requirement, dates and any revised deadline. Inconvenience, embarrassment or a disliked reading is not an exception.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§10</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Public documentation and administration</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">He authorizes publication under his real name of dated weights, uniformed photographs, inspection videos, Weekly Reviews, milestone and completion records, supervision streams, verified violations with their corrective recordings, consent confirmations and how participation ends. Private verification photographs, signed copies, credentials and private communications are excluded. Public material may be found, shared and copied beyond anyone’s control. This consent does not authorize harassment, stalking, confrontation, workplace contact or disclosure of private information. Observers may report evidence; they do not acquire authority to impose consequences.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§11</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Completion, withdrawal and archival ending</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Verified completion ends the active requirements and creates an archival completion record. He may withdraw consent at any time by notifying the AP; withdrawal is recorded accurately as a withdrawal and existing material is handled through the privacy, consent and takedown process. After 30 consecutive active days without documentation, written notice and seven days to resume, the AP may record an ending without verified completion.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§12</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Amendments, notices and interpretation</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">A new requirement or material change takes effect only when written, dated, logged in Updates and co-signed; a material amendment also requires renewed consent. Website edits, observer comments and automated messages do not amend the agreement. Unclear instructions are clarified in writing before they support an adverse finding.</p>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 24px; padding: 20px 0; border-top: 1px solid #D8D6CF;">
+            <div style="display: flex; gap: 12px; align-items: baseline;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #B3261E;">§13</span><span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 20px; text-transform: uppercase; line-height: 1.15;">Acknowledgments and signatures</span></div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; text-wrap: pretty;">Both parties initial the key terms and sign. The AP completes the execution verification record; signing alone does not activate enforcement.</p>
+          </div>
       </div>
     </section>
     <sc-if value="{{ hasAmendments }}" hint-placeholder-val="{{ false }}">
     <section style="border-bottom: 1px solid #141412; padding: 56px 32px 72px; background: #F1F0EA;">
       <div style="max-width: 1160px; margin: 0 auto;">
-        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 16px;">Amendment log &mdash; §12.1</p>
+        <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0 0 16px;">Amendment log &mdash; §12</p>
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; margin: 0 0 12px;">Amendments</h2>
-        <p style="margin: 0 0 24px; font-size: 15px; color: #3A3935; max-width: 640px;">This page reflects published amendments through {{ amendmentsThrough }}. Each change to the Edition 2 terms is recorded by date and title.</p>
+        <p style="margin: 0 0 24px; font-size: 15px; color: #3A3935; max-width: 640px;">This page reflects published amendments through {{ amendmentsThrough }}. Each written, dated and co-signed change is logged here by date and title.</p>
         <div style="border: 1px solid #141412;">
           <sc-for list="{{ amendments }}" as="am" hint-placeholder-count="1">
             <div style="display: grid; grid-template-columns: 150px 1fr; gap: 20px; padding: 16px 20px; border-top: 1px solid #D8D6CF; font-size: 15px; line-height: 1.6;">

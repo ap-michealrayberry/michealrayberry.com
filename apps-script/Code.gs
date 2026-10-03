@@ -31,7 +31,7 @@ var CONFIG = {
 
 var AP_EMAIL = 'ap@michealrayberry.com';
 var MRB_EMAIL = 'contact@michealrayberry.com';
-var PROJECT_START_FALLBACK = '2026-10-11';
+var PROJECT_START_FALLBACK = '2026-10-03'; // signed contract (Edition 2, Oct 3 2026): Day 1 = Oct 3
 var TEST_START_FALLBACK = '2026-10-03';
 var AGREEMENT_EDITION = 2;
 /* Public supervision video switch. ON by user ruling, Oct 3 2026: /live/ embeds
@@ -86,6 +86,7 @@ var TEST_STATE = (function () {
   return out;
 })();
 function testPhaseActive(today) {
+  return false; // testing phase ended Oct 3 2026: the signed contract is the only agreement
   today = today || Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
   return TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
     TEST_STATE.start <= today && today < PROJECT_LAUNCH;
@@ -146,7 +147,7 @@ var TABS = {
 
 /* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
    from Sunday 13 Sept 2026. The nightly check at 22:20 rules on the night. */
-var SUPERVISION_START = '2026-09-13';
+var SUPERVISION_START = '2026-10-03'; // contract §6: beginning on the project start date
 var SUPERVISION_NIGHTS = [0, 1, 2, 3, 4]; // JS getDay: Sun=0 … Thu=4
 function supervisionScheduled(ds) {
   if (ds < SUPERVISION_START) return false;
@@ -1007,9 +1008,34 @@ function httpsUrlInput(value, fieldName) {
   return s;
 }
 
+/* Cloudflare Stream recordings (Recording Assistant direct upload, Oct 3 2026)
+   are accepted wherever a public recording URL is filed. Canonical form is
+   the iframe URL. */
+function streamUrlCanonical(value) {
+  var s = String(value == null ? '' : value).trim();
+  var a = s.match(/^https:\/\/iframe\.videodelivery\.net\/([a-f0-9]{32})$/);
+  if (a) return 'https://iframe.videodelivery.net/' + a[1];
+  var b = s.match(/^https:\/\/(customer-[a-z0-9]+)\.cloudflarestream\.com\/([a-f0-9]{32})\/(?:iframe|watch)$/);
+  if (b) return 'https://' + b[1] + '.cloudflarestream.com/' + b[2] + '/iframe';
+  return '';
+}
+var MEDIA_PUBLIC_BASE_DEFAULT = 'https://pub-944fe11d344847f68307fb252477ba11.r2.dev';
+function mediaPublicBase() {
+  return String(PropertiesService.getScriptProperties().getProperty('MEDIA_PUBLIC_BASE') || MEDIA_PUBLIC_BASE_DEFAULT).replace(/\/+$/, '');
+}
+function mediaUrlInput(value) {
+  var s = sheetText(value, 600, 'photo URL');
+  var base = mediaPublicBase();
+  if (s.indexOf(base + '/') !== 0) throw new Error('photo must be stored in the record media bucket');
+  var rel = s.slice(base.length + 1);
+  if (!/^(?:photos|wait)\/\d{4}\/\d{2}\/\d{2}\/micheal-ray-berry-day-\d{3,}-(?:front|left|rear|right|wait)-\d{4}-\d{2}-\d{2}\.(?:jpe?g|png|webp)$/i.test(rel)) throw new Error('photo path is not canonical');
+  return s;
+}
 function youtubeUrlInput(value, fieldName) {
   var label = fieldName || 'YouTube URL';
   var s = sheetText(value, 2048, label);
+  var stream = streamUrlCanonical(s);
+  if (stream) return stream;
   var watch = s.match(/^https:\/\/(?:www\.)?youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})$/);
   if (watch) return 'https://www.youtube.com/watch?v=' + watch[1];
   var shortLink = s.match(/^https:\/\/youtu\.be\/([A-Za-z0-9_-]{11})$/);
@@ -1719,11 +1745,11 @@ function doPost(e) {
       try { obj = JSON.parse(e.postData.contents); } catch (perr) {}
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'attest') return deviceAuthorized(obj) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
-      if (obj && obj.action === 'packet') return deviceAuthorized(obj) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
-      if (obj && obj.action === 'correctivefiled') return deviceAuthorized(obj) ? handleCorrectiveFiled(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
-      if (obj && obj.action === 'weeklyfiled') return deviceAuthorized(obj) ? handleWeeklyFiled(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
-      if (obj && obj.action === 'ytfiled') return deviceAuthorized(obj) ? handleYtFiled(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
-      if (obj && obj.action === 'confirmationfiled') return deviceAuthorized(obj) ? handleParticipantConfirmationFiled(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action === 'packet') return deviceAuthorized(obj) ? deployAfterFiling(handlePacket(obj), !!obj.finalize) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action === 'correctivefiled') return deviceAuthorized(obj) ? deployAfterFiling(handleCorrectiveFiled(obj), true) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action === 'weeklyfiled') return deviceAuthorized(obj) ? deployAfterFiling(handleWeeklyFiled(obj), true) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action === 'ytfiled') return deviceAuthorized(obj) ? deployAfterFiling(handleYtFiled(obj), true) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action === 'confirmationfiled') return deviceAuthorized(obj) ? deployAfterFiling(handleParticipantConfirmationFiled(obj), true) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'challenge') return deviceAuthorized(obj) ? issueChallenge(String(obj.kind || 'daily'), obj.ref, obj.assignment_id, obj.attempt_id) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'ping') return deviceAuthorized(obj) ? jsonOut({ ok: true }) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'mystate') return deviceAuthorized(obj) ? handleMyState() : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
@@ -2597,7 +2623,7 @@ function weeklyFilingFields(obj, gate) {
     weight = Number(obj.weight);
     if (!isFinite(weight) || weight <= 0 || weight > 1500) throw new Error('invalid weekly weight');
   }
-  var backupUrl = obj.url ? privateDriveBackupUrlInput(obj.url, 'weekly private Drive backup URL') : '';
+  var backupUrl = obj.url ? (streamUrlCanonical(obj.url) || privateDriveBackupUrlInput(obj.url, 'weekly private Drive backup URL')) : '';
   return {
     date: date,
     day: day,
@@ -2744,6 +2770,7 @@ function fileWeeklyYoutubeUrl(date, url, gate, attestationSeal) {
     if (apDateStr(matches[0].values[1]) !== filedDate) throw new Error('week ' + week + ' is filed for a different review date');
     var current = String(matches[0].values[7] || '').trim();
     if (current === url) return { changed: false, idempotent: true };
+    if (current && streamUrlCanonical(current)) throw new Error('the weekly Cloudflare recording is already on file and cannot be replaced');
     if (current) privateDriveBackupUrlInput(current, 'existing weekly private Drive backup URL');
     sheet.getRange(matches[0].row, 8).setValue(url);
     return { changed: true, idempotent: false };
@@ -3170,9 +3197,12 @@ function handlePacket(obj) {
     filingAttestation(today, 'daily', obj.attestation_seal || obj.seal);
     if (obj.video_url) {
       videoUrl = httpsUrlInput(obj.video_url, 'packet video URL');
-      var privateVideoId = driveIdFromUrl(videoUrl);
-      if (!privateVideoId) throw new Error('packet video must be the private Drive backup returned by the upload service');
-      requirePrivateDriveItem(DriveApp.getFileById(privateVideoId), 'daily packet video');
+      if (streamUrlCanonical(videoUrl)) videoUrl = streamUrlCanonical(videoUrl);
+      else {
+        var privateVideoId = driveIdFromUrl(videoUrl);
+        if (!privateVideoId) throw new Error('packet video must be a Cloudflare Stream recording or the private Drive backup');
+        requirePrivateDriveItem(DriveApp.getFileById(privateVideoId), 'daily packet video');
+      }
     }
   } catch (e) {
     return jsonOut({ ok: false, error: String(e.message || e) });
@@ -3204,14 +3234,52 @@ function handlePacket(obj) {
       return jsonOut({ ok: false, error: String(imageError.message || imageError) });
     }
   }
+  if (obj.photo_url) {
+    var photoUrl, photoAngle, photoWait;
+    try {
+      photoUrl = mediaUrlInput(obj.photo_url);
+      photoWait = /\/wait\//.test(photoUrl);
+      photoAngle = photoWait ? '' : ((photoUrl.match(/-(front|left|rear|right)-\d{4}-\d{2}-\d{2}\.[a-z]+$/i) || [])[1] || '');
+      if (!photoWait && !photoAngle) throw new Error('photo view not recognized');
+      if (photoUrl.indexOf('-' + today + '.') === -1) throw new Error('photo date does not match the packet date');
+    } catch (photoInputError) {
+      return jsonOut({ ok: false, error: String(photoInputError.message || photoInputError) });
+    }
+    try {
+      withActiveAgreementMutation('the daily packet photo could be recorded', function (lockedGate) {
+        var lockedDate = agreementDateInput(today, 'packet date', lockedGate);
+        filingAttestation(lockedDate, 'daily', obj.attestation_seal || obj.seal);
+        if (photoWait) {
+          stateSetUnlockedBatch(siteStateSheet(), siteStateSnapshot(), [
+            { key: 'wait_still_date', value: lockedDate },
+            { key: 'wait_still_url', value: photoUrl },
+          ], 'wait_still_url');
+          return { changed: true };
+        }
+        var col = { front: 4, left: 5, rear: 6, right: 7 }[photoAngle.toLowerCase()];
+        var ps = weighinsSheet(), pv = ps.getDataRange().getValues(), prow = 0, pn = 0;
+        for (var r = 1; r < pv.length; r++) if (apDateStr(pv[r][0]) === lockedDate) { prow = r + 1; pn++; }
+        if (pn > 1) throw new Error('duplicate daily rows require AP repair');
+        if (!prow) { ps.appendRow([lockedDate]); prow = ps.getLastRow(); } // tracker row created automatically
+        var cur = String(ps.getRange(prow, col).getValue() || '').trim();
+        if (cur && cur !== photoUrl) throw new Error('the ' + photoAngle + ' photograph is already on file and cannot be replaced by the device');
+        if (!cur) ps.getRange(prow, col).setValue(photoUrl);
+        return { changed: !cur };
+      });
+    } catch (photoError) {
+      return jsonOut({ ok: false, error: String(photoError.message || photoError) });
+    }
+  }
   if (videoUrl) {
     try {
       withActiveAgreementMutation('the daily packet video could be recorded', function (lockedGate) {
         var lockedDate = agreementDateInput(today, 'packet date', lockedGate);
         filingAttestation(lockedDate, 'daily', obj.attestation_seal || obj.seal);
-        var privateVideoId = driveIdFromUrl(videoUrl);
-        if (!privateVideoId) throw new Error('packet video must be the private Drive backup returned by the upload service');
-        requirePrivateDriveItem(DriveApp.getFileById(privateVideoId), 'daily packet video');
+        if (!streamUrlCanonical(videoUrl)) {
+          var privateVideoId = driveIdFromUrl(videoUrl);
+          if (!privateVideoId) throw new Error('packet video must be a Cloudflare Stream recording or the private Drive backup');
+          requirePrivateDriveItem(DriveApp.getFileById(privateVideoId), 'daily packet video');
+        }
         var vs = weighinsSheet();
         var vv = vs.getDataRange().getValues();
         var packetRows = [];
@@ -3579,17 +3647,16 @@ function nightlyComplianceCheck() {
       'Console: the MRB menu in the record sheet.\n' +
       'This is an automated message from the site Apps Script.',
   });
-  notifySubscribers('daily', 'Daily Result: PACKET INCOMPLETE — Day ' + dayN,
+  notifySubscribers('daily', 'Daily Result: INCOMPLETE AT 10 PM — Day ' + dayN,
     'Micheal Ray Berry — Daily Result for ' + today + ' (Day ' + dayN + ')\n\n' +
-    'Daily Compliance Packet incomplete at the 10:00 PM ET check.\nMissing: ' + missing.join(', ') + '.\n\n' +
-    'The miss has been declared to the Accountability Partner for confirmation under §7. Once confirmed it is published as a Violation Event with its corrective requirement.\n\n' +
+    'Automated check at 10:00 PM ET: the Daily Compliance Packet was not complete on the record.\nNot on record: ' + missing.join(', ') + '.\n\n' +
+    'The Accountability Partner reviews receipts, evidence and any documented exception before confirming or rejecting a Violation Event (§8). An automated flag does not by itself establish a missed deadline.\n\n' +
     'Record: ' + SUB_SITE + '/daily/\n');
 }
 
-/* ═════ SCHEDULED SUPERVISION CHECK (§3.4) ═════
-   User ruling Oct 3 2026: no session record by the check = the night is
-   marked MISSED automatically (public) and a Violation Event is declared for
-   AP confirmation under §7, exactly like the packet. */
+/* ═════ SCHEDULED SUPERVISION CHECK (contract §6/§8) ═════
+   No completed session record by the check creates a private REVIEW REQUIRED
+   flag and a queued review. Only the AP's apsupervision ruling writes MISSED. */
 function supervisionNightlyCheck() {
   var gate = activeAgreementGate('supervisionNightlyCheck');
   if (!gate || !dateWithinAgreement(gate.today, gate)) return;
@@ -3607,8 +3674,8 @@ function supervisionNightlyCheck() {
       return { changed: false, queued: false };
     }
     var sh = supervisionSheet();
-    if (sr) sh.getRange(sr.row, 3).setValue('MISSED');
-    else sh.appendRow([today, 'yes', 'MISSED', '', '', '', 'Declared automatically: no session record was present when checked at ' + checkedAt]);
+    if (sr) sh.getRange(sr.row, 3).setValue('REVIEW REQUIRED');
+    else sh.appendRow([today, 'yes', 'REVIEW REQUIRED', '', '', '', 'Automated flag: no completed session record was present when checked at ' + checkedAt]);
     return { changed: true, queued: true, today: today };
   });
   if (!review.queued) return;
@@ -3616,14 +3683,9 @@ function supervisionNightlyCheck() {
   queueViolationReview(today, 'SUPERVISION:' + today,
     'Supervision record-presence review — no submitted archive record was present when checked at ' + checkedAt + '.');
   try {
-    mailAP('MISSED — Evening Supervision ' + today + ' — confirm the Violation Event',
-      'No session record was present when the scheduled check ran at ' + checkedAt + '. The night is now publicly marked MISSED. A Violation Event has been declared for your confirmation under §7: VERIFY or REJECT it from the MRB menu. If a documented §9 exception applies, mark the night EXCEPTION and reject the event with the reason.');
+    mailAP('REVIEW REQUIRED — Evening Supervision ' + today,
+      'No completed session record was present when the scheduled check ran at ' + checkedAt + '. This is an automated flag, not a ruling (§8). Review the Twitch broadcast, receipts and any documented §9 exception, then rule COMPLETED, MISSED or EXCEPTION from the MRB menu.');
   } catch (e) {}
-  notifySubscribers('supervision', 'MISSED: Evening Supervision — ' + today,
-    'Micheal Ray Berry — Evening Supervision, ' + today + '\n\n' +
-    'The required 6:00–10:00 PM ET session was not on the record when checked at ' + checkedAt + '. The night is marked MISSED.\n\n' +
-    'The Violation Event is declared to the Accountability Partner for confirmation under §7.\n\n' +
-    'Supervision record: ' + SUB_SITE + '/live/\n');
 }
 
 /* A scheduled check may flag a possible lapsed corrective window, but only
@@ -4461,7 +4523,6 @@ function verifyViolationReview(rowNumber, finalText, gate, expectedIdentity) {
   });
   triggerDeploy();
   try { mrbViolationNotice(verified.row); } catch (e) {}
-  try { PropertiesService.getScriptProperties().setProperty('NOTICE_' + verified.marker.split('|')[2].slice(0, 40), new Date().toISOString()); } catch (pe) {}
   try {
     var lvl = consequenceForLevel(verifiedViolationCount());
     var esc = /72-hour corrective deadline/i.test(verified.text);
@@ -5235,8 +5296,16 @@ function handleApAction(obj) {
           : sop === 'complete' ? 'COMPLETED' : 'MISSED';
         if (srow) supervisionSheet().getRange(srow.row, 3).setValue(sst);
         else supervisionSheet().appendRow([sd, supervisionScheduled(sd) ? 'yes' : 'no', sst, '', '', supervisionUrl, supervisionNote]);
-        return { changed: true };
+        return { changed: true, date: sd };
       });
+      if (sop === 'missed') {
+        var missedDate = String(obj.date || supervisionGate.today);
+        notifySubscribers('supervision', 'MISSED: Evening Supervision — ' + missedDate,
+          'Micheal Ray Berry — Evening Supervision, ' + missedDate + '\n\n' +
+          'The Accountability Partner reviewed the record and ruled the required 6:00–10:00 PM ET session MISSED.\n\n' +
+          'Supervision record: ' + SUB_SITE + '/live/\n');
+      }
+      triggerDeploy();
       return jsonOut({ ok: true });
     }
     if (obj.action === 'apdeploy') { triggerDeploy(); return jsonOut({ ok: true, deployed: true }); }
@@ -5268,10 +5337,17 @@ function setSecondaryBuildHook(url) {
 /* Triggers a rebuild of the live site. BUILD_HOOK holds the host's build
    hook. Silence used to mean "no hook set", which is indistinguishable
    from success when run by hand, so every path logs. */
+/* Site rebuilds automatically after every accepted filing (user ruling Oct 3
+   2026). Photo-only packet calls wait for the finalize call. */
+function deployAfterFiling(out, shouldDeploy) {
+  if (!shouldDeploy) return out;
+  try { var j = JSON.parse(out.getContent()); if (j && j.ok) triggerDeploy(); } catch (e) { Logger.log('deployAfterFiling: ' + e); }
+  return out;
+}
 function triggerDeploy() {
   var props = PropertiesService.getScriptProperties();
   var hooks = [
-    { name: 'Netlify', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
+    { name: 'Cloudflare Pages', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
     { name: 'Secondary host (unused)', url: props.getProperty('BUILD_HOOK_2') },
   ].filter(function (x) { return !!x.url; });
 
@@ -6303,7 +6379,7 @@ function dailyPacketStateFromRow(dateStr, row) {
   var weightRecorded = isFinite(weight) && weight > 0;
   var missing = [];
   if (!trackerUpdated) missing.push('public tracker update (no dated Weigh-ins row)');
-  if (!weightRecorded) missing.push('scale-synced weight (step on the Withings scale)');
+  if (!weightRecorded) missing.push('scale-synced weight (step on the scale; it syncs through Google Health)');
   var photos = 0;
   if (trackerUpdated) for (var p = 3; p <= 6; p++) if (String(row[p] || '').trim()) photos++;
   if (photos !== 4) missing.push('accountability photographs (' + photos + '/4 filed)');
@@ -6990,17 +7066,7 @@ function handlePortalAction(obj) {
   }
 }
 
-function portalNoticeAt(details) {
-  var stamped = PropertiesService.getScriptProperties().getProperty('NOTICE_' + details.marker.split('|')[2].slice(0, 40));
-  if (stamped) return new Date(stamped);
-  // No stamp (verified before the portal existed): treat the notice as the
-  // end of the verification day, ET — the later of the possible times.
-  var a = details.verifiedDate.split('-').map(Number);
-  var guess = new Date(Date.UTC(a[0], a[1] - 1, a[2], 23, 59, 59));
-  var off = Utilities.formatDate(guess, 'America/New_York', 'Z'); // e.g. -0400
-  var mins = (off.charAt(0) === '-' ? 1 : -1) * (Number(off.slice(1, 3)) * 60 + Number(off.slice(3, 5)));
-  return new Date(guess.getTime() + mins * 60000);
-}
+
 
 function portalContestRows() {
   var v = tab('Contests').getDataRange().getValues();
@@ -7026,17 +7092,12 @@ function portalState() {
   if (gate.active) {
     var rows = violationLogSheet().getDataRange().getValues();
     var contests = portalContestRows();
-    var now = new Date();
-    for (var i = 1; i < rows.length; i++) {
+    for (var i = rows.length - 1; i >= 1 && base.contestable.length < 20; i--) {
       var d = verifiedViolationDetails(rows[i], gate);
       if (!d) continue;
-      var closes = new Date(portalNoticeAt(d).getTime() + 48 * 3600 * 1000);
       var id = 'V-' + publicViolationToken(d.marker);
       var filed = contests[id] || null;
-      if (closes < now && !filed) continue;
-      if (closes < new Date(now.getTime() - 14 * 864e5)) continue;
-      base.contestable.push({ id: id, date: d.date, what: participantSafeRecordText(d.text),
-        closes: closes.toISOString(), open: closes > now && !filed,
+      base.contestable.push({ id: id, date: d.date, what: participantSafeRecordText(d.text), open: !filed,
         filed: filed ? filed.received : '', filedStatus: filed ? filed.status : '' });
     }
   }
@@ -7102,18 +7163,17 @@ function portalContest(obj) {
   var state = portalState();
   var item = null;
   for (var i = 0; i < state.contestable.length; i++) if (state.contestable[i].id === id) item = state.contestable[i];
-  if (!item) return { ok: false, error: 'That entry is not inside a contest window.' };
-  if (item.filed) return { ok: false, error: 'A contest for this entry is already on file.' };
-  if (!item.open) return { ok: false, error: 'The 48-hour contest window has closed. The determination stands.' };
+  if (!item) return { ok: false, error: 'That entry is not on the record.' };
+  if (item.filed) return { ok: false, error: 'A correction request for this entry is already on file.' };
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    if (portalContestRows()[id]) return { ok: false, error: 'A contest for this entry is already on file.' };
-    tab('Contests').appendRow([portalNowEt(), id, item.date, sheetText(reason, 2000, 'reason'), evidence, 'RECEIVED', item.closes]);
+    if (portalContestRows()[id]) return { ok: false, error: 'A correction request for this entry is already on file.' };
+    tab('Contests').appendRow([portalNowEt(), id, item.date, sheetText(reason, 2000, 'reason'), evidence, 'RECEIVED', '']);
   } finally { lock.releaseLock(); }
-  mailAP('CONTEST FILED — ' + id + ' (' + item.date + ')',
-    'Micheal contested this Violation Event inside the 48-hour window (closes ' + item.closes + ').\n\n' +
+  mailAP('CORRECTION REQUEST — ' + id + ' (' + item.date + ')',
+    'Micheal requested a factual correction of this Violation Event (contract §3).\n\n' +
     'Entry: ' + item.what + '\n\nReason:\n' + reason + '\n\nEvidence: ' + evidence + '\n\n' +
-    'Rule on it against the written rules only (§7). The Contests tab holds the filing.');
+    'Review it against the written rules (§8) and record a dated explanation if anything changes. The Contests tab holds the request.');
   return { ok: true };
 }
 

@@ -110,28 +110,28 @@
         } }),
       ]),
       msg('sup'),
-      el('p', { class: 'note', text: 'Start opens 5:45 PM ET and is accepted only while Twitch shows the channel live. End stamps the time and submits the night for AP verification against the broadcast. A night with no session on record at the 10:20 PM check is marked MISSED.' }),
+      el('p', { class: 'note', text: 'Start opens 5:45 PM ET and is accepted only while Twitch shows the channel live. End stamps the time and submits the night for AP verification against the broadcast. A night with no completed session at the 10:20 PM check is flagged to the AP, who rules on it.' }),
     ]);
   }
 
   function contest() {
     var list = S.contestable || [];
     var body = [];
-    if (!list.length) body.push(el('p', { class: 'note', text: 'No Violation Event is inside its 48-hour contest window.' }));
+    if (!list.length) body.push(el('p', { class: 'note', text: 'No Violation Events on record.' }));
     list.forEach(function (c) {
-      var reason = el('textarea', { placeholder: 'What the record gets wrong, against the written rules', disabled: ro() || !c.open, maxlength: '2000' });
+      var reason = el('textarea', { placeholder: 'What the record gets wrong, with the facts', disabled: ro() || !c.open, maxlength: '2000' });
       var ev = el('input', { type: 'url', placeholder: 'https:// evidence link', disabled: ro() || !c.open });
       body.push(el('div', { class: 'item' }, [
-        el('div', { class: 'row' }, [el('span', { text: c.id + ' · ' + c.date }), c.open ? el('span', { class: 'no', 'data-count': c.closes, text: left(new Date(c.closes) - Date.now()) }) : el('span', { text: c.filed ? 'Contest filed' : 'Closed' })]),
+        el('div', { class: 'row' }, [el('span', { text: c.id + ' · ' + c.date }), el('span', { text: c.filed ? 'Request filed' : 'No request filed' })]),
         el('p', { class: 'note', text: c.what }),
         c.filed ? el('div', { class: 'msg good', text: 'Filed ' + fmtEt(c.filed) + ' · ' + (c.filedStatus || 'RECEIVED') }) : null,
         c.open ? reason : null, c.open ? ev : null,
-        c.open ? el('button', { class: 'btn', disabled: ro() || busy, text: 'File contest with the AP', onclick: function () { post('con-' + c.id, { action: 'contest', id: c.id, reason: reason.value, evidence: ev.value.trim() }); } }) : null,
+        c.open ? el('button', { class: 'btn', disabled: ro() || busy, text: 'Send correction request to the AP', onclick: function () { post('con-' + c.id, { action: 'contest', id: c.id, reason: reason.value, evidence: ev.value.trim() }); } }) : null,
         msg('con-' + c.id),
       ]));
     });
-    body.push(el('p', { class: 'note', text: 'One contest per entry, with evidence, within 48 hours of the notice. The AP rules against the written rules only. After the window closes the determination stands.' }));
-    return panel('Contest a violation · §7', el('span', { class: 'state', text: list.filter(function (c) { return c.open; }).length + ' open window(s)' }), body);
+    body.push(el('p', { class: 'note', text: 'You may request a factual correction of any entry, with evidence (§3). The AP reviews it against the written rules; a request does not change the entry by itself.' }));
+    return panel('Request a factual correction', el('span', { class: 'state', text: list.filter(function (c) { return c.filed; }).length + ' filed' }), body);
   }
 
   function record() {
@@ -180,7 +180,7 @@
       portalFilings: {}, next: { text: 'Level 2 — 20 continuous minutes of corner time, recorded in one unbroken take and published beside the entry' },
       supervision: { scheduled: true, status: '', start: '', end: '', window: '6:00–10:00 PM ET' },
       twitch: { configured: true, live: true, title: 'Evening Supervision · Session 007' },
-      contestable: [{ id: 'V-3F8A1C0D9B27', date: '2026-10-16', what: 'Daily Compliance Packet incomplete — photographs not filed by 10:00 PM ET', closes: new Date(Date.now() + 30 * 3600e3).toISOString(), open: true, filed: '' }],
+      contestable: [{ id: 'V-3F8A1C0D9B27', date: '2026-10-16', what: 'Daily Compliance Packet incomplete — photographs not filed by 10:00 PM ET', open: true, filed: '' }],
       violations: [{ date: '2026-10-16', what: 'Daily Compliance Packet incomplete', status: 'Unresolved' }] };
   }
   load();

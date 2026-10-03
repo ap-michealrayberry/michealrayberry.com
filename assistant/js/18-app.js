@@ -599,12 +599,12 @@
     function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
     wrap.innerHTML =
       '<div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#B3261E">Post to YouTube — public — then file the link</div>' +
-      '<div style="font-size:13px;line-height:1.6;color:#3A3935">Upload the take publicly to @michealrayberry with this title and description, paste the video link, and file it — the record embeds the YouTube video.</div>' +
+      '<div style="font-size:13px;line-height:1.6;color:#3A3935">This take uploaded directly to Cloudflare and was filed to the record automatically — there is nothing to paste. Optional: also post it to YouTube @michealrayberry with this title and description.</div>' +
       '<label class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6B6A64">Title <button type="button" data-copy="yt-title" class="mono" style="margin-left:8px;font-size:11px;cursor:pointer">Copy</button></label>' +
       '<textarea id="yt-title" readonly rows="2" class="mono" style="width:100%;box-sizing:border-box;font-size:12px;padding:8px;border:1px solid #D8D6CF;background:#F1F0EA;resize:vertical">' + esc(meta.title) + "</textarea>" +
       '<label class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6B6A64">Description <button type="button" data-copy="yt-desc" class="mono" style="margin-left:8px;font-size:11px;cursor:pointer">Copy</button></label>' +
       '<textarea id="yt-desc" readonly rows="7" class="mono" style="width:100%;box-sizing:border-box;font-size:12px;padding:8px;border:1px solid #D8D6CF;background:#F1F0EA;resize:vertical">' + esc(meta.desc) + "</textarea>" +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<div style="display:none">' +
       '<input id="yt-url" type="url" placeholder="https://youtu.be/…" class="mono" style="flex:1;min-width:180px;font-size:12px;padding:10px;border:1px solid #141412;background:#FAFAF7">' +
       '<button type="button" id="yt-file" class="btn btn-primary">File the link</button></div>' +
       '<div id="yt-msg" class="mono" style="font-size:12px;color:#B3261E;min-height:14px"></div>';

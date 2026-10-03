@@ -2806,6 +2806,111 @@
     throw new Error("Drive upload ended without a finalized private URL");
   }
 
+  /* Direct upload to Cloudflare Stream (Oct 3 2026). /api/stream-upload
+     (Pages Function) checks the device credentials against Apps Script and
+     opens a tus Direct Creator Upload; the browser then sends the bytes
+     straight to Cloudflare. Photographs go to the record media bucket (R2)
+     through /api/media-put. No separate private copy is kept. */
+  var STREAM_CHUNK = 50 * 1024 * 1024; // multiple of 256 KiB, >= 5 MiB
+
+  function unlockToken() {
+    try { return localStorage.getItem("mrb_unlock_token") || ""; } catch (e) { return ""; }
+  }
+
+  async function postSiteJson(path, body) {
+    var res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(body),
+    });
+    var j = null;
+    try { j = await res.json(); } catch (e) {}
+    if (!j || !j.ok) throw new Error((j && j.error) || (path + " failed (HTTP " + res.status + ")"));
+    return j;
+  }
+
+  async function streamUpload(item, blob, statusWriter) {
+    var cfg = MRB.config.get();
+    if (cfg.demoMode) return { ok: true, demo: true, url: "" };
+    if (item.streamDone && item.publicUrl) return { ok: true, url: item.publicUrl };
+    var total = blob.size;
+    if (!item.streamUploadUrl) {
+      var t = await postSiteJson("/api/stream-upload", {
+        key: cfg.deviceKey, unlock: unlockToken(), kind: item.kind, date: item.date,
+        day: item.day, size: total, name: driveName(item, blob),
+      });
+      item.streamUploadUrl = t.uploadUrl;
+      item.streamUid = t.uid;
+      item.publicUrl = t.url;
+      item.uploadOffset = 0;
+      item.phase = "video-uploading";
+      await putSession(item);
+    }
+    var head = await fetch(item.streamUploadUrl, { method: "HEAD", headers: { "Tus-Resumable": "1.0.0" } });
+    if (head.status === 403 || head.status === 404 || head.status === 410) {
+      item.streamUploadUrl = null;
+      item.publicUrl = "";
+      item.uploadOffset = 0;
+      await putSession(item);
+      throw new Error("Cloudflare upload session expired; it restarts on the next attempt");
+    }
+    var offset = Number(head.headers.get("Upload-Offset") || 0) || 0;
+    while (offset < total) {
+      renewUploadLease(item);
+      await putSession(item);
+      var end = Math.min(offset + STREAM_CHUNK, total);
+      var r = await fetch(item.streamUploadUrl, {
+        method: "PATCH",
+        headers: { "Tus-Resumable": "1.0.0", "Upload-Offset": String(offset), "Content-Type": "application/offset+octet-stream" },
+        body: blob.slice(offset, end),
+      });
+      if (r.status !== 204 && r.status !== 200) {
+        var err = new Error("Cloudflare upload HTTP " + r.status);
+        err.offset = offset;
+        throw err;
+      }
+      var next = Number(r.headers.get("Upload-Offset"));
+      offset = isFinite(next) && next > offset ? next : end;
+      item.uploadOffset = offset;
+      await putSession(item);
+      if (statusWriter) statusWriter("Uploading " + item.kind + " to Cloudflare — " + Math.round((offset / total) * 100) + "% of " + formatBytes(total));
+    }
+    item.streamDone = true;
+    item.phase = "video-uploaded";
+    await putSession(item);
+    return { ok: true, url: item.publicUrl };
+  }
+
+  async function mediaPut(item, ph) {
+    var cfg = MRB.config.get();
+    if (cfg.demoMode) return "";
+    var j = await postSiteJson("/api/media-put", {
+      key: cfg.deviceKey, unlock: unlockToken(), date: item.date, day: item.day,
+      name: ph.name, image_b64: ph.b64,
+    });
+    return j.url;
+  }
+
+  async function fileRecordingLink(item, kind, url) {
+    if (MRB.config.get().demoMode || !url || item.linkFiled) return;
+    var j = await MRB.api.postJson({
+      action: "ytfiled",
+      key: MRB.config.get().deviceKey,
+      kind: kind,
+      date: item.date,
+      ref: kind === "corrective" ? item.vRef : "",
+      assignment_id: kind === "corrective" ? item.assignmentId : "",
+      attempt_id: kind === "corrective" ? item.attemptId : "",
+      url: url,
+      attestation_seal: item.seal || "",
+    });
+    if (!j || !j.ok) throw new Error("Recording filing failed: " + ((j && j.error) || "no response"));
+    item.linkFiled = true;
+    item.filingStatus = j.status || "";
+    await putSession(item);
+  }
+
   /* Legacy direct PUT — kept for any old queue item that still carries a
      presigned URL; new uploads all go through driveRelayUpload. */
   async function resumablePut(uploadUrl, blob, onProgress, priorOffset) {
@@ -2945,13 +3050,12 @@
     }
     if (!blob) throw new Error("No blob in queue item");
 
-    // Every take ships to the AP's Google Drive as a BACKUP copy — for corrective
-    // sessions the public YouTube posting remains evidence submitted for AP
-    // review; this copy is disaster recovery only.
-    var up = await driveRelayUpload(item, blob, statusWriter);
-    item.publicUrl = (up && (up.url || up.publicUrl)) || item.publicUrl || "";
+    // Every take uploads directly to Cloudflare Stream. The Stream recording
+    // is the filed public record; there is no separate private copy.
+    var up = await streamUpload(item, blob, statusWriter);
+    item.publicUrl = (up && up.url) || item.publicUrl || "";
     if (!MRB.config.get().demoMode && !item.publicUrl) {
-      throw new Error("Private video backup URL is unavailable");
+      throw new Error("Cloudflare Stream URL is unavailable");
     }
     item.phase = "video-uploaded";
     await putSession(item);
@@ -2990,10 +3094,14 @@
     if (item.kind === "daily" && item.photos) {
       for (var p = 0; p < item.photos.length; p++) {
         var ph = item.photos[p];
+        if (!ph.url) {
+          ph.url = await mediaPut(item, ph);
+          await putSession(item);
+        }
         await MRB.api.packet({
           date: item.date,
           name: ph.name,
-          image_b64: ph.b64,
+          photo_url: ph.url,
           weight: p === 0 ? item.weight : undefined,
           attestation_seal: item.seal,
           finalize: false,
@@ -3028,27 +3136,26 @@
         version: item.version,
         attestation_seal: item.seal,
       });
+      await fileRecordingLink(item, "consent", filedUrl);
     } else if (item.kind === "corrective") {
-      // Backup uploaded above; nothing filed to the record yet. Posting the
-      // take to YouTube and filing the link on the result screen submits it
-      // for AP verification (correctivefiled).
+      // Published beside the violation entry at once; the entry stays open
+      // until the AP verifies the session (contract §8).
+      await fileRecordingLink(item, "corrective", filedUrl);
+    } else if (item.kind === "announcement") {
+      await fileRecordingLink(item, "announcement", filedUrl);
     } else {
       // demo — the attestation is enough
     }
 
-    item.phase = item.kind === "corrective" || item.kind === "confirmation" || item.kind === "announcement"
-      ? "private-backup-sealed"
-      : item.kind === "demo" ? "demo-complete" : "filed";
+    item.phase = item.kind === "demo" ? "demo-complete" : "filed";
     await putSession(item);
     if (statusWriter) {
       statusWriter(item.kind === "corrective"
-        ? "Private backup sealed; public link filing remains pending."
+        ? "Uploaded to Cloudflare and published beside the entry; awaiting AP verification."
         : item.kind === "confirmation"
-          ? "Participant statement sealed; public link filing remains pending."
-        : item.kind === "announcement"
-          ? "Announcement capture sealed; public link filing remains pending."
+          ? "Consent recording uploaded and filed; awaiting AP review."
           : item.kind === "demo" ? "Demo capture complete; nothing filed."
-            : "Filed and sealed.");
+            : "Uploaded to Cloudflare, filed and sealed. The site rebuilds automatically.");
     }
     return item;
   }
@@ -5153,12 +5260,12 @@
     function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
     wrap.innerHTML =
       '<div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#B3261E">Post to YouTube — public — then file the link</div>' +
-      '<div style="font-size:13px;line-height:1.6;color:#3A3935">Upload the take publicly to @michealrayberry with this title and description, paste the video link, and file it — the record embeds the YouTube video.</div>' +
+      '<div style="font-size:13px;line-height:1.6;color:#3A3935">This take uploaded directly to Cloudflare and was filed to the record automatically — there is nothing to paste. Optional: also post it to YouTube @michealrayberry with this title and description.</div>' +
       '<label class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6B6A64">Title <button type="button" data-copy="yt-title" class="mono" style="margin-left:8px;font-size:11px;cursor:pointer">Copy</button></label>' +
       '<textarea id="yt-title" readonly rows="2" class="mono" style="width:100%;box-sizing:border-box;font-size:12px;padding:8px;border:1px solid #D8D6CF;background:#F1F0EA;resize:vertical">' + esc(meta.title) + "</textarea>" +
       '<label class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6B6A64">Description <button type="button" data-copy="yt-desc" class="mono" style="margin-left:8px;font-size:11px;cursor:pointer">Copy</button></label>' +
       '<textarea id="yt-desc" readonly rows="7" class="mono" style="width:100%;box-sizing:border-box;font-size:12px;padding:8px;border:1px solid #D8D6CF;background:#F1F0EA;resize:vertical">' + esc(meta.desc) + "</textarea>" +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<div style="display:none">' +
       '<input id="yt-url" type="url" placeholder="https://youtu.be/…" class="mono" style="flex:1;min-width:180px;font-size:12px;padding:10px;border:1px solid #141412;background:#FAFAF7">' +
       '<button type="button" id="yt-file" class="btn btn-primary">File the link</button></div>' +
       '<div id="yt-msg" class="mono" style="font-size:12px;color:#B3261E;min-height:14px"></div>';

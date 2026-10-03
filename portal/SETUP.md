@@ -43,7 +43,7 @@ Redeploy the Pages project after adding the secrets.
 ## What it does
 - **Today's packet** — status of each item and a countdown to 10:00 PM ET; opens the Recording Assistant.
 - **Owed now** — open corrective requirements (level, minutes, due date). A pasted YouTube link goes to the private *Portal Filings* tab and the AP is emailed to check and attach it. Filing does not resolve the entry.
-- **Evening Supervision** — Start (5:45–10:00 PM ET, only while Twitch shows the channel live) and End. End sets the night to `SUBMITTED · awaiting AP verification`. A night started but never ended is still `IN PROGRESS` at the 10:20 PM check and is marked MISSED.
-- **Contest** — one per Violation Event, with a reason and an https evidence link, within 48 hours of the AP's verification notice. Goes to the private *Contests* tab and the AP is emailed. The form locks when the window closes.
+- **Evening Supervision** — Start (5:45–10:00 PM ET, only while Twitch shows the channel live) and End. End sets the night to `SUBMITTED · awaiting AP verification`. A night started but never ended is still `IN PROGRESS` at the 10:20 PM check and is flagged REVIEW REQUIRED for the AP to rule on.
+- **Correction request** — one per Violation Event, with a reason and an https evidence link (contract §3: Micheal may request factual correction). Goes to the private *Contests* tab and the AP is emailed. No time window.
 
 The portal's own code never holds the Apps Script URL or any key; the Pages Function verifies the Access sign-in token on every request and relays server-side.
