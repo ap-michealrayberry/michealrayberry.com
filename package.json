@@ -6,6 +6,12 @@
     "node": ">=24"
   },
   "scripts": {
+    "test": "tsc --noEmit && vitest run",
+    "dev": "wrangler dev",
+    "types": "wrangler types --strict-vars=false",
+    "db:migrate:local": "wrangler d1 migrations apply mrb-record --local",
+    "db:migrate:remote": "wrangler d1 migrations apply mrb-record --remote",
+    "import-sheets": "node scripts/import-sheets.mjs",
     "generate": "node scripts/publish.mjs",
     "prepare-dist": "node scripts/prepare-dist.mjs",
     "audit-output": "node scripts/audit-output.mjs dist",
@@ -24,6 +30,18 @@
     "check-syntax": "node --check scripts/publish.mjs && node --check scripts/static-site.mjs && node --check scripts/prepare-dist.mjs && node --check scripts/audit-output.mjs && node --check scripts/test-apps-script.mjs && node --check scripts/test-release.mjs && node --check scripts/submit-indexnow.mjs && node --check functions/observer.js && npm run check-apps-script-syntax && npm run check-browser-syntax && npm run check-assistant-bundle"
   },
   "dependencies": {
+    "hono": "^4.13.12",
     "sharp": "0.35.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.147.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260815.1": true,
+    "workerd@1.20261001.1": true
   }
 }

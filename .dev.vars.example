@@ -1,0 +1,3 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+# Local requests to localhost are treated as this signed-in Access user.
+DEV_ACCESS_EMAIL=michealrayberry@gmail.com
