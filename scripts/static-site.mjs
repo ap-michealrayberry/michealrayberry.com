@@ -88,6 +88,7 @@ function expand(tpl, scope) {
 /* ── values (mirrors the former renderVals, computed from the sheet) ── */
 function computeValues(ctx) {
   const { rows, violations, updates, siteState, attestMap, photoFiles, findPhoto, relUrl, publicVideoUrl, videoEmbed, longDate, htmlEscape, normalizeDate, SITE_ORIGIN, START_DATE, todayIso } = ctx;
+  const LAUNCH_DATE = ctx.LAUNCH_DATE || START_DATE, TEST_PHASE = !!ctx.TEST_PHASE;
   const esc = (s) => htmlEscape(String(s == null ? '' : s));
   const startWeight = 340, goalWeight = 200;
   const dayOf = (iso) => Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(START_DATE + 'T12:00:00Z')) / 864e5) + 1;
@@ -259,8 +260,11 @@ function computeValues(ctx) {
   const openCount = openList.length;
   const ms = MILESTONES.filter((m) => m < current);
   return {
-    dayNumber, dayCounterLabel: rawDay < 1 ? '—' : String(dayNumber),
-    startDateLong: esc(longDate(START_DATE)),
+    dayNumber,
+    dayCounterLabel: TEST_PHASE
+      ? 'T-' + Math.round((Date.parse(LAUNCH_DATE + 'T12:00:00Z') - Date.parse(todayIso + 'T12:00:00Z')) / 864e5)
+      : rawDay < 1 ? '—' : String(dayNumber),
+    startDateLong: esc(longDate(LAUNCH_DATE)),
     startLabel: fmt(startWeight), goalLabel: fmt(goalWeight),
     currentLabel: last ? fmt(current) : '—', lostLabel: last ? fromDeclaredLabel : '—', remainingLabel: last ? fmt(remaining) : '—',
     pctLabel: last ? pct.toFixed(1) + '%' : '—', pctWidth: last ? Math.max(0.5, pct) + '%' : '0%',

@@ -65,7 +65,36 @@ const buildNow = () => new Date(BUILD_INSTANT.getTime());
    key `start_date` — a restart is a single sheet edit, no code change. When
    `prior_attempt_note` is set it renders on /daily so an earlier attempt is
    closed on the record, not erased (its photos stay in the repo history). */
-let START_DATE = '2026-08-31';
+let START_DATE = '2026-10-11';
+/* Testing phase (Oct 2026): while today < the Site State start_date (the
+   official Day 1) and Site State test_mode is not "off", the record runs from
+   test_start_date as if the agreement were active. Pages show a testing
+   notice, days read T-n (countdown to launch), and violations are marked
+   TEST. On the launch date the phase ends by itself: START_DATE becomes the
+   official Day 1 and every earlier row drops out of the public record. */
+const TEST_START_FALLBACK = '2026-10-03';
+let LAUNCH_DATE = START_DATE;
+let TEST_PHASE = false;
+let TEST_SPAN = 0;
+/* Test stream shown on /live/ throughout the testing phase. Site State
+   test_stream_url overrides; YT_LIVE_VIDEO_ID env is the next fallback. */
+let TEST_STREAM_ID = '';
+const TEST_STREAM_FALLBACK = 'https://youtube.com/live/jPD7ZaSzKWk';
+const ytIdOf = (v) => (String(v || '').trim().match(/(?:live\/|v=|youtu\.be\/|embed\/|^)([\w-]{11})(?:[?&#]|$)/) || [])[1] || '';
+function testDayLabel(n) { return `T-${TEST_SPAN - n + 1}`; }
+function applyTestPhase(file, text) {
+  const rel = path.relative(ROOT, file).split(path.sep).join('/');
+  let out = text.replace(/<body([^>]*)>/i, (m) => `${m}\n<div role="note" style="background:#141412;color:#FAFAF7;font:600 12px/1.5 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;padding:9px 16px;text-align:center">Testing phase · official record begins ${longDate(LAUNCH_DATE)}</div>`);
+  const prose = /^(?:index\.html|(?:about|agreement|consent|positions|uniform|share|observer|updates)\/)/;
+  if (!prose.test(rel)) {
+    out = out.replace(/\b(Day|DAY) (\d{1,3})\b/g, (m, w, d) => {
+      const n = Number(d);
+      if (n < 1 || n > TEST_SPAN) return m;
+      return w === 'DAY' ? testDayLabel(n).toUpperCase() : testDayLabel(n);
+    });
+  }
+  return out;
+}
 let PRIOR_NOTE = '';
 const START_WEIGHT = 340;
 const GOAL_WEIGHT = 200;
@@ -311,6 +340,7 @@ async function readMaybe(file) {
 }
 
 async function writeIfChanged(file, data) {
+  if (TEST_PHASE && typeof data === 'string' && /\.html$/i.test(file)) data = applyTestPhase(file, data);
   const next = Buffer.isBuffer(data) ? data : Buffer.from(data);
   const current = await readMaybe(file);
   if (current && current.equals(next)) return false;
@@ -843,7 +873,8 @@ async function cardImage(c) {
     <text x="${PAD + 30}" y="${H - PAD - 28}" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="17" letter-spacing="2" fill="#8A8983">${c.complete ? 'FILES PRESENT' : c.anyFiled ? 'PARTIAL FILE RECORD' : 'NO PUBLIC FILE RECORD'} · 340 → 200 LB · PUBLIC ACCOUNTABILITY PROJECT</text>
     <g transform="translate(${W - PAD - 30 - 118} ${H - PAD - 134})"><rect width="118" height="118" fill="#FAFAF7"/><g transform="translate(6 6) scale(${106 / qr.size})"><path d="${qr.path}" fill="#141412"/></g></g>
   </svg>`;
-  return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
+  const svgOut = TEST_PHASE ? svg.replace(/>DAY (\d{1,3})</g, (m, d) => (Number(d) >= 1 && Number(d) <= TEST_SPAN ? `>${testDayLabel(Number(d))} · TEST<` : m)) : svg;
+  return sharp(Buffer.from(svgOut)).png({ compressionLevel: 9 }).toBuffer();
 }
 /* Minimal QR encoder — byte mode, error-correction L, fixed mask 0. Enough
    for one short URL; returns { size, path } for an SVG <path>. */
@@ -2733,7 +2764,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
   const canonical = `${SITE_ORIGIN}/live/`;
   const title = 'Evening Supervision — Micheal Ray Berry';
   const description = 'Evening Supervision: current status, the live stream during a confirmed session, published operating rules, and historical session outcomes.';
-  const SESSION_START = '2026-09-13';
+  const SESSION_START = START_DATE;
   const YT_CHANNEL_ID = String(process.env.YT_CHANNEL_ID || '').trim();
   // YT_LIVE_VIDEO_ID (id or youtube.com/live/<id> URL) pins one broadcast —
   // used for stream tests; it wins over the channel's current live stream.
@@ -2749,7 +2780,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     schema_version: 1,
     agreement_active: agreementActive,
     published_at: buildNow().toISOString(),
-    sessions: Object.fromEntries(supervision.filter((s) => s.date <= today).map((s) => {
+    sessions: Object.fromEntries(supervision.filter((s) => s.date >= START_DATE && s.date <= today).map((s) => {
       const applies = agreementAppliesOn(s.date, agreementActive, effectiveDate);
       return [s.date, {
         required: applies && s.required,
@@ -2817,6 +2848,11 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       .detail span{font:600 16px/1.3 'IBM Plex Mono',ui-monospace,monospace}
       .embed{margin:0;background:#000;aspect-ratio:16/9;max-width:100%;display:none}
       .embed iframe{width:100%;height:100%;border:0;display:block}
+      .teststream{margin:0 0 28px;border:1px solid var(--ink)}
+      .ts-label{margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font:700 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px}
+      .ts-embed{margin:0;background:#000;aspect-ratio:16/9}
+      .ts-embed iframe{width:100%;height:100%;border:0;display:block}
+      .ts-note{margin:0;padding:12px 16px;font-size:14px;line-height:1.55;color:var(--muted)}
       .embed .fb{display:flex;align-items:center;justify-content:center;height:100%;color:#FAFAF7;font:600 14px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}
       .embed .fb:hover{color:#FF6B61}
       h2.sup{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:26px;margin:44px 0 12px}
@@ -2853,6 +2889,11 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       ? 'Under the verified execution state, an explicit schedule row may require a fixed-camera Evening Supervision session on a night preceding a scheduled workday.'
       : 'Edition 2 proposes fixed-camera Evening Supervision on specified nights, but agreement execution is not verified and the requirement is not active.'} While a session is in progress, the live stream plays on this page.</p>
     <div class="sup-wrap">
+      ${TEST_PHASE && TEST_STREAM_ID ? `<section class="teststream" aria-label="Test stream">
+        <p class="ts-label"><span class="lamp on"></span>Test stream · not an official session</p>
+        <figure class="ts-embed"><iframe src="https://www.youtube.com/embed/${TEST_STREAM_ID}?autoplay=1&amp;mute=1" title="Evening Supervision — test stream" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe></figure>
+        <p class="ts-note">Shown during the testing phase to check the camera and stream. The official record begins ${htmlEscape(longDate(LAUNCH_DATE))}. <a href="https://www.youtube.com/watch?v=${TEST_STREAM_ID}" rel="noopener">Open on YouTube</a></p>
+      </section>` : ''}
       <div class="status">
         <div class="line" data-live-status role="status" aria-live="polite"><span class="lamp"></span>CHECKING SCHEDULE…</div>
         <div class="detail" data-live-detail></div>
@@ -3264,7 +3305,7 @@ ${SYN_FOOTER}
 }
 function staticCtx(data) {
   return Object.assign({
-    ROOT, SITE_ORIGIN, START_DATE, todayIso: todayEtIso(),
+    ROOT, SITE_ORIGIN, START_DATE, LAUNCH_DATE, TEST_PHASE, todayIso: todayEtIso(),
     findPhoto, relUrl, publicVideoUrl, videoEmbed, longDate, htmlEscape, normalizeDate,
   }, data);
 }
@@ -3376,6 +3417,19 @@ async function main() {
     throw new Error('Site State must contain one explicit valid start_date.');
   }
   START_DATE = siteState.start_date;
+  LAUNCH_DATE = START_DATE;
+  {
+    const testStart = isRealIsoDate(siteState.test_start_date) ? siteState.test_start_date : TEST_START_FALLBACK;
+    const today = todayEtIso();
+    TEST_PHASE = String(siteState.test_mode || '').toLowerCase() !== 'off'
+      && testStart < LAUNCH_DATE && testStart <= today && today < LAUNCH_DATE;
+    if (TEST_PHASE) {
+      START_DATE = testStart;
+      TEST_SPAN = Math.round((Date.parse(`${LAUNCH_DATE}T12:00:00Z`) - Date.parse(`${testStart}T12:00:00Z`)) / 86400000);
+      TEST_STREAM_ID = ytIdOf(siteState.test_stream_url) || ytIdOf(process.env.YT_LIVE_VIDEO_ID) || ytIdOf(TEST_STREAM_FALLBACK);
+      console.warn(`TESTING PHASE: record runs from ${testStart} (T-${TEST_SPAN}); official Day 1 = ${LAUNCH_DATE}.`);
+    }
+  }
   /* Evening Supervision record (§3.4): one row per scheduled night the record
      has ruled on — COMPLETED / MISSED / EXCEPTION · reason. */
   const supervisionColumns = ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'];
@@ -3669,7 +3723,9 @@ async function main() {
   confirmations.sort((a, b) => a.date.localeCompare(b.date));
   /* agreement_edition asserts activation and therefore requires a complete,
      exact tuple; only a deliberately cleared edition may publish inactive. */
-  const agreementGate = agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
+  const agreementGate = TEST_PHASE
+    ? { active: true, effectiveDate: START_DATE, activationTupleComplete: false, reviewedConfirmationFingerprint: '' }
+    : agreementExecutionGate(siteState, confirmations, START_DATE, todayEtIso());
   const agreementExecutionActive = agreementGate.active;
   const agreementEffectiveDate = agreementGate.effectiveDate;
   const reviewedConfirmationFingerprint = agreementGate.reviewedConfirmationFingerprint;
@@ -3679,6 +3735,7 @@ async function main() {
     ? violations.filter((entry) => entry.state && entry.eventVerifiedAt
       && agreementAppliesOn(entry.date, true, agreementEffectiveDate))
     : [];
+  if (TEST_PHASE) violations = violations.map((v) => ({ ...v, what: `TEST · ${v.what}` }));
   assertUniqueViolationIdentities(violations);
   const publicSupervisionUrlsEnabled = agreementExecutionActive
     && process.env.PUBLIC_SUPERVISION_URLS_ENABLED === 'true';

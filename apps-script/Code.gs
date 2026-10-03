@@ -31,7 +31,8 @@ var CONFIG = {
 
 var AP_EMAIL = 'ap@michealrayberry.com';
 var MRB_EMAIL = 'contact@michealrayberry.com';
-var PROJECT_START_FALLBACK = '2026-08-31';
+var PROJECT_START_FALLBACK = '2026-10-11';
+var TEST_START_FALLBACK = '2026-10-03';
 var AGREEMENT_EDITION = 2;
 /* Public supervision video switch. ON by user ruling, Oct 3 2026: /live/ embeds
    the YouTube live stream during a confirmed session and the homepage carries
@@ -41,7 +42,7 @@ var PUBLIC_SUPERVISION_VIDEO_ENABLED = true;
 /* Day 1 of the CURRENT attempt. The Site State key `start_date` overrides the
    fallback (cached 5 min), so a restart is ONE sheet edit — script, publisher,
    and SPA all read the same cell. */
-var PROJECT_START = (function () {
+var PROJECT_LAUNCH = (function () {
   try {
     var c = CacheService.getScriptCache().get('mrb_start_date');
     if (c) return c;
@@ -59,6 +60,48 @@ var PROJECT_START = (function () {
   } catch (e) {}
   return PROJECT_START_FALLBACK;
 })();
+/* Testing phase (Oct 2026). While today < start_date (official Day 1) and
+   Site State test_mode is not "off", the system runs from test_start_date as
+   if the agreement were active: checks run, violations are declared, emails
+   are sent with a [TEST] prefix and T-n day labels. It ends by itself on the
+   launch date — PROJECT_START becomes the official Day 1 and every earlier row
+   falls outside the agreement period (never counted, never published). */
+var TEST_STATE = (function () {
+  var out = { mode: '', start: TEST_START_FALLBACK };
+  try {
+    var c = CacheService.getScriptCache().get('mrb_test_state');
+    if (c) return JSON.parse(c);
+    var sh = ssReadOnly().getSheetByName('Site State');
+    if (sh) {
+      var vals = sh.getDataRange().getValues();
+      for (var i = 1; i < vals.length; i++) {
+        var k = String(vals[i][0]).trim(), v = vals[i][1];
+        var s = v instanceof Date ? Utilities.formatDate(v, 'America/New_York', 'yyyy-MM-dd') : String(v || '').trim();
+        if (k === 'test_mode') out.mode = s.toLowerCase();
+        if (k === 'test_start_date' && /^\d{4}-\d{2}-\d{2}$/.test(s)) out.start = s;
+      }
+    }
+    CacheService.getScriptCache().put('mrb_test_state', JSON.stringify(out), 300);
+  } catch (e) {}
+  return out;
+})();
+function testPhaseActive(today) {
+  today = today || Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
+  return TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
+    TEST_STATE.start <= today && today < PROJECT_LAUNCH;
+}
+var TEST_PHASE = testPhaseActive();
+var PROJECT_START = TEST_PHASE ? TEST_STATE.start : PROJECT_LAUNCH;
+var TEST_SPAN = Math.round((new Date(PROJECT_LAUNCH) - new Date(TEST_STATE.start)) / 864e5);
+function testLabels(text) {
+  if (!TEST_PHASE) return text;
+  return String(text).replace(/\b(Day|DAY) (\d{1,3})\b/g, function (m, w, d) {
+    var n = Number(d);
+    if (n < 1 || n > TEST_SPAN) return m;
+    var t = 'T-' + (TEST_SPAN - n + 1);
+    return w === 'DAY' ? t.toUpperCase() : t;
+  });
+}
 var WEIGHT_AUTO_START = '2026-07-30'; // date the scale began writing weights
 
 /* Tabs, in creation order. The headers are the contract between this
@@ -3954,6 +3997,15 @@ function agreementExecutionState() {
     out.effectiveDate = [out.projectStart, out.mrbSignatureDate, out.apSignatureDate, out.consentDate, out.confirmationReviewDate]
       .sort().pop();
   }
+  if (testPhaseActive(out.today)) {
+    out.test = true;
+    out.launchDate = PROJECT_LAUNCH;
+    out.projectStart = TEST_STATE.start;
+    out.effectiveDate = TEST_STATE.start;
+    out.missing = [];
+    out.active = !out.error;
+    return out;
+  }
   out.active = !out.error && !!out.effectiveDate && out.effectiveDate <= out.today && out.missing.length === 0;
   return out;
 }
@@ -6172,6 +6224,11 @@ function apSign() {
 function sendMail(to, subject, body) {
   try {
     if (MailApp.getRemainingDailyQuota() < 2) { Logger.log('MAIL QUOTA EXHAUSTED — not sent: ' + subject); return false; }
+    if (TEST_PHASE) {
+      subject = '[TEST] ' + testLabels(subject);
+      body = testLabels(body) + '\n\n— Testing phase. The official record begins ' + PROJECT_LAUNCH +
+        '. Entries dated before then are test entries and leave the public record at launch.';
+    }
     MailApp.sendEmail(to, subject, body);
     return true;
   } catch (e) {
