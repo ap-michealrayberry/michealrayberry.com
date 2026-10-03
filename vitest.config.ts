@@ -22,6 +22,8 @@ export default defineConfig(async () => {
                 SHEETS_MIRROR: 'off',
                 SHEETS_FEEDS: '{}',
                 IMAGE_TRANSFORMS: 'off',
+                ATTEST_HMAC_KEY: 'test-attestation-key',
+                STREAM_API_TOKEN: 'test-stream-token',
               },
             },
           })],

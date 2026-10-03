@@ -40,7 +40,7 @@
       <main class="lock-main">
         <form class="panel lock-panel" id="lock-form" autocomplete="off">
           <h1 class="lock-title">Recording Assistant</h1>
-          <p class="settings-note">The capture instrument opens only with both keys: the device key held by the participant and the unlock code issued by the Accountability Partner. Both are checked by the record server.</p>
+          <p class="settings-note">Sign-in is handled by Cloudflare Access. Reload the page to continue.</p>
           <label class="field">
             <span>Device key (participant)</span>
             <input type="password" id="lock-device-key" class="mono" inputmode="text" autocomplete="off" />
@@ -64,7 +64,7 @@
           <div class="name">MICHEAL RAY BERRY</div>
           <div class="tagline">PUBLIC ACCOUNTABILITY PROJECT</div>
         </div>
-        <button type="button" id="btn-lock" class="site-header-right mono lock-btn" title="Lock the instrument">RECORD · LOCK</button>
+        <button type="button" id="btn-lock" class="site-header-right mono lock-btn" title="Sign out of the Recording Assistant">RECORD · SIGN OUT</button>
       </header>
 
       <main class="home-main">
@@ -102,7 +102,7 @@
         <section class="chooser" aria-label="Sessions">
           <h2 class="chooser-heading">Sessions</h2>
           <p class="chooser-intro">One instrument. Every session. Shared camera, overlay, monitor, voice, hashing, and upload — only the script and filing destination differ.</p>
-          <p class="chooser-intro" style="color:#6B6A64;font-size:12.5px">Visitors: this is the official capture instrument behind the record. Filing requires the device key issued to Micheal, checked server-side on every action. Without verified access, operative sessions stay unavailable; the separate demonstration can be opened deliberately and reaches no record. The standard it enforces is documented at <a href="/positions/" style="color:inherit">michealrayberry.com/positions</a>.</p>
+          <p class="chooser-intro" style="color:#6B6A64;font-size:12.5px">Visitors: this is the official capture instrument behind the record. Filing requires Micheal's sign-in, checked server-side on every action. Without verified access, operative sessions stay unavailable; the separate demonstration can be opened deliberately and reaches no record. The standard it enforces is documented at <a href="/positions/" style="color:inherit">michealrayberry.com/positions</a>.</p>
 
           <button type="button" class="session-card" data-session="daily" id="card-daily">
             <div class="session-card-top">
@@ -126,6 +126,14 @@
               <span class="session-when mono">Mondays if active</span>
             </div>
             <p class="session-desc">The proposed weekly review reads the week from the record to camera. It is required only while Edition 2 execution is verified.</p>
+          </button>
+
+          <button type="button" class="session-card" data-session="milestone" id="card-milestone">
+            <div class="session-card-top">
+              <span class="session-name">Milestone</span>
+              <span class="session-when mono">320 · 300 · 275 · 250 · 225 · 200</span>
+            </div>
+            <p class="session-desc">Verification video after a scale reading at or below a threshold. Official only after Accountability Partner review.</p>
           </button>
 
           <button type="button" class="session-card" data-session="confirmation" id="card-confirmation">
@@ -152,13 +160,6 @@
             <p class="session-desc">Explainer of the standard. Marked DEMONSTRATION · NOT A SESSION. Answers no violation.</p>
           </button>
 
-          <a class="session-card" id="card-file" href="file/">
-            <div class="session-card-top">
-              <span class="session-name">File</span>
-              <span class="session-when mono">After the take</span>
-            </div>
-            <p class="session-desc">YouTube title, description, and link. Latest daily take overwrites. Closed after 10 PM ET and for any day that is not today.</p>
-          </a>
         </section>
 
         <section class="settings-panel panel" id="settings-panel">
@@ -166,11 +167,11 @@
             Device configuration
           </button>
           <div id="settings-body" class="settings-body" hidden>
-            <label class="field">
+            <label class="field" hidden>
               <span>Device key</span>
               <input type="password" id="input-device-key" class="mono" autocomplete="off" placeholder="mrb_packet_key" />
             </label>
-            <label class="field">
+            <label class="field" hidden>
               <span>Apps Script exec URL</span>
               <input type="url" id="input-exec-url" class="mono" placeholder="https://script.google.com/…/exec" />
             </label>

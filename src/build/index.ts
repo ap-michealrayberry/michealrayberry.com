@@ -170,3 +170,16 @@ export async function runBuild(env: Env, reason: string, now = new Date()): Prom
     await releaseLease(env.DB);
   }
 }
+
+/** Rebuild after a filing. A build already running leaves a note; whoever finishes next builds once more. */
+export async function buildSoon(env: Env, reason: string): Promise<void> {
+  const first = await runBuild(env, reason);
+  if (!first.built) {
+    await env.CACHE.put('build:again', reason, { expirationTtl: 3600 });
+    return;
+  }
+  if (await env.CACHE.get('build:again')) {
+    await env.CACHE.delete('build:again');
+    await runBuild(env, 'queued');
+  }
+}

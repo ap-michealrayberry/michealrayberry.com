@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "tsc --noEmit && vitest run",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --local-upstream localhost:8787",
     "types": "wrangler types --strict-vars=false",
     "db:migrate:local": "wrangler d1 migrations apply mrb-record --local",
     "db:migrate:remote": "wrangler d1 migrations apply mrb-record --remote",

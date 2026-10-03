@@ -1,5 +1,5 @@
 /* MRB Recording Assistant — minimal offline shell for PWA install */
-var CACHE = "mrb-record-v3";
+var CACHE = "mrb-record-v4";
 var ASSETS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest"];
 
 self.addEventListener("install", function (event) {
