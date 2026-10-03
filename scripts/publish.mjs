@@ -201,7 +201,13 @@ function validateTable(rows, expected, label) {
     const choices = Array.isArray(name) ? name : [name];
     return choices.map(normalizedHeader).includes(actual[index]);
   });
-  if (!ok) throw new Error(`${label} schema mismatch; expected ${expected.map((v) => Array.isArray(v) ? v.join('|') : v).join(', ')}`);
+  if (!ok) {
+    const raw = String((rows[0] || [])[0] || '');
+    const got = /^\s*<(?:!doctype|html)/i.test(raw)
+      ? 'an HTML page (the feed URL is not returning CSV — check it is the published CSV link, not a sign-in or sheet view)'
+      : `${actual.length} column(s): ${actual.slice(0, 15).join(', ').slice(0, 300) || '(empty)'}`;
+    throw new Error(`${label} schema mismatch; expected ${expected.map((v) => Array.isArray(v) ? v.join('|') : v).join(', ')}; received ${got}`);
+  }
   for (let index = 1; index < rows.length; index++) {
     if (rows[index].length !== expected.length) {
       throw new Error(`${label} row ${index + 1} has ${rows[index].length} columns; expected exactly ${expected.length}.`);
@@ -561,7 +567,9 @@ async function fetchText(url, optional = false) {
       signal: AbortSignal.timeout(30000),
     });
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return await response.text();
+    const body = await response.text();
+    if (/^\s*<(?:!doctype|html)/i.test(body)) console.warn(`Record feed returned HTML instead of CSV (content-type: ${response.headers.get('content-type') || 'unknown'}).`);
+    return body;
   } catch (error) {
     if (optional) {
       console.warn(`Optional record feed fetch failed: ${error.message}`);
