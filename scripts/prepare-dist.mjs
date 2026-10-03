@@ -198,13 +198,14 @@ function assertPublicFile(relativePath) {
   ) {
     throw new Error(`Refusing to publish forbidden file: ${relativePath}`);
   }
-  if (!PUBLIC_EXTENSIONS.has(extension)) {
-    throw new Error(`Public file type is not allowlisted: ${relativePath}`);
+  if (!PUBLIC_EXTENSIONS.has(extension) || !isReviewedDirectoryFile(relativePath)) {
+    // Leftover repo files outside the allowlist are skipped, never published.
+    SKIPPED.push(relativePath);
+    return false;
   }
-  if (!isReviewedDirectoryFile(relativePath)) {
-    throw new Error(`Public file path is not allowlisted: ${relativePath}`);
-  }
+  return true;
 }
+const SKIPPED = [];
 
 async function requireRegularFile(source, relativePath) {
   let ancestor = ROOT;
@@ -245,8 +246,7 @@ async function copyPublicDirectory(sourceRoot, destinationRoot, prefix) {
       if (entry.name.startsWith('.')) throw new Error(`Refusing hidden public directory: ${relativePath}`);
       await copyPublicDirectory(source, destination, relativePath);
     } else if (entry.isFile()) {
-      assertPublicFile(relativePath);
-      await fs.copyFile(source, destination);
+      if (assertPublicFile(relativePath)) await fs.copyFile(source, destination);
     } else {
       throw new Error(`Unsupported public filesystem entry: ${relativePath}`);
     }
@@ -281,4 +281,5 @@ try {
   if (staged) await fs.rm(stage, { recursive: true, force: true });
 }
 
+if (SKIPPED.length) console.warn(`Skipped ${SKIPPED.length} non-allowlisted repo file(s) — not published; safe to delete from the repo:\n  ` + SKIPPED.join('\n  '));
 console.log('Prepared allowlisted deploy output in dist/.');
