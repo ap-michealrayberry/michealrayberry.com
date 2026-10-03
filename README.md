@@ -11,7 +11,6 @@ may be inferred from the deployment itself.
 
 ## Authoritative current state
 
-
 `project-config-v2.json` is the reviewed Edition 2 source: official Day 1 October 11, 2026, declared baseline 340.0 lb, goal 200.0 lb, and 28 consecutive days at goal. Keep the signed edition and this config aligned. After a reviewed change, run `npm run sync-config`; CI refuses mismatched generated server/assistant facts. Site State dates must match the versioned config.
 
 Public prelaunch testing remains enabled from October 3 through October 10. Test evidence and AP-reviewed outcomes remain at `/testing/` after launch and are excluded from official progress. A test gate runs simulated requirements; it does not verify signatures or consent. Keep test rows and published derivative assets in the source feeds so the archive can be rebuilt.
@@ -37,6 +36,16 @@ Public prelaunch testing remains enabled from October 3 through October 10. Test
   `TWITCH_CHANNEL` (default michealrayberry) and `TWITCH_PARENTS` (extra
   hostnames, comma-separated, e.g. the *.pages.dev preview). YouTube stays the
   archive for recorded sessions.
+
+## October 3 design and content update
+
+The full project includes the earlier Cloudflare, security, form, configuration, public testing, and livestream repairs plus the refreshed public design. The homepage separates today’s documentation from corrections owed and tonight’s supervision. It shows the latest dated record, weekly summary, weight trend, completed corrections, a configured introduction recording, and clear watch/follow/report actions.
+
+The five main sections are Record, Live, Progress, Rules, and Participate. `scripts/public-design.mjs` owns the shared navigation and responsive styles; the footer keeps the detailed standards, archives, and participation pages easy to find. `site.template.html` remains the source for the homepage and core record pages. The existing project facts and agreement requirements are unchanged.
+
+The homepage introduction uses the existing participation statement. To show Micheal’s actual introduction recording, set `intro_video_url` in the reviewed Site State feed to its approved public URL. No recording or new photograph has been fabricated. The existing uniform photograph links to the full image.
+
+This package contains the complete build project: source, public assets, Cloudflare Functions, the Apps Script backend, tests, and deployment instructions. Production `dist/` is regenerated from the existing private reviewed feed configuration; temporary synthetic test output is excluded from the delivered source package. Upload the project files to the existing repository and keep the configured Cloudflare build command `npm run build`.
 
 ## Non-negotiable privacy boundaries
 
@@ -426,3 +435,13 @@ must complete and privately document all of these actions:
   sharing or API behavior.
 - Regenerate or explicitly migrate any older public photo that fails the strict
   JPEG verifier before relying on automatic mirroring.
+
+## Final local verification — October 3, 2026
+
+- All 35 generated public-test pages passed at 1440, 390, and 320 px: 105 layout checks, no unresolved template text, no JavaScript errors, and no page-wide horizontal overflow.
+- Six browser scenarios passed: scheduled, awaiting stream confirmation, live, completed, agreement inactive, and stale status. Each retained exactly one public Twitch player.
+- Syntax/configuration/bundle checks, publisher/output audits, Apps Script checks, capture-recovery tests, all 12 Function tests, and release integration checks passed.
+- The release test verifies independent daily documentation status with an outstanding correction, shared five-section navigation, public test evidence retention, official/test separation, signed and unsigned launch behavior, staged assets, and mismatched-date rejection.
+- Dependency audit reported zero vulnerabilities. Cloudflare Functions compilation passed for the included server handlers.
+
+Browser verification used isolated fixtures, a stubbed Turnstile widget, and blocked external services. Real email delivery, Twitch playback on serving domains, Access account policy, camera/microphone permission, and operational uploads still require the configured deployment checks in `DEPLOYMENT.md`.

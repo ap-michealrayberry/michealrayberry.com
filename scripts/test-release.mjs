@@ -57,6 +57,15 @@ try {
  assert.ok((await read('live/index.html')).includes('player.twitch.tv/?channel=michealrayberry'));
  assert.ok((await read('agreement/index.html')).includes('TEST outcomes do not verify Edition 2 execution'));
  const priorTest = await readJson('data/testing.json');
+ const home = await read('index.html');
+ const documentationCard = home.match(/<section[^>]*aria-labelledby="today-documentation-heading"[\s\S]*?<\/section>/)?.[0];
+ assert.ok(documentationCard?.includes('Documentation filed'), 'Today must show filed documentation despite an outstanding correction');
+ assert.ok(!documentationCard.includes('One unresolved violation'));
+ assert.ok(home.includes('Level 1 corner time') && home.includes('Corrections still owed'));
+ assert.ok(home.includes('Watch live') && home.includes('Weekly summary') && home.includes('/live.js'));
+ const primaryNavigation = home.match(/<nav class="sitenav"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+ assert.equal((primaryNavigation.match(/<a /g) || []).length, 5);
+ assert.ok(primaryNavigation.includes('Participate') && primaryNavigation.includes('Rules'));
  assert.equal(priorTest.violations.length,1);
  assert.ok(!(await read('agreement/index.html')).includes('Agreement execution is recorded as verified effective'));
  assert.equal(priorTest.records.length,1); assert.ok(Object.values(priorTest.records[0].photos).every(Boolean));

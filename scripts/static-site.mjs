@@ -10,6 +10,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { PROJECT } from './project-config.mjs';
+import { publicNavigation } from './public-design.mjs';
 
 const VIEWS = [
   { page: 'home', slug: '', label: 'Home', title: `Micheal Ray Berry — public accountability, ${PROJECT.startWeightLb} to ${PROJECT.goalWeightLb}`,
@@ -272,9 +273,34 @@ function computeValues(ctx) {
 
   const todayRow = byDate[todayIso];
   const packetDone = !!(todayRow && !Number.isNaN(todayRow.weight) && hasPublishedPhotos(todayRow) && todayRow.video);
+  const photoCount = todayRow ? ['front','left','rear','right'].filter(angle => photoUrl(todayRow, angle)).length : 0;
+  const latestRecord = all.slice().sort((a,b) => a.date.localeCompare(b.date)).at(-1);
+  const pendingCorrections = publicViolations.filter(v => v.state === 'corrected').length;
+  const resolvedCorrections = publicViolations.filter(v => v.state === 'resolved').length;
+  const completeDocumentation = all.filter(hasCompletePublicPacket).length;
+  const recordHref = r => '/daily/' + r.date + '-day-' + String(dayOf(r.date)).padStart(3, '0') + '/';
+  const deadlinePassed = ctx.buildInstantIso && Number(new Intl.DateTimeFormat('en-US', {timeZone:'America/New_York',hour:'numeric',hourCycle:'h23'}).format(new Date(ctx.buildInstantIso))) >= 22;
   const openCount = openList.length;
   const ms = MILESTONES.filter((m) => m < current);
   return {
+    publicNavigation: publicNavigation(),
+    recordScopeLabel: TEST_PHASE ? 'Test' : 'Project',
+    progressScopeLabel: TEST_PHASE ? 'Test weight trend' : 'Weight progress',
+    publishedAtLabel: esc(new Date(ctx.buildInstantIso || todayIso + 'T12:00:00Z').toLocaleString('en-US', { timeZone:'America/New_York', month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short' })),
+    todayWeightStatus: todayRow && Number.isFinite(todayRow.weight) ? 'Filed' : 'Not filed',
+    todayPhotoStatus: photoCount + ' / 4 filed',
+    todayVideoStatus: todayRow && todayRow.video ? 'Filed' : 'Not filed',
+    todayTrackerStatus: todayRow ? 'Filed' : 'Not filed',
+    todayRecordHref: rawDay > 0 ? recordHref({date:todayIso}) : '/daily/',
+    packetStateClass: packetDone ? 'good' : agreementExecuted && deadlinePassed ? 'attention' : '',
+    correctionsStateClass: !agreementExecuted ? '' : pendingCorrections ? '' : 'good',
+    correctionsStatus: !agreementExecuted ? 'Requirements not active' : pendingCorrections ? 'Awaiting Accountability Partner review' : 'No correction outstanding',
+    pendingCorrectionsLabel: pendingCorrections + ' awaiting review',
+    resolvedCorrectionsLabel: resolvedCorrections + ' verified complete',
+    latestRecordLabel: latestRecord ? (TEST_PHASE ? 'Test record · ' : '') + esc(longDate(latestRecord.date)) : 'No dated entry published yet',
+    latestRecordHref: latestRecord ? recordHref(latestRecord) : '/daily/',
+    latestWeekHref: rawDay > 0 ? '/weeks/week-' + String(Math.ceil(rawDay / 7)).padStart(2,'0') + '/' : '/weeks/',
+    completeDocumentationLabel: completeDocumentation + (completeDocumentation === 1 ? ' day with all required documentation filed' : ' days with all required documentation filed'),
     dayNumber,
     dayCounterLabel: TEST_PHASE
       ? 'T-' + Math.round((Date.parse(LAUNCH_DATE + 'T12:00:00Z') - Date.parse(todayIso + 'T12:00:00Z')) / 864e5)
@@ -325,8 +351,8 @@ function computeValues(ctx) {
     deadlineHeading: agreementExecuted ? 'Deadline' : 'Proposed deadline',
     deadlineValue: agreementExecuted ? '10:00 PM ET daily' : '10:00 PM ET if activated',
     complianceLabel: !agreementExecuted ? 'Edition 2 requirements are not active'
-      : openCount > 0 ? (openCount === 1 ? 'One unresolved violation' : openCount + ' unresolved violations')
-        : (rawDay < 1 ? 'Record not yet started' : packetDone ? 'Today’s required media and weight filed' : 'Today’s packet due'),
+      : rawDay < 1 ? 'Record not yet started' : packetDone ? 'Documentation filed'
+      : deadlinePassed ? 'Incomplete at deadline — review pending' : 'Documentation pending',
     todayPacketLabel: !agreementExecuted ? 'No filing is due · execution not verified'
       : rawDay < 1 ? '' : (packetDone ? 'Required media and weight filed · ' : 'Due · ') + todayIso,
     hasOwed: agreementExecuted && !!owedLabel, noOwed: !(agreementExecuted && owedLabel),
@@ -383,7 +409,7 @@ export async function buildStaticSite(ctx) {
 ${FONTS}
 ${helmetStyle}
 <script src="/unsw.js"></script>
-${v.slug === 'live' ? '<script src="/live.js" defer></script>' : ''}
+${v.page === 'home' ? '<script src="/live.js" defer></script>' : ''}
 <script src="/livenav.js" defer></script>
 </head>
 <body>

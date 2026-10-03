@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import { PROJECT } from './project-config.mjs';
 import { projectAssets } from './project-assets.mjs';
 import { testingArchive } from './testing-archive.mjs';
+import { publicNavigation, finishPublicHtml } from './public-design.mjs';
 
 async function requiredRealpath(label, candidate) {
   try {
@@ -354,6 +355,10 @@ async function readMaybe(file) {
 }
 
 async function writeIfChanged(file, data) {
+  if (typeof data === 'string' && /\.html$/i.test(file)) {
+    const current = '/' + path.relative(ROOT, file).split(path.sep).join('/').replace(/index\.html$/, '');
+    data = finishPublicHtml(data, current);
+  }
   if (TEST_PHASE && typeof data === 'string' && /\.html$/i.test(file)) data = applyTestPhase(file, data);
   const next = Buffer.isBuffer(data) ? data : Buffer.from(data);
   const current = await readMaybe(file);
@@ -770,10 +775,10 @@ const RC_CSS = `
 .rc.warn .lamp{background:#8A6A1E}.rc.neutral .lamp{background:#6B6A64}.rc.bad .lamp{background:var(--accent)}.rc.bad .rc-status{color:var(--accent)}
 .rc dl{margin:0;display:grid;grid-template-columns:120px 1fr;gap:5px 14px;font-size:14px;line-height:1.45}
 .rc dl div{display:contents}.rc dt{font:600 11px/1.6 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.rc dd{margin:0}.rc dl div.bad dd{color:var(--accent);font-weight:600}
+.rc dd{margin:0;min-width:0;overflow-wrap:anywhere}.rc dl div.bad dd{color:var(--accent);font-weight:600}
 .rc.compact dl{grid-template-columns:100px 1fr;font-size:13px;gap:3px 12px}
 .rc-next{margin:0;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--muted)}
-@media(max-width:560px){.rc{grid-template-columns:1fr}.rc-photo{aspect-ratio:4/3}.rc-photo img{object-position:50% 20%}.rc-body{padding:14px 16px;gap:8px}.rc-status{font-size:19px}.rc dl{grid-template-columns:1fr;gap:2px 0}.rc dt{margin-top:6px}}
+@media(max-width:560px){.rc,.rc.compact{grid-template-columns:1fr}.rc-photo{aspect-ratio:4/3}.rc-photo img{object-position:50% 20%}.rc-body{padding:14px 16px;gap:8px}.rc-status{font-size:19px}.rc dl,.rc.compact dl{grid-template-columns:1fr;gap:2px 0}.rc dt{margin-top:6px}}
 `;
 function cardCtx(day, opts = {}) {
   const X = CARD_CTX || { rows: [], violations: [], supervision: [], agreementActive: false, agreementEffectiveDate: '' };
@@ -1135,7 +1140,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
     @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}70%{box-shadow:0 0 0 7px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
     @media (prefers-reduced-motion:reduce){.rec-lamp{animation:none}}
     @media(max-width:760px){.sitehead{padding:0 16px}.sitehead-in{align-items:flex-start}.sitenav{width:100%;align-items:stretch;overflow-x:auto;-webkit-overflow-scrolling:touch}.nav-primary,.nav-secondary{flex-wrap:nowrap;justify-content:flex-start;width:max-content;min-width:100%}.sitenav a{min-height:44px;display:inline-flex;align-items:center}.nav-secondary a{min-height:40px}}
-.viewsw{display:inline-flex;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+.viewsw{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
     .viewsw a{padding:11px 16px;text-decoration:none;color:var(--ink)}
     .viewsw a+a{border-left:1px solid var(--ink)}
     .viewsw a[aria-current]{background:var(--ink);color:var(--paper)}
@@ -1177,9 +1182,7 @@ function dailyPage({ record, photos, previous, next, attestation }) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
@@ -1244,7 +1247,7 @@ const PAGE_CSS = `
     @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}70%{box-shadow:0 0 0 7px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
     @media (prefers-reduced-motion:reduce){.rec-lamp{animation:none}}
     @media(max-width:760px){.sitehead{padding:0 16px}.sitehead-in{align-items:flex-start}.sitenav{width:100%;align-items:stretch;overflow-x:auto;-webkit-overflow-scrolling:touch}.nav-primary,.nav-secondary{flex-wrap:nowrap;justify-content:flex-start;width:max-content;min-width:100%}.sitenav a{min-height:44px;display:inline-flex;align-items:center}.nav-secondary a{min-height:40px}}
-.viewsw{display:inline-flex;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+.viewsw{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
     .viewsw a{padding:11px 16px;text-decoration:none;color:var(--ink)}
     .viewsw a+a{border-left:1px solid var(--ink)}
     .viewsw a[aria-current]{background:var(--ink);color:var(--paper)}
@@ -1275,7 +1278,7 @@ const PAGE_CSS = `
     caption{text-align:left;margin:0 0 8px;font:600 12px/1.4 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
     th{text-align:left;background:var(--ink);color:var(--paper);padding:8px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
     td{padding:8px 10px;border-bottom:1px solid var(--rule)}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:24px 0}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px;margin:24px 0}
     .gallery figure{margin:0;border:1px solid var(--ink);background:#fff}.gallery img{display:block;width:100%;height:auto}
     .gallery figcaption{padding:8px 10px;font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
     .pending{border-left:4px solid var(--accent);padding:12px 16px;background:#f1f0ea}
@@ -1353,9 +1356,7 @@ function milestonePage(target, entries) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Micheal Ray Berry</a> / <a href="/milestones/">Milestones</a> / ${target} lb</nav>
@@ -1427,7 +1428,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   const wEvidence = filesPresent >= elapsed && wChain.every((c) => c.v.state === 'open' || c.v.recording);
   const auditHtml = `<section aria-label="Weekly audit" style="border:1px solid #141412;margin:0 0 28px">
     <div style="padding:12px 16px;border-bottom:1px solid #D8D6CF;font:700 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase">Weekly audit · Week ${week}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))">
       ${[['Days with files present', `${filesPresent} of ${elapsed}`], ['Days incomplete', String(Math.max(0, elapsed - filesPresent))],
         ['Supervision', wSup.length ? `${wSup.length - wSupMissed} of ${wSup.length}${wSupMissed ? ' · ' + wSupMissed + ' missed' : ''}` : '—'],
         ['Violations this week', `${wChain.length}${wChain.filter((c) => c.v.state !== 'resolved').length ? ' · ' + wChain.filter((c) => c.v.state !== 'resolved').length + ' open' : ''}`],
@@ -1469,9 +1470,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Micheal Ray Berry</a> / <a href="/weeks/">Weeks</a> / Week ${week}</nav>
@@ -1483,7 +1482,7 @@ function weekPage(week, weekEntries, allEntries, lastWeek) {
   <p class="intro">${htmlEscape(description)}</p>
   ${auditHtml}
   ${weekCards.length ? `<h2 style="font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:8px 0 12px">Report cards \u00B7 ${filesPresent} of ${weekCards.length} days have all listed files present · timing unverified</h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:0 0 32px">${weekCards.join('')}</div>` : ''}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;margin:0 0 32px">${weekCards.join('')}</div>` : ''}
   ${rows ? `<table><caption>Recorded entries for week ${week}</caption><thead><tr><th scope="col">Day</th><th scope="col">Date</th><th scope="col">Weight</th><th scope="col">Note</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="pending">No days currently have all listed files present in this week.</div>'}
   <p>${nav}</p>
   <p><a href="/daily/">Full daily record</a> · <a href="/dashboard/">Weigh-in log</a></p>
@@ -1536,9 +1535,7 @@ function weeksIndexPage(entries, lastDay) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Micheal Ray Berry</a> / Weeks</nav>
@@ -1705,7 +1702,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
     @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}70%{box-shadow:0 0 0 7px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
     @media (prefers-reduced-motion:reduce){.rec-lamp{animation:none}}
     @media(max-width:760px){.sitehead{padding:0 16px}.sitehead-in{align-items:flex-start}.sitenav{width:100%;align-items:stretch;overflow-x:auto;-webkit-overflow-scrolling:touch}.nav-primary,.nav-secondary{flex-wrap:nowrap;justify-content:flex-start;width:max-content;min-width:100%}.sitenav a{min-height:44px;display:inline-flex;align-items:center}.nav-secondary a{min-height:40px}}
-.viewsw{display:inline-flex;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+.viewsw{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
     .viewsw a{padding:11px 16px;text-decoration:none;color:var(--ink)}
     .viewsw a+a{border-left:1px solid var(--ink)}
     .viewsw a[aria-current]{background:var(--ink);color:var(--paper)}
@@ -1730,7 +1727,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
     .eyebrow{font:600 12px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
     h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(2rem,5vw,3.5rem);line-height:1;margin:.35rem 0}
     .intro{max-width:760px}.count{font:600 14px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.08em}
-    ul{list-style:none;padding:0;margin:28px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+    ul{list-style:none;padding:0;margin:28px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:20px}
     .card{border:1px solid var(--ink);background:#fff}.card a{display:block;color:inherit;text-decoration:none}
     .card img{display:block;width:100%;height:auto}
     .card .meta{display:flex;flex-direction:column;gap:2px;padding:10px 12px;font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase}
@@ -1750,9 +1747,7 @@ function dailyIndexPage(entries, dayStates = new Map(), vioByDate = new Map(), a
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <div class="eyebrow">Official public record · MichealRayBerry.com</div>
@@ -1900,7 +1895,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
     @keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}70%{box-shadow:0 0 0 7px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
     @media (prefers-reduced-motion:reduce){.rec-lamp{animation:none}}
     @media(max-width:760px){.sitehead{padding:0 16px}.sitehead-in{align-items:flex-start}.sitenav{width:100%;align-items:stretch;overflow-x:auto;-webkit-overflow-scrolling:touch}.nav-primary,.nav-secondary{flex-wrap:nowrap;justify-content:flex-start;width:max-content;min-width:100%}.sitenav a{min-height:44px;display:inline-flex;align-items:center}.nav-secondary a{min-height:40px}}
-.viewsw{display:inline-flex;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+.viewsw{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--ink);margin:0 0 22px;font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
     .viewsw a{padding:11px 16px;text-decoration:none;color:var(--ink)}
     .viewsw a+a{border-left:1px solid var(--ink)}
     .viewsw a[aria-current]{background:var(--ink);color:var(--paper)}
@@ -1938,9 +1933,7 @@ function noRecordPage({ date, day, previous, next, reason, kind = 'none', photoC
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
   <header>
     <div class="eyebrow"><a href="/">Micheal Ray Berry</a> · Public Accountability Project</div>
@@ -2062,9 +2055,7 @@ function consentPage(confirmations = [], agreementActive = false, effectiveDate 
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
   <header>
     <div class="eyebrow">Consent</div>
@@ -2343,9 +2334,7 @@ function violationPage(v, prev, next) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
   <header>
     <div class="eyebrow">Durable public violation entry</div>
@@ -2509,7 +2498,7 @@ function positionsPage(entries, siteState = {}) {
     .seq{border:1px solid var(--ink);background:var(--paper);padding:18px 20px;margin:22px 0;display:flex;flex-direction:column;gap:8px}
     .seq b{font:700 17px/1.3 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em}
     .seq p{margin:0;font-size:14px;line-height:1.6;color:#3A3935}
-    .views{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;margin:20px 0 10px}
+    .views{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:20px;margin:20px 0 10px}
     .view{border:1px solid var(--ink);display:flex;flex-direction:column;background:var(--paper)}
     .view img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;border-bottom:1px solid var(--ink)}
     .view .ph{width:100%;aspect-ratio:9/16;background:repeating-linear-gradient(45deg,#f6f5f1,#f6f5f1 10px,#eeece6 10px,#eeece6 20px);border-bottom:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font:600 10px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:#6B6A64;text-align:center;padding:0 14px}
@@ -2531,9 +2520,7 @@ function positionsPage(entries, siteState = {}) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
   <header>
     <div class="eyebrow">The documentation standard</div>
@@ -2670,9 +2657,7 @@ function violationsIndexPage(violations) {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
 <header>
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Micheal Ray Berry</a> / Violations</nav>
@@ -2851,7 +2836,7 @@ function partnerPage() {
       <div style="display:flex;flex-direction:column;gap:16px;align-self:start">
         <div style="background:var(--ink);color:var(--paper);padding:24px;display:flex;flex-direction:column;gap:12px">
           <span style="font:600 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8983">The one requirement</span>
-          <span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:32px;text-transform:uppercase;line-height:1">Apply the written requirements exactly</span>
+          <span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(22px,4vw,32px);text-transform:uppercase;line-height:1">Apply the written requirements exactly</span>
         </div>
         <p>Do not waive a requirement because it becomes inconvenient, and do not invent additional requirements. Safety, employment, privacy, and emergency exceptions remain controlling.</p>
         <p>Appointment requires identity verification, references, a written scope, and a trial period. No home address is shared before vetting. Financial or device authority requires a separate, revocable agreement after vetting.</p>
@@ -2898,12 +2883,12 @@ function notifyPage() {
 
 function accountablePage() {
   const canonical = `${SITE_ORIGIN}/accountable/`;
-  const title = 'Hold Me Accountable — Micheal Ray Berry';
+  const title = 'Participate and Hold Me Accountable — Micheal Ray Berry';
   const desc = 'Permission for anyone who knows Micheal Ray Berry to hold him to his published public accountability record: open violations, required corrections, the daily packet, and Evening Supervision.';
   const SAY = [
     ['Your record shows an open violation.', '/violations/'],
     ['Have you completed your required correction?', '/corrections/'],
-    ['Your packet is still incomplete.', '/daily/'],
+    ['Your daily documentation is still incomplete.', '/daily/'],
     ['Aren’t you on supervision tonight?', '/live/'],
     ['Did you post today’s inspection?', '/daily/'],
   ];
@@ -2920,7 +2905,7 @@ function accountablePage() {
       .ha-say q{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.15;quotes:'\\201C' '\\201D'}
       .ha-say span{font:600 12px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
       h2.ha{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:26px;margin:0 0 14px}
-      .ha-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border:1px solid var(--ink)}
+      .ha-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));border:1px solid var(--ink)}
       .ha-grid div{padding:18px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
       .ha-grid div:last-child{border-right:none}
       .ha-grid b{font:700 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
@@ -2929,11 +2914,21 @@ function accountablePage() {
       .ha-no p{margin:0 0 10px;font-size:16px;line-height:1.6}
     </style>
     <p class="ha-eyebrow">Public accountability record · Permission</p>
-    <h1 class="ha-h1">Hold Me Accountable</h1>
+    <h1 class="ha-h1">Participate in the project</h1>
     <p class="ha-lede">If you know Micheal Ray Berry, you have his permission to hold him to this record in ordinary personal settings. Do not involve his employer, coworkers, hotel guests, customers, or unrelated third parties. He published the rules so that the people around him can know exactly what he owes and ask whether he has done it.</p>
     <div class="ha-wrap">
+      <section aria-labelledby="participation-actions">
+        <h2 class="ha" id="participation-actions">Choose how to follow</h2>
+        <div class="home-cards">
+          <div class="home-card"><h2>Watch live</h2><p>Follow the public Twitch stream and check the recorded supervision status.</p><a href="/live/">Watch live →</a></div>
+          <div class="home-card"><h2>Get updates</h2><p>Receive the daily result, published corrections, and weekly recap. Test messages are labeled [TEST].</p><a href="/notify/">Follow by email →</a></div>
+          <div class="home-card"><h2>Report an issue</h2><p>Point out a possible documentation problem or inconsistency. Reports go privately to the Accountability Partner for review.</p><a href="/observer/">Send an Observer note →</a></div>
+        </div>
+        <p style="margin-top:20px;max-width:760px">Visitors may ask about published commitments and submit evidence. The Accountability Partner verifies violations, assigns the written corrections, and confirms completion. Viewer reports do not automatically create a violation or a new requirement.</p>
+        <p><a href="/share/">Share the project</a> · <a href="/partner/">Apply for the Local Accountability Partner role</a> · <a href="/testing/">View public testing</a></p>
+      </section>
       <section>
-        <h2 class="ha">You may say</h2>
+        <h2 class="ha">Hold me accountable: you may say</h2>
         <div class="ha-say">${SAY.map(([q, href]) => `<a href="${href}"><q>${htmlEscape(q)}</q><span>Check ${htmlEscape(href)} →</span></a>`).join('')}</div>
       </section>
       <section>
@@ -2941,7 +2936,7 @@ function accountablePage() {
         <div class="ha-grid">
           <div><b>Owed now</b><p>The homepage shows any open entry and the corner time it requires, with its deadline.</p><p><a href="/">Homepage →</a></p></div>
           <div><b>Violations</b><p>Every declared violation, its status, and the corrective session filed beside it.</p><p><a href="/violations/">Violation log →</a></p></div>
-          <div><b>Today’s packet</b><p>Weight, four photographs, inspection video and tracker, due by 10:00 PM ET.</p><p><a href="/daily/">The Record →</a></p></div>
+          <div><b>Today’s documentation</b><p>Weight, four photographs, inspection video and tracker, due by 10:00 PM ET.</p><p><a href="/daily/">The Record →</a></p></div>
           <div><b>Tonight</b><p>Evening Supervision, 6:00–10:00 PM ET, Sunday–Thursday, live on Twitch.</p><p><a href="/live/">Supervision →</a></p></div>
         </div>
       </section>
@@ -2989,7 +2984,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     ['Dinner is prepared at home', 'Delivery, restaurant takeout, and convenience meals purchased during the period are not permitted.'],
     ['Meal standard', 'A healthy home-cooked meal; yogurt for dessert. Nothing outside the planned meal.'],
     ['Visible areas orderly', 'The monitored living and dining areas are brought to the project\u2019s minimum standard of order before the session begins.'],
-    [agreementActive ? 'Daily packet relationship' : 'Proposed daily packet relationship', agreementActive
+    [agreementActive ? 'Daily documentation' : 'Proposed daily documentation', agreementActive
       ? 'Supervision does not substitute for the Daily Inspection, weigh-in, photographs, or tracker update. The active terms set the packet deadline at 10:00 PM Eastern; current file presence does not prove timeliness.'
       : 'Edition 2 describes a separate Daily Inspection, weigh-in, photograph, and tracker process. No packet or supervision requirement is active while execution remains unverified.'],
     ['Necessary privacy is permitted', 'Bathrooms, changing, sensitive work information, private communications, visitors, and other legitimately private matters remain outside public observation.'],
@@ -3035,7 +3030,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       .lamp{width:12px;height:12px;border-radius:50%;background:#5a5955;display:inline-block;flex-shrink:0}
       .lamp.on{background:#FF6B61;box-shadow:0 0 0 0 rgba(255,107,97,.6);animation:supPulse 1.6s ease-out infinite}
       @keyframes supPulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.6)}70%{box-shadow:0 0 0 10px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
-      .detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;border-top:1px solid #3A3935}
+      .detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:0;border-top:1px solid #3A3935}
       .detail div{padding:12px 14px 12px 0;display:flex;flex-direction:column;gap:4px}
       .detail b{font:600 10px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8983}
       .detail span{font:600 16px/1.3 'IBM Plex Mono',ui-monospace,monospace}
@@ -3079,15 +3074,14 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     <p class="sup-eyebrow">Public Accountability / Evening Supervision</p>
     <h1 class="sup-h1">Evening Supervision</h1>
     <p class="sup-lede">${agreementActive
-      ? 'Under the verified execution state, an explicit schedule row may require a fixed-camera Evening Supervision session on a night preceding a scheduled workday.'
-      : 'Edition 2 proposes fixed-camera Evening Supervision on specified nights, but agreement execution is not verified and the requirement is not active.'} While a session is in progress, the live stream plays on this page.</p>
+      ? TEST_PHASE ? 'Public testing is active. Test sessions exercise the supervision rules without establishing signed agreement execution.' : 'Required Evening Supervision sessions run 6:00–10:00 PM ET on the published schedule. Today’s status and reviewed outcomes appear below.'
+      : 'The livestream is available. Official supervision requirements are not active until the agreement is verified; today’s published status appears below.'} Watch the public Twitch stream here or open it directly on Twitch.</p>
     <div class="sup-wrap">
       ${PROJECT.supervision.publicLiveEnabled && TEST_STREAM_ID ? `<section class="teststream" aria-label="Public livestream">
         <p class="ts-label"><span class="lamp"></span>${TEST_PHASE ? 'Public test stream' : 'Public livestream'} · completion requires AP review</p>
         <figure class="ts-embed"><iframe src="${htmlEscape(TWITCH_EMBED)}" title="Public livestream — Micheal Ray Berry (Twitch)" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe></figure>
         <p class="ts-note">The Twitch player reports whether the channel is broadcasting. Broadcast availability does not verify attendance or completion. Official Day 1 is ${htmlEscape(longDate(LAUNCH_DATE))}. <a href="${TWITCH_URL}" rel="noopener">Open on Twitch</a></p>
       </section>` : ''}
-      <figure class="embed" data-live-embed data-src="${htmlEscape(liveSrc)}" data-fallback="${TWITCH_URL}"></figure>
       <div class="status">
         <div class="line" data-live-status role="status" aria-live="polite"><span class="lamp"></span>CHECKING SCHEDULE…</div>
         <div class="detail" data-live-detail></div>
@@ -3096,7 +3090,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       <h2 class="sup">Evening Supervision</h2>
       <p style="max-width:680px">${agreementActive
         ? 'During an explicitly activated session, normal evening activity continues under observation. Micheal is not required to entertain, interact with viewers, or remain directly in front of the camera continuously; the published rules apply until the period ends.'
-        : 'If the agreement-execution gate is later activated and a session is explicitly scheduled, normal evening activity may continue under the proposed observation rules. There is no active session requirement now.'}</p>
+        : 'When official supervision becomes active, normal evening activity continues under the published rules. Official session requirements are not active now.'}</p>
       <p style="max-width:680px">Scheduled sessions run 6:00–10:00 PM Eastern, Sunday–Thursday, on nights preceding a scheduled workday. The live stream plays on this page while a session is in progress. ${publicUrlsEnabled ? 'Completed sessions may carry an archive link in the record below.' : 'Archive links for completed sessions are not published.'}</p>
 
       <h2 class="sup">${agreementActive ? 'Rules while under supervision' : 'Proposed rules'}</h2>
@@ -3111,7 +3105,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       </div>
 
       <h2 class="sup">Today's schedule status</h2>
-      <p style="max-width:680px">Only today's explicitly recorded state is shown publicly. Future work and supervision dates are not published here. No requirement is shown as active unless the agreement-execution gate is active.</p>
+      <p style="max-width:680px">Today’s recorded supervision status appears below. Future work and supervision dates are not published here. Official requirements begin only after the agreement is verified.</p>
       <div class="sched" data-live-schedule></div>
 
       <h2 class="sup">Authorized exceptions</h2>
@@ -3123,7 +3117,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       <div class="record">${recordRows}</div>
       <p style="margin-top:24px;font-size:14px;color:var(--muted)">${agreementActive
         ? 'An adverse supervision outcome may become a governed violation entry after Accountability Partner review.'
-        : 'No adverse supervision or violation outcome applies while agreement execution remains unverified.'} The process is summarized on <a href="/agreement/">the agreement-status page</a>.</p>
+        : 'Official violation outcomes require a verified agreement. Public test outcomes stay in the test archive.'} The process is summarized on <a href="/agreement/">the agreement-status page</a>.</p>
     </div>`;
   return synPage({ title, desc: description, canonical, body, wide: true });
 }
@@ -3220,9 +3214,7 @@ function cornerTimePage(entries, violations, demoUrl = '') {
 <div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>
   <header>
     <div class="eyebrow">The corrective requirement</div>
@@ -3420,9 +3412,7 @@ const SYN_CSS = `
 const SYN_HEADER = `<div style="background:#141412;color:#FAFAF7;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:flex;gap:10px;align-items:center;padding:7px 32px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:#B3261E;display:inline-block"></span><span>Public accountability record</span></div>
 <div class="sitehead"><div class="sitehead-in">
   <a class="wordmark" href="/"><b>Micheal Ray Berry</b><span>Under public accountability</span></a>
-  <nav class="sitenav" aria-label="Site navigation">
-    <span class="nav-primary"><a href="/daily/">Record</a><a href="/live/" data-live-nav><span data-live-dot></span><span data-live-label>Live</span></a><a href="/violations/">Violations</a><a href="/dashboard/">Progress</a><a href="/agreement/">Agreement</a><a href="/about/">About</a><a href="/uniform/">Uniform</a><a href="/partner/">Partner</a><a class="ap" href="/accountable/">Hold Me Accountable</a></span>
-  </nav>
+  ${publicNavigation()}
 </div></div><script src="/livenav.js" defer></script>`;
 const SYN_FOOTER = `<div class="sitefoot"><div class="sitefoot-in">
     <div class="sitefoot-top">
@@ -3497,7 +3487,7 @@ ${SYN_FOOTER}
 }
 function staticCtx(data) {
   return Object.assign({
-    ROOT, SITE_ORIGIN, START_DATE, LAUNCH_DATE, TEST_PHASE, PROJECT, todayIso: todayEtIso(),
+    ROOT, SITE_ORIGIN, START_DATE, LAUNCH_DATE, TEST_PHASE, PROJECT, todayIso: todayEtIso(), buildInstantIso: buildNow().toISOString(),
     findPhoto, relUrl, publicVideoUrl, videoEmbed, longDate, htmlEscape, normalizeDate,
   }, data);
 }

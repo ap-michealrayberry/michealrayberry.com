@@ -4,7 +4,7 @@
    and the homepage module reads LIVE NOW. A writable schedule row alone is not
    proof of a broadcast. */
 (function () {
-  var TZ = 'America/New_York', START = '2026-09-13', H0 = 18, H1 = 22;
+  var TZ = 'America/New_York', H0 = 18, H1 = 22;
   var FEED = '/data/supervision.json';
   var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var rows = {}, agreementActive = false, publishedAt = 0, feedFailed = false;
@@ -36,7 +36,6 @@
     return Object.prototype.hasOwnProperty.call(r, 'required') && yes(r.required);
   }
   function confirmed(date) { var r = rowOf(date); return !!(r && feedFresh(10 * 60 * 1000) && /^(LIVE|IN PROGRESS)\b/i.test(r.status || '')); }
-  function sessionNo(date) { var n = 0; for (var d = START; d <= date; d = addDays(d, 1)) if (required(d)) n++; return n; }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function label(date) { var a = date.split('-'); return DOW[dowOf(date)].toUpperCase() + ' ' + Number(a[2]); }
   function state() {
@@ -44,7 +43,7 @@
     var windowOpen = required(now.iso) && now.h >= H0 && now.h < H1;
     var live = windowOpen && confirmed(now.iso);
     var remaining = live ? (H1 - now.h) * 3600 - now.m * 60 - now.s : 0;
-    return { now: now, active: live, windowOpen: windowOpen, remaining: remaining, tonight: required(now.iso), exemptTonight: exempt(now.iso), no: sessionNo(now.iso), inactive: !feedFailed && !agreementActive, stale: feedFailed || (agreementActive && !gateCurrent()) };
+    return { now: now, active: live, windowOpen: windowOpen, remaining: remaining, tonight: required(now.iso), exemptTonight: exempt(now.iso), inactive: !feedFailed && !agreementActive, stale: feedFailed || (agreementActive && !gateCurrent()) };
   }
 
   function set(sel, html) {
@@ -57,7 +56,7 @@
       var clock = n.querySelector('[data-live-clock]');
       if (!clock) {
         n.innerHTML =
-          '<div><b>Session</b><span>' + session + '</span></div>' +
+          '<div><b>Date</b><span>' + session + '</span></div>' +
           '<div><b>Scheduled start</b><span>6:00 PM ET</span></div>' +
           '<div><b>Required end</b><span>10:00 PM ET</span></div>' +
           '<div><b>Time remaining</b><span data-live-clock></span></div>' +
@@ -95,17 +94,17 @@
     var st = state();
     var lamp = '<span class="lamp' + (st.active ? ' on' : '') + '"></span>';
     if (st.inactive) {
-      set('[data-live-status]', lamp + 'PROPOSED — NOT ACTIVATED');
+      set('[data-live-status]', lamp + 'OFFICIAL REQUIREMENTS NOT ACTIVE');
       set('[data-live-detail]', '<div><b>Agreement</b><span>Execution is not verified</span></div><div><b>Today</b><span>No active supervision requirement</span></div><div><b>Public video</b><span>Plays here during a live session</span></div>');
       embed(false);
     } else if (st.stale) {
-      set('[data-live-status]', lamp + 'STATUS UNAVAILABLE — STALE PUBLIC FEED');
+      set('[data-live-status]', lamp + 'CURRENT STATUS UNAVAILABLE');
       set('[data-live-detail]', '<div><b>Today</b><span>No current requirement state can be shown</span></div><div><b>Public video</b><span>Plays here during a live session</span></div>');
       embed(false);
     } else if (st.active) {
       set('[data-live-status]', lamp + 'SUPERVISION STATUS — IN PROGRESS');
       var hh = Math.floor(st.remaining / 3600), mm = Math.floor((st.remaining % 3600) / 60), ss = st.remaining % 60;
-      setActiveDetail(pad(st.no).padStart(3, '0'), pad(hh) + ':' + pad(mm) + ':' + pad(ss));
+      setActiveDetail(st.now.iso, pad(hh) + ':' + pad(mm) + ':' + pad(ss));
       embed(true);
     } else if (st.windowOpen) {
       set('[data-live-status]', lamp + 'SCHEDULED WINDOW — STREAM NOT CONFIRMED');
@@ -120,7 +119,7 @@
       embed(false);
     }
     var d = st.now.iso, r = rowOf(d), rowStatus = r ? String(r.status || '') : '';
-    var stat = st.inactive ? 'PROPOSED — NOT ACTIVATED' : st.stale ? 'STATUS UNAVAILABLE' : exempt(d) ? 'EXCEPTION' : required(d) ? 'REQUIRED — 6:00–10:00' : 'NO REQUIREMENT RECORDED';
+    var stat = st.inactive ? 'OFFICIAL REQUIREMENTS NOT ACTIVE' : st.stale ? 'STATUS UNAVAILABLE' : exempt(d) ? 'EXCEPTION' : required(d) ? 'REQUIRED — 6:00–10:00' : 'NO REQUIREMENT RECORDED';
     if (!st.inactive && !st.stale && /^COMPLETED$/i.test(rowStatus.trim())) stat = 'COMPLETED';
     if (!st.inactive && !st.stale && /^MISSED$/i.test(rowStatus.trim())) stat = 'MISSED';
     if (st.active) stat = 'IN PROGRESS';

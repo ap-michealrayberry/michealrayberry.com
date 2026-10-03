@@ -152,8 +152,7 @@
     <div style="display: flex; align-items: center; gap: 10px 28px; flex-wrap: wrap;">
       <span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E; display: inline-block;"></span>
       <span>{{ projectStatusLabel }}</span>
-      <span>Administered by the Accountability Partner</span>
-      <span data-live-key="agreementStatus">{{ agreementStatus }}</span>
+      <span>Reviewed by the Accountability Partner</span>
     </div>
   </div>
 
@@ -164,20 +163,7 @@
         <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1;">Micheal Ray Berry</span>
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #6B6A64;">Under public accountability</span>
       </a>
-      <nav aria-label="Site navigation" style="display: flex; gap: 2px; row-gap: 4px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
-          <sc-if value="{{ inViolation }}" hint-placeholder-val="{{ false }}">
-          <a href="/violations/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: #B3261E; padding: 9px 12px; color: #FFFFFF; margin-right: 6px; text-decoration: none; display: inline-block;" style-hover="background: #8E1E18;">Unresolved violation</a>
-          </sc-if>
-          <a href="/daily/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Record</a>
-          <a href="/live/" data-live-nav style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;"><span data-live-dot style="width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block;"></span><span data-live-label>Live</span></a>
-          <a href="/violations/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Violations</a>
-          <a href="/dashboard/" onClick="{{ goDashboard }}" aria-current="{{ isDashboardNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Progress</a>
-          <a href="/agreement/" onClick="{{ goAgreement }}" aria-current="{{ isAgreementNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Agreement</a>
-          <a href="/about/" onClick="{{ goAbout }}" aria-current="{{ isAboutNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">About</a>
-          <a href="/uniform/" onClick="{{ goUniform }}" aria-current="{{ isUniformNav }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Uniform</a>
-          <a href="/partner/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 9px; color: #141412; text-decoration: none; display: inline-block;" style-hover="color: #B3261E; text-decoration: underline; text-underline-offset: 4px;">Partner</a>
-          <a href="/accountable/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 10px; margin-left: 4px; color: #B3261E; border: 1px solid #B3261E; text-decoration: none; display: inline-block;" style-hover="background: #B3261E; color: #FFFFFF;">Hold Me Accountable</a>
-        </nav>
+      {{ publicNavigation }}
     </div>
   </header>
 
@@ -188,77 +174,75 @@
   <!-- ==================== HOME ==================== -->
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div data-screen-label="Home">
-    <section style="border-bottom: 1px solid #141412; padding: 48px 32px 44px;">
-      <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px); gap: 48px; align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: 28px; min-width: 0;">
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">Public accountability record</span>
-            <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 80px); line-height: 0.93; text-transform: uppercase; margin: 0; max-width: 820px; text-wrap: balance;">Micheal Ray Berry is under public accountability</h1>
-            <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: #3A3935; line-height: 1.6;">Documented daily under his real name · Publicly supervised 6–10 PM ET, Sunday–Thursday</p>
+    <section class="home-section">
+      <div class="home-wrap">
+        <div class="home-hero">
+          <div>
+            <p class="home-eyebrow">Public Accountability Record</p>
+            <h1 class="home-title">Micheal Ray Berry</h1>
+            <p class="home-lede">Daily documentation. Public supervision. Published review by an Accountability Partner.</p>
+            <p class="home-note">I chose to make this record public so the people following it can see whether I meet the commitments I made. <a href="/about/">Why this is public →</a></p>
+            <div class="home-actions"><a class="home-button primary" href="/live/">Watch live</a><a class="home-button" href="/notify/">Get updates</a><a class="home-button" href="/observer/">Report an issue</a></div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); border: 1px solid #141412;">
-            <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Day</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;">{{ dayCounterLabel }}</span></div>
-            <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Current · lb</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;"><span data-live-key="currentLabel">{{ currentLabel }}</span></span></div>
-            <div style="padding: 16px; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 6px; background: #FBF1F0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #B3261E;">{{ openCountHeading }}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600; color: #B3261E;"><span data-live-key="openCountLabel">{{ openCountLabel }}</span></span></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Declared start · lb</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: clamp(22px, 3vw, 34px); font-weight: 600;">{{ startWeight }}</span></div>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-            <section data-sup-module aria-label="Evening Supervision" style="border: 1px solid #141412; background: #FFFFFF; display: flex; flex-direction: column;">
-              <div data-sup-head style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 11px 14px; border-bottom: 1px solid #D8D6CF;">
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Evening Supervision</span>
-                <span role="status" aria-live="polite" style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;"><span data-sup-dot style="display: none; width: 9px; height: 9px; border-radius: 50%; background: #B3261E;"></span><span data-sup-label>Checking status</span></span>
-              </div>
-              <div style="padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
-                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.04em; color: #3A3935;">6:00–10:00 PM ET · Sunday–Thursday · live on Twitch</span>
-                <p style="margin: 0; font-size: 16px; line-height: 1.55; text-wrap: pretty;">During Evening Supervision, Micheal remains publicly observable during the scheduled session under the project’s prescribed uniform and conduct requirements.</p>
-                <span data-sup-when style="display: none; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;"></span>
-                <a data-sup-action href="/live/" style="margin-top: auto; align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #141412;">Supervision status →</a>
-              </div>
-            </section>
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-              <div style="border: 1px solid #141412;">
-                <div style="padding: 11px 14px; border-bottom: 1px solid #D8D6CF; display: flex; justify-content: space-between; gap: 12px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Today’s packet</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;">{{ deadlineValue }}</span></div>
-                <div style="padding: 14px; display: flex; flex-direction: column; gap: 6px;">
-                  <span style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15;"><span data-live-key="complianceLabel">{{ complianceLabel }}</span></span>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3A3935;"><span data-live-key="todayPacketLabel">{{ todayPacketLabel }}</span></span>
-                  <span style="font-size: 14px; color: #3A3935;">Weigh-in · inspection video · four photographs · tracker</span>
-                </div>
-              </div>
-              <div style="border: 1px solid #141412; flex: 1;">
-                <div style="padding: 11px 14px; border-bottom: 1px solid #D8D6CF; display: flex; justify-content: space-between; gap: 12px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Violation log</span><a href="/violations/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #141412;">All entries →</a></div>
-                <div style="padding: 14px; display: flex; flex-direction: column; gap: 6px;">
-                  <sc-if value="{{ hasOwed }}" hint-placeholder-val="{{ false }}">
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #B3261E;">Owed now</span>
-                  <a href="{{ owedHref }}" style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15; color: #B3261E; text-decoration: none;">{{ owedLabel }}</a>
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;">Due by {{ owedDue }} · recorded and published</span>
-                  </sc-if>
-                  <sc-if value="{{ noOwed }}" hint-placeholder-val="{{ true }}">
-                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;">Nothing owed</span>
-                  </sc-if>
-                  <span style="font-size: 15px; line-height: 1.5;">Possible misses are flagged automatically. After AP verification, corrections are assigned at 10, 20 or 30 minutes by level and published beside the entry within 72 hours.</span>
-                  <div style="display: flex; gap: 8px 18px; flex-wrap: wrap;"><a href="/corrections/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Corrective sessions →</a><a href="/accountable/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #B3261E;">Hold me accountable →</a><a href="/notify/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Get notified →</a></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <figure class="home-portrait">
+            <a href="/photos/official/micheal-ray-berry-official-front-v2.jpg" aria-label="View Micheal Ray Berry’s full project photograph"><img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width:700px) 90px, 220px" width="3189" height="4933" fetchpriority="high" decoding="async" alt="Micheal Ray Berry in the black project uniform, hands behind head."></a>
+            <figcaption>Project photograph · routine uniform<br><a href="/uniform/">Uniform standard →</a></figcaption>
+          </figure>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" fetchpriority="high" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start {{ startWeight }}." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6B6A64; line-height: 1.6;">Official photograph · project uniform</span>
-          <div style="margin-top: 14px; border-top: 1px solid #141412; padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6A64;">Progress · {{ startLabel }} → {{ goalLabel }} lb</span>
-            <div style="height: 10px; background: #E5E3DC; position: relative;"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ pctWidth }}; background: #141412;"></div></div>
-            <div style="display: flex; justify-content: space-between; gap: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><span>{{ lostLabel }}</span><span>Next threshold {{ nextMilestone }}</span></div>
-            <a href="/dashboard/" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #141412;">Progress →</a>
-          </div>
+        <div class="home-stats" aria-label="{{ recordScopeLabel }} figures">
+          <div class="home-stat"><span class="home-label">{{ recordScopeLabel }} day</span><strong>{{ dayCounterLabel }}</strong></div>
+          <div class="home-stat"><span class="home-label">Latest weight · lb</span><strong>{{ currentLabel }}</strong></div>
+          <div class="home-stat"><span class="home-label">Goal · lb</span><strong>{{ goalLabel }}</strong></div>
+          <div class="home-stat"><span class="home-label">{{ openCountHeading }}</span><strong>{{ openCountLabel }}</strong></div>
+        </div>
+        <p class="home-update">Record published {{ publishedAtLabel }} · <a href="/testing/">Public test archive</a></p>
+      </div>
+    </section>
+    <section class="home-section">
+      <div class="home-wrap">
+        <h2>Today’s record</h2>
+        <div class="home-cards">
+          <section class="home-card" aria-labelledby="today-documentation-heading">
+            <h2 id="today-documentation-heading">Today’s documentation</h2>
+            <p class="home-state {{ packetStateClass }}" data-live-key="complianceLabel">{{ complianceLabel }}</p>
+            <p class="home-note">{{ todayPacketLabel }}</p>
+            <ul class="home-checks"><li><span>Recorded weigh-in</span><span>{{ todayWeightStatus }}</span></li><li><span>Four photographs</span><span>{{ todayPhotoStatus }}</span></li><li><span>Inspection video</span><span>{{ todayVideoStatus }}</span></li><li><span>Tracker entry</span><span>{{ todayTrackerStatus }}</span></li></ul>
+            <p class="home-note">Daily deadline: {{ deadlineValue }}. Filing records receipt; the Accountability Partner reviews compliance.</p>
+            <a href="{{ todayRecordHref }}">View today’s documentation →</a>
+          </section>
+          <section class="home-card" aria-labelledby="corrections-heading">
+            <h2 id="corrections-heading">Corrections still owed</h2>
+            <sc-if value="{{ hasOwed }}"><p class="home-state attention"><a href="{{ owedHref }}">{{ owedLabel }}</a></p><p>Due by {{ owedDue }}. The entry remains open until its correction is verified.</p></sc-if>
+            <sc-if value="{{ noOwed }}"><p class="home-state {{ correctionsStateClass }}">{{ correctionsStatus }}</p></sc-if>
+            <p class="home-note">{{ pendingCorrectionsLabel }} · {{ resolvedCorrectionsLabel }}</p>
+            <p class="home-note">Possible misses are reviewed before a correction is assigned. Completed corrections stay in the history.</p>
+            <a href="/violations/">View the violation log →</a>
+          </section>
+          <section class="home-card" data-sup-module aria-label="Tonight’s supervision">
+            <div data-sup-head><h2>Tonight’s supervision</h2><p class="home-state" role="status" aria-live="polite"><span data-sup-dot style="display:none" aria-hidden="true"></span><span data-sup-label>Checking today’s status</span></p></div>
+            <p>6:00–10:00 PM ET · Sunday–Thursday</p><p>Normal evening activity under the published supervision rules. The livestream remains available during public testing.</p>
+            <p class="home-note" data-sup-when></p><a data-sup-action href="/live/">Watch live and check the record →</a>
+          </section>
         </div>
       </div>
     </section>
-    <section style="padding:28px 32px;border-bottom:1px solid #141412"><p style="max-width:1160px;margin:auto"><a href="/about/">Why this is public</a> · <a href="/consent/">Participation evidence</a> · <a href="/testing/">Public test archive</a></p></section>
-    <section style="border-bottom: 1px solid #141412; padding: 40px 32px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
-        <p style="margin: 0; font-size: 16px; line-height: 1.6; max-width: 760px;">{{ agreementStatusSentence }} The record is administered by the Accountability Partner. Questions and reports: <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>.</p>
-        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6B6A64;">Archive: <a href="/daily/" style="color: #141412;">/daily/</a> · <a href="/violations/" style="color: #141412;">/violations/</a> · <a href="/agreement/" style="color: #141412;">/agreement/</a></p>
+    <section class="home-section" style="background:#f3f2ec">
+      <div class="home-wrap"><h2>Follow the progress</h2>
+        <div class="home-cards">
+          <section class="home-card"><h2>{{ progressScopeLabel }}</h2><p><strong>{{ currentLabel }} lb</strong> latest recorded · {{ startLabel }} lb declared baseline</p><div class="home-progress" aria-hidden="true"><span style="width:{{ pctWidth }}"></span></div><p>{{ lostLabel }} lb change from baseline · next threshold {{ nextMilestone }} lb</p><p class="home-note">Weight trends show progress. Changes in weight do not trigger corrections.</p><a href="/dashboard/">View weight history and milestones →</a></section>
+          <section class="home-card"><h2>Latest daily record</h2><p class="home-state">{{ latestRecordLabel }}</p><p>{{ completeDocumentationLabel }}</p><p class="home-note">Open the dated entry for photographs, the inspection recording, and its published status.</p><a href="{{ latestRecordHref }}">View the latest record →</a></section>
+          <section class="home-card"><h2>Weekly summary</h2><p>{{ wrClosed }}</p><p>{{ wrCurrent }}</p><p class="home-note">Review the week’s documented days, weight entries, and published outcomes.</p><a href="{{ latestWeekHref }}">Read the weekly summary →</a></section>
+        </div>
+        <div class="home-actions"><a class="home-button primary" href="/notify/">Follow by email</a><a class="home-button" href="/accountable/">Hold me accountable</a><a class="home-button" href="/share/">Share the project</a></div>
+      </div>
+    </section>
+    <section class="home-section">
+      <div class="home-wrap home-intro"><h2>Why I chose public accountability</h2>
+        <blockquote>“I am deliberately making this accountability public. I want this project seen, found, shared, discussed, and followed under my real name. Visibility creates pressure I cannot quietly escape. I consent to people observing this public record and holding me to the commitments I have voluntarily made.”</blockquote>
+        <sc-if value="{{ introVideoEmbed }}"><iframe src="{{ introVideoEmbed }}" title="Micheal Ray Berry introduces the public accountability project" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></sc-if>
+        <sc-if value="{{ introVideoUrl }}"><p><a href="{{ introVideoUrl }}">Watch my project introduction →</a></p></sc-if>
+        <p>Visitors can follow the record, ask about published commitments, and report concerns. The Accountability Partner reviews evidence and makes the official rulings. <a href="/accountable/">How to participate →</a></p>
+        <p class="home-note">{{ agreementStatusSentence }} Participation remains voluntary, with the published safety and privacy limits. <a href="/agreement/">Read the rules and current status</a> · <a href="/consent/">Participation evidence</a>.</p>
       </div>
     </section>
   </div>
@@ -297,7 +281,7 @@
 
 
     <section style="border-bottom: 1px solid #141412; padding: 0 32px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,180px),1fr));">
         <div style="padding: 40px 24px 40px 0; display: flex; flex-direction: column; gap: 8px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Day</span>
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 48px; font-weight: 600; line-height: 1;">{{ dayNumber }}</span>
@@ -342,7 +326,7 @@
           <span>Milestones</span>
           <span>Edition 2 requires verification before a recorded threshold becomes an official milestone whenever its terms apply</span>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0; border: 1px solid #141412;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,100px),1fr)); gap: 0; border: 1px solid #141412;">
           <sc-for list="{{ milestoneCells }}" as="ms" hint-placeholder-count="6">
             <div style="padding: 20px 8px; text-align: center; font-family: 'IBM Plex Mono', monospace; background: {{ ms.bg }}; color: {{ ms.color }}; border-right: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 4px;">
               <span style="font-size: 24px; font-weight: 600;">{{ ms.label }}</span>
@@ -421,7 +405,7 @@
               <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;">{{ expandedDate }} — {{ expandedWeight }} · All four angles</span>
               <button onClick="{{ closeExpanded }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: #141412; color: #FAFAF7; border: none; padding: 8px 16px; cursor: pointer;">Close</button>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,140px),1fr)); gap: 12px;">
               <sc-for list="{{ expandedAngles }}" as="ang" hint-placeholder-count="4">
                 <figure style="margin: 0; display: flex; flex-direction: column; gap: 6px;">
                   <div style="aspect-ratio: 9 / 16; border: 1px solid #141412; background: #F1F0EA; overflow: hidden;">
@@ -436,7 +420,7 @@
             </sc-if>
           </div>
         </sc-if>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%,150px),1fr)); gap: 14px;">
           <sc-for list="{{ photoRows }}" as="ph" hint-placeholder-count="3">
             <sc-if value="{{ ph.isMissed }}" hint-placeholder-val="{{ false }}">
               <figure style="margin: 0; display: flex; flex-direction: column; gap: 6px;">
@@ -502,10 +486,10 @@
     <section style="border-bottom: 1px solid #141412; padding: 48px 32px;">
       <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px); gap: 48px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 18px; max-width: 720px;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">About · what “under” means</span>
-          <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 60px); line-height: 0.95; text-transform: uppercase; margin: 0;">Micheal Ray Berry is under public accountability</h1>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #B3261E;">About · why this is public</span>
+          <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(40px, 6vw, 60px); line-height: 0.95; text-transform: uppercase; margin: 0;">Why I chose public accountability</h1>
           <p style="margin: 0; font-size: 18px; line-height: 1.65;">Micheal Ray Berry asked for this structure in writing. {{ agreementStatusSentence }} The Accountability Partner holds the site, the domain, the record and the accounts; Micheal files to it and cannot edit it.</p>
-          <p style="margin: 0; font-size: 18px; line-height: 1.65;">Every day he files weight, four photographs, an inspection video and a tracker update by 10:00 PM ET. Five evenings a week, Sunday to Thursday, he is on a public live stream. Possible misses are flagged automatically. The Accountability Partner verifies each Violation Event before assigning a recorded correction.</p>
+          <p style="margin: 0; font-size: 18px; line-height: 1.65;">The published daily standard is a weight entry, four photographs, an inspection video, and a tracker update by 10:00 PM ET. The supervision schedule is 6:00–10:00 PM ET, Sunday–Thursday. Public testing exercises these requirements separately from the official record. Possible misses are flagged automatically. The Accountability Partner verifies each Violation Event before assigning a recorded correction.</p>
         </div>
         <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 320px" width="3189" height="4933" loading="lazy" decoding="async" alt="Micheal Ray Berry, official photograph — black unitard, hands behind head. Declared start {{ startWeight }}." style="width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; display: block; border: 1px solid #141412;">
       </div>
@@ -524,7 +508,7 @@
     <section style="border-bottom: 1px solid #141412; padding: 48px 32px;">
       <div class="mrb-hero" style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); gap: 40px;">
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64; line-height: 1.6;">Limits</span>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 900px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,260px),1fr)); gap: 24px; max-width: 900px;">
           <div style="display: flex; flex-direction: column; gap: 8px;"><span style="font-weight: 600; font-size: 17px;">Exposure has boundaries</span><span style="font-size: 15px; line-height: 1.6; color: #3A3935;">This record invites scrutiny of the material deliberately published here. It does not authorize harassment, threats, stalking, attempts to obtain private information, contact with employers or coworkers, or interference with employment.</span></div>
           <div style="display: flex; flex-direction: column; gap: 8px;"><span style="font-weight: 600; font-size: 17px;">Withdrawal is recorded</span><span style="font-size: 15px; line-height: 1.6; color: #3A3935;">Participation remains voluntary. He may end the agreement at any time. Ending it does not erase the existing public record; if the completion standard has not been verified, the record will state: “Project ended without verified completion.”</span></div>
           <div style="display: flex; flex-direction: column; gap: 8px;"><span style="font-weight: 600; font-size: 17px;">Health is separate</span><span style="font-size: 15px; line-height: 1.6; color: #3A3935;">Medical decisions are handled privately; the agreement allows a documented medical exception.</span></div>
@@ -544,7 +528,7 @@
           <div style="padding: 24px 28px; border-bottom: 1px solid #D8D6CF; display: flex; flex-direction: column; gap: 8px;">
             <span style="font-size: 17px; font-weight: 600;">I know him personally. What now?</span>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Then yes — this really is the Micheal Ray Berry you know, and the results are under his real name.</p>
-            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Recognition is an intended part of the public project. In ordinary personal settings, people who know him may ask about the published record; workplace contact is excluded: ask whether today’s packet is filed, whether he served the corner time he owes, or whether he attended Evening Supervision. He published the rules so that people who know him can know what he owes. See <a href="/accountable/" style="color: #B3261E; font-weight: 600;">Hold Me Accountable</a>.</p>
+            <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">Recognition is an intended part of the public project. In ordinary personal settings, people who know him may ask about the published record; workplace contact is excluded: ask whether today’s documentation is filed, whether he served the corner time he owes, or whether he attended Evening Supervision. He published the rules so that people who know him can know what he owes. See <a href="/accountable/" style="color: #B3261E; font-weight: 600;">Hold Me Accountable</a>.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #3A3935;">If you notice an inconsistency or a possible breach, report it through the <a href="/observer/" style="color: #B3261E; font-weight: 600;">Observer Submission</a> page (no name or email required) or <a href="mailto:ap@michealrayberry.com" style="color: #B3261E; font-weight: 600;">ap@michealrayberry.com</a>. The Accountability Partner reviews it; Micheal does not.</p>
             <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #141412; font-weight: 600;">Holding him to the record is welcome. Harassment, threats, contact with his employer or coworkers, attempts to obtain private information, or showing up uninvited is not.</p>
           </div>
@@ -593,10 +577,10 @@
   <sc-if value="{{ isAgreement }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Agreement">
     <section style="border-bottom: 1px solid #141412; padding: 72px 32px 80px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 64px; align-items: start;">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,340px),1fr)); gap: 64px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 28px;">
           <p style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #B3261E; margin: 0;">{{ agreementFullHeading }} · Day 1: {{ startDateLong }}</p>
-          <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1>
+          <h1 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(44px, 6vw, 76px); text-transform: uppercase; line-height: 1; margin: 0;">Public Accountability Agreement</h1><p style="font-size:16px;line-height:1.8;margin:12px 0 0">Read the standards: <a href="/uniform/">Uniform</a> · <a href="/positions/">Inspection</a> · <a href="/corrections/">Corrections</a> · <a href="/consent/">Participation evidence</a> · <a href="/violations/">Violation log</a>.</p>
           <div style="display: flex; flex-direction: column; gap: 16px; font-size: 17px; line-height: 1.65; max-width: 560px;">
             <p style="margin: 0;"><strong>{{ agreementStatusSentence }}</strong></p>
             <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0;">Edition 2 is the current draft and becomes operative only after both signatures and the separate consent confirmation are verified in the official record. This page is a public summary; signed copies and signature images remain private.</p></sc-if>
@@ -627,7 +611,7 @@
     </section>
 
     <section style="border-bottom: 1px solid #141412; padding: 64px 32px 80px; background: #F1F0EA;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,340px),1fr)); gap: 24px;">
         <div style="background: #141412; color: #FAFAF7; padding: 32px 36px; display: flex; flex-direction: column; gap: 12px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B3261E;">On completion</span>
           <span style="font-size: 20px; font-weight: 600;">The record ends in daylight too.</span>
@@ -652,7 +636,7 @@
         <h2 style="font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 36px; text-transform: uppercase; margin: 0;">{{ agreementFullHeading }}</h2>
         <sc-if value="{{ agreementInactive }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;"><strong>Agreement execution is not verified.</strong> Edition 2 is the proposed governing document. Publication of this summary does not prove consent or create an executed bilateral agreement. Signed copies and signature images remain private.</p></sc-if>
         <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 16px; line-height: 1.65; color: #3A3935; max-width: 640px;"><strong>Agreement execution is recorded as verified effective {{ agreementEffectiveDateLong }}.</strong> This page summarizes the verified edition; signed copies and signature images remain private.</p></sc-if>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border: 1px solid #141412; max-width: 880px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,300px),1fr)); gap: 0; border: 1px solid #141412; max-width: 880px;">
           <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;">{{ agreementConsentScopeLabel }}</span>
             <ul style="margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.7; display: flex; flex-direction: column; gap: 4px;">
@@ -705,7 +689,7 @@
           <sc-if value="{{ agreementExecuted }}" hint-placeholder-val="{{ false }}"><p style="margin: 0;">Under the activated agreement, documented entries remain visible with dated corrections and review outcomes.</p></sc-if>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border: 1px solid #141412; margin-top: 48px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,260px),1fr)); gap: 0; border: 1px solid #141412; margin-top: 48px;">
           <div style="padding: 28px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #D8D6CF;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #6B6A64;">Edition 2 §8 process</span>
             <span style="font-size: 18px; font-weight: 600;">The Corrective Session</span>
@@ -782,7 +766,7 @@
   <sc-if value="{{ isUniform }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Uniform">
     <section style="border-bottom: 1px solid #141412; padding: 72px 32px 80px;">
-      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 64px; align-items: start;">
+      <div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,340px),1fr)); gap: 64px; align-items: start;">
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div style="width: 100%; aspect-ratio: 9 / 16; max-height: 560px; border: 1px solid #141412; background: #F1F0EA; overflow: hidden; display: flex; align-items: center; justify-content: center;">
             <img src="/photos/official/micheal-ray-berry-official-front-v2.jpg" srcset="/photos/official/micheal-ray-berry-official-front-480.webp 480w, /photos/official/micheal-ray-berry-official-front-800.webp 800w, /photos/official/micheal-ray-berry-official-front-1200.webp 1200w" sizes="(max-width: 700px) calc(100vw - 32px), 50vw" width="3189" height="4933" loading="lazy" decoding="async" alt="The documentation standard — front view, hands behind head, in the black standard uniform" style="width: 100%; height: 100%; object-fit: contain; display: block;">
