@@ -1,3 +1,12 @@
 # Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
-# Local requests to localhost are treated as this signed-in Access user.
+# Local requests to localhost are treated as this signed-in Access user
+# (michealrayberry@gmail.com = mrb, ap@michealrayberry.com = ap).
 DEV_ACCESS_EMAIL=michealrayberry@gmail.com
+# Secrets used in production (empty locally unless you are testing them):
+ACCESS_AUD_ASSISTANT=
+ACCESS_AUD_MRB=
+ACCESS_AUD_AP=
+SHEETS_FEEDS={}
+TURNSTILE_SECRET=
+OBSERVER_SECRET=
+SUBSCRIBE_RELAY_KEY=

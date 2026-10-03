@@ -18,6 +18,10 @@ export default defineConfig(async () => {
                 ACCESS_AUD_MRB: 'aud-mrb',
                 ACCESS_AUD_AP: 'aud-ap',
                 DEV_ACCESS_EMAIL: 'michealrayberry@gmail.com',
+                // Pinned so a developer's .dev.vars never changes test results.
+                SHEETS_MIRROR: 'off',
+                SHEETS_FEEDS: '{}',
+                IMAGE_TRANSFORMS: 'off',
               },
             },
           })],

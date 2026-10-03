@@ -1,0 +1,52 @@
+# Path redirects for Workers Static Assets. Only public/ is deployed, so repo
+# files need no 404 rules here.
+
+/home        /            301
+# Every public page is a static file generated at build time from
+# site.template.html — no client-side rendering, no SPA rewrites.
+/accountability-partner  /partner/  301
+/personal    /  301
+/personal/*  /  301
+/log         /violations/   301
+/annex/* / 301
+/annex / 301
+/protocol/* / 301
+/protocol / 301
+
+# The capture instrument is /assistant/ — one tool, six session types. Every old
+# tool path and the retired portal funnel there.
+/corrective    /assistant/   301
+/weekly        /assistant/   301
+/confirmation  /assistant/   301
+/record        /daily/   301
+/record/*      /daily/   301
+/mrb           /assistant/   301
+/ap            /             301
+/ap/*          /             301
+/mrb/*         /assistant/   301
+/inspection    /positions/   301
+/portal        /assistant/   301
+/resolution    /assistant/   301
+/Corner%20Time.dc.html               /assistant/  301
+/Violation%20Acknowledgment.dc.html  /assistant/  301
+
+/violations/v-000/ /violations/ 301
+/violations/v-000 /violations/ 301
+
+/penalties     /violations/ 301
+/penalties/*   /violations/ 301
+
+
+/corner-time  /corrections/  301
+/corner-time/*  /corrections/  301
+
+
+# Reference became Share (Sept 13)
+/reference    /share/  301
+/reference/*  /share/  301
+/hold-me-accountable   /accountable/   301
+/hold-me-accountable/  /accountable/   301
+
+# The testing phase is retired (contract Edition 2: Day 1 = 2026-10-03).
+/testing    /daily/  301
+/testing/*  /daily/  301

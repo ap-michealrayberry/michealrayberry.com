@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error -- plain .mjs script, no type declarations
-import { etTimestamp, mapTables, normalizeDate, parseCsv, publicViolationId, verifiedViolation } from '../../scripts/import-sheets.mjs';
+// Plain JS module shared with the Worker (src/import/sheets.js).
+import { etTimestamp, mapTables, normalizeDate, parseCsv, publicViolationId, verifiedViolation } from '../../src/import/sheets.js';
 
 const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
 const marker = (date: string, verifiedOn: string, text: string) => `APV1|${verifiedOn}|${sha(`violation-v1\n${date}\n${text}`)}`;
