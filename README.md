@@ -11,6 +11,7 @@ may be inferred from the deployment itself.
 
 ## Authoritative current state
 
+
 `project-config-v2.json` is the reviewed Edition 2 source: official Day 1 October 11, 2026, declared baseline 340.0 lb, goal 200.0 lb, and 28 consecutive days at goal. Keep the signed edition and this config aligned. After a reviewed change, run `npm run sync-config`; CI refuses mismatched generated server/assistant facts. Site State dates must match the versioned config.
 
 Public prelaunch testing remains enabled from October 3 through October 10. Test evidence and AP-reviewed outcomes remain at `/testing/` after launch and are excluded from official progress. A test gate runs simulated requirements; it does not verify signatures or consent. Keep test rows and published derivative assets in the source feeds so the archive can be rebuilt.
