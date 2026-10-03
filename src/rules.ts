@@ -193,6 +193,7 @@ export function packetComponents(row: PacketRow | null) {
     weight: row?.weight_lb != null,
     video: !!row?.video,
     photos,
+    views: { front: !!row?.photo_front, left: !!row?.photo_left, rear: !!row?.photo_rear, right: !!row?.photo_right },
   };
   return { ...parts, complete: parts.tracker && parts.weight && parts.video && photos === 4 };
 }

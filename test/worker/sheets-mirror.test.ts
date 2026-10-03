@@ -45,6 +45,24 @@ describe('Sheets mirror (steps 2–3)', () => {
     expect(await env.DB.prepare("SELECT count(*) AS n FROM events WHERE action = 'sheets.mirror'").first('n')).toBe(1);
   });
 
+  it('merges only the scale weight into days and keeps violation ids stable', async () => {
+    await env.DB.prepare("UPDATE days SET video = 'https://customer-x.cloudflarestream.com/0123456789abcdef0123456789abcdef/iframe' WHERE date = '2026-10-04'").run();
+    const violations = csv([
+      ['date', 'violation', 'status', 'submitted', 'resolved', 'ap_verification', 'corrections', 'recording', 'event_verification'],
+      ['2026-10-04', 'Automated flag', 'Unresolved', '', '', '', '', '', ''],
+    ]);
+    mockFeeds({ VIOLATION_CSV: violations, WEIGHINS_CSV: FEEDS.WEIGHINS_CSV.replace('338.9', '338.7') });
+    await mirrorSheets(mirrorEnv, NOW);
+    const id = await env.DB.prepare('SELECT id FROM violations').first('id');
+    expect(await env.DB.prepare("SELECT weight_lb, video FROM days WHERE date = '2026-10-04'").first()).toMatchObject({ weight_lb: 338.7, video: expect.stringContaining('cloudflarestream') });
+    mockFeeds({ VIOLATION_CSV: violations.replace('Unresolved', 'Rejected · not a violation') });
+    await mirrorSheets(mirrorEnv, NOW);
+    expect(await env.DB.prepare('SELECT id, status FROM violations').all()).toMatchObject({ results: [{ id, status: 'rejected' }] });
+    vi.restoreAllMocks();
+    mockFeeds();
+    await mirrorSheets(mirrorEnv, NOW);
+  });
+
   it('does nothing when the feeds have not changed', async () => {
     mockFeeds();
     expect(await mirrorSheets(mirrorEnv, NOW)).toEqual({ changed: false });

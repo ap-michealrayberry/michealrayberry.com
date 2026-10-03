@@ -10,3 +10,6 @@ SHEETS_FEEDS={}
 TURNSTILE_SECRET=
 OBSERVER_SECRET=
 SUBSCRIBE_RELAY_KEY=
+# Attestation seal key and Stream token (production values via wrangler secret put):
+ATTEST_HMAC_KEY=local-dev-attestation-key-not-secret-0000000000
+STREAM_API_TOKEN=

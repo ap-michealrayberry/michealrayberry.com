@@ -20,10 +20,8 @@
 /confirmation  /assistant/   301
 /record        /daily/   301
 /record/*      /daily/   301
-/mrb           /assistant/   301
 /ap            /             301
 /ap/*          /             301
-/mrb/*         /assistant/   301
 /inspection    /positions/   301
 /portal        /assistant/   301
 /resolution    /assistant/   301

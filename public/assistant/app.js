@@ -46,6 +46,7 @@
     confirmation: "CONFIRMATION",
     demo: "DEMONSTRATION",
     announcement: "PROJECT ANNOUNCEMENT",
+    milestone: "MILESTONE VERIFICATION",
   };
 
   var KIND_MAP = {
@@ -55,6 +56,7 @@
     confirmation: "confirmation",
     demo: "demo",
     announcement: "announcement",
+    milestone: "milestone",
   };
 
   /** Level → minutes for corner time. Level capped at 3. */
@@ -534,12 +536,9 @@
     return MRB.config.get();
   }
 
+  /* Cloudflare Access signs the participant in; there is no device key. */
   function ensureKey() {
-    var c = cfg();
-    if (!c.deviceKey && !c.demoMode) {
-      throw new Error("Device key missing. Set mrb_packet_key in configuration.");
-    }
-    return c.deviceKey || "demo-key";
+    return "";
   }
 
   async function getJson(url) {
@@ -552,38 +551,53 @@
     }
   }
 
-  /**
-   * POST JSON to Apps Script. Field names are load-bearing:
-   * - r2sign sends `mime` (not contentType)
-   * - response uses `uploadUrl` (not url)
-   */
+  /* Each assistant action goes to its endpoint on this site (README §2.4).
+     The record server is the Worker; Access identifies the participant. */
+  var ROUTES = {
+    challenge: "/api/challenge",
+    attest: "/api/attest",
+    packet: "/api/packet",
+    weeklyfiled: "/api/weekly",
+    confirmationfiled: "/api/confirmation",
+    correctivefiled: "/api/corrective",
+    milestonefiled: "/api/milestone",
+  };
+  function routeFor(payload) {
+    if (payload.action === "mystate" || payload.action === "ping") return { method: "GET", path: "/api/me" };
+    if (payload.action === "ytfiled") {
+      if (payload.kind === "corrective") return { method: "POST", path: "/api/corrective" };
+      if (payload.kind === "consent" || payload.kind === "confirmation") return { method: "POST", path: "/api/confirmation" };
+      if (payload.kind === "announcement" || payload.kind === "demo") return { method: "POST", path: "/api/recording" };
+      return null;
+    }
+    return ROUTES[payload.action] ? { method: "POST", path: ROUTES[payload.action] } : null;
+  }
+
   async function postJson(body) {
     var c = cfg();
     var payload = Object.assign({}, body || {});
-    if (payload.action !== "unlock") {
-      try {
-        var unlock = localStorage.getItem("mrb_unlock_token") || "";
-        if (unlock) payload.unlock = unlock;
-      } catch (e) {
-        /* Storage can be unavailable in private browsing; the server fails closed. */
-      }
-    }
+    delete payload.key;
+    delete payload.unlock;
     if (c.demoMode) {
       return mockPost(payload);
     }
-    if (!c.execUrl) throw new Error("Apps Script exec URL missing; offline demo was not explicitly enabled");
-    var res = await fetch(c.execUrl, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-      credentials: "omit",
-      redirect: "follow",
+    var route = routeFor(payload);
+    if (!route) return { ok: false, error: "unknown action " + payload.action };
+    var action = payload.action;
+    delete payload.action;
+    var res = await fetch(route.path, {
+      method: route.method,
+      headers: route.method === "POST" ? { "Content-Type": "application/json" } : {},
+      body: route.method === "POST" ? JSON.stringify(payload) : undefined,
+      credentials: "same-origin",
+      cache: "no-store",
     });
     var text = await res.text();
     try {
       return JSON.parse(text);
     } catch (e) {
-      throw new Error("Non-JSON response from exec (" + res.status + "): " + text.slice(0, 120));
+      if (res.status === 401 || res.status === 403) throw new Error("Sign-in expired — reload the page to sign in again");
+      throw new Error("Non-JSON response from the record server (" + res.status + ", " + action + ")");
     }
   }
 
@@ -638,7 +652,7 @@
     return Promise.resolve({ ok: false, error: "Unknown mock action " + action });
   }
 
-  async function challenge(kind, ref, assignmentId, attemptId) {
+  async function challenge(kind, ref, assignmentId, attemptId, threshold) {
     var c = cfg();
     var key = ensureKey();
     var k = MRB.config.KIND_MAP[kind] || kind;
@@ -655,8 +669,8 @@
         demo: true,
       };
     }
-    if (!c.execUrl) throw new Error("Apps Script exec URL missing");
     var body = { action: "challenge", key: key, kind: k };
+    if (k === "milestone") body.threshold = Number(threshold);
     if (k === "corrective") {
       body.ref = String(ref || "").trim().toUpperCase();
       body.assignment_id = String(assignmentId || "").trim().toUpperCase();
@@ -809,14 +823,10 @@
   async function pingServer() {
     var c = cfg();
     if (c.demoMode) return { ok: true, demo: true, message: "Explicit offline demonstration" };
-    if (!c.execUrl) return { ok: false, message: "Apps Script exec URL not set" };
-    if (!c.deviceKey) {
-      return { ok: false, message: "Device key not set" };
-    }
     try {
-      var data = await postJson({ action: "ping", key: c.deviceKey });
+      var data = await postJson({ action: "ping" });
       if (data && data.ok) {
-        return { ok: true, message: "Server accepted device key" };
+        return { ok: true, message: "Signed in as " + (data.email || "the participant") };
       }
       return { ok: false, message: (data && data.error) || "Rejected" };
     } catch (e) {
@@ -2262,23 +2272,12 @@
   /**
    * Weekly review figures from the record only. Omit lines that cannot be computed.
    */
-  function weeklyFigures(record, weekStartIso, dayOneWeight) {
+  /* `coveredDates` is the server's list of active dates the review reports (§7:
+     the first review covers only the active dates available). */
+  function weeklyFigures(record, coveredDates, dayOneWeight) {
     var weigh = (record && record.weighIns) || [];
     var viol = (record && record.violations) || [];
-    var start = MRB.dates.parseDate(weekStartIso);
-    if (!start) return { documented: 0, required: 7, missing: [], lines: [] };
-
-    var days = [];
-    for (var i = 0; i < 7; i++) {
-      var d = new Date(Date.UTC(start.y, start.m - 1, start.d + i));
-      var iso =
-        MRB.dates.pad4(d.getUTCFullYear()) +
-        "-" +
-        MRB.dates.pad2(d.getUTCMonth() + 1) +
-        "-" +
-        MRB.dates.pad2(d.getUTCDate());
-      days.push(iso);
-    }
+    var days = Array.isArray(coveredDates) ? coveredDates.slice() : [];
 
     var byDate = {};
     weigh.forEach(function (w) {
@@ -2314,7 +2313,7 @@
       : null;
 
     var lines = [];
-    lines.push("Days documented: " + documented + " of 7.");
+    lines.push("Days documented: " + documented + " of " + days.length + ".");
     if (missing.length) lines.push("Dates missing: " + missing.join(", ") + ".");
     if (startW != null) lines.push("Weight at start of week: " + startW + " pounds.");
     if (endW != null) lines.push("Weight at end of week: " + endW + " pounds.");
@@ -2330,7 +2329,7 @@
 
     return {
       documented: documented,
-      required: 7,
+      required: days.length,
       missing: missing,
       startW: startW,
       endW: endW,
@@ -2382,12 +2381,21 @@
   function confirmationScript(ctx) {
     return (
       "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
-      (ctx.version || "1") +
+      (ctx.version || "2") +
       ", recorded on " +
       fmtDateLong(ctx.date) +
       ". " +
       "I have reviewed the final terms presented to me, understand the stated documentation and publication scope, and voluntarily consent to them subject to the published safety, privacy, and legal limits. I understand that withdrawal, lawful redaction, and safety or privacy takedown remain available. " +
       "This statement is read by a synthetic voice while I appear on camera. My appearance and this recording are evidence submitted for review; they do not independently prove comprehension, voluntariness, or bilateral execution. Edition 2 remains inactive unless the Accountability Partner separately verifies this statement and both signatures."
+    );
+  }
+
+  function milestoneScript(ctx) {
+    return (
+      "Milestone verification. Micheal Ray Berry, Day " + ctx.day + ", " + fmtDateLong(ctx.date) + ". " +
+      "Threshold: " + ctx.threshold + " pounds. Scale-synced weight on the record today: " + ctx.weight + " pounds. " +
+      "Verification code " + String(ctx.code).split("").join(" ") + ". " +
+      "Black project uniform, Inspection position. This recording is evidence for Accountability Partner review; the milestone becomes official only after that review. Session ends."
     );
   }
 
@@ -2415,6 +2423,7 @@
   MRB.scripts = {
     dailySegments: dailySegments,
     announcementScript: announcementScript,
+    milestoneScript: milestoneScript,
     photoPrompts: photoPrompts,
     cornerSegments: cornerSegments,
     cornerOpening: cornerOpening,
@@ -3143,6 +3152,15 @@
       await fileRecordingLink(item, "corrective", filedUrl);
     } else if (item.kind === "announcement") {
       await fileRecordingLink(item, "announcement", filedUrl);
+    } else if (item.kind === "milestone") {
+      var ms = await MRB.api.postJson({
+        action: "milestonefiled",
+        date: item.date,
+        threshold: item.threshold,
+        url: filedUrl,
+        attestation_seal: item.seal,
+      });
+      if (!ms || !ms.ok) throw new Error((ms && ms.error) || "Milestone filing failed");
     } else {
       // demo — the attestation is enough
     }
@@ -3252,6 +3270,7 @@
     if (type === "daily") return 3;
     if (type === "confirmation") return 2;
     if (type === "announcement") return 3;
+    if (type === "milestone") return 2;
     return 2;
   }
 
@@ -4115,8 +4134,9 @@
       weight: opts.weight,
       level: opts.level || 1,
       minutes: opts.minutes || 10,
-      version: opts.version || "1",
+      version: opts.version || "2",
       week: opts.week || 1,
+      threshold: opts.threshold || 0,
       vRef: String(opts.vRef || "").trim().toUpperCase(),
       assignmentId: String(opts.assignmentId || "").trim().toUpperCase(),
       attemptId: String(opts.attemptId || "").trim().toUpperCase(),
@@ -4201,6 +4221,8 @@
         await runConfirmation(session);
       } else if (session.type === "announcement") {
         await runAnnouncement(session);
+      } else if (session.type === "milestone") {
+        await runMilestone(session);
       } else {
         await runDemo(session);
       }
@@ -4423,7 +4445,13 @@
     );
   }
 
+  /* Contract §1: the consent recording begins with 15 to 30 seconds in the
+     participant's own voice; synthetic narration may follow but does not replace it. */
   async function runConfirmation(session) {
+    MRB.ui.setStatus("session", "Confirmation — your own voice");
+    session.poseText = "FACE CAMERA · SPEAK IN YOUR OWN VOICE";
+    await speakAndHold(session, "Begin your own statement now: who you are, Edition 2, that you have read and understand the requirements, that you choose to participate, and that you can stop. You have thirty seconds.", 0);
+    await sleep(30000, session);
     MRB.ui.setStatus("session", "Confirmation");
     session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.confirmationScript(session), 30);
@@ -4433,6 +4461,14 @@
     MRB.ui.setStatus("session", "Demonstration");
     session.poseText = "FACE CAMERA · HANDS BEHIND HEAD";
     await speakAndHold(session, MRB.scripts.demoScript(), 25);
+  }
+
+  /* §7: milestone documentation — black uniform, Inspection position, the
+     scale-synced reading and the threshold read to camera. AP review makes it official. */
+  async function runMilestone(session) {
+    MRB.ui.setStatus("session", "Milestone verification");
+    session.poseText = "INSPECTION POSITION · HANDS BEHIND HEAD";
+    await speakAndHold(session, MRB.scripts.milestoneScript(session), 45);
   }
 
   async function runAnnouncement(session) {
@@ -4588,7 +4624,8 @@
       week: session.week,
       version: session.version,
       documented: session.figures && session.figures.documented,
-      required: 7,
+      required: session.figures ? session.figures.required : 0,
+      threshold: session.threshold,
       openCount: session.figures && session.figures.open ? session.figures.open.length : 0,
     };
 
@@ -4754,6 +4791,8 @@
     var corrective = MRB.ui.byId("card-corrective");
     var weekly = MRB.ui.byId("card-weekly");
     if (daily) daily.disabled = !active;
+    var milestoneCard = MRB.ui.byId("card-milestone");
+    if (milestoneCard) milestoneCard.disabled = !active;
     if (corrective) {
       corrective.disabled = !active || correctiveEntries().length === 0;
       corrective.title = corrective.disabled
@@ -4764,7 +4803,7 @@
       var weeklyState = participantStateCache && participantStateCache.weekly;
       var weeklyComplete = !!weeklyState && weeklyState.eligible === true &&
         /^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) &&
-        Number(weeklyState.day) >= 8 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
+        Number(weeklyState.day) >= 1 && Math.floor(Number(weeklyState.day)) === Number(weeklyState.day) &&
         Number(weeklyState.week) >= 1 && Math.floor(Number(weeklyState.week)) === Number(weeklyState.week);
       weekly.disabled = !active || !weeklyComplete;
       weekly.title = weekly.disabled
@@ -4772,7 +4811,7 @@
         : "";
     }
     if (config.demoMode) {
-      ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement"].forEach(function (id) {
+      ["card-daily", "card-corrective", "card-weekly", "card-confirmation", "card-announcement", "card-milestone"].forEach(function (id) {
         var card = MRB.ui.byId(id);
         if (card) {
           card.disabled = true;
@@ -4842,7 +4881,7 @@
         throw new Error(String(weeklyState && weeklyState.reason || "Weekly review is not due."));
       }
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(weeklyState.date || "")) ||
-          Number(weeklyState.day) < 8 || Math.floor(Number(weeklyState.day)) !== Number(weeklyState.day) ||
+          Number(weeklyState.day) < 1 || Math.floor(Number(weeklyState.day)) !== Number(weeklyState.day) ||
           Number(weeklyState.week) < 1 || Math.floor(Number(weeklyState.week)) !== Number(weeklyState.week)) {
         throw new Error("Server weekly schedule is incomplete.");
       }
@@ -4861,6 +4900,14 @@
     if (type === "confirmation") {
       fields.innerHTML =
         '<label class="field"><span>Agreement version</span><input id="pf-version" type="text" class="mono" value="2" readonly aria-readonly="true" /></label>';
+    }
+
+    if (type === "milestone") {
+      fields.innerHTML =
+        '<label class="field"><span>Threshold</span><select id="pf-threshold" class="mono">' +
+        '<option value="320">320 lb</option><option value="300">300 lb</option><option value="275">275 lb</option>' +
+        '<option value="250">250 lb</option><option value="225">225 lb</option><option value="200">200 lb</option></select></label>' +
+        '<div class="field"><span>Weight — scale-synced</span><p id="pf-weight-synced" class="mono" style="margin:4px 0 0;font-size:18px;font-weight:600">Fetched with the code at start</p></div>';
     }
 
     var minutes = type === "corrective" ? entry.minutes : MRB.preflight.estimateMinutes(type, 1);
@@ -5031,7 +5078,7 @@
             throw new Error(String(currentWeekly && currentWeekly.reason || "Weekly review is not due."));
           }
           if (!/^\d{4}-\d{2}-\d{2}$/.test(String(currentWeekly.date || "")) ||
-              Number(currentWeekly.day) < 8 || Math.floor(Number(currentWeekly.day)) !== Number(currentWeekly.day) ||
+              Number(currentWeekly.day) < 1 || Math.floor(Number(currentWeekly.day)) !== Number(currentWeekly.day) ||
               Number(currentWeekly.week) < 1 || Math.floor(Number(currentWeekly.week)) !== Number(currentWeekly.week)) {
             throw new Error("Server weekly schedule is incomplete.");
           }
@@ -5054,12 +5101,14 @@
 
     // One challenge per attempt — never reuse
     var kind = MRB.config.KIND_MAP[type];
+    var threshold = type === "milestone" ? Number((MRB.ui.byId("pf-threshold") || {}).value) : 0;
     var ch;
     try {
       ch = await MRB.api.challenge(kind,
         type === "corrective" && entry ? entry.id : "",
         type === "corrective" && entry ? entry.assignmentId : "",
-        type === "corrective" && entry ? entry.attemptId : "");
+        type === "corrective" && entry ? entry.attemptId : "",
+        threshold);
     } catch (e) {
       MRB.ui.setStatus("preflight", "Challenge failed: " + e.message);
       MRB.ui.byId("btn-preflight-start").disabled = false;
@@ -5068,6 +5117,15 @@
 
     // Daily sessions require the scale-synced weight — the record accepts no
     // other figure, so a session cannot start without one on file for today.
+    // §7: a milestone crossing is a scale reading at or below the threshold.
+    if (type === "milestone" && (!ch.weight || Number(ch.weight) > threshold)) {
+      MRB.ui.setStatus("preflight", ch.weight
+        ? "Today's scale-synced weight (" + Number(ch.weight).toFixed(1) + " lb) is above " + threshold + " lb."
+        : "No scale-synced weight on the record for today. Step on the scale, wait for it to sync, then try again.");
+      MRB.ui.byId("btn-preflight-start").disabled = false;
+      return;
+    }
+
     if (type === "daily") {
       var swEl = MRB.ui.byId("pf-weight-synced");
       if (!ch.weight) {
@@ -5107,13 +5165,13 @@
       day = Number(weekly.day);
       week = Number(weekly.week);
       ch.day = day;
-      var weekStart = weekStartIso(participantStateCache.projectStart, week);
-      if (!weekStart) {
-        MRB.ui.setStatus("preflight", "Server project start is invalid. Filing remains blocked.");
+      figures = MRB.scripts.weeklyFigures(recordCache, weekly.dates, 340);
+      // The server checks these figures against the record (§7); if they disagree, reload first.
+      if (weekly.figures && (weekly.figures.documented !== figures.documented || weekly.figures.required !== figures.required)) {
+        MRB.ui.setStatus("preflight", "The public record has not caught up with the server yet. Wait a minute and run preflight again.");
         MRB.ui.byId("btn-preflight-start").disabled = false;
         return;
       }
-      figures = MRB.scripts.weeklyFigures(recordCache, weekStart, 340);
     }
 
     try {
@@ -5132,7 +5190,8 @@
         day: day,
         date: date,
         code: ch.code,
-        weight: type === "daily" ? (ch.weight || null) : type === "weekly" ? figures.endW : weight,
+        weight: type === "daily" || type === "milestone" ? (ch.weight || null) : type === "weekly" ? figures.endW : weight,
+        threshold: threshold,
         level: level,
         minutes: type === "corrective" ? entry.minutes : pending.minutes,
         version: version,
@@ -5205,7 +5264,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is August 31, 2026." +
+          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is October 3, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }
@@ -5427,7 +5486,7 @@
     handlersBound = true;
 
     // Session cards
-    ["daily", "corrective", "weekly", "confirmation", "demo", "announcement"].forEach(function (t) {
+    ["daily", "corrective", "weekly", "confirmation", "demo", "announcement", "milestone"].forEach(function (t) {
       var card = MRB.ui.byId("card-" + t);
       if (card) {
         card.addEventListener("click", function () {
@@ -5520,54 +5579,24 @@
     });
   }
 
-  /* ── Two-key lock ─────────────────────────────────────────────────────
-     The instrument opens only after the record server has accepted BOTH the
-     participant's device key and the AP's unlock code (action "unlock").
-     The server returns a sealed token with its authoritative expiry and checks
-     that token again on every participant action. Explicit offline demonstration
-     mode is local-only and permits only the demonstration session. */
+  /* ── Sign-in ──────────────────────────────────────────────────────────
+     Cloudflare Access signs the participant in before this page loads (one-time
+     PIN to the participant's address); every API call is checked again by the
+     record server. "Sign out" ends the Access session. Explicit offline
+     demonstration mode stays local-only and permits only the demonstration. */
   function isUnlocked() {
-    var c = MRB.config.get();
-    if (c.demoMode) return true;
-    var tok = localStorage.getItem("mrb_unlock_token") || "";
-    var until = Number(localStorage.getItem("mrb_unlock_until") || 0);
-    return !!tok && until > Date.now();
+    return true;
   }
   function lockNow() {
     localStorage.removeItem("mrb_unlock_token");
     localStorage.removeItem("mrb_unlock_until");
     MRB.config.save({ demoMode: false });
-    MRB.ui.showView("lock");
+    window.location.href = "/cdn-cgi/access/logout";
   }
   async function tryUnlock(ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
-    var dk = (MRB.ui.byId("lock-device-key").value || "").trim();
-    var ac = (MRB.ui.byId("lock-ap-code").value || "").trim();
-    var err = MRB.ui.byId("lock-error");
-    var btn = MRB.ui.byId("btn-unlock");
-    err.hidden = true;
-    if (!dk || !ac) { err.textContent = "Both keys are required."; err.hidden = false; return; }
-    btn.disabled = true;
-    try {
-      MRB.config.save({ demoMode: false });
-      var r = await MRB.api.postJson({ action: "unlock", key: dk, code: ac });
-      var expires = Number(r && r.expires);
-      if (!r || !r.ok || !r.token || !isFinite(expires) || expires <= Date.now()) {
-        throw new Error((r && r.error) || "Server returned an invalid unlock grant");
-      }
-      MRB.config.save({ deviceKey: dk });
-      localStorage.setItem("mrb_unlock_token", String(r.token));
-      localStorage.setItem("mrb_unlock_until", String(expires));
-      MRB.ui.byId("lock-device-key").value = "";
-      MRB.ui.byId("lock-ap-code").value = "";
-      MRB.ui.showView("home");
-      await refreshHome();
-    } catch (e) {
-      err.textContent = "Refused: " + (e && e.message ? e.message : "keys not accepted");
-      err.hidden = false;
-    } finally {
-      btn.disabled = false;
-    }
+    MRB.ui.showView("home");
+    await refreshHome();
   }
 
   async function init() {

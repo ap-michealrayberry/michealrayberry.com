@@ -23,7 +23,7 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/assistant", "/assistant/*", "/observer", "/report"]
+    "run_worker_first": ["/api/*", "/assistant", "/assistant/*", "/mrb", "/mrb/*", "/observer", "/report"]
   },
   "rules": [
     { "type": "Text", "globs": ["**/*.html", "**/*.txt"], "fallthrough": true },
@@ -54,7 +54,7 @@
 
   "vars": {
     "SITE_ORIGIN": "https://michealrayberry.com",
-    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_TEAM_DOMAIN": "little-glitter-649b.cloudflareaccess.com",
     "MRB_EMAIL": "michealrayberry@gmail.com",
     "AP_EMAIL": "ap@michealrayberry.com",
     "TWITCH_CHANNEL": "michealrayberry",
@@ -64,11 +64,16 @@
     // "on" mirrors the Google Sheets into D1 every 5 minutes (until step 4).
     "SHEETS_MIRROR": "on",
     "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec",
-    "TURNSTILE_SITE_KEY": "0x4AAAAAAE-PPlGkpwWU3XVt"
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAE-PPlGkpwWU3XVt",
+    // Cloudflare Stream (recordings): account and player hostname.
+    "CF_ACCOUNT_ID": "815a5058df21872d6221175d2a2ef15d",
+    "STREAM_CUSTOMER_CODE": "customer-sbx737pkvhyavdz9"
   }
   // Secrets (wrangler secret put):
   //   ACCESS_AUD_ASSISTANT, ACCESS_AUD_MRB, ACCESS_AUD_AP  Access application audiences
   //   SHEETS_FEEDS         JSON of the seven published feed URLs (Sheets mirror)
   //   TURNSTILE_SECRET, OBSERVER_SECRET, SUBSCRIBE_RELAY_KEY  observer form + sign-up relay
+  //   ATTEST_HMAC_KEY      attestation seal key (contract §5 verification)
+  //   STREAM_API_TOKEN     API token with Stream:Edit (Direct Creator Uploads)
   // Local dev: .dev.vars (see .dev.vars.example).
 }

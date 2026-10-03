@@ -36,9 +36,10 @@ describe('GET /api/me', () => {
     expect((await exports.default.fetch('http://localhost:8787/api/nope')).status).toBe(404);
   });
 
-  it('only accepts GET: there is nothing to write in step 1', async () => {
-    const res = await exports.default.fetch('http://localhost:8787/api/me', { method: 'POST', body: '{}' });
-    expect(res.status).toBe(404);
+  it('only accepts GET, and refuses cross-origin writes', async () => {
+    expect((await exports.default.fetch('http://localhost:8787/api/me', { method: 'POST', body: '{}' })).status).toBe(403);
+    const sameOrigin = await exports.default.fetch('http://localhost:8787/api/me', { method: 'POST', body: '{}', headers: { Origin: 'http://localhost:8787' } });
+    expect(sameOrigin.status).toBe(404);
   });
 
   it('reports the gate as inactive and requires nothing before execution is recorded', async () => {
