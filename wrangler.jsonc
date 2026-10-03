@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker "mrb": the record API, cron and (from step 2) the site itself.
+  // The Pages projects ignore this file (no pages_build_output_dir).
+  "name": "mrb",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"],
+  // Step 1 ships dark: no route, no workers.dev or preview hostname. Nothing is
+  // reachable until step 2 adds the michealrayberry.com route behind Access.
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mrb-record",
+      "database_id": "80d5c5f6-d62b-42a5-8670-2e2cf3e7da41",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "",
+    "MRB_EMAIL": "michealrayberry@gmail.com",
+    "AP_EMAIL": "ap@michealrayberry.com",
+    "TWITCH_CHANNEL": "michealrayberry"
+  }
+  // Secrets (wrangler secret put): ACCESS_AUD_ASSISTANT, ACCESS_AUD_MRB, ACCESS_AUD_AP.
+  // Local dev: DEV_ACCESS_EMAIL in .dev.vars (see .dev.vars.example).
+}
