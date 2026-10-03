@@ -45,11 +45,8 @@
   "kv_namespaces": [{ "binding": "CACHE", "id": "e7c86f0e66634f48966299171fa8b361" }],
 
   "triggers": {
-    "crons": [
-      "*/5 * * * *",   // Sheets mirror (steps 2–3 only, while SHEETS_MIRROR = on)
-      "10 4 * * *",    // 00:10 ET during daylight time: nightly rebuild
-      "10 5 * * *"     // 00:10 ET during standard time: nightly rebuild
-    ]
+    // One tick; src/cron/schedule.ts runs each job at its Eastern-time slot (DST included).
+    "crons": ["*/5 * * * *"]
   },
 
   "vars": {
@@ -57,23 +54,27 @@
     "ACCESS_TEAM_DOMAIN": "little-glitter-649b.cloudflareaccess.com",
     "MRB_EMAIL": "michealrayberry@gmail.com",
     "AP_EMAIL": "ap@michealrayberry.com",
+    // Micheal's private notice address for briefs and notices (contract §12); Code.gs used contact@.
+    "MRB_NOTICE_EMAIL": "contact@michealrayberry.com",
     "TWITCH_CHANNEL": "michealrayberry",
     // Cloudflare Image Transformations for photo derivatives: "on" once enabled on the zone.
     "IMAGE_TRANSFORMS": "off",
     "PUBLIC_SUPERVISION_URLS_ENABLED": "false",
-    // "on" mirrors the Google Sheets into D1 every 5 minutes (until step 4).
-    "SHEETS_MIRROR": "on",
     "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbziCyE3mnmUGZypHRiu1A6wK1n2EIRj2_U3czGc3JQS4L3ZXMxRJCINyMFDYC5bZ9vQ/exec",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE-PPlGkpwWU3XVt",
     // Cloudflare Stream (recordings): account and player hostname.
     "CF_ACCOUNT_ID": "815a5058df21872d6221175d2a2ef15d",
-    "STREAM_CUSTOMER_CODE": "customer-sbx737pkvhyavdz9"
+    "STREAM_CUSTOMER_CODE": "customer-sbx737pkvhyavdz9",
+    // Fitbit weight-log sources that count as the scale (manual entries never do).
+    "FITBIT_SCALE_SOURCES": "Aria,AriaAir,Aria 2"
   }
   // Secrets (wrangler secret put):
   //   ACCESS_AUD_ASSISTANT, ACCESS_AUD_MRB, ACCESS_AUD_AP  Access application audiences
-  //   SHEETS_FEEDS         JSON of the seven published feed URLs (Sheets mirror)
   //   TURNSTILE_SECRET, OBSERVER_SECRET, SUBSCRIBE_RELAY_KEY  observer form + sign-up relay
   //   ATTEST_HMAC_KEY      attestation seal key (contract §5 verification)
   //   STREAM_API_TOKEN     API token with Stream:Edit (Direct Creator Uploads)
+  //   POSTMARK_TOKEN       Postmark server token (mail from ap@michealrayberry.com)
+  //   TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET   Helix app (supervision poller)
+  //   FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET   Fitbit Web API app (scale weight)
   // Local dev: .dev.vars (see .dev.vars.example).
 }

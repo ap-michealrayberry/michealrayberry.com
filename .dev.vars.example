@@ -6,10 +6,15 @@ DEV_ACCESS_EMAIL=michealrayberry@gmail.com
 ACCESS_AUD_ASSISTANT=
 ACCESS_AUD_MRB=
 ACCESS_AUD_AP=
-SHEETS_FEEDS={}
 TURNSTILE_SECRET=
 OBSERVER_SECRET=
 SUBSCRIBE_RELAY_KEY=
 # Attestation seal key and Stream token (production values via wrangler secret put):
 ATTEST_HMAC_KEY=local-dev-attestation-key-not-secret-0000000000
 STREAM_API_TOKEN=
+# Step 4: email, Twitch poller, Fitbit (production values via wrangler secret put)
+POSTMARK_TOKEN=
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+FITBIT_CLIENT_ID=
+FITBIT_CLIENT_SECRET=

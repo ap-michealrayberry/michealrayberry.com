@@ -53,6 +53,9 @@
       el('div', { class: 'clock', 'data-count': deadline.toISOString(), text: p.complete ? 'Complete' : left(ms) }),
       el('div', { class: 'rows' }, items.map(function (x) { return el('div', { class: 'row' }, [el('span', { text: x[0] }), el('span', { class: x[1] ? 'ok' : 'no', text: x[1] ? 'Filed' : 'Outstanding' })]); })),
       el('a', { class: 'btn', href: '/assistant/', text: 'Open Recording Assistant →' }),
+      S.fitbit && S.fitbit.configured && !S.fitbit.connected
+        ? el('p', { class: 'note' }, ['The scale is not connected yet. ', el('a', { href: '/mrb/fitbit/connect', text: 'Connect Fitbit (once) →' })])
+        : null,
       el('p', { class: 'note', text: 'A late filing is still accepted and stays with its date; the time it arrived is recorded for the Accountability Partner (§4).' }),
     ]);
   }
