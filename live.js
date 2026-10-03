@@ -1,6 +1,6 @@
 /* Evening Supervision: /live/ console + homepage module. Public live video is
    ON (user ruling, Oct 3 2026): during a confirmed session (row LIVE / IN
-   PROGRESS, fresh feed, active agreement) /live/ mounts the YouTube live embed
+   PROGRESS, fresh feed, active agreement) /live/ mounts the Twitch live embed
    and the homepage module reads LIVE NOW. A writable schedule row alone is not
    proof of a broadcast. */
 (function () {
@@ -79,14 +79,13 @@
       if (src) {
         var i = document.createElement('iframe');
         i.src = src; i.title = 'Evening Supervision — live';
-        i.allow = 'autoplay; encrypted-media; picture-in-picture'; i.allowFullscreen = true;
-        i.referrerPolicy = 'strict-origin-when-cross-origin';
+        i.allow = 'autoplay; fullscreen'; i.allowFullscreen = true;
         f.appendChild(i);
       } else {
         var a = document.createElement('a');
         a.className = 'fb'; a.rel = 'noopener';
-        a.href = f.getAttribute('data-fallback') || 'https://www.youtube.com/@michealrayberry/live';
-        a.textContent = 'Watch on YouTube \u2192';
+        a.href = f.getAttribute('data-fallback') || 'https://www.twitch.tv/michealrayberry';
+        a.textContent = 'Watch on Twitch \u2192';
         f.appendChild(a);
       }
     });

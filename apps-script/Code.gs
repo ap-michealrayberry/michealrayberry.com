@@ -35,7 +35,7 @@ var PROJECT_START_FALLBACK = '2026-10-11';
 var TEST_START_FALLBACK = '2026-10-03';
 var AGREEMENT_EDITION = 2;
 /* Public supervision video switch. ON by user ruling, Oct 3 2026: /live/ embeds
-   the YouTube live stream during a confirmed session and the homepage carries
+   the Twitch live stream (twitch.tv/michealrayberry) during a confirmed session and the homepage carries
    the Evening Supervision module. Agreement execution still gates whether any
    session is REQUIRED. */
 var PUBLIC_SUPERVISION_VIDEO_ENABLED = true;

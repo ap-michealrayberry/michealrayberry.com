@@ -78,9 +78,15 @@ let TEST_PHASE = false;
 let TEST_SPAN = 0;
 /* Test stream shown on /live/ throughout the testing phase. Site State
    test_stream_url overrides; YT_LIVE_VIDEO_ID env is the next fallback. */
+/* Evening Supervision streams live on Twitch (agreement §2/§10 amended Oct 3
+   2026). YouTube remains the archive for recorded sessions. Twitch embeds
+   require every serving hostname as a parent; extras via TWITCH_PARENTS. */
+const TWITCH_CHANNEL = (String(process.env.TWITCH_CHANNEL || 'michealrayberry').trim().match(/^[A-Za-z0-9_]{3,25}$/) || ['michealrayberry'])[0];
+const TWITCH_URL = `https://www.twitch.tv/${TWITCH_CHANNEL}`;
+const TWITCH_PARENTS = ['michealrayberry.com', 'www.michealrayberry.com', 'michaelrayberry.com', 'www.michaelrayberry.com',
+  ...String(process.env.TWITCH_PARENTS || '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9.-]+$/i.test(s))];
+const TWITCH_EMBED = `https://player.twitch.tv/?channel=${TWITCH_CHANNEL}&${TWITCH_PARENTS.map((p) => `parent=${p}`).join('&')}&muted=true&autoplay=true`;
 let TEST_STREAM_ID = '';
-const TEST_STREAM_FALLBACK = 'https://youtube.com/live/jPD7ZaSzKWk';
-const ytIdOf = (v) => (String(v || '').trim().match(/(?:live\/|v=|youtu\.be\/|embed\/|^)([\w-]{11})(?:[?&#]|$)/) || [])[1] || '';
 function testDayLabel(n) { return `T-${TEST_SPAN - n + 1}`; }
 function applyTestPhase(file, text) {
   const rel = path.relative(ROOT, file).split(path.sep).join('/');
@@ -2763,17 +2769,9 @@ function observerReceivedPage() {
 function livePage(supervision = [], violations = [], agreementActive = false, effectiveDate = '', publicUrlsEnabled = false) {
   const canonical = `${SITE_ORIGIN}/live/`;
   const title = 'Evening Supervision — Micheal Ray Berry';
-  const description = 'Evening Supervision: current status, the live stream during a confirmed session, published operating rules, and historical session outcomes.';
+  const description = 'Evening Supervision: current status, the Twitch live stream during a confirmed session, published operating rules, and historical session outcomes.';
   const SESSION_START = START_DATE;
-  const YT_CHANNEL_ID = String(process.env.YT_CHANNEL_ID || '').trim();
-  // YT_LIVE_VIDEO_ID (id or youtube.com/live/<id> URL) pins one broadcast —
-  // used for stream tests; it wins over the channel's current live stream.
-  const pinned = (String(process.env.YT_LIVE_VIDEO_ID || '').trim().match(/(?:live\/|v=|youtu\.be\/|^)([\w-]{11})(?:[?&#]|$)/) || [])[1] || '';
-  const liveSrc = pinned
-    ? `https://www.youtube.com/embed/${pinned}?autoplay=1&mute=1`
-    : /^UC[\w-]{22}$/.test(YT_CHANNEL_ID)
-      ? `https://www.youtube.com/embed/live_stream?channel=${YT_CHANNEL_ID}&autoplay=1&mute=1`
-      : '';
+  const liveSrc = TWITCH_EMBED;
   const vioByDate = new Map(violations.map((v) => [v.date, v]));
   const today = todayEtIso();
   const dataBlock = {
@@ -2846,7 +2844,7 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
       .detail div{padding:12px 14px 12px 0;display:flex;flex-direction:column;gap:4px}
       .detail b{font:600 10px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#8A8983}
       .detail span{font:600 16px/1.3 'IBM Plex Mono',ui-monospace,monospace}
-      .embed{margin:0;background:#000;aspect-ratio:16/9;max-width:100%;display:none}
+      .embed{margin:0 0 16px;background:#000;aspect-ratio:16/9;max-width:100%;display:none;border:1px solid var(--ink)}
       .embed iframe{width:100%;height:100%;border:0;display:block}
       .teststream{margin:0 0 28px;border:1px solid var(--ink)}
       .ts-label{margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font:700 13px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px}
@@ -2891,14 +2889,14 @@ function livePage(supervision = [], violations = [], agreementActive = false, ef
     <div class="sup-wrap">
       ${TEST_PHASE && TEST_STREAM_ID ? `<section class="teststream" aria-label="Test stream">
         <p class="ts-label"><span class="lamp on"></span>Test stream · not an official session</p>
-        <figure class="ts-embed"><iframe src="https://www.youtube.com/embed/${TEST_STREAM_ID}?autoplay=1&amp;mute=1" title="Evening Supervision — test stream" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe></figure>
-        <p class="ts-note">Shown during the testing phase to check the camera and stream. The official record begins ${htmlEscape(longDate(LAUNCH_DATE))}. <a href="https://www.youtube.com/watch?v=${TEST_STREAM_ID}" rel="noopener">Open on YouTube</a></p>
+        <figure class="ts-embed"><iframe src="${htmlEscape(TWITCH_EMBED)}" title="Evening Supervision — test stream (Twitch)" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe></figure>
+        <p class="ts-note">Shown during the testing phase to check the camera and stream. The official record begins ${htmlEscape(longDate(LAUNCH_DATE))}. <a href="${TWITCH_URL}" rel="noopener">Open on Twitch</a></p>
       </section>` : ''}
+      <figure class="embed" data-live-embed data-src="${htmlEscape(liveSrc)}" data-fallback="${TWITCH_URL}"></figure>
       <div class="status">
         <div class="line" data-live-status role="status" aria-live="polite"><span class="lamp"></span>CHECKING SCHEDULE…</div>
         <div class="detail" data-live-detail></div>
       </div>
-      <figure class="embed" data-live-embed data-src="${htmlEscape(liveSrc)}" data-fallback="https://www.youtube.com/@michealrayberry/live"></figure>
 
       <h2 class="sup">Evening Supervision</h2>
       <p style="max-width:680px">${agreementActive
@@ -3426,7 +3424,7 @@ async function main() {
     if (TEST_PHASE) {
       START_DATE = testStart;
       TEST_SPAN = Math.round((Date.parse(`${LAUNCH_DATE}T12:00:00Z`) - Date.parse(`${testStart}T12:00:00Z`)) / 86400000);
-      TEST_STREAM_ID = ytIdOf(siteState.test_stream_url) || ytIdOf(process.env.YT_LIVE_VIDEO_ID) || ytIdOf(TEST_STREAM_FALLBACK);
+      TEST_STREAM_ID = TWITCH_CHANNEL;
       console.warn(`TESTING PHASE: record runs from ${testStart} (T-${TEST_SPAN}); official Day 1 = ${LAUNCH_DATE}.`);
     }
   }

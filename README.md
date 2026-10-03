@@ -27,10 +27,11 @@ may be inferred from the deployment itself.
   **milestone reached**. A milestone becomes official only after the required
   milestone video and explicit Accountability Partner verification.
 - Public live supervision is ON (user ruling, Oct 3 2026). During a confirmed
-  session /live/ embeds the YouTube live stream and the homepage module reads
-  LIVE NOW. Set the Cloudflare Pages environment variable `YT_CHANNEL_ID` (UC…)
-  for the embed;
-  without it /live/ links to youtube.com/@michealrayberry/live.
+  session /live/ embeds the Twitch live stream (twitch.tv/michealrayberry) and
+  the homepage module reads LIVE NOW. Optional Cloudflare Pages variables:
+  `TWITCH_CHANNEL` (default michealrayberry) and `TWITCH_PARENTS` (extra
+  hostnames, comma-separated, e.g. the *.pages.dev preview). YouTube stays the
+  archive for recorded sessions.
 
 ## Non-negotiable privacy boundaries
 

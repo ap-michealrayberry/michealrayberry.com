@@ -183,6 +183,20 @@ function computeValues(ctx) {
     verification: esc(v.verification || (v.state === 'resolved' ? 'Verified by the AP' : v.state === 'corrected' ? 'Awaiting AP verification' : '—')),
     corrections: (v.corrections || []).map(esc), hasCorrections: (v.corrections || []).length > 0,
   }));
+  /* What is owed right now: the oldest open entry, its level by position in
+     the accumulated count (§8.1, capped at 3) and the 72-hour deadline (§8.3). */
+  const ordered = publicViolations.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const owedIdx = ordered.findIndex((v) => v.state === 'open');
+  let owedLabel = '', owedHref = '/violations/', owedDue = '';
+  if (owedIdx >= 0) {
+    const v = ordered[owedIdx];
+    const level = Math.min(3, owedIdx + 1), mins = { 1: 10, 2: 20, 3: 30 }[level];
+    const notice = String(v.eventVerifiedAt || v.date).slice(0, 10);
+    const due = new Date(notice + 'T12:00:00Z'); due.setUTCDate(due.getUTCDate() + 3);
+    owedDue = due.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
+    owedLabel = 'Level ' + level + ' corner time · ' + mins + ' minutes';
+    owedHref = '/violations/' + v.slug + '/';
+  }
   const violDates = publicViolations.map((v) => v.date).sort();
   const lastViol = violDates.at(-1) || null;
   const daysBetween = (later, earlier) => Math.round((
@@ -305,6 +319,8 @@ function computeValues(ctx) {
         : (rawDay < 1 ? 'Record not yet started' : packetDone ? 'Today’s required media and weight filed' : 'Today’s packet due'),
     todayPacketLabel: !agreementExecuted ? 'No filing is due · execution not verified'
       : rawDay < 1 ? '' : (packetDone ? 'Required media and weight filed · ' : 'Due · ') + todayIso,
+    hasOwed: agreementExecuted && !!owedLabel, noOwed: !(agreementExecuted && owedLabel),
+    owedLabel: esc(owedLabel), owedHref, owedDue: esc(owedDue),
     _chart: chart,
   };
 }
