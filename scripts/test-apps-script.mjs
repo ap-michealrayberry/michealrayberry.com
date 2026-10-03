@@ -7,10 +7,6 @@ let uuidCounter = 0;
 const scriptProperties = new Map([['SEAL_SECRET', 'test-only-seal-secret']]);
 const context = {
   Utilities: {
-    formatDate(date, timezone, pattern) {
-      if (pattern === 'yyyy-MM-dd') return new Intl.DateTimeFormat('en-CA', {timeZone: timezone}).format(date);
-      throw new Error('Unexpected test date pattern: ' + pattern);
-    },
     DigestAlgorithm: { SHA_256: 'sha256' },
     Charset: { UTF_8: 'utf8' },
     computeDigest(_algorithm, input) {

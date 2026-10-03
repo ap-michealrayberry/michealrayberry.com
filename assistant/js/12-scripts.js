@@ -315,7 +315,7 @@
     var change = startW != null && endW != null ? +(endW - startW).toFixed(1) : null;
     var totalChange =
       dayOneWeight != null && endW != null ? +(endW - dayOneWeight).toFixed(1) : null;
-    var remaining = endW != null ? +(endW - MRB.config.PROJECT.goalWeightLb).toFixed(1) : null;
+    var remaining = endW != null ? +(endW - 200).toFixed(1) : null;
 
     var open = viol.filter(function (v) {
       return v.open;
@@ -332,7 +332,7 @@
     if (startW != null) lines.push("Weight at start of week: " + startW + " pounds.");
     if (endW != null) lines.push("Weight at end of week: " + endW + " pounds.");
     if (change != null) lines.push("Change across the week: " + change + " pounds.");
-    if (totalChange != null) lines.push("Change from the declared " + MRB.config.PROJECT.startWeightLb + "-pound baseline: " + totalChange + " pounds.");
+    if (totalChange != null) lines.push("Change from the declared 340-pound baseline: " + totalChange + " pounds.");
     if (remaining != null) lines.push("Distance remaining to two hundred: " + remaining + " pounds.");
     if (open.length) {
       lines.push("Open entries: " + open.length + ".");
@@ -395,7 +395,7 @@
   function confirmationScript(ctx) {
     return (
       "I am Micheal Ray Berry. This is my participant statement for Accountability Partner review concerning the Public Accountability Project terms, version " +
-      (ctx.version || MRB.config.PROJECT.edition) +
+      (ctx.version || "1") +
       ", recorded on " +
       fmtDateLong(ctx.date) +
       ". " +

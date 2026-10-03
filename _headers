@@ -1,8 +1,8 @@
-# Header rules for Cloudflare Pages.
+# Header rules (Netlify _headers format).
 #
 # Keep ALL comments at the top of this file. A '#' line inside or directly
 # above a path block made an earlier host skip that block silently — that once
-# reduced this file to 5 of its 10 rules; the habit costs nothing on Cloudflare Pages.
+# reduced this file to 5 of its 10 rules; the habit costs nothing on Netlify.
 #
 # The CSP is a containment boundary rather than an XSS cure. Scripts are
 # same-origin; the capture instrument may connect only to its configured Apps
@@ -21,7 +21,7 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Cross-Origin-Opener-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self' https://challenges.cloudflare.com blob: data: https://script.google.com https://script.googleusercontent.com https://api.elevenlabs.io https://www.googleapis.com https://storage.googleapis.com; worker-src 'self' blob:; frame-src 'self' https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://player.twitch.tv https://embed.twitch.tv; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self' blob: data: https://script.google.com https://script.googleusercontent.com https://api.elevenlabs.io https://www.googleapis.com https://storage.googleapis.com; worker-src 'self' blob:; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.twitch.tv https://embed.twitch.tv; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate

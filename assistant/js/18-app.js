@@ -452,7 +452,7 @@
         MRB.ui.byId("btn-preflight-start").disabled = false;
         return;
       }
-      figures = MRB.scripts.weeklyFigures(recordCache, weekStart, MRB.config.PROJECT.startWeightLb);
+      figures = MRB.scripts.weeklyFigures(recordCache, weekStart, 340);
     }
 
     try {
@@ -504,7 +504,7 @@
     var brand = " | Micheal Ray Berry"; // short suffix survives YouTube's ~70-char truncation; the project name lives in the channel + description
     var dayN = ytPad3(ctx.day);
     var tail =
-      "\n\nPublic Accountability Project — declared " + MRB.config.PROJECT.startWeightLb + " lb start and " + MRB.config.PROJECT.goalWeightLb + " lb goal. The agreement page reports current applicability. " +
+      "\n\nPublic Accountability Project — declared 340 lb start and 200 lb goal. The agreement page reports whether the proposed daily documentation standard is currently in force. " +
       "The official record is " + base + "/. Recorded through the official Recording Assistant; " +
       "displayed codes and clocks assist review but do not independently prove capture time or authenticity.\n" +
       "Agreement: " + base + "/agreement\nContact: ap@michealrayberry.com";
@@ -544,7 +544,7 @@
       return {
         title: "Project Announcement — Day 1 · " + ctx.date + brand,
         desc:
-          "Announcement of the Micheal Ray Berry Public Accountability Project: declared " + MRB.config.PROJECT.startWeightLb + " lb start, " + MRB.config.PROJECT.goalWeightLb + " lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Official Day 1 is " + MRB.config.PROJECT.startDate + "." +
+          "Announcement of the Micheal Ray Berry Public Accountability Project: declared 340 lb start, 200 lb goal, and a proposed daily public documentation standard. Agreement execution is reported separately. Day 1 is August 31, 2026." +
           "\nThe record: " + base + "/\nThe agreement: " + base + "/agreement" + tail,
       };
     }
@@ -672,7 +672,7 @@
         "Reason: " +
         (outcome.reason || "invalidation") +
         "\n\nAn invalidated session is discarded in full. " +
-        "No partial corrective is saved as a shorter session. For pain, dizziness, numbness, injury concerns, or an emergency, stop and document the reason for AP rescheduling. Do not immediately restart or add time after a safety stop.";
+        "No partial corrective is saved as a shorter session. Restart from zero when ready.";
       return;
     }
 
@@ -873,7 +873,6 @@
     return !!tok && until > Date.now();
   }
   function lockNow() {
-    MRB.api.postJson({ action: "logout" }).catch(function () {});
     localStorage.removeItem("mrb_unlock_token");
     localStorage.removeItem("mrb_unlock_until");
     MRB.config.save({ demoMode: false });
@@ -881,12 +880,12 @@
   }
   async function tryUnlock(ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
-    var dk = "SERVER-MANAGED";
+    var dk = (MRB.ui.byId("lock-device-key").value || "").trim();
     var ac = (MRB.ui.byId("lock-ap-code").value || "").trim();
     var err = MRB.ui.byId("lock-error");
     var btn = MRB.ui.byId("btn-unlock");
     err.hidden = true;
-    if (!ac) { err.textContent = "The Accountability Partner unlock code is required."; err.hidden = false; return; }
+    if (!dk || !ac) { err.textContent = "Both keys are required."; err.hidden = false; return; }
     btn.disabled = true;
     try {
       MRB.config.save({ demoMode: false });

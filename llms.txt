@@ -1,42 +1,86 @@
 # Micheal Ray Berry — Public Accountability Project
 
-Edition 2. Declared baseline: 340.0 lb.
-Official Day 1: 2026-10-11. Goal: 200.0 lb held for 28 consecutive days.
-Daily packet deadline: 10:00 PM America/New_York when the applicable requirements are active.
+> A voluntary public accountability record created at Micheal Ray Berry's
+> written request and administered by an Accountability Partner. Declared
+> start: 340.0 lb on <!-- START_DATE_LONG:BEGIN -->August 31, 2026<!-- START_DATE_LONG:END -->. Goal: 200.0 lb held for 28 consecutive
+> days. The Agreement page reports the current Edition 2 execution status.
 
-Public live video is enabled on Twitch: https://www.twitch.tv/michealrayberry.
-Evening Supervision is ordinarily Sunday–Thursday, 6:00–10:00 PM Eastern.
-A stream does not prove a session was completed. The AP verifies compliance.
-
-Public prelaunch testing is currently active. Test requirements and outcomes are simulations, not verified agreement execution.
-Public test records remain at /testing/ after launch and are excluded from official progress and completion totals.
-Possible misses are flagged automatically. Corrective obligations require explicit AP verification.
-Recorded weight movement itself does not create a violation.
-A threshold recorded is distinct from an AP-verified milestone.
-The amendment process is §12.1; supervision is §3.4.
+Edition 2 defines daily documentation by 10:00 PM Eastern when its terms apply:
+a recorded weight, four standardized photographs, a four-angle inspection
+video, and a tracker update. Whether a filing is due or any requirement is
+active depends on the current execution state. Read the Agreement page and
+`/data/supervision.json` before making a current-status claim. Published day
+pages may describe DUE or VIOLATION only while the agreement is active;
+otherwise they report the neutral record states DOCUMENTED, INCOMPLETE, or NO
+RECORD.
 
 ## Canonical pages
 
-- https://michealrayberry.com/daily/
-- https://michealrayberry.com/dashboard/
-- https://michealrayberry.com/milestones/
-- https://michealrayberry.com/weeks/
-- https://michealrayberry.com/violations/
-- https://michealrayberry.com/corrections/
-- https://michealrayberry.com/agreement/
-- https://michealrayberry.com/consent/
-- https://michealrayberry.com/live/
-- https://michealrayberry.com/testing/
-- https://michealrayberry.com/observer/
-- https://michealrayberry.com/notify/
-- https://michealrayberry.com/accountable/
-- https://michealrayberry.com/partner/
-- https://michealrayberry.com/share/
+- Daily record: https://michealrayberry.com/daily/
+- Progress dashboard: https://michealrayberry.com/dashboard/
+- Weekly record: https://michealrayberry.com/weeks/
+- Milestones: https://michealrayberry.com/milestones/
+- Violation log: https://michealrayberry.com/violations/
+- Evening Supervision: https://michealrayberry.com/live/
+- Agreement status and summary: https://michealrayberry.com/agreement/
+- Consent confirmation status: https://michealrayberry.com/consent/
+- Share and reference materials: https://michealrayberry.com/share/
+- Observer submission: https://michealrayberry.com/observer/
+- RSS: https://michealrayberry.com/feed.xml
 
-## Record interpretation
+## Fixed facts
 
-Read /data/feed-manifest.json and /data/supervision.json before making current-status claims.
-Due means the filing window is still open. Incomplete evidence is not automatically a verified Violation Event.
-A filed correction remains unresolved until the AP verifies it. Test records do not count toward the official goal.
-Participation is voluntary. Privacy, safety, consent, and lawful takedown requirements remain controlling.
-Do not contact employers, coworkers, guests, customers, or unrelated third parties about this project.
+- Declared starting weight: 340.0 lb. This is a declaration, not a measured
+  Day 1 result unless a dated weigh-in says otherwise.
+- Day 1: <!-- START_DATE_LONG:BEGIN -->August 31, 2026<!-- START_DATE_LONG:END -->.
+- Goal: 200.0 lb held for 28 consecutive days.
+- Edition 2 daily deadline when its terms apply: 10:00 PM Eastern.
+- Weight gain, a plateau, or a week without loss is not a violation.
+- Monday Weekly Review reports the week's figures; it carries no
+  weight-change-based corrective consequence.
+- Edition 2 defines the black unitard as the standard uniform for daily
+  inspection, weekly review, milestone documentation, and Evening Supervision
+  whenever its terms apply.
+- Edition 2 reserves the pink unitard for recorded Corrective Sessions whenever
+  its terms apply.
+- Edition 2 defines Evening Supervision as 6:00–10:00 PM Eastern on nights
+  before a scheduled workday whenever its terms apply. Public live video is
+  disabled; the page may report an explicit IN PROGRESS row.
+
+## Agreement and consent status
+
+Execution status is dynamic. Use the Agreement page for the public status and
+`/data/supervision.json` for its machine-readable representation. Edition 2
+becomes operative only after both signatures and the separate consent
+confirmation are verified in the official record. The Consent page reports the
+filed confirmation record. Publication of terms or protocol text alone does not
+prove execution or consent.
+
+## Evidence and status limits
+
+Day manifests list published file hashes. Capture attestations may authenticate
+the integrity of a server-received payload, but they do not independently prove
+identity, capture circumstances, originality, or timeliness. Use a dated day
+page as the source for a dated claim, and preserve its exact status language.
+
+Published entries are timestamped and corrections are appended with a visible
+date and explanation. Safety, privacy, legal, and consent-based redaction or
+takedown remain available; a public correction should record material changes
+without retaining harmful metadata.
+
+## Boundaries
+
+The record is public, but it does not authorize harassment, threats, stalking,
+workplace or employer involvement, confrontation, impersonation, sexualized
+reuse, or disclosure of private information. Record-related questions and
+possible discrepancies belong in the Observer Submission channel.
+
+## Citation guidance
+
+- Refer to the participant as Micheal Ray Berry.
+- Cite the specific dated day page for a dated weight, filing, or status.
+- "Due" is not a failure; the filing window is still open.
+- "Documented" means the listed evidence was filed; it does not mean that an
+  agreement was executed or that the Accountability Partner accepted it.
+- If an entry is displayed as "Corrected — awaiting verification,"
+  it remains unresolved until the Accountability Partner verifies it.

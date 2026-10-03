@@ -1,47 +1,3 @@
-/* PROJECT_CONFIG:BEGIN — generated; edit project-config-v2.json, then npm run sync-config. */
-var PROJECT_FACTS = {
-  "schemaVersion": 1,
-  "edition": 2,
-  "person": "Micheal Ray Berry",
-  "siteOrigin": "https://michealrayberry.com",
-  "startDate": "2026-10-11",
-  "testStartDate": "2026-10-03",
-  "startWeightLb": 340,
-  "goalWeightLb": 200,
-  "completionDays": 28,
-  "milestonesLb": [
-    320,
-    300,
-    275,
-    250,
-    225,
-    200
-  ],
-  "deadlineEt": "22:00",
-  "supervision": {
-    "section": "3.4",
-    "startDate": "2026-10-11",
-    "nights": [
-      0,
-      1,
-      2,
-      3,
-      4
-    ],
-    "startEt": "18:00",
-    "endEt": "22:00",
-    "publicLiveEnabled": true,
-    "twitchChannel": "michealrayberry"
-  },
-  "amendmentSection": "12.1",
-  "correctionMinutes": [
-    10,
-    20,
-    30
-  ]
-};
-/* PROJECT_CONFIG:END */
-
 /**
  * MRB Public Accountability Project — record engine
  * ═══════════════════════════════════════════════════════════════════
@@ -75,21 +31,21 @@ var CONFIG = {
 
 var AP_EMAIL = 'ap@michealrayberry.com';
 var MRB_EMAIL = 'contact@michealrayberry.com';
-var PROJECT_START_FALLBACK = PROJECT_FACTS.startDate;
-var TEST_START_FALLBACK = PROJECT_FACTS.testStartDate;
-var AGREEMENT_EDITION = PROJECT_FACTS.edition;
+var PROJECT_START_FALLBACK = '2026-10-11';
+var TEST_START_FALLBACK = '2026-10-03';
+var AGREEMENT_EDITION = 2;
 /* Public supervision video switch. ON by user ruling, Oct 3 2026: /live/ embeds
    the Twitch live stream (twitch.tv/michealrayberry) during a confirmed session and the homepage carries
    the Evening Supervision module. Agreement execution still gates whether any
    session is REQUIRED. */
-var PUBLIC_SUPERVISION_VIDEO_ENABLED = PROJECT_FACTS.supervision.publicLiveEnabled;
+var PUBLIC_SUPERVISION_VIDEO_ENABLED = true;
 /* Day 1 of the CURRENT attempt. The Site State key `start_date` overrides the
    fallback (cached 5 min), so a restart is ONE sheet edit — script, publisher,
    and SPA all read the same cell. */
 var PROJECT_LAUNCH = (function () {
   try {
     var c = CacheService.getScriptCache().get('mrb_start_date');
-    if (c === PROJECT_START_FALLBACK) return c;
+    if (c) return c;
     // Module loading must be read-only. Setup/migration helpers create and
     // protect sheets deliberately; a gate-adjacent read never does so.
     var stateSheet = ssReadOnly().getSheetByName('Site State');
@@ -109,7 +65,7 @@ var PROJECT_LAUNCH = (function () {
    if the agreement were active: checks run, violations are declared, emails
    are sent with a [TEST] prefix and T-n day labels. It ends by itself on the
    launch date — PROJECT_START becomes the official Day 1 and every earlier row
-   moves to the permanent public test archive (never counted in official totals). */
+   falls outside the agreement period (never counted, never published). */
 var TEST_STATE = (function () {
   var out = { mode: '', start: TEST_START_FALLBACK };
   try {
@@ -131,7 +87,7 @@ var TEST_STATE = (function () {
 })();
 function testPhaseActive(today) {
   today = today || Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
-  return PROJECT_LAUNCH === PROJECT_FACTS.startDate && TEST_STATE.start === PROJECT_FACTS.testStartDate && TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
+  return TEST_STATE.mode !== 'off' && TEST_STATE.start < PROJECT_LAUNCH &&
     TEST_STATE.start <= today && today < PROJECT_LAUNCH;
 }
 var TEST_PHASE = testPhaseActive();
@@ -176,16 +132,22 @@ var TABS = {
      independent safety switch is deliberately enabled; only an AP ruling may
      verify COMPLETED. Public output receives sanitized status only. */
   'Supervision':    ['date', 'required', 'status', 'start', 'end', 'stream_url', 'note'],
+  /* MRB portal filings (AP-only, never published). Contests: one per verified
+     event, inside 48 h of the notice. Portal Filings: corrective links queued
+     for the AP to attach through the console. */
+  'Contests':       ['received_at', 'violation_id', 'violation_date', 'reason', 'evidence_url', 'status', 'window_closes'],
+  'Portal Filings': ['received_at', 'kind', 'violation_id', 'assignment_id', 'url', 'status'],
   /* Observer submissions relayed by action 'observer' (shared secret
-     OBSERVER_SECRET). The Cloudflare /api/observer relay accepts validated Turnstile submissions. AP-only; never read
+     OBSERVER_SECRET). On Netlify the /observer/ form posts to Netlify Forms
+     instead, so this tab fills only if a relay is wired. AP-only; never read
      by the site. review = received | dismissed | verified | published | actioned. */
   'Observer':       ['received_at', 'type', 'message', 'name', 'email', 'source_url', 'quotable', 'review', 'ap_note'],
 };
 
 /* §3.4: nights preceding a scheduled workday — Sun–Thu — 18:00–22:00 ET,
-   from the versioned Edition 2 start date, or the explicit test start while testing. The nightly check at 22:20 rules on the night. */
-var SUPERVISION_START = TEST_PHASE ? TEST_STATE.start : PROJECT_FACTS.supervision.startDate;
-var SUPERVISION_NIGHTS = PROJECT_FACTS.supervision.nights; // JS getDay: Sun=0 … Thu=4
+   from Sunday 13 Sept 2026. The nightly check at 22:20 rules on the night. */
+var SUPERVISION_START = '2026-09-13';
+var SUPERVISION_NIGHTS = [0, 1, 2, 3, 4]; // JS getDay: Sun=0 … Thu=4
 function supervisionScheduled(ds) {
   if (ds < SUPERVISION_START) return false;
   var a = ds.split('-').map(Number);
@@ -1461,7 +1423,7 @@ function unlockOk(c) {
 }
 
 var ASSISTANT_UNLOCK_TOKEN_VERSION = 'MRBU1';
-var ASSISTANT_UNLOCK_TOKEN_MS = 2 * 60 * 60 * 1000;
+var ASSISTANT_UNLOCK_TOKEN_MS = 14 * 24 * 60 * 60 * 1000;
 var ASSISTANT_UNLOCK_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 function sha256Text(value) {
@@ -1615,6 +1577,10 @@ function keyOk(k) {
    unlock requires the device key + AP-supplied code; ap* requires the AP key. */
 
 function doGet(e) {
+  if (e && e.parameter && /^(subscribe|confirm|unsubscribe)$/.test(String(e.parameter.sub || ''))) {
+    try { return handleSubscribeAction(e.parameter); }
+    catch (se) { return jsonOut({ ok: false, error: String(se.message || se) }); }
+  }
   try {
     return routeGet(e);
   } catch (err) {
@@ -1751,7 +1717,6 @@ function doPost(e) {
     if (e && e.postData && e.postData.contents && String(e.postData.contents).charAt(0) === '{') {
       var obj = null;
       try { obj = JSON.parse(e.postData.contents); } catch (perr) {}
-      if (obj && obj.action === 'subscribe' && /^(subscribe|confirm|unsubscribe)$/.test(String(obj.sub || ''))) return handleSubscribeAction(obj);
       if (obj && obj.action === 'unlock') return handleUnlock(obj);
       if (obj && obj.action === 'attest') return deviceAuthorized(obj) ? handleAttest(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'packet') return deviceAuthorized(obj) ? handlePacket(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
@@ -1765,6 +1730,7 @@ function doPost(e) {
       if (obj && obj.action === 'observer') return observerOk(obj.secret) ? handleObserver(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action === 'vidinit') return deviceAuthorized(obj) ? handleVidInit(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
       if (obj && obj.action === 'vidchunk') return deviceAuthorized(obj) ? handleVidChunk(obj) : jsonOut({ ok: false, error: 'unauthorized or unlock expired' });
+      if (obj && obj.action && String(obj.action).indexOf('portal') === 0) return portalOk(obj.relay) ? handlePortalAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
       if (obj && obj.action && String(obj.action).indexOf('ap') === 0) return apOk(obj.key) ? handleApAction(obj) : jsonOut({ ok: false, error: 'unauthorized' });
     }
     return jsonOut({ ok: false, error: 'unknown action' });
@@ -4060,7 +4026,6 @@ function agreementExecutionState() {
     out.effectiveDate = [out.projectStart, out.mrbSignatureDate, out.apSignatureDate, out.consentDate, out.confirmationReviewDate]
       .sort().pop();
   }
-  if (out.projectStart && out.projectStart !== PROJECT_FACTS.startDate) out.error = 'Site State start_date differs from the versioned Edition 2 config';
   if (testPhaseActive(out.today)) {
     out.test = true;
     out.launchDate = PROJECT_LAUNCH;
@@ -4180,12 +4145,12 @@ function completionStreakAlert(activeGate) {
   for (var k = 0; k < 60; k++) {
     if (ds2 < gate.effectiveDate) break;
     var w2 = byDate[ds2];
-    if (w2 === undefined || w2 > PROJECT_FACTS.goalWeightLb) { if (k === 0) { ds2 = isoDateOffset(ds2, -1); continue; } break; } // today may not be filed yet
+    if (w2 === undefined || w2 > 200.0) { if (k === 0) { ds2 = isoDateOffset(ds2, -1); continue; } break; } // today may not be filed yet
     streak++;
     ds2 = isoDateOffset(ds2, -1);
   }
-  if (streak === 14 || streak === 21 || streak >= PROJECT_FACTS.completionDays) {
-    var key = 'COMPLETION_ALERT_' + (streak >= PROJECT_FACTS.completionDays ? PROJECT_FACTS.completionDays : streak);
+  if (streak === 14 || streak === 21 || streak >= 28) {
+    var key = 'COMPLETION_ALERT_' + (streak >= 28 ? 28 : streak);
     var props = PropertiesService.getScriptProperties();
     var recorded = withActiveAgreementMutation('the completion watch marker could be recorded', function () {
       if (props.getProperty(key)) return { changed: false, recorded: false };
@@ -4194,8 +4159,8 @@ function completionStreakAlert(activeGate) {
     });
     if (!recorded.recorded) return;
     MailApp.sendEmail(AP_EMAIL,
-      streak >= PROJECT_FACTS.completionDays ? 'COMPLETION CONDITION MET — ' + PROJECT_FACTS.completionDays + ' days at/under ' + PROJECT_FACTS.goalWeightLb + ' (§6.3)' : 'Completion watch — ' + streak + ' days at/under ' + PROJECT_FACTS.goalWeightLb,
-      streak >= PROJECT_FACTS.completionDays
+      streak >= 28 ? 'COMPLETION CONDITION MET — 28 days at/under 200 (§6.3)' : 'Completion watch — ' + streak + ' days at/under 200',
+      streak >= 28
         ? 'The tracker shows 28 consecutive days at or under 200.0 lbs.\n\nSchedule the official on-camera completion weigh-in (§6.3). Once verified, declare completion from the record sheet (MRB menu → Stage)'
         : streak + ' consecutive days at or under 200.0 lbs. At 28, the completion condition is met pending the official weigh-in.');
   }
@@ -4496,6 +4461,7 @@ function verifyViolationReview(rowNumber, finalText, gate, expectedIdentity) {
   });
   triggerDeploy();
   try { mrbViolationNotice(verified.row); } catch (e) {}
+  try { PropertiesService.getScriptProperties().setProperty('NOTICE_' + verified.marker.split('|')[2].slice(0, 40), new Date().toISOString()); } catch (pe) {}
   try {
     var lvl = consequenceForLevel(verifiedViolationCount());
     var esc = /72-hour corrective deadline/i.test(verified.text);
@@ -5280,9 +5246,10 @@ function handleApAction(obj) {
   }
 }
 
-/* ═════ BUILD HOOK (Cloudflare Pages) ═════
-   Pages project → Settings → Builds & deployments → Deploy hooks (main),
-   copy the private URL, then run setBuildHook. */
+/* ═════ BUILD HOOK (Netlify) ═════
+   Netlify → Site configuration → Build & deploy → Build hooks → Add (branch
+   main), copy the URL, then run setBuildHook. Host-neutral: any URL that
+   accepts an empty POST works (Cloudflare Pages deploy hooks too). */
 
 function setBuildHook(url) {
   PropertiesService.getScriptProperties().setProperty('BUILD_HOOK', String(url || '').trim());
@@ -5304,7 +5271,7 @@ function setSecondaryBuildHook(url) {
 function triggerDeploy() {
   var props = PropertiesService.getScriptProperties();
   var hooks = [
-    { name: 'Cloudflare Pages', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
+    { name: 'Netlify', url: props.getProperty('BUILD_HOOK') || props.getProperty('NETLIFY_HOOK') },
     { name: 'Secondary host (unused)', url: props.getProperty('BUILD_HOOK_2') },
   ].filter(function (x) { return !!x.url; });
 
@@ -5330,7 +5297,7 @@ function triggerDeploy() {
   var h = null;
   if (!h) {
     Logger.log('NO BUILD HOOK SET — nothing was triggered.\n' +
-      'Cloudflare Pages → Settings → Builds & deployments → Deploy hooks →\n' +
+      'Netlify → Site configuration → Build & deploy → Build hooks →\n' +
       'Add build hook (branch main), then run\n' +
       "setBuildHook('https://api.netlify.com/build_hooks/...')");
     return;
@@ -6068,8 +6035,8 @@ function handleMyState() {
   // The agreement's baseline is declared, not inferred from the first scale
   // reading. Keep the earliest observed measurement available as a separate
   // fact so a late first sync cannot silently rewrite the 340 lb declaration.
-  out.start = PROJECT_FACTS.startWeightLb;
-  out.declaredStart = PROJECT_FACTS.startWeightLb;
+  out.start = 340;
+  out.declaredStart = 340;
   out.earliestMeasurement = weights.length ? weights[0] : null;
   out.latest = weights.length ? weights[weights.length - 1] : null;
   out.history = weights.slice(-30);
@@ -6310,7 +6277,7 @@ function sendMail(to, subject, body) {
     if (TEST_PHASE) {
       subject = '[TEST] ' + testLabels(subject);
       body = testLabels(body) + '\n\n— Testing phase. The official record begins ' + PROJECT_LAUNCH +
-        '. Test entries remain at https://michealrayberry.com/testing/ after launch and do not count toward official progress.';
+        '. Entries dated before then are test entries and leave the public record at launch.';
     }
     MailApp.sendEmail(to, subject, body);
     return true;
@@ -6637,7 +6604,7 @@ function correctiveSubmittedWatch() {
   if (changed) stateSetWhileAgreementActive('the corrective-submission watch marker could be recorded', 'submitted_seen', JSON.stringify(seen));
 }
 
-var MILESTONES = PROJECT_FACTS.milestonesLb;
+var MILESTONES = [320, 300, 275, 250, 225, 200];
 
 function milestoneWatch() {
   var gate = activeAgreementGate('milestoneWatch');
@@ -6665,7 +6632,7 @@ function milestoneWatch() {
     changed = true;
     if (priming) continue;
     var day = dayOf(latestDate);
-    var final = target === PROJECT_FACTS.goalWeightLb;
+    var final = target === 200;
     mailMRB('THRESHOLD RECORDED — ' + target + ' lb scale row on Day ' + day,
       'The scale row for ' + latestDate + ' recorded ' + latest + ' lb, at or below the ' + target + '-pound threshold.\n\n' +
       'This is a threshold observation, not an official milestone. The milestone requires\n' +
@@ -6927,10 +6894,7 @@ function handleSubscribeAction(p) {
     if (!/^[a-f0-9]{32}$/.test(token)) return jsonOut({ ok: false, error: 'invalid token' });
     for (var j = 1; j < vals.length; j++) {
       if (String(vals[j][2]) !== token) continue;
-      if (p.sub === 'confirm') {
-        if (vals[j][1] === 'ACTIVE') return jsonOut({ ok: true, state: 'active' });
-        if (vals[j][1] !== 'PENDING' || now - new Date(vals[j][3]) > 48 * 60 * 60 * 1000) return jsonOut({ ok: false, error: 'expired token' });
-        sh.getRange(j + 1, 2).setValue('ACTIVE'); sh.getRange(j + 1, 5).setValue(now); return jsonOut({ ok: true, state: 'active' }); }
+      if (p.sub === 'confirm') { sh.getRange(j + 1, 2).setValue('ACTIVE'); sh.getRange(j + 1, 5).setValue(now); return jsonOut({ ok: true, state: 'active' }); }
       if (p.sub === 'unsubscribe') { sh.getRange(j + 1, 2).setValue('UNSUBSCRIBED'); return jsonOut({ ok: true, state: 'unsubscribed' }); }
     }
     return jsonOut({ ok: false, error: 'unknown token' });
@@ -6987,4 +6951,193 @@ function subscriberWeeklyAudit() {
     'Evening Supervision: ' + (sup - supMissed) + ' of ' + sup + ' required sessions on the record' + (supMissed ? ' · ' + supMissed + ' MISSED' : '') + '\n' +
     'Open violations: ' + summary.open + ' · total on record: ' + summary.total + '\n\n' +
     'Weekly page: ' + SUB_SITE + '/weeks/\n');
+}
+
+
+/* ═════ MRB PORTAL — mrb.michealrayberry.com (user ruling Oct 3 2026) ═════
+   Cloudflare Access (email one-time PIN) gates the portal. Its Pages Function
+   verifies the Access JWT, maps the email to a role (mrb = Micheal; ap =
+   read-only) and relays here with the PORTAL_RELAY_KEY script property.
+   Micheal FILES ONLY: nothing here edits, resolves, excuses, or removes a
+   public record entry. Supervision Start is accepted only when the Function
+   has confirmed through the Twitch API that the channel is live. */
+var PORTAL_TWITCH_URL = 'https://www.twitch.tv/michealrayberry';
+function setPortalRelayKey(key) {
+  if (!/^[A-Za-z0-9_-]{32,}$/.test(String(key || ''))) throw new Error('key must be 32+ url-safe characters');
+  PropertiesService.getScriptProperties().setProperty('PORTAL_RELAY_KEY', key);
+}
+function portalOk(k) {
+  var expected = PropertiesService.getScriptProperties().getProperty('PORTAL_RELAY_KEY') || '';
+  return !!expected && secureTextEquals(String(k || ''), expected);
+}
+function portalNowEt() { return Utilities.formatDate(new Date(), 'America/New_York', "yyyy-MM-dd'T'HH:mm:ssXXX"); }
+function portalHm() { return Number(Utilities.formatDate(new Date(), 'America/New_York', 'HHmm')); }
+function portalCell(v) { return v instanceof Date ? Utilities.formatDate(v, 'America/New_York', "yyyy-MM-dd'T'HH:mm:ssXXX") : String(v == null ? '' : v).trim(); }
+
+function handlePortalAction(obj) {
+  var role = obj.role === 'mrb' ? 'mrb' : (obj.role === 'ap' ? 'ap' : '');
+  if (!role) return jsonOut({ ok: false, error: 'unknown role' });
+  try {
+    if (obj.action === 'portalstate') return jsonOut(portalState());
+    if (role !== 'mrb') return jsonOut({ ok: false, error: 'read-only access' });
+    if (obj.action === 'portalsupstart') return jsonOut(portalSupStart(obj));
+    if (obj.action === 'portalsupend') return jsonOut(portalSupEnd());
+    if (obj.action === 'portalcontest') return jsonOut(portalContest(obj));
+    if (obj.action === 'portalcorrective') return jsonOut(portalCorrectiveLink(obj));
+    return jsonOut({ ok: false, error: 'unknown portal action' });
+  } catch (e) {
+    return jsonOut({ ok: false, error: String(e.message || e) });
+  }
+}
+
+function portalNoticeAt(details) {
+  var stamped = PropertiesService.getScriptProperties().getProperty('NOTICE_' + details.marker.split('|')[2].slice(0, 40));
+  if (stamped) return new Date(stamped);
+  // No stamp (verified before the portal existed): treat the notice as the
+  // end of the verification day, ET — the later of the possible times.
+  var a = details.verifiedDate.split('-').map(Number);
+  var guess = new Date(Date.UTC(a[0], a[1] - 1, a[2], 23, 59, 59));
+  var off = Utilities.formatDate(guess, 'America/New_York', 'Z'); // e.g. -0400
+  var mins = (off.charAt(0) === '-' ? 1 : -1) * (Number(off.slice(1, 3)) * 60 + Number(off.slice(3, 5)));
+  return new Date(guess.getTime() + mins * 60000);
+}
+
+function portalContestRows() {
+  var v = tab('Contests').getDataRange().getValues();
+  var byId = {};
+  for (var i = 1; i < v.length; i++) byId[String(v[i][1])] = { received: portalCell(v[i][0]), status: String(v[i][5] || '') };
+  return byId;
+}
+
+function portalState() {
+  var base = JSON.parse(handleMyState().getContent());
+  var today = base.today;
+  var sr = supervisionRow(today);
+  base.supervision = {
+    scheduled: !!base.agreementActive && supervisionScheduled(today),
+    status: sr ? String(sr.vals[2] || '') : '',
+    start: sr ? portalCell(sr.vals[3]) : '',
+    end: sr ? portalCell(sr.vals[4]) : '',
+    window: '6:00–10:00 PM ET',
+  };
+  base.next = nextConsequence();
+  base.contestable = [];
+  var gate = agreementExecutionState();
+  if (gate.active) {
+    var rows = violationLogSheet().getDataRange().getValues();
+    var contests = portalContestRows();
+    var now = new Date();
+    for (var i = 1; i < rows.length; i++) {
+      var d = verifiedViolationDetails(rows[i], gate);
+      if (!d) continue;
+      var closes = new Date(portalNoticeAt(d).getTime() + 48 * 3600 * 1000);
+      var id = 'V-' + publicViolationToken(d.marker);
+      var filed = contests[id] || null;
+      if (closes < now && !filed) continue;
+      if (closes < new Date(now.getTime() - 14 * 864e5)) continue;
+      base.contestable.push({ id: id, date: d.date, what: participantSafeRecordText(d.text),
+        closes: closes.toISOString(), open: closes > now && !filed,
+        filed: filed ? filed.received : '', filedStatus: filed ? filed.status : '' });
+    }
+  }
+  var pf = tab('Portal Filings').getDataRange().getValues();
+  base.portalFilings = {};
+  for (var p = 1; p < pf.length; p++) base.portalFilings[String(pf[p][2])] = { received: portalCell(pf[p][0]), status: String(pf[p][5] || '') };
+  return base;
+}
+
+function portalSupStart(obj) {
+  if (obj.twitchLive !== true) return { ok: false, error: 'Twitch shows the channel offline. Start the stream on Twitch first.' };
+  var gate = activeAgreementGate('portal supervision start');
+  if (!gate) return { ok: false, error: 'Agreement execution is not active; no session is required.' };
+  var today = gate.today;
+  if (!supervisionScheduled(today)) return { ok: false, error: 'No Evening Supervision is scheduled tonight.' };
+  var hm = portalHm();
+  if (hm < 1745 || hm >= 2200) return { ok: false, error: 'Start opens at 5:45 PM ET and closes at 10:00 PM ET.' };
+  var now = portalNowEt();
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = supervisionSheet(), sr = supervisionRow(today);
+    if (sr && String(sr.vals[3] || '').trim()) return { ok: true, idempotent: true, start: portalCell(sr.vals[3]) };
+    if (sr && /^(MISSED|EXCEPTION|COMPLETED|SUBMITTED)/i.test(String(sr.vals[2] || ''))) return { ok: false, error: 'Tonight is already recorded as ' + sr.vals[2] + '.' };
+    var note = 'Started from the MRB portal; Twitch live confirmed via the Twitch API' + (obj.twitchStartedAt ? ' (stream began ' + String(obj.twitchStartedAt).slice(0, 25) + ')' : '') + '.';
+    if (sr) { sh.getRange(sr.row, 3, 1, 5).setValues([['IN PROGRESS', now, '', PORTAL_TWITCH_URL, note]]); }
+    else sh.appendRow([today, 'yes', 'IN PROGRESS', now, '', PORTAL_TWITCH_URL, note]);
+  } finally { lock.releaseLock(); }
+  triggerDeploy();
+  return { ok: true, start: now };
+}
+
+function portalSupEnd() {
+  var gate = activeAgreementGate('portal supervision end');
+  if (!gate) return { ok: false, error: 'Agreement execution is not active.' };
+  var today = gate.today, now = portalNowEt(), early = portalHm() < 2200;
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  var start;
+  try {
+    var sh = supervisionSheet(), sr = supervisionRow(today);
+    if (!sr || !String(sr.vals[3] || '').trim()) return { ok: false, error: 'No session was started tonight.' };
+    if (String(sr.vals[4] || '').trim()) return { ok: true, idempotent: true, end: portalCell(sr.vals[4]) };
+    start = portalCell(sr.vals[3]);
+    var note = String(sr.vals[6] || '') + ' Ended from the MRB portal at ' + now + (early ? ' — BEFORE the 10:00 PM ET required end.' : '.');
+    sh.getRange(sr.row, 3).setValue('SUBMITTED · awaiting AP verification');
+    sh.getRange(sr.row, 5).setValue(now);
+    sh.getRange(sr.row, 7).setValue(note.trim());
+  } finally { lock.releaseLock(); }
+  triggerDeploy();
+  mailAP('Evening Supervision submitted — ' + today + (early ? ' — EARLY END' : ''),
+    'Started ' + start + ', ended ' + now + (early ? ' (before the 10:00 PM ET required end)' : '') + '.\n\n' +
+    'Verify against the Twitch broadcast (' + PORTAL_TWITCH_URL + '/videos) and rule COMPLETED, or MISSED/EXCEPTION, from ' + AP_CONSOLE + '.');
+  return { ok: true, end: now, early: early };
+}
+
+function portalContest(obj) {
+  var gate = activeAgreementGate('portal contest');
+  if (!gate) return { ok: false, error: 'Agreement execution is not active.' };
+  var id = String(obj.id || '').trim();
+  var reason = String(obj.reason || '').trim();
+  var evidence = String(obj.evidence || '').trim();
+  if (reason.length < 20 || reason.length > 2000) return { ok: false, error: 'The reason must be 20–2,000 characters.' };
+  if (!/^https:\/\/[^\s<>"]{4,500}$/.test(evidence)) return { ok: false, error: 'An https evidence link is required.' };
+  var state = portalState();
+  var item = null;
+  for (var i = 0; i < state.contestable.length; i++) if (state.contestable[i].id === id) item = state.contestable[i];
+  if (!item) return { ok: false, error: 'That entry is not inside a contest window.' };
+  if (item.filed) return { ok: false, error: 'A contest for this entry is already on file.' };
+  if (!item.open) return { ok: false, error: 'The 48-hour contest window has closed. The determination stands.' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    if (portalContestRows()[id]) return { ok: false, error: 'A contest for this entry is already on file.' };
+    tab('Contests').appendRow([portalNowEt(), id, item.date, sheetText(reason, 2000, 'reason'), evidence, 'RECEIVED', item.closes]);
+  } finally { lock.releaseLock(); }
+  mailAP('CONTEST FILED — ' + id + ' (' + item.date + ')',
+    'Micheal contested this Violation Event inside the 48-hour window (closes ' + item.closes + ').\n\n' +
+    'Entry: ' + item.what + '\n\nReason:\n' + reason + '\n\nEvidence: ' + evidence + '\n\n' +
+    'Rule on it against the written rules only (§7). The Contests tab holds the filing.');
+  return { ok: true };
+}
+
+function portalCorrectiveLink(obj) {
+  var gate = activeAgreementGate('portal corrective link');
+  if (!gate) return { ok: false, error: 'Agreement execution is not active.' };
+  var id = String(obj.id || '').trim();
+  var url = youtubeUrlInput(obj.url);
+  var state = JSON.parse(handleMyState().getContent());
+  var item = null;
+  for (var i = 0; i < (state.corrective || []).length; i++) if (state.corrective[i].id === id) item = state.corrective[i];
+  if (!item) return { ok: false, error: 'No open corrective requirement matches that entry.' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var pf = tab('Portal Filings').getDataRange().getValues();
+    for (var r = 1; r < pf.length; r++) {
+      if (String(pf[r][2]) !== id || String(pf[r][1]) !== 'corrective-link') continue;
+      if (String(pf[r][4]) === url) return { ok: true, idempotent: true };
+      return { ok: false, error: 'A link for this entry is already queued. Write to the AP to replace it.' };
+    }
+    tab('Portal Filings').appendRow([portalNowEt(), 'corrective-link', id, item.assignmentId || '', url, 'AWAITING AP ATTACH']);
+  } finally { lock.releaseLock(); }
+  mailAP('Corrective link filed — ' + id,
+    'Micheal filed the public recording for ' + id + ' (' + item.violationDate + ', Level ' + item.level + ' · ' + item.minutes + ' min, due ' + item.due + '):\n\n' + url + '\n\n' +
+    'Check it against the verification standard (identity, uniform, elapsed time, unbroken take), then attach it from ' + AP_CONSOLE + '. Filing does not resolve the entry.');
+  return { ok: true };
 }

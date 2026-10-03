@@ -11,10 +11,6 @@ may be inferred from the deployment itself.
 
 ## Authoritative current state
 
-`project-config-v2.json` is the reviewed Edition 2 source: official Day 1 October 11, 2026, declared baseline 340.0 lb, goal 200.0 lb, and 28 consecutive days at goal. Keep the signed edition and this config aligned. After a reviewed change, run `npm run sync-config`; CI refuses mismatched generated server/assistant facts. Site State dates must match the versioned config.
-
-Public prelaunch testing remains enabled from October 3 through October 10. Test evidence and AP-reviewed outcomes remain at `/testing/` after launch and are excluded from official progress. A test gate runs simulated requirements; it does not verify signatures or consent. Keep test rows and published derivative assets in the source feeds so the archive can be rebuilt.
-
 - Edition 2 is the only current agreement version. It has no operative effect
   until the execution gate below reports `ACTIVE`.
 - Routine recordings use a plain black unitard. Recorded corrective sessions
@@ -32,20 +28,10 @@ Public prelaunch testing remains enabled from October 3 through October 10. Test
   milestone video and explicit Accountability Partner verification.
 - Public live supervision is ON (user ruling, Oct 3 2026). During a confirmed
   session /live/ embeds the Twitch live stream (twitch.tv/michealrayberry) and
-  the public Twitch player is available on /live/. Attendance and completion remain separate AP-reviewed states. Optional Cloudflare Pages variables:
+  the homepage module reads LIVE NOW. Optional Cloudflare Pages variables:
   `TWITCH_CHANNEL` (default michealrayberry) and `TWITCH_PARENTS` (extra
   hostnames, comma-separated, e.g. the *.pages.dev preview). YouTube stays the
   archive for recorded sessions.
-
-## October 3 design and content update
-
-The full project includes the earlier Cloudflare, security, form, configuration, public testing, and livestream repairs plus the refreshed public design. The homepage separates today’s documentation from corrections owed and tonight’s supervision. It shows the latest dated record, weekly summary, weight trend, completed corrections, a configured introduction recording, and clear watch/follow/report actions.
-
-The five main sections are Record, Live, Progress, Rules, and Participate. `scripts/public-design.mjs` owns the shared navigation and responsive styles; the footer keeps the detailed standards, archives, and participation pages easy to find. `site.template.html` remains the source for the homepage and core record pages. The existing project facts and agreement requirements are unchanged.
-
-The homepage introduction uses the existing participation statement. To show Micheal’s actual introduction recording, set `intro_video_url` in the reviewed Site State feed to its approved public URL. No recording or new photograph has been fabricated. The existing uniform photograph links to the full image.
-
-This package contains the complete build project: source, public assets, Cloudflare Functions, the Apps Script backend, tests, and deployment instructions. Production `dist/` is regenerated from the existing private reviewed feed configuration; temporary synthetic test output is excluded from the delivered source package. Upload the project files to the existing repository and keep the configured Cloudflare build command `npm run build`.
 
 ## Non-negotiable privacy boundaries
 
@@ -338,7 +324,6 @@ npm run test:audit
 npm run test:apps-script
 npm run test:assistant
 npm run test:release
-npm run test:functions
 npm run security:audit
 npm run build
 ```
@@ -380,9 +365,9 @@ successful.
 - Confirm all seven upstreams are sanitized views, the seal secret matches the
   Apps Script property, and no operational identifier appears in source, build
   logs, or `dist/`.
-- Keep public Twitch live video enabled. Archive recording links remain controlled separately by `PUBLIC_SUPERVISION_URLS_ENABLED`. The stream being available does not verify attendance or completion.
+- Keep both supervision-video switches off.
 - Deploy the Apps Script changes and run the explicit schema migration before
-  activating the new assistant. During the labeled public test period, exercise capture,
+  activating the new assistant. In a private test workbook, exercise capture,
   filing, rejection, stale-attempt refusal, reload recovery, completion, and
   resolution. Test real sheet protections and concurrent calls; local tests
   cannot validate Google-hosted permissions or transaction behavior.
@@ -393,13 +378,11 @@ successful.
 
 ## Observer submissions
 
-The Observer form posts to `/api/observer`; notifications post to `/api/subscribe`. Both use Turnstile, same-origin checks, honeypots, and a server-only POST relay to Apps Script. Observer messages remain private until AP review. Notifications require an emailed confirmation; pending confirmation links expire after 48 hours. Relay secrets never travel in query strings.
-
-Configure the Pages widget site key and private secrets as described in `DEPLOYMENT.md`. Cloudflare Functions compile from the root `functions/` directory; the public output is `dist/`. Do not deploy only the ZIP contents as static assets or omit Functions. Public testing deliberately exercises these real flows; every test email includes `[TEST]`.
-
-## Protected Recording Assistant
-
-`/assistant/` and `/api/assistant` require a verified Cloudflare Access JWT at the origin. The server verifies the signature, issuer, audience, and expiry, including on Pages aliases. The device key stays in the server environment. An AP unlock code creates a two-hour HttpOnly, Secure, SameSite cookie backed by the `ASSISTANT_SESSIONS` KV binding. The browser stores only a UI marker; it receives neither the device key nor the upstream unlock grant. Logout deletes the KV session and clears its cookie. Changing `ASSISTANT_SESSION_VERSION` revokes all grants. KV propagation is eventually consistent, so revocation is also enforced by expiration, Access, and the upstream key/code binding. Protected assets are not cached for offline use; already recorded captures remain in IndexedDB for recovery. Setup is in `DEPLOYMENT.md`.
+The current Netlify form is the active observer intake. Submissions remain
+private until the AP deliberately reviews and publishes allowed content. The
+Cloudflare relay is parked; if it is intentionally restored, configure
+`TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`, `OBSERVER_SECRET`, and
+`APPS_SCRIPT_URL` privately and repeat the threat/privacy review first.
 
 ## Privacy incident response — owner actions
 
@@ -426,6 +409,11 @@ must complete and privately document all of these actions:
 
 ## Remaining architecture work
 
+- Replace the static browser device key and localStorage bearer token with
+  short-lived server sessions using `HttpOnly`, `Secure`, `SameSite` cookies,
+  CSRF protection, per-user rate limiting, and an explicit revocation registry.
+  The current server-verified HMAC token closes the former client-only unlock
+  bypass, but it is still not sufficient for a hostile-client threat model.
 - Provide the authenticated or capability-limited sanitized feed service
   described above. The mixed workbook must stay private.
 - Move source-to-public photo digest links from Script Properties into a
@@ -435,13 +423,3 @@ must complete and privately document all of these actions:
   sharing or API behavior.
 - Regenerate or explicitly migrate any older public photo that fails the strict
   JPEG verifier before relying on automatic mirroring.
-
-## Final local verification — October 3, 2026
-
-- All 35 generated public-test pages passed at 1440, 390, and 320 px: 105 layout checks, no unresolved template text, no JavaScript errors, and no page-wide horizontal overflow.
-- Six browser scenarios passed: scheduled, awaiting stream confirmation, live, completed, agreement inactive, and stale status. Each retained exactly one public Twitch player.
-- Syntax/configuration/bundle checks, publisher/output audits, Apps Script checks, capture-recovery tests, all 12 Function tests, and release integration checks passed.
-- The release test verifies independent daily documentation status with an outstanding correction, shared five-section navigation, public test evidence retention, official/test separation, signed and unsigned launch behavior, staged assets, and mismatched-date rejection.
-- Dependency audit reported zero vulnerabilities. Cloudflare Functions compilation passed for the included server handlers.
-
-Browser verification used isolated fixtures, a stubbed Turnstile widget, and blocked external services. Real email delivery, Twitch playback on serving domains, Access account policy, camera/microphone permission, and operational uploads still require the configured deployment checks in `DEPLOYMENT.md`.
