@@ -18,7 +18,8 @@ const SECURITY_HEADERS: Record<string, string> = {
 
 function cacheControlFor(path: string): string {
   if (path.startsWith('photos/')) return 'public, max-age=31536000, immutable';
-  if (path.startsWith('data/')) return 'public, max-age=60, must-revalidate';
+  // max-age=0: the zone's Browser Cache TTL would otherwise stretch short lifetimes to hours.
+  if (path.startsWith('data/')) return 'public, max-age=0, must-revalidate';
   if (path.startsWith('daily/') || path.startsWith('weeks/') || path.startsWith('cards/')) return 'public, max-age=3600';
   if (path.endsWith('.json')) return 'public, max-age=3600';
   return 'public, max-age=0, must-revalidate';

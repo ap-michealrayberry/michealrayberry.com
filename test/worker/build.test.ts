@@ -144,6 +144,12 @@ describe('serving', () => {
     expect((await exports.default.fetch(`${ORIGIN}/backups/2026-10-05.sql`)).status).toBe(404);
   });
 
+  it('redirects www to the canonical host, keeping the path', async () => {
+    const res = await exports.default.fetch('https://www.michealrayberry.com/daily/?x=1', { redirect: 'manual' });
+    expect(res.status).toBe(301);
+    expect(res.headers.get('location')).toBe('https://michealrayberry.com/daily/?x=1');
+  });
+
   it('builds only from the AP role', async () => {
     const mrb = await exports.default.fetch('http://localhost:8787/api/ap/build', { method: 'POST' });
     expect(mrb.status).toBe(403);
